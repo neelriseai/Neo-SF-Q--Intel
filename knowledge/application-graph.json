@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "b62832784b09e062dbe1cf1bcf69ddb9d3f9448154ce60afe137264a3fdd5c0b",
+  "sourceSnapshot": "7f5f4abee6f30d2c61717e876a30c0c59dd5b4c1cf9bcc419fa5cc97e395c0d3",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -366,6 +366,14 @@
       "authority": "canonical-guidance"
     },
     {
+      "id": "file:Docs/16-deferred-operator-actions.md",
+      "kind": "file",
+      "label": "16-deferred-operator-actions.md",
+      "source": "Docs/16-deferred-operator-actions.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
       "id": "file:Docs/README.md",
       "kind": "file",
       "label": "README.md",
@@ -526,6 +534,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/fusion-policy.json",
+      "kind": "file",
+      "label": "fusion-policy.json",
+      "source": "config/fusion-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/governance-policy.json",
       "kind": "file",
       "label": "governance-policy.json",
@@ -678,6 +694,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/evals/hybrid-fusion-evaluation-v1.json",
+      "kind": "file",
+      "label": "hybrid-fusion-evaluation-v1.json",
+      "source": "quality/evals/hybrid-fusion-evaluation-v1.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/evals/retrieval-boundaries-v1.json",
       "kind": "file",
       "label": "retrieval-boundaries-v1.json",
@@ -706,6 +730,14 @@
       "kind": "file",
       "label": "2026-09-09-graph-grounded-reasoning-design.md",
       "source": "quality/reviews/2026-09-09-graph-grounded-reasoning-design.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-hybrid-candidate-fusion.md",
+      "kind": "file",
+      "label": "2026-09-09-hybrid-candidate-fusion.md",
+      "source": "quality/reviews/2026-09-09-hybrid-candidate-fusion.md",
       "category": "project",
       "authority": "supporting"
     },
@@ -810,6 +842,14 @@
       "kind": "file",
       "label": "domain.py",
       "source": "src/neo_sf_q_intel/domain.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/fusion.py",
+      "kind": "file",
+      "label": "fusion.py",
+      "source": "src/neo_sf_q_intel/fusion.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -994,6 +1034,14 @@
       "kind": "file",
       "label": "test_context_pack.py",
       "source": "tests/test_context_pack.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_fusion.py",
+      "kind": "file",
+      "label": "test_fusion.py",
+      "source": "tests/test_fusion.py",
       "category": "test",
       "authority": "verification"
     },
@@ -1201,6 +1249,14 @@
       "label": "reasoning.graph-context-compiler",
       "status": "FOUNDATION",
       "summary": "Compiles an analysis-only, project/snapshot-isolated context pack from replay-validated canonical structure under deterministic atomic count/character/byte budgets. Caller-supplied source fragments and semantic receipts remain non-authoritative candidates; governed resolution, seed-rationale receipts, provider token/time budgets, outcome memory and workflow consumption remain planned.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:reasoning.hybrid-candidate-fusion",
+      "kind": "capability",
+      "label": "reasoning.hybrid-candidate-fusion",
+      "status": "FOUNDATION",
+      "summary": "Deterministically fuses request-, context-, channel- and freshness-bound exact, lexical, confirmed-graph and semantic candidate receipts under an independently pinned policy/evaluation contract. Outputs remain analysis-only candidates; protected deterministic tiers, conflicts, omissions, outages and upstream context gaps are explicit. Completion requires real channel adapters, trusted A3 verification receipts and an adjudicated hybrid-quality corpus.",
       "authority": "policy"
     },
     {
@@ -1810,6 +1866,31 @@
       "to": "file:tests/test_scenario_independence.py"
     },
     {
+      "from": "capability:reasoning.hybrid-candidate-fusion",
+      "relation": "implemented_by",
+      "to": "file:config/fusion-policy.json"
+    },
+    {
+      "from": "capability:reasoning.hybrid-candidate-fusion",
+      "relation": "implemented_by",
+      "to": "file:quality/evals/hybrid-fusion-evaluation-v1.json"
+    },
+    {
+      "from": "capability:reasoning.hybrid-candidate-fusion",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/fusion.py"
+    },
+    {
+      "from": "capability:reasoning.hybrid-candidate-fusion",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:reasoning.hybrid-candidate-fusion",
+      "relation": "verified_by",
+      "to": "file:tests/test_fusion.py"
+    },
+    {
       "from": "capability:reasoning.semantic-retrieval",
       "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/providers.py"
@@ -2018,6 +2099,16 @@
       "from": "file:src/neo_sf_q_intel/context_pack.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/fusion.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_pack.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/fusion.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/governance.py",
@@ -2293,6 +2384,16 @@
       "from": "file:tests/test_context_pack.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:tests/test_fusion.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/fusion.py"
+    },
+    {
+      "from": "file:tests/test_fusion.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
       "from": "file:tests/test_governance.py",

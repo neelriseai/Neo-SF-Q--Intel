@@ -56,6 +56,21 @@
       "verification": ["tests/test_context_pack.py"]
     },
     {
+      "id": "reasoning.hybrid-candidate-fusion",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Deterministically fuses request-, context-, channel- and freshness-bound exact, lexical, confirmed-graph and semantic candidate receipts under an independently pinned policy/evaluation contract. Outputs remain analysis-only candidates; protected deterministic tiers, conflicts, omissions, outages and upstream context gaps are explicit. Completion requires real channel adapters, trusted A3 verification receipts and an adjudicated hybrid-quality corpus.",
+      "implementation": ["src/neo_sf_q_intel/fusion.py", "config/fusion-policy.json", "quality/evals/hybrid-fusion-evaluation-v1.json"],
+      "verification": ["tests/test_fusion.py"],
+      "verificationCases": {
+        "positive": ["tests/test_fusion.py"],
+        "negative": ["tests/test_fusion.py"],
+        "failure": ["tests/test_fusion.py"],
+        "degradation": ["tests/test_fusion.py"],
+        "scenarioIndependence": ["tests/test_fusion.py"]
+      }
+    },
+    {
       "id": "reasoning.graph-grounded-agent",
       "owner": "Orchestrator",
       "status": "NEXT",

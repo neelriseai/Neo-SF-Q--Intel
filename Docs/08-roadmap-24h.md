@@ -9,7 +9,7 @@ Build and final verification target the org machine: Python 3.14.3, Node.js 26.5
 | Hours | Planned outcome | Current status |
 |---:|---|---|
 | 0–2 | Repository, canonical docs, contracts, provider profiles and environment preflight | Foundation implemented; org-machine provider verification pending |
-| 2–6 | Auto-created PostgreSQL run/checkpoint memory, SQLite/JSON/cache fallback, hybrid retrieval ports and snapshot checks | Run/checkpoint and fallback foundation implemented; governed metadata/audit ports and semantic fusion pending |
+| 2–6 | Auto-created PostgreSQL run/checkpoint memory, SQLite/JSON/cache fallback, hybrid retrieval ports and snapshot checks | Run/checkpoint, fallback and isolated deterministic candidate-fusion foundations implemented; channel adapters, governed metadata/audit ports and adjudicated retrieval quality remain |
 | 6–10 | LangGraph workflow and four schema-bounded specialist agents | Deterministic typed stages implemented; independent provider-backed agents pending |
 | 10–13 | Salesforce services and five MCP adapters | Three foundation tools exist; governed live reads, policy/audit envelope and remaining adapters pending |
 | 13–16 | Playwright worker and generic locator-ranking/healing path | Locator ranking library implemented; browser capture/apply worker pending |
@@ -30,6 +30,11 @@ Build and final verification target the org machine: Python 3.14.3, Node.js 26.5
 - Governance scorecard uses measured results, never constants presented as execution.
 
 ## Contingencies
+
+Environment- or session-dependent work is tracked in
+`Docs/16-deferred-operator-actions.md`. A deferred operator action does not pause unrelated roadmap
+work, and a capability remains unavailable or explicitly degraded until its acceptance evidence is
+recorded.
 
 - If LangGraph dependency installation fails under Python 3.14, stop and resolve that dependency; do not install an unapproved Python runtime or silently replace durable orchestration.
 - Keep the current bounded in-process cosine index for the 24-hour demo. When persistent vector
@@ -67,7 +72,7 @@ impact, test and evidence-path analysis, but every public release decision remai
 | A1 | Canonical ontology plus source-profile relation mapping — foundation implemented | Normalization, independent profile pinning, source-schema bounds and adversarial mapping tests pass; completion still requires upstream record envelopes and proof that trusted first-source behavior is preserved |
 | A2 | Direction-aware propagation and versioned analysis-risk policy — isolated foundation implemented | Policy/domain tests now prove relation direction/depth, bounded path enumeration, source/profile-bound ordered edge receipts, inverse/cycle/diamond behavior and no default risk; grounded risk-factor receipts, freshness fields and assurance-workflow integration remain |
 | A3 | Deterministic `GraphContextPack` compiler — isolated foundation implemented | Analysis-only pack, stable hash, replay-validated canonical structure, candidate-only unresolved fragments, atomic count/character/byte budgets, explicit omissions and project/snapshot isolation; seed-rationale receipts, deterministic work-unit/depth accounting, provider-token/time budgets, governed fragment resolution, prior outcomes, semantic-index receipts and workflow consumption remain |
-| A4 | Hybrid candidate fusion | Exact/graph/lexical plus in-process or ChromaDB semantic candidates; semantic hits remain non-authoritative |
+| A4 | Hybrid candidate fusion — isolated foundation implemented | Exact, lexical, confirmed-graph and semantic candidate receipts are fused deterministically under request/context/channel/freshness roots and a separately pinned evaluation contract; protected deterministic tiers, upstream gaps, conflicts, omissions and outages are explicit; outputs remain non-authoritative. Real retrieval adapters, trusted A3 verification receipts and at least 20 adjudicated hybrid-quality cases remain |
 | A5 | Graph-grounded specialist proposal/verifier | Typed output; citations/endpoints restricted to pack; invalid schema/hallucinated IDs/provider outage tested |
 | A6 | Assurance workflow integration | Impact/security/test stages consume the pack; unsupported narrative cannot change deterministic facts or lift `INCOMPLETE` |
 | A7 | Outcome/evaluation memory | Test/incident/human-correction outcomes linked to source snapshot; policy changes require reviewed eval/version promotion |

@@ -40,12 +40,19 @@ ephemeral index may rank the active source snapshot, while exact, graph and lexi
 4. Retrieve semantic candidates from ChromaDB when enabled; otherwise use the current bounded
    in-process cosine index for the small approved corpus.
 5. Build an evidence pack with token budget, provenance and freshness.
-6. Validate every agent-returned evidence ID against the pack.
+6. Fuse typed exact, lexical, confirmed-graph and semantic candidate receipts using the pinned
+   weighted reciprocal-rank policy. Exact and confirmed-graph bundles are protected from semantic
+   displacement, while every fused item remains a non-authoritative candidate.
+7. Validate every agent-returned evidence ID against the pack.
 
 This sequence is the retrieval half of graph-grounded agent reasoning. It is not represented as a
 generic GraphRAG product or an LLM-generated graph. The isolated deterministic context-compiler
-foundation now owns canonical structure/candidate selection, authority separation and atomic budgets.
-Governed source resolution, semantic-index/outcome receipts and workflow delivery remain pending;
+foundation owns canonical structure selection, authority separation and atomic budgets. The
+isolated fusion foundation owns bounded request- and channel-rooted candidate ranking, conflict
+preservation, explicit degradation and trusted replay. It propagates upstream context
+incompleteness and cannot satisfy a release gate. Governed source resolution, real channel
+adapters, trusted A3 verification receipts, semantic-index/outcome receipts and workflow delivery
+remain pending;
 once integrated, an output verifier will accept only typed proposals whose endpoints and evidence
 IDs are present in the hash-valid context pack.
 

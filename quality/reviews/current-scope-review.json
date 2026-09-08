@@ -1,17 +1,18 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "graph-context-pack-foundation-2026-09-09",
+  "reviewId": "hybrid-candidate-fusion-foundation-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
     "config/capability-scope.json",
     "config/quality-policy.json",
-    "config/context-compiler-policy.json",
-    "src/neo_sf_q_intel/context_pack.py",
-    "tests/test_context_pack.py",
-    "Docs/01-architecture.md",
+    "config/fusion-policy.json",
+    "quality/evals/hybrid-fusion-evaluation-v1.json",
+    "src/neo_sf_q_intel/fusion.py",
+    "tests/test_fusion.py",
     "Docs/03-data-memory-and-retrieval.md",
     "Docs/08-roadmap-24h.md",
-    "Docs/10-graph-grounded-agent-reasoning.md"
+    "Docs/10-graph-grounded-agent-reasoning.md",
+    "Docs/16-deferred-operator-actions.md"
   ],
   "reviewers": [
     "genericity_reviewer",
@@ -19,44 +20,49 @@
   ],
   "findings": [
     {
-      "code": "CALLER_TEXT_FALSE_AUTHORITY",
-      "severity": "P1",
-      "resolution": "Caller-supplied text is typed as UnresolvedSourceFragment with UNVERIFIED/CANDIDATE state and mayAuthorize=false. It creates a blocking FRAGMENT_RESOLUTION_UNAVAILABLE gap and cannot become evidence until a governed resolver verifies artifact bytes, range, digest and extraction identity."
-    },
-    {
-      "code": "TRUSTED_PACK_REPLAY_BOUNDARY",
-      "severity": "P1",
-      "resolution": "validate_graph_context_pack deterministically recompiles against independently supplied graph, propagation, request and policy roots and requires exact equality. Paired rehashes that remove blockers, alter paths, raise budgets or replace project/snapshot identities are rejected."
-    },
-    {
-      "code": "GRAPH_AND_CONTEXT_RESOURCE_BOUNDS",
-      "severity": "P1",
-      "resolution": "The pinned compiler policy bounds graph nodes, edges, canonical bytes, attributes, seeds, propagation artifacts, candidates, identifiers, locators, content, gaps and the full serialized pack. Policy trust is checked before configured limits are used; budget arithmetic is revalidated on read."
-    },
-    {
-      "code": "STRUCTURE_IS_NOT_RELEASE_AUTHORITY",
+      "code": "CANDIDATE_AUTHORITY_SEPARATION",
       "severity": "P0",
-      "resolution": "The pack is literally ANALYSIS_ONLY with mayAuthorize=false and authorityEligible=false. Replay-validated graph paths are named confirmedStructurePaths, while missing freshness and risk-factor receipts create blocking gaps and keep analysisComplete=false. Governance 2.x remains interlocked."
+      "resolution": "Fusion inputs and outputs are literal CANDIDATE and ANALYSIS_ONLY types with mayAuthorize=false, authorityEligible=false and maySatisfyReleaseEvidence=false. Confirmed source-node provenance never confirms semantic relevance."
     },
     {
-      "code": "A3_FRAGMENT_RESOLVER",
-      "severity": "P1",
-      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.graph-context-compiler. Acceptance: a repository-relative resolver verifies artifact digest, byte/line range, content digest, extractor/version, snapshot and redaction before issuing an authoritative fragment receipt."
+      "code": "UPSTREAM_CONTEXT_GAP_PROPAGATION",
+      "severity": "P0",
+      "resolution": "A3 blocking gaps create UPSTREAM_CONTEXT_INCOMPLETE and keep overall analysis incomplete; A4 reports its narrower fusion completeness separately and cannot launder an incomplete context pack."
     },
     {
-      "code": "A3_SEED_AND_EXECUTION_BUDGET_RECEIPTS",
-      "severity": "P1",
-      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.graph-context-compiler. Acceptance: typed seed-selection rationale plus deterministic depth/work-unit accounting are added; provider token/time budgets remain provider-stage controls and an outer timeout fails compilation rather than returning partial context."
+      "code": "INDEPENDENT_FUSION_TRUST_ROOTS",
+      "severity": "P0",
+      "resolution": "Request, query, graph, ontology, profile, context, channel, policy and evaluation identities are validated against independent roots. Trusted replay recompiles and rejects paired content/digest mutation."
     },
     {
-      "code": "A2_FRESHNESS_AND_RISK_FACTOR_RECEIPTS",
+      "code": "CHANNEL_FRESHNESS_WITHOUT_RESULTS",
       "severity": "P1",
-      "resolution": "Retained as a truthful upstream FOUNDATION boundary. Owner: reasoning.directional-propagation. Acceptance: paths bind evaluated-at/validity receipts and risk factors bind target, project, snapshot, request, extractor and evidence before A3 can report complete analysis."
+      "resolution": "Every channel root is strictly reconstructed and checked against the fixed evaluation time, even when the channel returns zero candidates. Future, expired and forged roots fail closed."
     },
     {
-      "code": "A3_WORKFLOW_AND_PROVIDER_CONSUMERS",
+      "code": "PROTECTED_DETERMINISTIC_ADMISSION",
       "severity": "P1",
-      "resolution": "Retained as planned scope. Owner: reasoning.graph-grounded-agent and orchestration.multi-agent. Acceptance: workflow/provider consumers invoke trusted replay validation and reject citations or endpoints outside the pack; ChromaDB and outcome memory remain optional candidate/history planes."
+      "resolution": "Exact and confirmed-graph bundles are admitted ahead of proposal-only bundles using only protected-channel contributions and canonical ties. Semantic corroboration or flooding cannot change protected admission under a tight cap."
+    },
+    {
+      "code": "EVIDENCE_BINDING_DUPLICATES_AND_CONFLICTS",
+      "severity": "P1",
+      "resolution": "Evidence identifiers map to allowed context endpoints; logical claims are deduplicated before channel ranking; conflicting values remain an atomic set and any protected/conflict omission creates a blocking gap."
+    },
+    {
+      "code": "A4_REAL_CHANNEL_ADAPTERS",
+      "severity": "P1",
+      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.hybrid-candidate-fusion. Acceptance: exact, lexical, graph and in-process semantic adapters emit the governed receipt contract and a service consumer verifies A3 transitively before fusion."
+    },
+    {
+      "code": "A4_ADJUDICATED_RETRIEVAL_QUALITY",
+      "severity": "P1",
+      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.hybrid-candidate-fusion. Acceptance: at least twenty human-adjudicated, versioned cross-channel cases implement explicit populations, formulas and thresholds before any ranked-quality claim or weight promotion."
+    },
+    {
+      "code": "A4_CANONICAL_ASSERTION_DIGEST",
+      "severity": "P2",
+      "resolution": "Deferred to the producer adapter boundary. Acceptance: a versioned assertion schema supplies a canonical assertion digest with case, Unicode and structured-value metamorphic tests; fusion must not apply business-specific normalization heuristics."
     }
   ],
   "statusDowngrades": []

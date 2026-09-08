@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "evaluationSetId": "hybrid-fusion-evaluation-v1",
+  "evaluationSetVersion": "1.0.0",
+  "sha256": "0bc6cb4838db63080ad5b3e78a65f09acb4d0d3e8e0dae6347f53545c61acf66",
+  "targetPolicyId": "hybrid-candidate-fusion",
+  "targetPolicyVersion": "1.0.0",
+  "qualitySampleStatus": "INSUFFICIENT_ADJUDICATED_CASES",
+  "adjudicatedCaseCount": 0,
+  "minimumAdjudicatedCaseCount": 20,
+  "requiredCases": [
+    "conflict-preservation",
+    "deterministic-outage",
+    "duplicate-amplification",
+    "permutation-invariance",
+    "semantic-nonpromotion",
+    "stale-index-rejection"
+  ]
+}

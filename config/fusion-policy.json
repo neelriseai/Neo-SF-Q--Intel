@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "hybrid-candidate-fusion",
+  "policyVersion": "1.0.0",
+  "sha256": "9e525d71006be7eb1ac354ddd11077f485c48a09045135a2699831a064808fa3",
+  "posture": "ANALYSIS_ONLY",
+  "evaluationSetId": "hybrid-fusion-evaluation-v1",
+  "evaluationSetPath": "quality/evals/hybrid-fusion-evaluation-v1.json",
+  "evaluationSetSha256": "0bc6cb4838db63080ad5b3e78a65f09acb4d0d3e8e0dae6347f53545c61acf66",
+  "rankMethod": "WEIGHTED_RECIPROCAL_RANK",
+  "scoreNormalization": "CHANNEL_NORMALIZED_UNIT_INTERVAL",
+  "tieBreak": ["FUSED_SCORE_DESC", "ENTITY_ID", "ASSERTION_KEY", "ASSERTION_VALUE", "CANDIDATE_ID"],
+  "degradedProfile": "AVAILABLE_CHANNELS_ONLY_WITH_EXPLICIT_GAPS",
+  "supportedModalities": ["EXACT", "LEXICAL", "GRAPH", "SEMANTIC"],
+  "protectedModalities": ["EXACT", "GRAPH"],
+  "reciprocalRankConstant": 60,
+  "scoreDecimalPlaces": 8,
+  "modalityWeights": {
+    "EXACT": 5,
+    "LEXICAL": 3,
+    "GRAPH": 4,
+    "SEMANTIC": 2
+  },
+  "limits": {
+    "maximumInputCandidates": 512,
+    "maximumInputCandidatesPerModality": 256,
+    "maximumInputBytes": 1048576,
+    "maximumOutputCandidates": 64,
+    "maximumEvidenceIdsPerCandidate": 32,
+    "maximumIdentifierCharacters": 256,
+    "maximumReasonCharacters": 512,
+    "maximumOmissionRecords": 512,
+    "maximumResultBytes": 262144
+  }
+}

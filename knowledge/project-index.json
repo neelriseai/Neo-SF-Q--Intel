@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "b62832784b09e062dbe1cf1bcf69ddb9d3f9448154ce60afe137264a3fdd5c0b",
+  "sourceSnapshot": "7f5f4abee6f30d2c61717e876a30c0c59dd5b4c1cf9bcc419fa5cc97e395c0d3",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -127,6 +127,37 @@
       "verification": [
         "tests/test_context_pack.py"
       ]
+    },
+    {
+      "id": "reasoning.hybrid-candidate-fusion",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Deterministically fuses request-, context-, channel- and freshness-bound exact, lexical, confirmed-graph and semantic candidate receipts under an independently pinned policy/evaluation contract. Outputs remain analysis-only candidates; protected deterministic tiers, conflicts, omissions, outages and upstream context gaps are explicit. Completion requires real channel adapters, trusted A3 verification receipts and an adjudicated hybrid-quality corpus.",
+      "implementation": [
+        "src/neo_sf_q_intel/fusion.py",
+        "config/fusion-policy.json",
+        "quality/evals/hybrid-fusion-evaluation-v1.json"
+      ],
+      "verification": [
+        "tests/test_fusion.py"
+      ],
+      "verificationCases": {
+        "positive": [
+          "tests/test_fusion.py"
+        ],
+        "negative": [
+          "tests/test_fusion.py"
+        ],
+        "failure": [
+          "tests/test_fusion.py"
+        ],
+        "degradation": [
+          "tests/test_fusion.py"
+        ],
+        "scenarioIndependence": [
+          "tests/test_fusion.py"
+        ]
+      }
     },
     {
       "id": "reasoning.graph-grounded-agent",
@@ -430,7 +461,7 @@
     {
       "path": "Docs/03-data-memory-and-retrieval.md",
       "category": "canonical-documentation",
-      "sha256": "245e5e7afeec8028ee2d60ba7c4b08c7a19238bb386bd6ac138d51277bbe4217"
+      "sha256": "9f24c2dba6dd84ee10a354e97dd7eac24a9985b54db1ffa6136e4b2cf5c9dbc0"
     },
     {
       "path": "Docs/03-evaluation-and-golden-dataset-engineering.md",
@@ -515,7 +546,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "3b5cac41c8e849a6cb2559abd93cc501b9059174a0471012f1a8b8ff6ff438e0"
+      "sha256": "43456ba052e530506f6182d41f48c4413d7ba3c665bfcd9499d1ec63629af977"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -545,7 +576,7 @@
     {
       "path": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "reference-documentation",
-      "sha256": "bd835a5cdcfa3e95e99f57f054f6a256ad6e8a60f390560b3ba94311ae99a02f"
+      "sha256": "8222e3341d6f07e8f7e48a15b9a79cf3c575521daec407c403226f76740835ab"
     },
     {
       "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
@@ -576,6 +607,11 @@
       "path": "Docs/15-development-assurance-process.md",
       "category": "canonical-documentation",
       "sha256": "76606f9fe37b1c84e8afd7ed375811253f75d6dbe4eaf3638fd57157d327866a"
+    },
+    {
+      "path": "Docs/16-deferred-operator-actions.md",
+      "category": "reference-documentation",
+      "sha256": "f99358cf672678308668f43d153b10e9abb32ccea02a48b529ddf4012233d8c6"
     },
     {
       "path": "Docs/README.md",
@@ -670,12 +706,17 @@
     {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "f3d18990dff687fb746eb030226b75d857b66d909f06aedf70a031a4cba5b9b8"
+      "sha256": "543d2cb737554512e7d5c122985db516367cf2b0db523b9f1113c6384e35d6b2"
     },
     {
       "path": "config/context-compiler-policy.json",
       "category": "policy",
       "sha256": "0b1530ff282c20f42423d0a1016fb8f64107d198cb0530fe122a7e4d0d857579"
+    },
+    {
+      "path": "config/fusion-policy.json",
+      "category": "policy",
+      "sha256": "7e68b17b12eea2aa659191b53d9027df882884cf542cd20b4ea1326fc081d842"
     },
     {
       "path": "config/governance-policy.json",
@@ -695,7 +736,7 @@
     {
       "path": "config/quality-policy.json",
       "category": "policy",
-      "sha256": "b9f298cb2393212e921b75c7610e31e5299a87d0549f3b2fecfd11ed4fae4cdd"
+      "sha256": "5988a97b636b0b0f4ff7679e79dfd01ec4e936901181010a06363b83448be306"
     },
     {
       "path": "config/reasoning-policy.json",
@@ -773,6 +814,11 @@
       "sha256": "d4eb321ee74a36c188f86db2303fcc4fa653b1dee356409cc8f68cbec9a4692b"
     },
     {
+      "path": "quality/evals/hybrid-fusion-evaluation-v1.json",
+      "category": "project",
+      "sha256": "ba161ffd2b3cc1a3dc565aea51fb031268df1de5f44ff1c087389bee04ce8657"
+    },
+    {
       "path": "quality/evals/retrieval-boundaries-v1.json",
       "category": "project",
       "sha256": "32e05c6a40d8ec16d7919e2d7773d00bb50b0d5b6c1ff191d8f10750812e766d"
@@ -793,6 +839,11 @@
       "sha256": "b5f5ef8b7d3f6fc457a083e6e2a4ef57a26f33579388602bcd17aba7abc23de9"
     },
     {
+      "path": "quality/reviews/2026-09-09-hybrid-candidate-fusion.md",
+      "category": "project",
+      "sha256": "7b75cdbe4e191bfa51d876669e0befd4ce949b4fee42cbc3216c899256be15e5"
+    },
+    {
       "path": "quality/reviews/2026-09-09-initial-genericity-audit.md",
       "category": "project",
       "sha256": "79e01d9c9f3690ac48c4107e0334d22d56ac73aaefcb24f433dd9ed122da6303"
@@ -805,7 +856,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "be6c8bff5afb316ccbff88dbaf754f24af3f3532d8284b8b4418e0d020a8c055"
+      "sha256": "0ec74255cd6189bdd95d31ef81e96c336acc9ac9608313e4c5c774509f8448a7"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -856,6 +907,11 @@
       "path": "src/neo_sf_q_intel/domain.py",
       "category": "python-runtime",
       "sha256": "26e5f92bac39f87ac5162e9d5f7920d743d023be2cfca1f98fb563dcef8f28ee"
+    },
+    {
+      "path": "src/neo_sf_q_intel/fusion.py",
+      "category": "python-runtime",
+      "sha256": "c2cd172b494d6d6c57881a6e90fccde1b61e0dc67204be2180e5d9cee036d8fb"
     },
     {
       "path": "src/neo_sf_q_intel/governance.py",
@@ -971,6 +1027,11 @@
       "path": "tests/test_context_pack.py",
       "category": "test",
       "sha256": "38e0a4207254734f356e325b1dfb63509af0bd7471403a0e8483e880b3936aa2"
+    },
+    {
+      "path": "tests/test_fusion.py",
+      "category": "test",
+      "sha256": "9267bab7f3d486ed57ed5d5443f6fa62694758acc5ce62dd3133429c95a0f96e"
     },
     {
       "path": "tests/test_governance.py",
