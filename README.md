@@ -48,8 +48,16 @@ Start the API and dashboard in separate terminals:
 npm run dev
 ```
 
-The API uses PostgreSQL and durable LangGraph checkpoints when `DATABASE_URL` is configured.
-Without it, the health endpoint reports `in-memory-demo`; that mode is for local UI work only.
+The API prefers PostgreSQL when `DATABASE_URL` is configured. The current runtime wires complete
+run documents and durable LangGraph checkpoints; its schema also reserves governed relational
+tables for evidence chunks, graph edges and tool audit while their application ports remain a
+foundation milestone. Required PostgreSQL tables and reviewed migrations apply at startup. If
+PostgreSQL is absent or unreachable, the runtime auto-creates the configured `SQLITE_PATH` and
+stores complete run documents there. If SQLite also fails, versioned JSON source artifacts and
+process memory keep deterministic analysis available. `/health` reports the active mode and reason
+for degradation rather than implying PostgreSQL durability.
+Persistent vector retrieval is a later ChromaDB capability. PostgreSQL remains relational and no
+PostgreSQL vector extension is part of the supported org-machine architecture.
 
 ## Genericity and architecture gates
 

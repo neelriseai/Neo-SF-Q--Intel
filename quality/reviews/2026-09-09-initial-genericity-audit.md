@@ -43,3 +43,42 @@ The same reviewer audited the first remediation. The follow-up findings were han
 | Unknown kinds and relationships were silently omitted | Resolved with typed analysis gaps that fail governance and force an `INCOMPLETE` decision |
 | Result and traversal caps could silently omit mandatory validations or high-risk impacts | Resolved by risk/obligation ranking, unconditional mandatory-test preservation and explicit truncation/capacity gaps |
 | Exact-cap linear traversal could exit before discovering a queued omitted hop | Resolved by inspecting queued in-depth nodes for the next eligible neighbor and a linear-chain boundary regression test |
+
+## Vector-store constraint
+
+The org-machine dependency constraint was clarified after this audit. Persistent vector retrieval is
+tracked as `retrieval.chromadb` in `NEXT` state. ChromaDB is the sole planned vector store;
+PostgreSQL remains authoritative relational run/evidence/audit/checkpoint storage. No vector plugin
+or extension may be introduced into PostgreSQL.
+
+The follow-up documentation audit also found an obsolete PostgreSQL embedding array and ambiguous
+architecture boundaries. The base schema no longer creates that column, an explicit migration removes
+it from existing local databases, architecture diagrams separate ChromaDB from PostgreSQL, and the
+genericity gate now rejects PostgreSQL vector dependencies or embedding/vector columns in runtime and
+migration code.
+
+The first dependency rule was broadened after independent review: all supported Python manifest and
+lockfile names are inspected, known persistent vector clients are checked against an explicit
+`chromadb`-only allowlist, runtime imports are covered, and SQL patterns reject renamed semantic/vector
+array columns and vector extensions. Negative regression fixtures cover alternate clients and schema
+evasions while allowing the standard-library ephemeral similarity foundation.
+
+The persistence requirement was then clarified: PostgreSQL is the target primary, self-initializing
+non-vector memory for all required state. The current runtime wires complete run documents and
+LangGraph checkpoints; chunk/metadata, graph and audit tables are relational foundations whose
+application ports remain `FOUNDATION`. The service falls back to an auto-created SQLite run store
+and finally to versioned JSON source artifacts plus an explicitly non-durable process cache. Health
+output exposes the selected backend and degradation reason. Connectivity fallback, SQLite failure,
+automatic migration and non-fallback schema defects are covered by failure-path tests.
+
+Final persistence re-review found three containment gaps. The default `.runtime/` durability files
+and SQLite sidecars are now ignored, and the quality gate verifies the default SQLite and Chroma
+locations remain ignored. Live PostgreSQL validation now covers every current-schema table,
+embedding/vector column names, vector UDTs and the vector extension. Static policy covers Python and
+Node runtime DDL plus common local persistent vector packages (`sqlite-vec`, `hnswlib`, `annoy`).
+Cross-table, neutral-column-name, extension, Node-DDL and dependency bypass tests prevent regression.
+The final reviewer pass caught and resolved a live-schema false positive: PostgreSQL full-text search
+uses `search_vector tsvector`, which is lexical state rather than an embedding index. Validation now
+classifies column payload types, explicitly permits `tsvector`, and still rejects vector UDTs,
+serialized embedding payloads and the vector extension. A startup regression test exercises the
+actual lexical-column shape.

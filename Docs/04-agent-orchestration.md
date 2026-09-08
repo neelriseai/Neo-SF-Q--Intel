@@ -2,9 +2,10 @@
 
 ## Orchestrator
 
-LangGraph coordinates a typed workflow and, when `DATABASE_URL` is configured, persists
-checkpoints to PostgreSQL. Routing and release policy remain deterministic. The unconfigured
-local mode is explicitly labeled `in-memory-demo` and is not durable evidence.
+LangGraph coordinates a typed workflow and, when PostgreSQL is reachable, persists checkpoints
+there. Routing and release policy remain deterministic. If PostgreSQL is absent, complete run
+documents persist in auto-created SQLite while the graph runs without durable checkpoints; if
+SQLite also fails, the process cache is explicitly labeled non-durable.
 
 ```text
 START

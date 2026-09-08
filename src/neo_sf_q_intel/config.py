@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     azure_openai_embedding_deployment: str | None = None
 
     database_url: SecretStr | None = None
+    sqlite_path: Path = Path(".runtime/neo_sf_q_intel.db")
     salesforce_app_root: Path | None = None
     source_min_contract_version: str = "1.0.0"
     source_required_capabilities: str = ""
@@ -72,6 +73,11 @@ class Settings(BaseSettings):
         if root.is_absolute():
             return root.resolve()
         return ((repository_root or Path.cwd()) / root).resolve()
+
+    def resolved_sqlite_path(self, repository_root: Path | None = None) -> Path:
+        if self.sqlite_path.is_absolute():
+            return self.sqlite_path.resolve()
+        return ((repository_root or Path.cwd()) / self.sqlite_path).resolve()
 
     @property
     def required_capabilities(self) -> tuple[str, ...]:

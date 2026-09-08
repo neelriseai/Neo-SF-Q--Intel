@@ -124,7 +124,7 @@ Your current situation supports a surprisingly complete hackathon build:
 | UI | Next.js |
 | Database initially | SQLite/files |
 | Graph initially | SQLite/JSONL + NetworkX |
-| PostgreSQL/pgvector | Later when Cognizant provisions |
+| PostgreSQL + ChromaDB | PostgreSQL for relational durability; ChromaDB for later vector retrieval |
 | LLM | Approved enterprise LLM endpoint |
 | Embeddings | Useful later, **not needed for first graph-based MVP** |
 | Copilot | Development interface; optional product access channel |
@@ -711,7 +711,7 @@ ReleaseDecision
 
 ## Current Storage
 SQLite + JSONL graph.
-PostgreSQL/pgvector is future-compatible.
+PostgreSQL plus a separately persisted ChromaDB index is future-compatible with the org constraint.
 
 ## Current Connectors
 FixtureSalesforceAdapter: ACTIVE
@@ -1109,7 +1109,7 @@ A useful engineering budget is:
 
 Those are design targets, not guaranteed token counts: the actual assistant may add its own system/tool context. The point is to make **project-supplied context bounded and intentional** rather than repeatedly asking an assistant to rediscover the whole repository.
 
-Embeddings can later improve semantic retrieval, but do not block this architecture on a vector DB. Your graph, file hashes, symbols and contracts can solve the first version deterministically.
+Embeddings can later improve semantic retrieval through ChromaDB, but do not block this architecture on its availability. Your graph, file hashes, symbols and contracts can solve the first version deterministically.
 
 ## Prompts, skills, guardrails, hooks and development assistant design
 
@@ -2028,7 +2028,7 @@ Redis
 Kafka
 Kubernetes
 Spring Boot
-pgvector
+ChromaDB (the supported org-machine vector store)
 ```
 
 Those are adapters/scaling/integration capabilities rather than prerequisites.

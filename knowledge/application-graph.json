@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "f9b3647f409860d1d7311871551c08238c877e43169a211274aa1bf2c620d2c1",
+  "sourceSnapshot": "a4a28fb76d2f858a974f0131b16372ad15de8d808017d9936e61310e0f3a86a7",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -526,6 +526,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:migrations/002_remove_postgres_embeddings.sql",
+      "kind": "file",
+      "label": "002_remove_postgres_embeddings.sql",
+      "source": "migrations/002_remove_postgres_embeddings.sql",
+      "category": "persistence",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:package-lock.json",
       "kind": "file",
       "label": "package-lock.json",
@@ -830,6 +838,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_repository.py",
+      "kind": "file",
+      "label": "test_repository.py",
+      "source": "tests/test_repository.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_repository_knowledge.py",
       "kind": "file",
       "label": "test_repository_knowledge.py",
@@ -866,6 +882,22 @@
       "kind": "file",
       "label": "test_semantic.py",
       "source": "tests/test_semantic.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_service_fallback.py",
+      "kind": "file",
+      "label": "test_service_fallback.py",
+      "source": "tests/test_service_fallback.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_vector_storage_policy.py",
+      "kind": "file",
+      "label": "test_vector_storage_policy.py",
+      "source": "tests/test_vector_storage_policy.py",
       "category": "test",
       "authority": "verification"
     },
@@ -932,6 +964,14 @@
       "authority": "policy"
     },
     {
+      "id": "capability:retrieval.chromadb",
+      "kind": "capability",
+      "label": "retrieval.chromadb",
+      "status": "NEXT",
+      "summary": "Project- and snapshot-isolated persistent semantic index behind the existing retrieval port; PostgreSQL remains authoritative relational memory.",
+      "authority": "policy"
+    },
+    {
       "id": "capability:orchestration.multi-agent",
       "kind": "capability",
       "label": "orchestration.multi-agent",
@@ -976,7 +1016,15 @@
       "kind": "capability",
       "label": "memory.postgresql",
       "status": "FOUNDATION",
-      "summary": "Stores versioned run documents, graph, chunks, audit and checkpoints.",
+      "summary": "Target primary non-vector memory. Run documents and checkpoints are wired now; evidence/chunk metadata, graph edges, audit and other governed state have schema foundations but still require application ports and tests.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:memory.resilient-fallback",
+      "kind": "capability",
+      "label": "memory.resilient-fallback",
+      "status": "FOUNDATION",
+      "summary": "Automatically falls back from PostgreSQL to an auto-created SQLite run store, then versioned JSON evidence plus a declared process cache.",
       "authority": "policy"
     },
     {
@@ -1086,6 +1134,11 @@
     {
       "from": "capability:memory.postgresql",
       "relation": "implemented_by",
+      "to": "file:migrations/002_remove_postgres_embeddings.sql"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/repository.py"
     },
     {
@@ -1097,6 +1150,46 @@
       "from": "capability:memory.postgresql",
       "relation": "owned_by",
       "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "verified_by",
+      "to": "file:tests/test_repository.py"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "verified_by",
+      "to": "file:tests/test_service_fallback.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "owned_by",
+      "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "verified_by",
+      "to": "file:tests/test_repository.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "verified_by",
+      "to": "file:tests/test_service_fallback.py"
     },
     {
       "from": "capability:orchestration.multi-agent",
@@ -1202,6 +1295,11 @@
       "from": "capability:reasoning.semantic-retrieval",
       "relation": "verified_by",
       "to": "file:tests/test_semantic.py"
+    },
+    {
+      "from": "capability:retrieval.chromadb",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
     },
     {
       "from": "capability:runtime.salesforce-live-evidence",
@@ -1624,6 +1722,16 @@
       "to": "file:src/neo_sf_q_intel/service.py"
     },
     {
+      "from": "file:tests/test_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
       "from": "file:tests/test_salesforce_cli.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/salesforce_cli.py"
@@ -1662,6 +1770,26 @@
       "from": "file:tests/test_semantic.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/semantic.py"
+    },
+    {
+      "from": "file:tests/test_service_fallback.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_service_fallback.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_service_fallback.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
+      "from": "file:tests/test_service_fallback.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
     },
     {
       "from": "file:tests/test_workflow.py",

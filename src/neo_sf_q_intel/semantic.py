@@ -26,7 +26,7 @@ def cosine_similarity(left: list[float], right: list[float]) -> float:
 
 
 class SemanticEvidenceIndex:
-    """Small-corpus vector ranking without requiring the pgvector extension."""
+    """Ephemeral small-corpus ranking foundation; ChromaDB will own persistence."""
 
     def __init__(self, source: SalesforceSourceSnapshot, provider: ModelProvider) -> None:
         self.source = source

@@ -38,7 +38,8 @@ Every active edge contains source/target, allowed edge type, confidence class, e
 
 - Hackathon: SQLite + JSONL export + NetworkX for bounded algorithms.
 - Pilot: PostgreSQL adjacency tables and content-addressed artifacts.
-- Optional pgvector for semantic chunks; graph/exact retrieval remains functional without it.
+- ChromaDB is the only optional persistent semantic index; graph/exact retrieval remains
+  functional without it, and PostgreSQL has no vector-extension dependency.
 
 ### Snapshot activation
 
@@ -82,7 +83,7 @@ architecture/graph-schema.yaml
 4. Deterministic bounded traversal/path scoring.
 5. Project/layer/symbol snapshot generation.
 6. PostgreSQL repository parity.
-7. Semantic chunks/embedding cache as P1.
+7. ChromaDB semantic-index adapter and embedding cache as P1.
 
 ### Dependency rules
 
@@ -102,7 +103,7 @@ architecture/graph-schema.yaml
 - Traversal depth/size caps and deterministic path ranking.
 - Inferred/confirmed separation.
 - Snapshot time-travel and inactive-edge behaviour.
-- SQLite/PostgreSQL repository contract parity.
+- SQLite/PostgreSQL relational repository parity and in-process/ChromaDB semantic-index parity.
 - Concurrent ingest and read consistency.
 
 ### Definition of done

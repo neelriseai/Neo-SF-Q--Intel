@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import fnmatch
 import json
 import re
 import subprocess
@@ -49,6 +50,40 @@ def _imports(path: Path) -> tuple[set[str], str | None]:
         elif isinstance(node, ast.ImportFrom) and node.module:
             names.add(node.module.split(".")[0])
     return names, None
+
+
+def check_vector_storage_policy(path: str, body: str, policy: dict) -> list[Finding]:
+    findings: list[Finding] = []
+    basename = Path(path).name
+    is_manifest = any(
+        fnmatch.fnmatch(basename, pattern) for pattern in policy["dependencyManifestPatterns"]
+    )
+    if is_manifest or path.startswith(("src/", "apps/", "packages/")):
+        approved = {
+            package.casefold().replace("_", "-")
+            for package in policy["approvedPersistentVectorPackages"]
+        }
+        for package in policy["knownPersistentVectorPackages"]:
+            pattern = rf"(?i)(?<![a-z0-9_-]){re.escape(package)}(?![a-z0-9_-])"
+            if re.search(pattern, body) and package.casefold().replace("_", "-") not in approved:
+                findings.append(
+                    Finding(
+                        "UNAPPROVED_VECTOR_BACKEND",
+                        path,
+                        f"Persistent vector backend {package} is not approved",
+                    )
+                )
+    if path.startswith("migrations/") or _is_allowed(path, policy["runtimeRoots"]):
+        for pattern in policy["postgresVectorPatterns"]:
+            if re.search(pattern, body):
+                findings.append(
+                    Finding(
+                        "POSTGRES_VECTOR_STORAGE",
+                        path,
+                        "PostgreSQL may not store vector columns or extensions",
+                    )
+                )
+    return findings
 
 
 def _head_scope() -> dict[str, dict] | None:
@@ -114,6 +149,7 @@ def check_repository() -> list[Finding]:
                 findings.append(
                     Finding("POSSIBLE_SECRET", path, "Matched a forbidden credential pattern")
                 )
+        findings.extend(check_vector_storage_policy(path, body, policy))
         if _is_allowed(path, allowed) or not _is_allowed(path, runtime_roots):
             continue
         for pattern in policy["scenarioLiteralPatterns"]:
@@ -137,6 +173,21 @@ def check_repository() -> list[Finding]:
         if example_values.get(key):
             findings.append(
                 Finding("POPULATED_EXAMPLE_SECRET", ".env.example", f"{key} must be blank")
+            )
+    for ignored_path in policy.get("requiredIgnoredPaths", []):
+        completed = subprocess.run(
+            ["git", "check-ignore", "-q", "--", ignored_path],
+            cwd=ROOT,
+            check=False,
+            shell=False,
+        )
+        if completed.returncode != 0:
+            findings.append(
+                Finding(
+                    "UNIGNORED_RUNTIME_STATE",
+                    ".gitignore",
+                    f"Runtime state path {ignored_path} must be ignored",
+                )
             )
     if example_values.get("ALLOW_SALESFORCE_WRITES", "").casefold() != "false":
         findings.append(

@@ -93,7 +93,7 @@ The following are non-negotiable unless changed through an Architecture Decision
 9. The LLM cannot directly deploy metadata, mutate Salesforce data or change permissions.
 10. Personal Salesforce environments contain synthetic data only.
 11. Chat history is temporary; contracts, ADRs, indexes, graph state, policies, evaluations and outcomes are durable memory.
-12. PostgreSQL/pgvector, live Salesforce, GitHub, Copilot MCP and Spring Boot are adapters or deployment choices, not POC blockers.
+12. PostgreSQL, ChromaDB, live Salesforce, GitHub, Copilot MCP and Spring Boot are adapters or deployment choices, not POC blockers. PostgreSQL is relational; ChromaDB is the only supported vector store.
 
 ## 4. System context and trust boundaries
 
@@ -174,7 +174,7 @@ flowchart TB
       PG["PostgreSQL"]
       GRAPH["Evidence graph"]
       ART["Artifact store"]
-      VECTOR["pgvector - optional"]
+      VECTOR["ChromaDB - optional vector index"]
       AUDIT["Immutable audit stream"]
     end
 
@@ -534,7 +534,7 @@ Confidence is not probability unless the extractor has been calibrated. The scor
 |---|---|---|
 | PostgreSQL | Runs, checkpoints, graph, evidence metadata, policies, audit index, evaluations | SQLite |
 | Approved object store | Raw snapshots, diffs, test logs, reports, large artifacts | Local content-addressed directory |
-| pgvector | Semantic retrieval over approved chunks | Omitted or exact text search |
+| ChromaDB | Semantic retrieval over approved chunks | Omitted or exact/text/graph retrieval |
 | Observability platform | Metrics, logs, traces and alerts | Local structured logs |
 
 ### 11.2 Core relational tables
@@ -1112,7 +1112,7 @@ P0 for the five-week build:
 P1 if capacity remains:
 
 - security reasoner, execution adapter/simulation, RCA, MCP;
-- PostgreSQL and embeddings;
+- PostgreSQL relational persistence and a separate ChromaDB embedding index;
 - live personal Developer Edition validation.
 
 P2 after the hackathon:
@@ -1194,7 +1194,7 @@ These do not block the offline core, but must be resolved for a live pilot:
 
 1. Approved enterprise LLM and embedding endpoints, data-use terms and quotas.
 2. Approved Python/Node artifacts and exact pinned versions.
-3. PostgreSQL version, pgvector availability, HA/backup service and schema ownership.
+3. PostgreSQL version, ChromaDB persistence location/version, HA/backup service and schema ownership.
 4. Enterprise identity provider, role mapping and approver groups.
 5. Secrets platform and connector credential rotation process.
 6. Salesforce integration method, OAuth scopes, sandbox and test-execution principal.

@@ -32,6 +32,14 @@
       "verification": ["tests/test_semantic.py"]
     },
     {
+      "id": "retrieval.chromadb",
+      "owner": "Change Analyst",
+      "status": "NEXT",
+      "genericity": "Project- and snapshot-isolated persistent semantic index behind the existing retrieval port; PostgreSQL remains authoritative relational memory.",
+      "implementation": [],
+      "verification": []
+    },
+    {
       "id": "orchestration.multi-agent",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
@@ -75,9 +83,17 @@
       "id": "memory.postgresql",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Stores versioned run documents, graph, chunks, audit and checkpoints.",
-      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/service.py", "migrations/001_assurance_runs.sql"],
-      "verification": []
+      "genericity": "Target primary non-vector memory. Run documents and checkpoints are wired now; evidence/chunk metadata, graph edges, audit and other governed state have schema foundations but still require application ports and tests.",
+      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/service.py", "migrations/001_assurance_runs.sql", "migrations/002_remove_postgres_embeddings.sql"],
+      "verification": ["tests/test_repository.py", "tests/test_service_fallback.py"]
+    },
+    {
+      "id": "memory.resilient-fallback",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Automatically falls back from PostgreSQL to an auto-created SQLite run store, then versioned JSON evidence plus a declared process cache.",
+      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/config.py"],
+      "verification": ["tests/test_repository.py", "tests/test_service_fallback.py"]
     },
     {
       "id": "tools.mcp",

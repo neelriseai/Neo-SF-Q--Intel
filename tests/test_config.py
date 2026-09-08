@@ -39,3 +39,10 @@ def test_source_project_must_be_explicitly_configured() -> None:
 def test_source_graph_digest_must_be_explicitly_configured() -> None:
     with pytest.raises(ValueError, match="SOURCE_GRAPH_SHA256"):
         Settings(allow_llm=False).require_graph_sha256()
+
+
+def test_sqlite_fallback_path_is_repository_relative() -> None:
+    settings = Settings(allow_llm=False, sqlite_path=Path("runtime/fallback.db"))
+
+    assert settings.resolved_sqlite_path(Path("workspace")).is_absolute()
+    assert settings.resolved_sqlite_path(Path("workspace")).name == "fallback.db"

@@ -29,6 +29,10 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
 - Agents exchange typed state. Every material claim must cite evidence IDs.
 - Inferred semantic edges remain distinct from confirmed source/runtime edges.
 - PostgreSQL owns durable run/evidence state; chat history is not product memory.
+- ChromaDB is the only supported vector store for future semantic retrieval. PostgreSQL remains
+  relational storage and must not acquire a vector-extension dependency.
+- PostgreSQL is primary non-vector memory. Startup must self-create its schema and fall back through
+  SQLite, defined JSON artifacts and process cache without hiding the active durability mode.
 - Add unit and contract tests for every capability and a failure-path test for every tool.
 - Run formatting, type, unit and integration checks before commits.
 

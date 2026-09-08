@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "f9b3647f409860d1d7311871551c08238c877e43169a211274aa1bf2c620d2c1",
+  "sourceSnapshot": "a4a28fb76d2f858a974f0131b16372ad15de8d808017d9936e61310e0f3a86a7",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -80,6 +80,14 @@
       ]
     },
     {
+      "id": "retrieval.chromadb",
+      "owner": "Change Analyst",
+      "status": "NEXT",
+      "genericity": "Project- and snapshot-isolated persistent semantic index behind the existing retrieval port; PostgreSQL remains authoritative relational memory.",
+      "implementation": [],
+      "verification": []
+    },
+    {
       "id": "orchestration.multi-agent",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
@@ -147,13 +155,32 @@
       "id": "memory.postgresql",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Stores versioned run documents, graph, chunks, audit and checkpoints.",
+      "genericity": "Target primary non-vector memory. Run documents and checkpoints are wired now; evidence/chunk metadata, graph edges, audit and other governed state have schema foundations but still require application ports and tests.",
       "implementation": [
         "src/neo_sf_q_intel/repository.py",
         "src/neo_sf_q_intel/service.py",
-        "migrations/001_assurance_runs.sql"
+        "migrations/001_assurance_runs.sql",
+        "migrations/002_remove_postgres_embeddings.sql"
       ],
-      "verification": []
+      "verification": [
+        "tests/test_repository.py",
+        "tests/test_service_fallback.py"
+      ]
+    },
+    {
+      "id": "memory.resilient-fallback",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Automatically falls back from PostgreSQL to an auto-created SQLite run store, then versioned JSON evidence plus a declared process cache.",
+      "implementation": [
+        "src/neo_sf_q_intel/repository.py",
+        "src/neo_sf_q_intel/service.py",
+        "src/neo_sf_q_intel/config.py"
+      ],
+      "verification": [
+        "tests/test_repository.py",
+        "tests/test_service_fallback.py"
+      ]
     },
     {
       "id": "tools.mcp",
@@ -202,7 +229,7 @@
     {
       "path": ".env.example",
       "category": "project",
-      "sha256": "f44855b849d3406e57ba055dc8ffc3e16b3f76d8ff8b24485f6fb62c6752c2a0"
+      "sha256": "98167e60b57fd1e9c09cf00f1ec22b1ad2835b235c45d888d7ca6ad3100635a0"
     },
     {
       "path": ".gitattributes",
@@ -217,12 +244,12 @@
     {
       "path": ".gitignore",
       "category": "project",
-      "sha256": "7cb38caa7298b5ea4fb6f2f3e42443b1704cf493b854cf32ce5e26c41f8a23c8"
+      "sha256": "c869278ed77a773570eaa3b6d3aa40dd07610ee6e5b54d22474150100348edaf"
     },
     {
       "path": "AGENTS.md",
       "category": "project",
-      "sha256": "600eb86732477367b50ea08a3258860999b6c81ef2173f1ccf6a1f126430cbe6"
+      "sha256": "f942a3358fefe632ab5ef9c785ec8a0fd9d6932c107a475de3064b8c4d2e262a"
     },
     {
       "path": "Docs/00-agentic-ai-assurance-retrofit-master.md",
@@ -232,7 +259,7 @@
     {
       "path": "Docs/00-integration-layer-master.md",
       "category": "reference-documentation",
-      "sha256": "fc5d43c53695d1e958b435a91ba53c6085c8c11697624c6e58b11bdda692272e"
+      "sha256": "4c57a0615ff9db60136f509f395eec827a6b0d206c901a8f60cdd0f5f86b3888"
     },
     {
       "path": "Docs/00-product-scope.md",
@@ -247,7 +274,7 @@
     {
       "path": "Docs/01-architecture.md",
       "category": "canonical-documentation",
-      "sha256": "73ccedb56468fa96f09dcb310ccc03ed32289f66d599f09835cb353f7072cbdd"
+      "sha256": "bd731038ecddcf9b8b296f00e7d12e521dbaa3501da023193419d2905e8391fc"
     },
     {
       "path": "Docs/01-contracts-and-domain-model.md",
@@ -272,7 +299,7 @@
     {
       "path": "Docs/03-data-memory-and-retrieval.md",
       "category": "canonical-documentation",
-      "sha256": "455b0caf2fdf51aa4015373bbe56da2c0cad9f1cd4c49c66d7c161d7308f62b6"
+      "sha256": "0e817accc4d47f0804b0489cff5f72667c1054a803d6eee7f6d85d327ad1c319"
     },
     {
       "path": "Docs/03-evaluation-and-golden-dataset-engineering.md",
@@ -282,12 +309,12 @@
     {
       "path": "Docs/03-evidence-graph-and-memory.md",
       "category": "reference-documentation",
-      "sha256": "087d659470a3ba15334a748c24670ad540e8fb98c697975c1f1930914e93ad81"
+      "sha256": "26e5bb26fb6891c07fe0407ab05396c61c9bcb483af5e01c10d1ee9be5774ae2"
     },
     {
       "path": "Docs/04-agent-orchestration.md",
       "category": "canonical-documentation",
-      "sha256": "e405daeb3a6c62e69444a49273bc14deb2450324bdac63e9a75f5f9e59a236ec"
+      "sha256": "6826f6e480078f99207dd377d9a22c84a8801e21a0306d0963426388737dc1cc"
     },
     {
       "path": "Docs/04-guardrails-and-policy-enforcement.md",
@@ -357,7 +384,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "904c5bea9c7b2780bac294df1ca7c0c6d34f7b391e43860c4dee2c5823b6ac16"
+      "sha256": "baa9a0a07782b9d17e509f91b64cb10be070e1a765faf7e9710aca9e442a46a4"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -367,7 +394,7 @@
     {
       "path": "Docs/09-demo-scenarios.md",
       "category": "canonical-documentation",
-      "sha256": "2e86039ae96851bc5f64c1b466b69c93dc8821033958f69969916013dba7143c"
+      "sha256": "5cac16abb66823af27e3a67d95842cfe85d13544ccc6f663c84a649c6e25dfa7"
     },
     {
       "path": "Docs/09-tool-mcp-and-agent-security.md",
@@ -377,7 +404,7 @@
     {
       "path": "Docs/10-agent-workflow-reliability-and-human-oversight.md",
       "category": "reference-documentation",
-      "sha256": "7b3ebbbe233ab22ad2b2b6e465dc2a2112fa7bd559d623a4b41c971c3ad2241e"
+      "sha256": "7311ff75a7e1d0acf29dca63a38ce3b5b17cde9254adb259ed55de60e5b6c208"
     },
     {
       "path": "Docs/10-connectors-and-external-integrations.md",
@@ -422,17 +449,17 @@
     {
       "path": "Docs/deep-research-report.md",
       "category": "reference-documentation",
-      "sha256": "cf76b7de18b579731888c528c8e414dbbae8cbf8da7564cc2e61c9181fe63f9e"
+      "sha256": "54e057eecba90646ce1b72ad371945b39854ab2e65920d125c7b360c7939848f"
     },
     {
       "path": "Docs/salesforce-change-assurance-production-solution-design (1).md",
       "category": "reference-documentation",
-      "sha256": "239b7d256ace6d3a775d028e8c56a66dee32c25b235255873f1f96446df317e9"
+      "sha256": "8b4c5af2a5d9aa48b403598dddf74495ec612522cf91d65d0cd12cbcd36a8d76"
     },
     {
       "path": "Docs/salesforce-change-assurance-production-solution-design.md",
       "category": "reference-documentation",
-      "sha256": "9ec54d78ad1049fb53e181a79a80a5cca7f8e5074ecc1bc7d21d23460de70000"
+      "sha256": "8bbacf38a28ab88d8a6bcd32795d8d9bcefac3c657349c6d1a735675d15369e1"
     },
     {
       "path": "Docs/salesforce-playground-app-and-codex-implementation-guide-updated.md",
@@ -447,7 +474,7 @@
     {
       "path": "README.md",
       "category": "project",
-      "sha256": "11f65061c7b8ae54fcf97717b8bbf52ab260551ffe3bccc55d01fdac47273943"
+      "sha256": "2fbfcc70bd19ece64aef443d6d1cc8f9b49a3332b49dd39e87645ce008ceb5ac"
     },
     {
       "path": "apps/web/AGENTS.md",
@@ -502,12 +529,12 @@
     {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "906880f567b739d00d0747abe3e9156d1d30a127fc36db4aaad0223b80665050"
+      "sha256": "48485d9ef1f3f9ea1fabd5df9b3efdec16b66f06120c68392c98a3de61e76f1c"
     },
     {
       "path": "config/quality-policy.json",
       "category": "policy",
-      "sha256": "c006fb55ab9329f6417260f02c7b1512ca0d589cb5625b049ccc131dc66863ec"
+      "sha256": "82de668a244853217f2946c4789cf97b8acb66c377293fa7a5b59ebd35de0a58"
     },
     {
       "path": "config/reasoning-policy.json",
@@ -522,7 +549,12 @@
     {
       "path": "migrations/001_assurance_runs.sql",
       "category": "persistence",
-      "sha256": "564ee8de213b436d83332e906cd26e7e5b7fa2c4aab3112b74ab802b1b848757"
+      "sha256": "0609e3e5a1e551ebff74e28e560813cdbb517b0ea1c5a9e6b84157d27e4723fc"
+    },
+    {
+      "path": "migrations/002_remove_postgres_embeddings.sql",
+      "category": "persistence",
+      "sha256": "ed3b4feeb31f93925c83e97e96ddf5419dbf1c4e0875dc669fcee585676d06d9"
     },
     {
       "path": "package-lock.json",
@@ -572,7 +604,7 @@
     {
       "path": "quality/reviews/2026-09-09-initial-genericity-audit.md",
       "category": "project",
-      "sha256": "19fed3485e4e8bc60e9ef115ea595f4c08e61ff702653c5f7c239131a111cc3f"
+      "sha256": "79e01d9c9f3690ac48c4107e0334d22d56ac73aaefcb24f433dd9ed122da6303"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -587,7 +619,7 @@
     {
       "path": "scripts/quality/check_genericity.py",
       "category": "project",
-      "sha256": "8ebe6c4c220e368250c3874576bfb733349a4d83dd5925c914e53ba1ef8d7694"
+      "sha256": "ae36b8db2b4d12ac21c2c79612abd18cccf18177d849415bac956dfb95a17b1d"
     },
     {
       "path": "src/neo_sf_q_intel/__init__.py",
@@ -602,12 +634,12 @@
     {
       "path": "src/neo_sf_q_intel/api.py",
       "category": "python-runtime",
-      "sha256": "7d5a3a9ffe1501a61d831be2fcd48b2fe749aca546085780d36841444cf93c3a"
+      "sha256": "f9941e2e858625180152e4651e0674c6c850ccef2962d975f3913835d75ae7fc"
     },
     {
       "path": "src/neo_sf_q_intel/config.py",
       "category": "python-runtime",
-      "sha256": "21c96faa626ad311424ba8aa1cc86f9d931a1066a8aea14ac4e0a02c8c139c6d"
+      "sha256": "ec5fd345cccc26c21ec764add21c6e0e8d1020fba82ad1c367f8142487644b68"
     },
     {
       "path": "src/neo_sf_q_intel/domain.py",
@@ -647,7 +679,7 @@
     {
       "path": "src/neo_sf_q_intel/repository.py",
       "category": "python-runtime",
-      "sha256": "9dd8f5798dc629535e3ebb68fea253f2bf14303e154df7c769c6568bd4ac4a10"
+      "sha256": "06c12c0ee7b9c0db47ebedb6e1371f9f41555470a05da5053a6f21b2c7ae1694"
     },
     {
       "path": "src/neo_sf_q_intel/retrieval.py",
@@ -667,12 +699,12 @@
     {
       "path": "src/neo_sf_q_intel/semantic.py",
       "category": "python-runtime",
-      "sha256": "b25f09ccd43e35dfcd07ac5b584c2fdd7dd3e5dbf0d0f29b7e333f9196103efa"
+      "sha256": "1ce3dd02ad0a90a699212d0c55428a563ab9bd348b1ec0feaa2e7539db111909"
     },
     {
       "path": "src/neo_sf_q_intel/service.py",
       "category": "python-runtime",
-      "sha256": "dbbf62df0ca4fbb426fc5b89105ad971864c79db459a895bd62aba7b75403486"
+      "sha256": "47ee5c3feeb01d52052100a7280d2c7a4bc5ed9caaeec56749459fd7eb162d73"
     },
     {
       "path": "src/neo_sf_q_intel/workflow.py",
@@ -692,12 +724,12 @@
     {
       "path": "tests/test_api.py",
       "category": "test",
-      "sha256": "cdafcc8131917f6230b6083809bf9bc6528e7ef205420c70ad3e1adf69485b4d"
+      "sha256": "a3a0d2be5d50db1ef5b3d0067da1b1efec4b1012c65e3633023a0c0f23ead9fc"
     },
     {
       "path": "tests/test_config.py",
       "category": "test",
-      "sha256": "512c26ce38156d2c30f7cedc0a8c53e4de36151f8799f3a528917e3a295ee9f2"
+      "sha256": "882e2e7bc48b94a643c253d63ee714f36b0ecd06e0ec60b101b0f34b20adadca"
     },
     {
       "path": "tests/test_governance.py",
@@ -713,6 +745,11 @@
       "path": "tests/test_reasoning_policy.py",
       "category": "test",
       "sha256": "5cffce1fb04302b37a505cbc34ca08e96f414b239f7ca8a1de8e0e1d135215a5"
+    },
+    {
+      "path": "tests/test_repository.py",
+      "category": "test",
+      "sha256": "fe443914dda45103898cbb186a5068fd27285f8654769a4c15429f1c6d1f69f4"
     },
     {
       "path": "tests/test_repository_knowledge.py",
@@ -738,6 +775,16 @@
       "path": "tests/test_semantic.py",
       "category": "test",
       "sha256": "74717baf057b7681e70085c267c1880e84ed0adba2e71757db3e99a843522b6d"
+    },
+    {
+      "path": "tests/test_service_fallback.py",
+      "category": "test",
+      "sha256": "3131c237ecbf8a7873039864a9e57a7ccfa30e1e11ef73b7f0eadfc5f7e7e532"
+    },
+    {
+      "path": "tests/test_vector_storage_policy.py",
+      "category": "test",
+      "sha256": "a9ae4d778bf93c7c7c54e5622a08739447539adfd0ef720b9de4449e009f0e33"
     },
     {
       "path": "tests/test_workflow.py",

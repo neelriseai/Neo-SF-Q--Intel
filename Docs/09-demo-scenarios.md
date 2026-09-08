@@ -18,4 +18,7 @@ Use a stale graph or unavailable model/Salesforce dependency. Show explicit `INC
 
 ## Viewer narrative
 
-The dashboard should make five ideas visually obvious: specialized agents cooperate; graph and semantic retrieval provide evidence; the platform selects less but sufficient testing; UI automation adapts safely; and governance controls can block the agent itself.
+The dashboard should make five ideas visually obvious: specialized agents cooperate; graph and
+semantic retrieval provide evidence; the platform selects less but sufficient testing; UI automation
+adapts safely; and governance controls can block the agent itself. The demo may use the bounded
+ephemeral semantic foundation; ChromaDB is the sole persistent vector backend in the roadmap.

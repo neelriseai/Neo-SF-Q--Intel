@@ -262,7 +262,8 @@ documentation/handoff      CURRENT
 - Worker restart does not duplicate external side effects.
 - `NO_GO`, `CONDITIONAL_GO` and `GO` cases are covered by deterministic tests.
 - Audit, metrics, alerts and operator runbooks cover the integrated flow.
-- No P0 layer depends on GitHub, Salesforce MCP, pgvector or a live org.
+- No P0 layer depends on GitHub, Salesforce MCP, a persistent vector store or a live org.
+  ChromaDB is the only supported later vector-store adapter.
 
 ## 12. Master demo script
 

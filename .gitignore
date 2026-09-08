@@ -11,6 +11,10 @@ node_modules/
 playwright-report/
 test-results/
 artifacts/
+.runtime/
+.chroma/
+*.db-wal
+*.db-shm
 Docs/Divine Framework.txt
 Docs/Microsoft.Services.Store.winmd
 *.log

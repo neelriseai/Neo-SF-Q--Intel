@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS knowledge_chunks (
     snapshot_id text NOT NULL,
     entity_id text,
     content text NOT NULL,
-    embedding double precision[],
     metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
     search_vector tsvector GENERATED ALWAYS AS
         (to_tsvector('english', content)) STORED

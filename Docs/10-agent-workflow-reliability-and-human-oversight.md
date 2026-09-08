@@ -199,7 +199,7 @@ Avoid approval fatigue: batch only actions with the same target/risk and preserv
 | Unavailable dependency | Product behavior |
 |---|---|
 | LLM | Continue deterministic impact/risk/coverage/selection/release; omit or queue semantic proposals/explanations |
-| Embeddings/vector store | Continue exact and graph retrieval; mark semantic recall limitation |
+| Embeddings/ChromaDB | Continue exact and graph retrieval; mark semantic recall limitation |
 | Live Salesforce | Use explicitly pinned fixture/cached snapshot if allowed and label it; never present as live |
 | Git provider | Use approved local snapshot; disable writeback |
 | Test runner | Produce plan/patch validation only; release gate sees missing execution evidence |
@@ -240,7 +240,7 @@ Initial SLOs should be based on measured local/integration baselines. Never impr
 - Cancellation during model, graph, test execution and writeback phases.
 - Expired, replayed, self-approved, wrong-target and hash-mismatched approval.
 - Source/patch/policy drift after approval.
-- Model, vector store, Salesforce, Git, runner and exporter outage.
+- Model, ChromaDB, Salesforce, Git, runner and exporter outage.
 - Loop/token/cost/time budgets terminate correctly.
 - Deterministic results remain unchanged across semantic retry/fallback.
 - UI/API distinguish live, fixture, simulated, stale and unavailable evidence.

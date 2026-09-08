@@ -42,12 +42,13 @@ def create_app(
     )
 
     @app.get("/health")
-    def health() -> dict[str, str]:
+    def health() -> dict[str, str | None]:
         return {
             "status": "ok",
             "provider": active_settings.ai_provider,
             "source_snapshot": active_service.source.snapshot_id,
-            "persistence": ("postgresql" if active_settings.database_url else "in-memory-demo"),
+            "persistence": active_service.persistence_mode,
+            "persistence_warning": active_service.persistence_warning,
         }
 
     @app.post("/api/v1/assurance-runs", response_model=AssuranceRun)

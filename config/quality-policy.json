@@ -18,6 +18,52 @@
     "(?i)\\bsk-[A-Za-z0-9_-]{20,}",
     "(?i)postgres(?:ql)?://[^\\s:@]+:[^\\s@]+@"
   ],
+  "dependencyManifestPatterns": [
+    "pyproject.toml",
+    "requirements*.txt",
+    "uv.lock",
+    "poetry.lock",
+    "Pipfile",
+    "Pipfile.lock",
+    "package.json",
+    "package-lock.json",
+    "npm-shrinkwrap.json",
+    "pnpm-lock.yaml",
+    "yarn.lock"
+  ],
+  "approvedPersistentVectorPackages": [
+    "chromadb"
+  ],
+  "requiredIgnoredPaths": [
+    ".runtime/neo_sf_q_intel.db",
+    ".runtime/chroma/index.sqlite3"
+  ],
+  "knownPersistentVectorPackages": [
+    "chromadb",
+    "pgvector",
+    "qdrant-client",
+    "qdrant_client",
+    "pinecone",
+    "weaviate-client",
+    "weaviate",
+    "pymilvus",
+    "milvus",
+    "faiss-cpu",
+    "faiss-gpu",
+    "faiss",
+    "lancedb",
+    "sqlite-vec",
+    "sqlite_vec",
+    "hnswlib",
+    "annoy",
+    "@pinecone-database/pinecone",
+    "@qdrant/js-client-rest"
+  ],
+  "postgresVectorPatterns": [
+    "(?i)create\\s+extension(?:\\s+if\\s+not\\s+exists)?\\s+(?:pg_)?vector",
+    "(?i)\\b[a-z_]*(embedding|vector)[a-z_]*\\s+(double\\s+precision|real|float[48]?|numeric|jsonb|json|bytea|text|blob)(?:\\s*\\[\\s*\\])?",
+    "(?i)\\b[a-z_][a-z0-9_]*\\s+vector\\s*(\\(|,|\\n)"
+  ],
   "blankExampleSecrets": [
     "OPENAI_API_KEY",
     "AZURE_OPENAI_API_KEY",
@@ -45,12 +91,14 @@
     "source.contract-ingestion",
     "reasoning.graph-impact",
     "reasoning.semantic-retrieval",
+    "retrieval.chromadb",
     "orchestration.multi-agent",
     "quality.test-selection",
     "automation.locator-healing",
     "governance.claim-grounding",
     "governance.release-decision",
     "memory.postgresql",
+    "memory.resilient-fallback",
     "tools.mcp",
     "runtime.salesforce-live-evidence",
     "quality.live-test-execution",

@@ -20,6 +20,7 @@ def test_api_exposes_health_and_typed_analysis() -> None:
 
     assert health.status_code == 200
     assert health.json()["source_snapshot"] == "demo"
+    assert health.json()["persistence"] == "memory-cache"
     assert response.status_code == 200
     assert response.json()["decision"]["code"] == "CONDITIONAL_GO"
     assert len(response.json()["activities"]) == 4
