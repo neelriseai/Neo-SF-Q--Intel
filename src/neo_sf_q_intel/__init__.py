@@ -1,0 +1,3 @@
+"""Neo SF Q-Intel domain and application package."""
+
+__version__ = "0.1.0"

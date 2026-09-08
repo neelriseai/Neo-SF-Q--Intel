@@ -1,0 +1,19 @@
+{
+  "name": "neo-sf-q-intel-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "workspaces": [
+    "apps/web",
+    "packages/browser"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@neo/web",
+    "build": "npm run build --workspace=@neo/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "test:browser": "npm run test --workspace=@neo/browser",
+    "test:e2e": "npm run test:e2e --workspace=@neo/browser"
+  }
+}

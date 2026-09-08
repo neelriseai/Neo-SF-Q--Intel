@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "neo-sf-q-intel"
+version = "0.1.0"
+description = "Evidence-grounded multi-agent Salesforce change assurance"
+requires-python = ">=3.14"
+dependencies = [
+  "fastapi>=0.140,<0.141",
+  "uvicorn>=0.35,<0.36",
+  "pydantic>=2.12,<3",
+  "pydantic-settings>=2.10,<3",
+  "openai>=2,<3",
+  "langgraph>=1.2,<1.3",
+  "langgraph-checkpoint-postgres>=3.1,<3.2",
+  "psycopg[binary,pool]>=3.3,<3.4",
+  "mcp>=1.27,<3",
+  "httpx>=0.28,<0.29",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.2,<2",
+  "pytest-cov>=7,<8",
+  "ruff>=0.12,<0.14",
+]
+
+[project.scripts]
+neo-api = "neo_sf_q_intel.api:run"
+neo-mcp = "neo_sf_q_intel.mcp_server:run"
+neo-preflight = "neo_sf_q_intel.preflight:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/neo_sf_q_intel"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

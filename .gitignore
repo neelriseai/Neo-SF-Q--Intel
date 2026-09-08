@@ -1,0 +1,17 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+.pytest_cache/
+.coverage
+htmlcov/
+node_modules/
+.next/
+playwright-report/
+test-results/
+artifacts/
+Docs/Divine Framework.txt
+Docs/Microsoft.Services.Store.winmd
+*.log
+.DS_Store
