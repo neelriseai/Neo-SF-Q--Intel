@@ -20,6 +20,7 @@ class SalesforceSourceSnapshot:
     contract: dict[str, Any]
     graph: dict[str, Any]
     project_index: dict[str, Any]
+    trusted_graph_sha256: str | None = None
 
     @property
     def snapshot_id(self) -> str:
@@ -179,16 +180,28 @@ def load_salesforce_source(
         raise SourceContractError(
             f"Required capabilities are unavailable: {', '.join(unavailable)}"
         )
-    return SalesforceSourceSnapshot(resolved, contract, graph, project_index)
+    return SalesforceSourceSnapshot(
+        resolved,
+        contract,
+        graph,
+        project_index,
+        trusted_graph_sha256=expected_graph_sha256.casefold(),
+    )
 
 
-def node_to_evidence(node: dict[str, Any], snapshot_id: str) -> EvidenceRef:
+def node_to_evidence(
+    node: dict[str, Any], snapshot_id: str, trusted_graph_sha256: str | None
+) -> EvidenceRef:
     node_id = str(node["id"])
     return EvidenceRef(
         evidence_id=f"graph:{snapshot_id}:{node_id}",
         kind=str(node.get("kind", "unknown")),
         label=str(node.get("label", node_id)),
         source=str(node.get("source", "knowledge/application-graph.json")),
-        state=EvidenceState.CONFIRMED,
-        attributes={"entity_id": node_id, "snapshot_id": snapshot_id},
+        state=(EvidenceState.CONFIRMED if trusted_graph_sha256 else EvidenceState.STALE),
+        attributes={
+            "entity_id": node_id,
+            "snapshot_id": snapshot_id,
+            "source_hash": trusted_graph_sha256,
+        },
     )

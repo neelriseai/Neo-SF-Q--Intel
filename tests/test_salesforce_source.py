@@ -69,6 +69,7 @@ def test_loads_fresh_implemented_contract(tmp_path: Path) -> None:
     graph_hash = write_source(tmp_path)
     source = load_salesforce_source(tmp_path, expected_graph_sha256=graph_hash)
     assert source.project_id == "example-salesforce-application"
+    assert source.trusted_graph_sha256 == graph_hash
 
 
 def test_accepts_compatible_newer_contract_minor_version(tmp_path: Path) -> None:

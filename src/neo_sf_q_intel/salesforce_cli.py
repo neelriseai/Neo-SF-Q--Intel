@@ -53,8 +53,7 @@ class SalesforceCLI:
             raise SalesforceCLIError("Salesforce CLI returned invalid JSON") from exc
         if completed.returncode != 0 or payload.get("status") not in (0, None):
             name = payload.get("name", "SalesforceCLIError")
-            message = payload.get("message", "Salesforce CLI command failed")
-            raise SalesforceCLIError(f"{name}: {message}")
+            raise SalesforceCLIError(f"{name}: Salesforce CLI command failed")
         return _sanitize(payload)
 
     def org_status(self) -> dict[str, Any]:

@@ -48,6 +48,14 @@
       "verification": ["tests/test_workflow.py"]
     },
     {
+      "id": "observability.agent-trace",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Emits bounded typed stage events and deliverables using capability, evidence, artifact, policy and gap identifiers without persisting prompts, secrets or hidden reasoning.",
+      "implementation": ["src/neo_sf_q_intel/domain.py", "src/neo_sf_q_intel/observability.py", "src/neo_sf_q_intel/workflow.py"],
+      "verification": ["tests/test_workflow.py"]
+    },
+    {
       "id": "quality.test-selection",
       "owner": "Test Intelligence",
       "status": "FOUNDATION",
@@ -77,7 +85,15 @@
       "status": "FOUNDATION",
       "genericity": "Deterministic policy consumes typed risk and validation state.",
       "implementation": ["src/neo_sf_q_intel/governance.py"],
-      "verification": ["tests/test_workflow.py"]
+      "verification": ["tests/test_governance.py", "tests/test_workflow.py"]
+    },
+    {
+      "id": "governance.measurement-contract",
+      "owner": "Governance Review",
+      "status": "FOUNDATION",
+      "genericity": "Defines executable run-level metric populations, thresholds, applicability and typed guardrail outcomes without treating heuristic scores as calibrated probability.",
+      "implementation": ["config/governance-policy.json", "src/neo_sf_q_intel/governance_policy.py", "src/neo_sf_q_intel/governance.py"],
+      "verification": ["tests/test_governance_policy.py", "tests/test_governance.py"]
     },
     {
       "id": "memory.postgresql",
@@ -107,7 +123,7 @@
       "id": "runtime.salesforce-live-evidence",
       "owner": "Orchestrator",
       "status": "NEXT",
-      "genericity": "Read routes come from validated contracts and policy allowlists.",
+      "genericity": "Planned live reads require validated contract routes, field/route allowlists, production-org refusal and redacted audit events; the current CLI adapter only proves bounded inspection and route validation.",
       "implementation": ["src/neo_sf_q_intel/salesforce_cli.py"],
       "verification": []
     },

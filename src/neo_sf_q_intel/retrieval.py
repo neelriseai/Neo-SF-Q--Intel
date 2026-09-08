@@ -3,55 +3,17 @@ from __future__ import annotations
 import re
 from collections import defaultdict, deque
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any
 
-from neo_sf_q_intel.domain import EvidenceRef
+from neo_sf_q_intel.domain import EvidenceRef, EvidenceState
+from neo_sf_q_intel.policy import ReasoningPolicy
 from neo_sf_q_intel.salesforce_source import (
     SalesforceSourceSnapshot,
     node_to_evidence,
 )
 
 TOKEN_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9_.-]{2,}")
-LOW_INFORMATION_TOKENS = {
-    "about",
-    "add",
-    "an",
-    "and",
-    "any",
-    "are",
-    "as",
-    "assess",
-    "at",
-    "be",
-    "by",
-    "change",
-    "class",
-    "component",
-    "field",
-    "file",
-    "for",
-    "from",
-    "how",
-    "in",
-    "into",
-    "is",
-    "it",
-    "modify",
-    "of",
-    "on",
-    "object",
-    "refactor",
-    "salesforce",
-    "something",
-    "that",
-    "the",
-    "this",
-    "test",
-    "thing",
-    "update",
-    "what",
-    "with",
-}
 
 
 def tokenize(text: str) -> set[str]:
@@ -73,18 +35,27 @@ class TraversalHit:
     source_id: str
     target_id: str
     depth: int
+    evidence_state: EvidenceState
+    source_snapshot: str
+    source_hash: str
+    valid_until: str | None
 
 
 @dataclass(frozen=True)
 class TraversalGap:
+    code: str
     relation: str
     source_id: str
     target_id: str
+    neighbor_id: str
 
 
 class EvidenceRetriever:
-    def __init__(self, source: SalesforceSourceSnapshot) -> None:
+    def __init__(
+        self, source: SalesforceSourceSnapshot, policy: ReasoningPolicy | None = None
+    ) -> None:
         self.source = source
+        self.policy = policy or ReasoningPolicy.load()
         self.nodes = {str(node["id"]): node for node in source.nodes}
         self.outgoing: dict[str, list[dict[str, Any]]] = defaultdict(list)
         self.incoming: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -93,7 +64,7 @@ class EvidenceRetriever:
             self.incoming[str(edge["to"])].append(edge)
 
     def search(self, query: str, changed_paths: list[str], limit: int = 8) -> list[RetrievalHit]:
-        query_tokens = tokenize(query) - LOW_INFORMATION_TOKENS
+        query_tokens = tokenize(query) - self.policy.low_information_tokens
         normalized_paths = {path.replace("\\", "/").casefold() for path in changed_paths}
         hits: list[RetrievalHit] = []
         for node in self.nodes.values():
@@ -129,12 +100,16 @@ class EvidenceRetriever:
             ]
         if not ranked:
             return []
-        minimum_score = 0.45 if len(query_tokens) <= 2 else 0.25
+        minimum_score = (
+            self.policy.short_query_minimum_score
+            if len(query_tokens) <= 2
+            else self.policy.long_query_minimum_score
+        )
         top_score = ranked[0].score
         tied = [hit for hit in ranked if abs(hit.score - top_score) < 1e-9]
-        if top_score < minimum_score or len(tied) >= 6:
+        if top_score < minimum_score or len(tied) >= self.policy.ambiguity_tie_limit:
             return []
-        cutoff = max(minimum_score, top_score * 0.65)
+        cutoff = max(minimum_score, top_score * self.policy.relative_cutoff_ratio)
         return [hit for hit in ranked if hit.score >= cutoff][:limit]
 
     def expand(
@@ -158,12 +133,26 @@ class EvidenceRetriever:
             ]
             for edge, neighbor_id, direction in adjacent:
                 relation = str(edge["relation"])
-                if allowed_relations is not None and relation not in allowed_relations:
+                trust_gap = self._edge_trust_gap(edge)
+                if trust_gap:
                     gaps.append(
                         TraversalGap(
+                            code=trust_gap,
                             relation=relation,
                             source_id=str(edge["from"]),
                             target_id=str(edge["to"]),
+                            neighbor_id=neighbor_id,
+                        )
+                    )
+                    continue
+                if allowed_relations is not None and relation not in allowed_relations:
+                    gaps.append(
+                        TraversalGap(
+                            code="UNKNOWN_RELATION",
+                            relation=relation,
+                            source_id=str(edge["from"]),
+                            target_id=str(edge["to"]),
+                            neighbor_id=neighbor_id,
                         )
                     )
                     continue
@@ -181,6 +170,12 @@ class EvidenceRetriever:
                         source_id=str(edge["from"]),
                         target_id=str(edge["to"]),
                         depth=current_depth + 1,
+                        evidence_state=EvidenceState(
+                            edge.get("evidenceState", EvidenceState.CONFIRMED)
+                        ),
+                        source_snapshot=str(edge.get("sourceSnapshot", self.source.snapshot_id)),
+                        source_hash=str(self.source.trusted_graph_sha256),
+                        valid_until=edge.get("validUntil"),
                     )
                 )
                 queue.append((neighbor_id, current_depth + 1))
@@ -190,4 +185,29 @@ class EvidenceRetriever:
         return expanded, list(unique_gaps.values()), truncated
 
     def evidence_for(self, node: dict[str, Any]) -> EvidenceRef:
-        return node_to_evidence(node, self.source.snapshot_id)
+        return node_to_evidence(node, self.source.snapshot_id, self.source.trusted_graph_sha256)
+
+    def _edge_trust_gap(self, edge: dict[str, Any]) -> str | None:
+        try:
+            state = EvidenceState(edge.get("evidenceState", EvidenceState.CONFIRMED))
+        except ValueError:
+            return "INVALID_EDGE_STATE"
+        if state not in {EvidenceState.CONFIRMED, EvidenceState.HUMAN_CONFIRMED}:
+            return f"EDGE_STATE_{state}"
+        if not self.source.trusted_graph_sha256:
+            return "EDGE_SOURCE_UNVERIFIED"
+        if edge.get("sourceHash") and edge["sourceHash"] != self.source.trusted_graph_sha256:
+            return "EDGE_SOURCE_MISMATCH"
+        if str(edge.get("sourceSnapshot", self.source.snapshot_id)) != self.source.snapshot_id:
+            return "EDGE_SNAPSHOT_MISMATCH"
+        valid_until = edge.get("validUntil")
+        if valid_until:
+            try:
+                expires = datetime.fromisoformat(str(valid_until).replace("Z", "+00:00"))
+            except ValueError:
+                return "EDGE_EXPIRY_INVALID"
+            if expires.tzinfo is None:
+                expires = expires.replace(tzinfo=UTC)
+            if expires <= datetime.now(UTC):
+                return "EDGE_EXPIRED"
+        return None

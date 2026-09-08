@@ -4,17 +4,17 @@
 
 Build and final verification target the org machine: Python 3.14.3, Node.js 26.5.x, Salesforce CLI 2.148.3 and local PostgreSQL. The development machine may use newer compatible patch releases, but the compatibility gate is the org machine.
 
-## Schedule
+## Planned 24-hour schedule and current truth
 
-| Hours | Outcome |
-|---:|---|
-| 0–2 | Repository, canonical docs, contracts, provider profiles and environment preflight |
-| 2–6 | Auto-created PostgreSQL run/checkpoint memory, SQLite/JSON/cache fallback, hybrid retrieval ports and snapshot checks |
-| 6–10 | LangGraph workflow and four schema-bounded specialist agents |
-| 10–13 | Salesforce services and five MCP adapters |
-| 13–16 | Playwright worker and generic locator-ranking/healing path |
-| 16–20 | Next.js dashboard: command center, run timeline, impact/tests, healing and governance |
-| 20–24 | Unit/contract/golden tests, live integration correction and rehearsal |
+| Hours | Planned outcome | Current status |
+|---:|---|---|
+| 0–2 | Repository, canonical docs, contracts, provider profiles and environment preflight | Foundation implemented; org-machine provider verification pending |
+| 2–6 | Auto-created PostgreSQL run/checkpoint memory, SQLite/JSON/cache fallback, hybrid retrieval ports and snapshot checks | Run/checkpoint and fallback foundation implemented; governed metadata/audit ports and semantic fusion pending |
+| 6–10 | LangGraph workflow and four schema-bounded specialist agents | Deterministic typed stages implemented; independent provider-backed agents pending |
+| 10–13 | Salesforce services and five MCP adapters | Three foundation tools exist; governed live reads, policy/audit envelope and remaining adapters pending |
+| 13–16 | Playwright worker and generic locator-ranking/healing path | Locator ranking library implemented; browser capture/apply worker pending |
+| 16–20 | Next.js dashboard: command center, run timeline, impact/tests, healing and governance | Polished command center and governance view implemented; complete timeline/test/healing/degradation views pending |
+| 20–24 | Unit/contract/golden tests, live integration correction and rehearsal | Unit, contract and mocked dashboard E2E exist; real vertical E2E and three golden scenarios pending |
 
 ## Gates
 
@@ -40,12 +40,13 @@ Build and final verification target the org machine: Python 3.14.3, Node.js 26.5
 
 ## Current implementation checkpoint
 
-The repository now contains the typed LangGraph workflow, four specialist nodes, deterministic
-governance, source graph traversal, OpenAI/Azure provider adapters, an extension-free embedding
-similarity index, PostgreSQL run/checkpoint wiring and relational foundation schema, three MCP tools, a Salesforce read adapter,
-metadata-aware Playwright healing and the first dashboard. Live PostgreSQL, Azure/OpenAI, and
-Salesforce org verification remain environment gates and must not be represented as completed
-until configured and run on the org machine.
+The repository now contains a typed LangGraph workflow with four deterministic specialist stages,
+deterministic governance, source graph traversal, OpenAI/Azure provider adapters, a standalone
+extension-free semantic index, PostgreSQL run/checkpoint wiring and relational foundation schema,
+three MCP tools, a bounded Salesforce CLI adapter, locator ranking and the first dashboard.
+Semantic results are not yet fused into assurance decisions. Live PostgreSQL, model-provider,
+Salesforce evidence, trusted test execution and browser-worker verification remain environment or
+implementation gates and must not be represented as completed until they are exercised end to end.
 
 ## Post-demo vector milestone
 

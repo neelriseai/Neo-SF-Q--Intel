@@ -51,19 +51,67 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
 
 ## Fast context and knowledge maintenance
 
-- Read `knowledge/project-index.json` and `knowledge/application-graph.json` before scanning
-  broad documentation. Follow the index `readOrder` for authoritative context.
+- For every development, debugging, patch, enhancement or impact-analysis task, first read
+  `knowledge/project-index.json` and query `knowledge/application-graph.json` for the affected
+  capability, files, imports and verification edges. Use those results to select only the relevant
+  canonical documents and source files; do not rescan all documentation by default.
+- Follow the index `readOrder` when broader authoritative context is genuinely required. Record a
+  missing relation/file classification as a knowledge-maintenance gap instead of repeatedly working
+  around an incomplete index.
 - After adding, removing, moving or materially changing code, policy or canonical docs, run
   `python scripts/catalog/build_project_index.py`. Before commit, `--check` must pass.
 - Generated graph edges are discovery aids, not authority or permission.
 
 ## Independent review lane
 
-- For every coherent capability or design slice, start one read-only reviewer sub-agent when
-  available. The developer continues independent work while it checks scenario coupling,
-  weak/thin layers, scope erosion, evidence/governance gaps and missing failure tests.
-- Send the reviewer a concise diff/design summary at the next natural boundary rather than
-  blocking each file edit. Resolve all P0/P1 findings before commit or record the owner/status
-  in `quality/reviews/` and keep the capability below `IMPLEMENTED`.
+- For every coherent capability or design slice, start independent read-only reviewer sub-agents
+  when available. Keep two lanes: (1) genericity/architecture/scope and (2) governance, evidence,
+  safety and verification. The developer continues independent work while reviews run.
+- Reviewers must challenge scenario/data coupling, hardcoding, pass-through or cosmetically named
+  agents, weak/thin vertical slices, scope erosion, capability overclaims, missing negative/failure
+  tests, and deviations from the canonical roadmap. A demo path is evidence for a reusable
+  capability; it is never the implementation boundary.
+- Send reviewers a concise capability/diff summary at natural integration boundaries, not after
+  each file write. This preserves pace while catching design errors before they spread.
+- Resolve every P0 and every P1 that contradicts a current implementation claim before commit.
+  A genuine planned P1 may remain only when its capability is truthfully `FOUNDATION`/`NEXT` and
+  the review ledger records its owner, capability ID, reason, acceptance boundary and priority.
+  Never hide a gap by weakening a test or changing a label without changing the underlying claim.
 - When sub-agents are unavailable, run `scripts/quality/check.ps1 -Full` and apply the checklist
   in `Docs/15-development-assurance-process.md` as the fallback independent review.
+
+## Priorities and verification cadence
+
+1. P0: credential/session safety, authorization, evidence integrity, destructive effects and false
+   `GO` paths. Stop the slice and correct these immediately.
+2. P1: end-to-end capability correctness, generic contracts, deterministic degradation, replayable
+   policy identity, persistence integrity and truthful capability/UI status. Resolve before commit.
+3. P2: breadth, performance, usability and polish that do not invalidate current evidence. Record
+   these without displacing P0/P1 work.
+
+- Tie every task to one or more existing capability IDs and an explicit acceptance result before
+  coding. If architecture changes, update the canonical document and scope manifest first or in the
+  same coherent slice.
+- Develop vertical slices through contract, service/domain behavior, adapter boundary, observable
+  result and tests. A schema, interface, prompt, agent label or dashboard card alone is not a
+  completed capability.
+- Run focused tests during implementation. Before integration, require positive, negative,
+  failure/degradation and scenario-independence or metamorphic tests where applicable. Run the
+  full Python, type, browser and dashboard gate before commit/push.
+- Re-audit earlier code when a new invariant is introduced. Apply the invariant consistently to
+  stored runs, adapters and UI claims rather than protecting only new code.
+
+## Agent observability and deliverables
+
+- Every agent/capability stage emits a structured, bounded event containing run/trace ID,
+  capability ID, agent/stage, status, input evidence IDs, output artifact IDs, policy versions and
+  hashes, duration, degradation/gap codes and error class. Never log prompts containing secrets,
+  credentials, tokens, frontdoor/session URLs or unredacted raw org payloads.
+- Each agent returns a typed deliverable with: conclusion/proposal, cited evidence IDs, material
+  assumptions, blocking and nonblocking gaps, deterministic measurements/guardrail outcomes, and
+  the next permitted action. Narrative detail may explain this artifact but cannot replace it.
+- Logging must be diagnostic, not noisy: no repeated full documents, hidden chain-of-thought,
+  fabricated confidence percentages or duplicate events. Keep enough detail to replay decisions
+  and identify which policy, source snapshot, runner and adapter produced each fact.
+- Capability review evidence belongs in the structured review ledger. Runtime facts belong in
+  governed stores. Chat messages are coordination context, not the system of record.

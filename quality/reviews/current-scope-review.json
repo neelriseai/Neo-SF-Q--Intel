@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0.0",
+  "reviewId": "governance-measurement-2026-09-09",
+  "status": "APPROVED",
+  "reviewedPaths": [
+    "config/capability-scope.json",
+    "config/governance-policy.json",
+    "config/quality-policy.json",
+    "config/reasoning-policy.json",
+    "quality/evals/retrieval-boundaries-v1.json",
+    "src/neo_sf_q_intel/analysis.py",
+    "src/neo_sf_q_intel/domain.py",
+    "src/neo_sf_q_intel/governance.py",
+    "src/neo_sf_q_intel/governance_policy.py",
+    "src/neo_sf_q_intel/policy.py",
+    "src/neo_sf_q_intel/retrieval.py",
+    "src/neo_sf_q_intel/salesforce_source.py",
+    "src/neo_sf_q_intel/salesforce_cli.py",
+    "src/neo_sf_q_intel/service.py",
+    "src/neo_sf_q_intel/workflow.py",
+    "src/neo_sf_q_intel/mcp_server.py",
+    "src/neo_sf_q_intel/observability.py",
+    "apps/web/src/app/page.tsx"
+  ],
+  "reviewers": [
+    "genericity_reviewer",
+    "governance_precision_auditor"
+  ],
+  "findings": [
+    {
+      "code": "GOVERNANCE_EXECUTION_TRUTH_TABLE",
+      "severity": "P1",
+      "resolution": "Typed execution results and exhaustive release-decision tests added."
+    },
+    {
+      "code": "UNCALIBRATED_CONFIDENCE_PRESENTATION",
+      "severity": "P1",
+      "resolution": "Dashboard now presents evidence basis rather than probability."
+    },
+    {
+      "code": "BYPASSABLE_SCOPE_REVIEW",
+      "severity": "P1",
+      "resolution": "Exact structured manifest coverage and two-reviewer approval are enforced."
+    },
+    {
+      "code": "CAPABILITY_OVERCLAIMS",
+      "severity": "P1",
+      "resolution": "Dashboard and canonical docs now distinguish deterministic stages and strategy foundations from planned model, live-tool, browser and execution verticals."
+    },
+    {
+      "code": "THIN_STAGE_OBSERVABILITY",
+      "severity": "P1",
+      "resolution": "Every executed workflow stage now emits a bounded typed success, abstention or sanitized failure event and deliverable with capabilities, opaque evidence/artifact references, policy identity, measurements, gaps and next action."
+    },
+    {
+      "code": "PRIOR_IMPLEMENTATION_GAPS",
+      "severity": "P1",
+      "resolution": "Open vertical-slice boundaries are recorded in the retrospective ledger and remain FOUNDATION or NEXT rather than being presented as complete."
+    }
+  ],
+  "statusDowngrades": []
+}

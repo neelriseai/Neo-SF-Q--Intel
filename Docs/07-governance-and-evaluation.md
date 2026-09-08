@@ -1,35 +1,103 @@
 # Governance and evaluation
 
-## Initial metrics
+## Measurement contract
 
-| Metric | Demonstration gate |
-|---|---:|
-| Material claims with valid evidence | 100% |
-| Unsupported release-blocking claims | 0 |
-| Critical impacted nodes recalled | 100% of golden obligations |
-| Mandatory tests selected | 100% |
-| Retrieval Recall@5 | at least 80% with numerator/denominator shown |
-| Unauthorized tool calls executed | 0 |
-| Tool calls with complete audit event | 100% |
-| Ambiguous locator cases abstained | 100% |
-| False locator heals | 0 in the approved corpus |
-| Deterministic decision reproducibility | 100% |
-| Persisted credential/session URL findings | 0 |
+Every measured result records the policy version and SHA-256, numerator, denominator,
+comparator, threshold, minimum sample size, applicability state and whether failure blocks a
+release. A zero denominator is `NOT_APPLICABLE`; it is never rewritten as `0/1` or reported as
+success. A population below its declared minimum is `INSUFFICIENT_SAMPLE`, with raw counts shown
+and no production-quality claim.
 
-Small-corpus results always show raw counts. These are demonstration gates, not universal accuracy claims.
+The executable run policy is `config/governance-policy.json`. Its Pydantic contract rejects
+missing populations, undeclared metric references, blocking metrics without a blocking control,
+and incomplete outcome-to-decision mappings.
 
-## Required evaluation sets
+## Implemented run-level metrics
 
-- Business-rule change impact.
-- Permission/security change impact.
-- LWC presentation change and locator healing.
-- Stale graph/contract rejection.
-- Missing live Salesforce degradation.
-- Model outage deterministic fallback.
-- Prompt injection inside documents and tool outputs.
-- Unauthorized write/approval attempts.
-- Unsupported evidence ID and fabricated entity rejection.
+| Metric | Numerator | Denominator | Gate |
+|---|---|---|---|
+| `material_claim_evidence_coverage` | Material claims marked supported whose cited IDs all resolve to `CONFIRMED` or `HUMAN_CONFIRMED` evidence | Material claims emitted by this run | `>= 1.0`; minimum 1; zero population `NOT_APPLICABLE`; blocking |
+| `impact_evidence_coverage` | Impact findings with at least one cited ID and every cited ID confirmed | Impact findings emitted by this run | `>= 1.0`; minimum 1; zero population `NOT_APPLICABLE`; blocking |
+| `selected_test_evidence_coverage` | Selected validations with at least one cited ID and every cited ID confirmed | Validations selected by this run | `>= 1.0`; minimum 1; zero population `NOT_APPLICABLE`; blocking |
 
-## Release policy
+These are evidence-completeness ratios, not model accuracy estimates. Retrieval strength is only a
+ranking signal. It is never displayed as a calibrated probability and never overrides evidence
+state, source hash, snapshot identity, relation direction or validity window.
+Each run also stores the reasoning-policy version/SHA-256 and the frozen retrieval evaluation-set
+ID/SHA-256. The reasoning identity covers both canonical policy and evaluation-set content, so
+candidate selection can be replayed and an in-place corpus edit cannot retain the old identity.
 
-An LLM may explain but cannot choose the code. The deterministic engine returns `INCOMPLETE` for stale evidence, missing mandatory results or unresolved critical claims; `NO_GO` for failed blocking controls; `CONDITIONAL_GO` for explicit review items; and `GO` only when every mandatory gate passes.
+## Implemented guardrails and hooks
+
+| Control | Stage | Exact trigger | Outcome |
+|---|---|---|---|
+| `evidence.confirmed-present` | post-analysis | No confirmed evidence exists | `ABSTAIN`, blocking |
+| `analysis.semantics-complete` | post-analysis | At least one `AnalysisGap.blocking=true` exists | `REVIEW_REQUIRED`, blocking |
+| `claims.confirmed-evidence-coverage` | post-analysis | Claim coverage is failed or sample is insufficient | `ABSTAIN`, blocking |
+| `impacts.confirmed-evidence-coverage` | post-analysis | Impact coverage is failed or sample is insufficient | `ABSTAIN`, blocking |
+| `tests.confirmed-evidence-coverage` | post-analysis | Selected-test coverage is failed or sample is insufficient | `ABSTAIN`, blocking |
+
+Recommended-test truncation is observable but nonblocking. Unknown relations block only when the
+untraversed neighbor is an impact/validation node or can bridge to one. Benign context relations do
+not block. The system does not use broad keyword filters for prompt injection; structural input
+schemas, provenance, source trust, tool authorization and output validation provide the boundary
+without rejecting legitimate content.
+
+The pre-commit hook validates knowledge freshness, genericity, exact structured scope-review
+coverage and the governance policy. The pre-push hook runs the full lint and test suite. A random
+file in the review directory cannot approve a policy change, and an honest capability downgrade is
+allowed only when the manifest names the capability, old state, new state and a concrete reason.
+
+## Release decision truth table
+
+Guardrail outcomes map deterministically: `DENY -> NO_GO`, `ABSTAIN -> INCOMPLETE`,
+`REVIEW_REQUIRED -> INCOMPLETE`, and `REQUIRE_APPROVAL -> CONDITIONAL_GO`. `DENY` wins if several
+blocking outcomes coexist.
+
+Evidence absence, staleness or expiry is an epistemic gap and therefore abstains to `INCOMPLETE`;
+it is not proof of an unsafe release. `NO_GO` is reserved for a confirmed failed validation or a
+future explicit deny-class security/policy violation.
+
+After governance passes:
+
+| Condition | Decision |
+|---|---|
+| Any selected validation has one unique, confirmed-evidence-backed `FAILED` result | `NO_GO` |
+| High-risk impact has no mandatory validation | `INCOMPLETE` |
+| A required validation has no unique result, cites unconfirmed evidence, or is `INCONCLUSIVE` | `INCOMPLETE` |
+| Every mandatory validation passes for a high-risk impact | `CONDITIONAL_GO` pending human approval |
+| Every selected validation passes and no impact is high risk | `GO` |
+| No validation is selected | `INCOMPLETE` |
+
+Selection evidence and execution evidence are different facts. Merely recommending a test can
+never produce `GO`. Execution evidence must be a distinct `test-execution` receipt whose test ID,
+outcome, configured trusted-runner ID/source, canonical result-artifact SHA-256, source snapshot,
+execution time and validity window match the typed result. Future, expired and over-age receipts
+are rejected. A policy allowlist is present, but a runtime test-execution producer is still `NEXT`;
+the analysis-only workflow therefore returns `INCOMPLETE` rather than manufacturing a pass.
+
+## Planned corpus gates (not yet runtime claims)
+
+Corpus promotion gates activate only with at least 20 adjudicated cases and a frozen corpus ID.
+Below 20 cases the result is `INSUFFICIENT_SAMPLE` and cannot support an accuracy claim.
+
+| Metric | Numerator | Denominator | Proposed promotion gate |
+|---|---|---|---|
+| Critical-impact recall | Expected critical impact IDs present in the output | Critical impact IDs in adjudicated golden cases | `>= 0.95`, plus every zero-recall case listed |
+| Mandatory-test recall | Expected mandatory test IDs selected | Mandatory test IDs in adjudicated golden cases | `>= 0.95` |
+| Unsupported material-claim rate | Emitted material claims adjudicated unsupported | Emitted material claims reviewed in the corpus | `<= 0.01` and zero unsupported release-blocking claims |
+| False-heal rate | Applied locator heals that resolve to the wrong target or alter test intent | Applied locator heals with adjudicated outcomes | `0` for critical flows; `<= 0.02` otherwise |
+| Release-decision agreement | Runs whose decision exactly equals the frozen deterministic expected decision | Adjudicated runs with an expected decision | `1.0` |
+
+These thresholds are candidate promotion rules until the corpus evaluator, labels and acceptance
+process are implemented. They must not appear on the dashboard as achieved metrics before then.
+
+## Planned operational-window gates (not yet implemented)
+
+Operational windows use a declared start/end time and deployment version. Tool audit completeness
+is `tool calls with request ID, actor, operation, policy decision, start/end timestamp and redacted
+result status / all tool calls`; target `1.0`, minimum 100 calls. Unauthorized execution rate is
+`executed calls whose authorization decision was not ALLOW / executed calls`; target `0`, minimum
+100 calls. Credential-persistence findings are the count of scanner-confirmed secrets, tokens or
+session URLs in logs and stores; target exactly `0` for every release. These remain planned until
+the audit writer and operational evaluator exist.

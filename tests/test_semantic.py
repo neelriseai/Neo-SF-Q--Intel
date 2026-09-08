@@ -19,6 +19,7 @@ def source() -> SalesforceSourceSnapshot:
         root=Path("."),
         contract={},
         project_index={"sourceSnapshot": "semantic"},
+        trusted_graph_sha256="semantic-digest",
         graph={
             "sourceSnapshot": "semantic",
             "nodes": [

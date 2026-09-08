@@ -9,6 +9,9 @@ import subprocess
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "config" / "quality-policy.json"
@@ -20,6 +23,43 @@ class Finding:
     code: str
     path: str
     message: str
+
+
+class ReviewFinding(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    code: str = Field(min_length=3)
+    severity: Literal["P0", "P1", "P2"]
+    resolution: str = Field(min_length=10)
+
+
+class StatusDowngrade(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    capabilityId: str = Field(min_length=3)
+    from_: Literal["IMPLEMENTED", "FOUNDATION", "NEXT", "DEFERRED"] = Field(alias="from")
+    to: Literal["IMPLEMENTED", "FOUNDATION", "NEXT", "DEFERRED"]
+    reason: str = Field(min_length=20)
+
+
+class ScopeReviewManifest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schemaVersion: str = Field(pattern=r"^\d+\.\d+\.\d+$")
+    reviewId: str = Field(min_length=3)
+    status: Literal["IN_PROGRESS", "APPROVED"]
+    reviewedPaths: list[str] = Field(min_length=1)
+    reviewers: list[str] = Field(min_length=2)
+    findings: list[ReviewFinding]
+    statusDowngrades: list[StatusDowngrade]
+
+    @model_validator(mode="after")
+    def validate_distinct_reviewers(self) -> ScopeReviewManifest:
+        if any(not item.strip() for item in self.reviewers):
+            raise ValueError("reviewer IDs cannot be blank")
+        if len(set(self.reviewers)) != len(self.reviewers):
+            raise ValueError("reviewer IDs must be distinct")
+        return self
 
 
 def _repo_files() -> list[str]:
@@ -120,6 +160,47 @@ def _changed_paths() -> set[str]:
         shell=False,
     )
     return tracked | {item.replace("\\", "/") for item in untracked.stdout.splitlines()}
+
+
+def _scope_review_findings(
+    policy: dict, controlled_changed: set[str], changed: set[str]
+) -> tuple[list[Finding], dict]:
+    if not controlled_changed:
+        return [], {}
+    manifest_path = policy["scopeReviewManifestPath"]
+    findings: list[Finding] = []
+    if manifest_path not in changed:
+        return [
+            Finding(
+                "MISSING_SCOPE_REVIEW",
+                ", ".join(sorted(controlled_changed)),
+                "Controlled policy changes require the structured scope-review manifest",
+            )
+        ], {}
+    try:
+        raw_manifest = json.loads((ROOT / manifest_path).read_text(encoding="utf-8"))
+        manifest = ScopeReviewManifest.model_validate(raw_manifest).model_dump(by_alias=True)
+    except (OSError, json.JSONDecodeError, ValidationError):
+        return [Finding("INVALID_SCOPE_REVIEW", manifest_path, "Manifest is not valid JSON")], {}
+    reviewed_paths = set(manifest.get("reviewedPaths", []))
+    uncovered = controlled_changed - reviewed_paths
+    if uncovered:
+        findings.append(
+            Finding(
+                "UNREVIEWED_POLICY_CHANGE",
+                ", ".join(sorted(uncovered)),
+                "Each changed controlled path must be named in reviewedPaths",
+            )
+        )
+    if manifest.get("status") != "APPROVED":
+        findings.append(
+            Finding(
+                "SCOPE_REVIEW_NOT_APPROVED",
+                manifest_path,
+                "Scope review must be APPROVED before commit",
+            )
+        )
+    return findings, manifest
 
 
 def check_repository() -> list[Finding]:
@@ -275,6 +356,13 @@ def check_repository() -> list[Finding]:
                     )
                 )
 
+    changed = _changed_paths()
+    controlled_changed = changed & set(policy["scopeControlledPaths"])
+    scope_review_findings, review_manifest = _scope_review_findings(
+        policy, controlled_changed, changed
+    )
+    findings.extend(scope_review_findings)
+
     head_scope = _head_scope()
     current_scope = {item["id"]: item for item in capabilities if item.get("id")}
     if head_scope is not None:
@@ -290,25 +378,26 @@ def check_repository() -> list[Finding]:
                     )
                 )
             elif rank[current["status"]] < rank[previous["status"]]:
-                findings.append(
-                    Finding(
-                        "CAPABILITY_REGRESSION",
-                        "config/capability-scope.json",
-                        f"Capability {identifier} regressed from {previous['status']}",
-                    )
+                downgrade = next(
+                    (
+                        item
+                        for item in review_manifest.get("statusDowngrades", [])
+                        if item.get("capabilityId") == identifier
+                        and item.get("from") == previous["status"]
+                        and item.get("to") == current["status"]
+                        and len(item.get("reason", "")) >= 20
+                    ),
+                    None,
                 )
-
-    changed = _changed_paths()
-    controlled_changed = changed & set(policy["scopeControlledPaths"])
-    review_changed = any(path.startswith(policy["reviewLedgerRoot"]) for path in changed)
-    if controlled_changed and not review_changed:
-        findings.append(
-            Finding(
-                "MISSING_SCOPE_REVIEW",
-                ", ".join(sorted(controlled_changed)),
-                "Scope/policy changes require a review-ledger change",
-            )
-        )
+                if downgrade is None:
+                    findings.append(
+                        Finding(
+                            "UNREVIEWED_CAPABILITY_REGRESSION",
+                            "config/capability-scope.json",
+                            f"Capability {identifier} regressed from {previous['status']} "
+                            "without an exact reviewed downgrade",
+                        )
+                    )
     return findings
 
 

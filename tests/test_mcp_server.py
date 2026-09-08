@@ -1,3 +1,5 @@
+import json
+
 from neo_sf_q_intel.config import Settings
 from neo_sf_q_intel.mcp_server import build_mcp
 from neo_sf_q_intel.service import AssuranceService
@@ -18,3 +20,6 @@ async def test_mcp_2_server_registers_and_executes_shared_services() -> None:
         "search_evidence",
     }
     assert result.content
+    body = json.loads(result.content[0].text)
+    assert body["request"]["change_intent"] == "INFORMATIONAL"
+    assert body["impacts"] == []

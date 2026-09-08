@@ -15,7 +15,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: Inter, Aptos, "Segoe UI", sans-serif; }
 body::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle at 88% 4%, rgba(200, 238, 104, .26), transparent 24%), radial-gradient(circle at 7% 32%, rgba(8, 127, 112, .08), transparent 28%); }
-button, textarea { font: inherit; }
+button, textarea, select { font: inherit; }
 .shell { width: min(1240px, calc(100% - 48px)); margin-inline: auto; position: relative; }
 .nav { height: 80px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(21, 40, 37, .12); }
 .brand { display: flex; gap: 12px; align-items: center; font-weight: 750; letter-spacing: -.02em; }
@@ -44,6 +44,8 @@ label { display: flex; justify-content: space-between; font-size: 12px; font-wei
 label em { color: var(--muted); font-style: normal; font-weight: 450; }
 textarea { width: 100%; resize: vertical; border: 1px solid var(--line); border-radius: 10px 3px 10px 3px; padding: 13px 14px; color: var(--ink); background: rgba(248, 250, 247, .9); line-height: 1.45; outline: none; }
 textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+select { width: 100%; border: 1px solid var(--line); border-radius: 10px 3px 10px 3px; padding: 11px 14px; color: var(--ink); background: rgba(248, 250, 247, .9); outline: none; }
+select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
 textarea.paths { font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; }
 button { margin-top: 18px; width: 100%; border: 0; background: var(--teal); color: white; font-weight: 750; padding: 14px 18px; border-radius: 10px 3px 10px 3px; display: flex; justify-content: space-between; cursor: pointer; }
 button:hover { background: #056b5e; } button:disabled { opacity: .55; cursor: wait; }

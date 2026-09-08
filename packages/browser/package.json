@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "tsc --noEmit",
     "test": "playwright test tests/locator-healer.spec.ts",
-    "test:e2e": "playwright test tests/dashboard.spec.ts"
+    "test:e2e": "playwright test tests/dashboard.spec.ts --config=playwright.e2e.config.ts"
   },
   "dependencies": {
     "playwright": "1.63.0",

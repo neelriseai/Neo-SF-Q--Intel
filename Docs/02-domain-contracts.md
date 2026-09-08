@@ -1,18 +1,25 @@
 # Domain contracts
 
-## Core types
+## Implemented core types
 
 - `ChangeRequest`: requirement text, repository refs and optional changed paths.
-- `EvidenceRef`: immutable identifier, kind, source, locator/hash and confidence.
-- `ImpactFinding`: affected entity, relation, severity, confidence and evidence IDs.
-- `TestObligation`: behavior to prove, mandatory flag and evidence IDs.
-- `TestPlan`: selected/excluded tests with deterministic reasons.
-- `ToolRequest` and `ToolResult`: authorized capability, bounded arguments and audit state.
-- `HealingIntent`: object, field/action, expected control and preconditions.
-- `HealingDecision`: ranked candidates, uniqueness result, evidence and abstention reason.
+- `EvidenceRef`: immutable identifier, kind, source, locator/hash and typed evidence state.
+- `ImpactFinding`: affected entity, relation, severity, evidence-ranking strength/basis and evidence IDs. Ranking strength is not a calibrated probability or release gate.
+- `TestSelection`: selected validation, mandatory/recommended classification, reason and evidence IDs.
+- `HealingProposal`: evidence-bound strategy proposal, deterministic ranking basis and approval flag;
+  it is not proof that a browser action occurred.
+- `AgentActivity` and `AgentDeliverable`: bounded trace summary, conclusion, evidence/artifact
+  references, policy identity, measurements, gaps and next permitted action.
 - `Claim`: text, materiality, evidence IDs and validation state.
-- `GovernanceAssessment`: metric values and policy violations.
+- `TestExecution`: selected test ID, typed outcome, runner ID, immutable result hash, source snapshot, execution/expiry time and confirmed execution-receipt IDs.
+- `GovernanceAssessment`: policy identity, exact metric values, typed guardrail decisions and violations.
 - `ReleaseDecision`: `GO`, `CONDITIONAL_GO`, `NO_GO` or `INCOMPLETE` plus deterministic reasons.
+
+## Target contracts
+
+The complete tool, test-execution and browser verticals will add domain-level `TestObligation` /
+`TestPlan`, authorized `ToolRequest` / `ToolResult`, and executable `HealingIntent` /
+`HealingDecision` contracts. Their absence is why those capabilities remain `FOUNDATION` or `NEXT`.
 
 ## Evidence states
 

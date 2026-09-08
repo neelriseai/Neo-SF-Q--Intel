@@ -36,7 +36,11 @@ def test_sqlite_repository_self_creates_and_round_trips_runs(tmp_path: Path) -> 
     database = tmp_path / "nested" / "fallback.db"
     repository = SQLiteRunRepository(database)
     run = AssuranceRun(
-        request=ChangeRequest(requirement="Assess configured metadata", project_id="fixture")
+        request=ChangeRequest(requirement="Assess configured metadata", project_id="fixture"),
+        reasoning_policy_version="1.1.0",
+        reasoning_policy_sha256="0" * 64,
+        reasoning_eval_set_id="unit-fixture",
+        reasoning_eval_set_sha256="1" * 64,
     )
 
     repository.setup()

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "evalSetId": "retrieval-boundaries-v1",
+  "cases": [
+    {
+      "id": "long-query-at-minimum",
+      "query": "alpha beta gamma delta",
+      "candidateTokens": ["alpha"],
+      "expected": "ACCEPT_AT_CONFIGURED_MINIMUM"
+    },
+    {
+      "id": "tie-at-ambiguity-limit",
+      "query": "alpha beta gamma delta",
+      "candidateCount": 6,
+      "expected": "ABSTAIN_AT_CONFIGURED_TIE_LIMIT"
+    },
+    {
+      "id": "candidate-order-permutation",
+      "query": "alpha beta gamma delta",
+      "candidateCount": 6,
+      "expected": "IDENTICAL_RANKED_IDS_AFTER_PERMUTATION"
+    }
+  ]
+}

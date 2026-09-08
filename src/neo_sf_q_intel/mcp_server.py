@@ -5,7 +5,7 @@ from pathlib import Path
 from mcp.server.mcpserver import MCPServer
 
 from neo_sf_q_intel.config import Settings
-from neo_sf_q_intel.domain import ChangeRequest
+from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest
 from neo_sf_q_intel.salesforce_cli import SalesforceCLI
 from neo_sf_q_intel.service import AssuranceService, create_service
 
@@ -17,10 +17,18 @@ def build_mcp(
     server = MCPServer("Neo SF Q-Intel")
 
     @server.tool()
-    def analyze_change(requirement: str, changed_paths: list[str] | None = None) -> dict:
+    def analyze_change(
+        requirement: str,
+        changed_paths: list[str] | None = None,
+        change_intent: ChangeIntent = ChangeIntent.INFORMATIONAL,
+    ) -> dict:
         """Analyze Salesforce change impact and return evidence-governed output."""
         run = service.analyze(
-            ChangeRequest(requirement=requirement, changed_paths=changed_paths or [])
+            ChangeRequest(
+                requirement=requirement,
+                changed_paths=changed_paths or [],
+                change_intent=change_intent,
+            )
         )
         return run.model_dump(mode="json")
 

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+
 from neo_sf_q_intel.domain import (
     AnalysisGap,
+    ChangeIntent,
     ChangeRequest,
     EvidenceRef,
     ImpactFinding,
@@ -28,31 +31,80 @@ class ChangeIntelligenceService:
         impacts: list[ImpactFinding] = []
         test_selections: list[TestSelection] = []
 
+        if request.change_intent is ChangeIntent.OBSERVED_CHANGE:
+            context = [self.retriever.evidence_for(hit.node) for hit in seeds]
+            return (
+                context,
+                [],
+                [],
+                [
+                    AnalysisGap(
+                        code="OBSERVED_CHANGE_UNVERIFIED",
+                        message=(
+                            "Observed change intent requires a verified diff receipt; "
+                            "supplied text or paths are only candidate context."
+                        ),
+                    )
+                ],
+            )
+        change_seeds = seeds if request.change_intent is ChangeIntent.PLANNED_CHANGE else []
+        if not change_seeds:
+            context = [self.retriever.evidence_for(hit.node) for hit in seeds]
+            return context, [], [], []
+        requirement_hash = hashlib.sha256(request.requirement.strip().encode()).hexdigest()
         direct = [
             (
                 hit.node,
-                "matched",
+                "declared",
                 "direct",
-                self._direct_confidence(hit),
-                {"kind": "query-match", "reasons": list(hit.reasons)},
+                self._direct_strength(hit),
+                {
+                    "kind": "declared-change",
+                    "reasons": list(hit.reasons),
+                    "change_intent": request.change_intent,
+                    "requirement_hash": requirement_hash,
+                    "project_id": request.project_id,
+                    "source_ref": request.source_ref,
+                    "source_snapshot": self.retriever.source.snapshot_id,
+                    "source_hash": self.retriever.source.trusted_graph_sha256,
+                },
             )
-            for hit in seeds
+            for hit in change_seeds
         ]
         traversal_hits, traversal_gaps, traversal_truncated = self.retriever.expand(
-            [str(hit.node["id"]) for hit in seeds],
+            [str(hit.node["id"]) for hit in change_seeds],
             depth=self.policy.traversal_depth,
             limit=self.policy.max_traversal_nodes,
             allowed_relations=self.policy.traversable_relations,
         )
-        gaps = [
-            AnalysisGap(
-                code="UNKNOWN_RELATION",
-                message="Traversal stopped at a relationship absent from the reviewed policy.",
-                entity_id=f"{gap.source_id}->{gap.target_id}",
-                relation=gap.relation,
+        gaps = []
+        for gap in traversal_gaps:
+            neighbor = self.retriever.nodes.get(gap.neighbor_id, {})
+            neighbor_policy = self.policy.node_kinds.get(str(neighbor.get("kind", "unknown")))
+            material = (
+                neighbor_policy is None
+                or neighbor_policy.role in {"IMPACT", "VALIDATION"}
+                or self._context_bridges_material_node(
+                    gap.neighbor_id, excluded_ids={gap.source_id, gap.target_id}
+                )
             )
-            for gap in traversal_gaps
-        ]
+            gaps.append(
+                AnalysisGap(
+                    code=(
+                        gap.code
+                        if gap.code != "UNKNOWN_RELATION" or material
+                        else "UNTRAVERSED_CONTEXT_RELATION"
+                    ),
+                    message=(
+                        "A material relationship is absent from the reviewed traversal policy."
+                        if material
+                        else "A non-material context relationship was not traversed."
+                    ),
+                    entity_id=f"{gap.source_id}->{gap.target_id}",
+                    relation=gap.relation,
+                    blocking=material,
+                )
+            )
         if traversal_truncated:
             gaps.append(
                 AnalysisGap(
@@ -65,13 +117,20 @@ class ChangeIntelligenceService:
                 hit.node,
                 hit.relation,
                 hit.direction,
-                max(0.6, 0.9 - (hit.depth * 0.1)),
+                max(
+                    self.policy.minimum_graph_strength,
+                    self.policy.graph_base_strength - (hit.depth * self.policy.graph_depth_penalty),
+                ),
                 {
                     "kind": "graph-edge",
                     "source_id": hit.source_id,
                     "relation": hit.relation,
                     "target_id": hit.target_id,
                     "direction": hit.direction,
+                    "evidence_state": hit.evidence_state,
+                    "source_snapshot": hit.source_snapshot,
+                    "source_hash": hit.source_hash,
+                    "valid_until": hit.valid_until,
                 },
             )
             for hit in traversal_hits
@@ -112,7 +171,7 @@ class ChangeIntelligenceService:
                     message="Confirmed impacts exceeded the reviewed output capacity.",
                 )
             )
-        for node, relation, direction, confidence, receipt in bounded_candidates:
+        for node, relation, direction, evidence_strength, receipt in bounded_candidates:
             item = self._evidence_with_receipt(node, receipt)
             evidence.append(item)
             kind = str(node.get("kind", "unknown"))
@@ -123,7 +182,8 @@ class ChangeIntelligenceService:
                     kind=kind,
                     relation=f"{direction}:{relation}",
                     severity=self.policy.node_kinds[kind].severity or "MEDIUM",
-                    confidence=confidence,
+                    evidence_strength=evidence_strength,
+                    strength_basis=self._strength_basis(receipt),
                     evidence_ids=[item.evidence_id],
                 )
             )
@@ -140,13 +200,19 @@ class ChangeIntelligenceService:
         recommended = [item for item in ranked_tests if item[0].get("mandatory") is not True]
         recommendation_capacity = max(0, self.policy.max_selected_tests - len(mandatory))
         bounded_tests = [*mandatory, *recommended[:recommendation_capacity]]
-        if len(mandatory) > self.policy.max_selected_tests or len(ranked_tests) > len(
-            bounded_tests
-        ):
+        if len(mandatory) > self.policy.max_selected_tests:
             gaps.append(
                 AnalysisGap(
                     code="VALIDATION_LIMIT_EXCEEDED",
-                    message="Validation obligations exceeded the reviewed execution capacity.",
+                    message="Mandatory validation obligations exceeded execution capacity.",
+                )
+            )
+        elif len(ranked_tests) > len(bounded_tests):
+            gaps.append(
+                AnalysisGap(
+                    code="RECOMMENDED_VALIDATION_TRUNCATED",
+                    message="Recommended validations were deterministically capacity-limited.",
+                    blocking=False,
                 )
             )
         for node, relation, _, _, receipt in bounded_tests:
@@ -174,9 +240,16 @@ class ChangeIntelligenceService:
             list({(gap.code, gap.entity_id, gap.relation): gap for gap in gaps}.values()),
         )
 
+    def _direct_strength(self, hit: RetrievalHit) -> float:
+        return min(1.0, max(self.policy.direct_minimum_strength, hit.score))
+
     @staticmethod
-    def _direct_confidence(hit: RetrievalHit) -> float:
-        return min(1.0, max(0.6, hit.score))
+    def _strength_basis(receipt: dict) -> str:
+        if receipt.get("kind") == "changed-path":
+            return "CHANGED_PATH_MATCH"
+        if receipt.get("kind") == "declared-change":
+            return "DECLARED_CHANGE_MATCH"
+        return "CONFIRMED_GRAPH_RELATION"
 
     def _evidence_with_receipt(self, node: dict, receipt: dict) -> EvidenceRef:
         evidence = self.retriever.evidence_for(node)
@@ -187,3 +260,16 @@ class ChangeIntelligenceService:
     @staticmethod
     def _unique_candidates(candidates: list[Candidate]) -> list[Candidate]:
         return list({str(item[0]["id"]): item for item in candidates}.values())
+
+    def _context_bridges_material_node(self, node_id: str, excluded_ids: set[str]) -> bool:
+        adjacent = [str(edge["to"]) for edge in self.retriever.outgoing[node_id]] + [
+            str(edge["from"]) for edge in self.retriever.incoming[node_id]
+        ]
+        for adjacent_id in adjacent:
+            if adjacent_id in excluded_ids:
+                continue
+            node = self.retriever.nodes.get(adjacent_id, {})
+            policy = self.policy.node_kinds.get(str(node.get("kind", "unknown")))
+            if policy is None or policy.role in {"IMPACT", "VALIDATION"}:
+                return True
+        return False

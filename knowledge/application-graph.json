@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "a4a28fb76d2f858a974f0131b16372ad15de8d808017d9936e61310e0f3a86a7",
+  "sourceSnapshot": "2343e2aa65e686d2ed10ae5ccb6d449ae7db1f931e963f1d7c71a1b88ce48efb",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -26,6 +26,14 @@
       "kind": "file",
       "label": "pre-commit",
       "source": ".githooks/pre-commit",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:.githooks/pre-push",
+      "kind": "file",
+      "label": "pre-push",
+      "source": ".githooks/pre-push",
       "category": "project",
       "authority": "supporting"
     },
@@ -494,6 +502,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/governance-policy.json",
+      "kind": "file",
+      "label": "governance-policy.json",
+      "source": "config/governance-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/quality-policy.json",
       "kind": "file",
       "label": "quality-policy.json",
@@ -566,6 +582,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:packages/browser/playwright.e2e.config.ts",
+      "kind": "file",
+      "label": "playwright.e2e.config.ts",
+      "source": "packages/browser/playwright.e2e.config.ts",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:packages/browser/src/locator-healer.ts",
       "kind": "file",
       "label": "locator-healer.ts",
@@ -606,10 +630,34 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/evals/retrieval-boundaries-v1.json",
+      "kind": "file",
+      "label": "retrieval-boundaries-v1.json",
+      "source": "quality/evals/retrieval-boundaries-v1.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/2026-09-09-initial-genericity-audit.md",
       "kind": "file",
       "label": "2026-09-09-initial-genericity-audit.md",
       "source": "quality/reviews/2026-09-09-initial-genericity-audit.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-retrospective-capability-audit.md",
+      "kind": "file",
+      "label": "2026-09-09-retrospective-capability-audit.md",
+      "source": "quality/reviews/2026-09-09-retrospective-capability-audit.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/current-scope-review.json",
+      "kind": "file",
+      "label": "current-scope-review.json",
+      "source": "quality/reviews/current-scope-review.json",
       "category": "project",
       "authority": "supporting"
     },
@@ -634,6 +682,14 @@
       "kind": "file",
       "label": "check_genericity.py",
       "source": "scripts/quality/check_genericity.py",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:scripts/quality/check_governance_policy.py",
+      "kind": "file",
+      "label": "check_governance_policy.py",
+      "source": "scripts/quality/check_governance_policy.py",
       "category": "project",
       "authority": "supporting"
     },
@@ -686,6 +742,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/governance_policy.py",
+      "kind": "file",
+      "label": "governance_policy.py",
+      "source": "src/neo_sf_q_intel/governance_policy.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/healing.py",
       "kind": "file",
       "label": "healing.py",
@@ -698,6 +762,14 @@
       "kind": "file",
       "label": "mcp_server.py",
       "source": "src/neo_sf_q_intel/mcp_server.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/observability.py",
+      "kind": "file",
+      "label": "observability.py",
+      "source": "src/neo_sf_q_intel/observability.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -822,6 +894,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_governance_policy.py",
+      "kind": "file",
+      "label": "test_governance_policy.py",
+      "source": "tests/test_governance_policy.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_mcp_server.py",
       "kind": "file",
       "label": "test_mcp_server.py",
@@ -874,6 +954,14 @@
       "kind": "file",
       "label": "test_scenario_independence.py",
       "source": "tests/test_scenario_independence.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_scope_review_policy.py",
+      "kind": "file",
+      "label": "test_scope_review_policy.py",
+      "source": "tests/test_scope_review_policy.py",
       "category": "test",
       "authority": "verification"
     },
@@ -980,6 +1068,14 @@
       "authority": "policy"
     },
     {
+      "id": "capability:observability.agent-trace",
+      "kind": "capability",
+      "label": "observability.agent-trace",
+      "status": "FOUNDATION",
+      "summary": "Emits bounded typed stage events and deliverables using capability, evidence, artifact, policy and gap identifiers without persisting prompts, secrets or hidden reasoning.",
+      "authority": "policy"
+    },
+    {
       "id": "capability:quality.test-selection",
       "kind": "capability",
       "label": "quality.test-selection",
@@ -1012,6 +1108,14 @@
       "authority": "policy"
     },
     {
+      "id": "capability:governance.measurement-contract",
+      "kind": "capability",
+      "label": "governance.measurement-contract",
+      "status": "FOUNDATION",
+      "summary": "Defines executable run-level metric populations, thresholds, applicability and typed guardrail outcomes without treating heuristic scores as calibrated probability.",
+      "authority": "policy"
+    },
+    {
       "id": "capability:memory.postgresql",
       "kind": "capability",
       "label": "memory.postgresql",
@@ -1040,7 +1144,7 @@
       "kind": "capability",
       "label": "runtime.salesforce-live-evidence",
       "status": "NEXT",
-      "summary": "Read routes come from validated contracts and policy allowlists.",
+      "summary": "Planned live reads require validated contract routes, field/route allowlists, production-org refusal and redacted audit events; the current CLI adapter only proves bounded inspection and route validation.",
       "authority": "policy"
     },
     {
@@ -1112,6 +1216,36 @@
       "to": "file:tests/test_workflow.py"
     },
     {
+      "from": "capability:governance.measurement-contract",
+      "relation": "implemented_by",
+      "to": "file:config/governance-policy.json"
+    },
+    {
+      "from": "capability:governance.measurement-contract",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "capability:governance.measurement-contract",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "capability:governance.measurement-contract",
+      "relation": "owned_by",
+      "to": "owner:Governance Review"
+    },
+    {
+      "from": "capability:governance.measurement-contract",
+      "relation": "verified_by",
+      "to": "file:tests/test_governance.py"
+    },
+    {
+      "from": "capability:governance.measurement-contract",
+      "relation": "verified_by",
+      "to": "file:tests/test_governance_policy.py"
+    },
+    {
       "from": "capability:governance.release-decision",
       "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/governance.py"
@@ -1120,6 +1254,11 @@
       "from": "capability:governance.release-decision",
       "relation": "owned_by",
       "to": "owner:Governance Review"
+    },
+    {
+      "from": "capability:governance.release-decision",
+      "relation": "verified_by",
+      "to": "file:tests/test_governance.py"
     },
     {
       "from": "capability:governance.release-decision",
@@ -1190,6 +1329,31 @@
       "from": "capability:memory.resilient-fallback",
       "relation": "verified_by",
       "to": "file:tests/test_service_fallback.py"
+    },
+    {
+      "from": "capability:observability.agent-trace",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "capability:observability.agent-trace",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/observability.py"
+    },
+    {
+      "from": "capability:observability.agent-trace",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/workflow.py"
+    },
+    {
+      "from": "capability:observability.agent-trace",
+      "relation": "owned_by",
+      "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:observability.agent-trace",
+      "relation": "verified_by",
+      "to": "file:tests/test_workflow.py"
     },
     {
       "from": "capability:orchestration.multi-agent",
@@ -1432,6 +1596,11 @@
       "to": "file:packages/browser/src/locator-healer.ts"
     },
     {
+      "from": "file:scripts/quality/check_governance_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/analysis.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
@@ -1467,6 +1636,16 @@
       "to": "file:src/neo_sf_q_intel/domain.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/governance_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/healing.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
@@ -1492,6 +1671,11 @@
       "to": "file:src/neo_sf_q_intel/service.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/observability.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/preflight.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/config.py"
@@ -1515,6 +1699,11 @@
       "from": "file:src/neo_sf_q_intel/retrieval.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/retrieval.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/retrieval.py",
@@ -1609,7 +1798,17 @@
     {
       "from": "file:src/neo_sf_q_intel/workflow.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/workflow.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/healing.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/observability.py"
     },
     {
       "from": "file:tests/test_analysis.py",
@@ -1664,6 +1863,16 @@
     {
       "from": "file:tests/test_governance.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/governance.py"
     },
     {
@@ -1675,6 +1884,26 @@
       "from": "file:tests/test_governance.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_governance_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
     },
     {
       "from": "file:tests/test_mcp_server.py",
@@ -1762,6 +1991,11 @@
       "to": "file:src/neo_sf_q_intel/salesforce_source.py"
     },
     {
+      "from": "file:tests/test_scenario_independence.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
       "from": "file:tests/test_semantic.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/salesforce_source.py"
@@ -1795,6 +2029,11 @@
       "from": "file:tests/test_workflow.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/observability.py"
     },
     {
       "from": "file:tests/test_workflow.py",

@@ -33,12 +33,14 @@ def test_relative_salesforce_root_is_resolved_from_repository() -> None:
 
 def test_source_project_must_be_explicitly_configured() -> None:
     with pytest.raises(ValueError, match="SALESFORCE_APP_ROOT"):
-        Settings(allow_llm=False).resolved_salesforce_root()
+        Settings(
+            allow_llm=False, salesforce_app_root=None, _env_file=None
+        ).resolved_salesforce_root()
 
 
 def test_source_graph_digest_must_be_explicitly_configured() -> None:
     with pytest.raises(ValueError, match="SOURCE_GRAPH_SHA256"):
-        Settings(allow_llm=False).require_graph_sha256()
+        Settings(allow_llm=False, source_graph_sha256=None, _env_file=None).require_graph_sha256()
 
 
 def test_sqlite_fallback_path_is_repository_relative() -> None:

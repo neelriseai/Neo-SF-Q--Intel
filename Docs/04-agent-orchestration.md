@@ -19,16 +19,18 @@ START
 Preflight, live evidence collection, and selected-test execution are application-service gates
 around this initial graph and remain scheduled work for the 24-hour implementation window.
 
-## Specialist responsibilities
+## Current specialist-stage responsibilities
 
-| Agent | May do | Must not do |
+| Stage | Current behavior | Target boundary not yet claimed |
 |---|---|---|
-| Change Analyst | Normalize requirements; propose semantic impacts | Confirm source facts or authorize tools |
-| Test Intelligence | Explain coverage; propose non-mandatory tests | Remove mandatory obligations |
-| UI Healing | Rank evidence-backed locator candidates | Guess on ambiguity or bypass UI permissions |
-| Governance Review | Identify unsupported claims and missing controls | Alter evidence or select release outcome |
+| Change Analyst | Deterministic lexical/path seed matching plus trusted graph traversal; abstains on unsupported semantics | Provider-backed normalization and semantic proposals fused into assurance evidence |
+| Test Intelligence | Deterministically separates graph-connected mandatory and recommended selections | Trusted execution planning/results and provider explanations |
+| UI Healing | Converts eligible impacts into approval-gated metadata/accessibility strategy proposals | Current-DOM capture, candidate ranking, apply and before/after browser evidence |
+| Governance Review | Revalidates evidence, exact metrics, guardrails and deterministic decision truth | Durable tool/model audit and human approval workflow |
 
-Agents do not converse freely. Each receives a bounded context pack and returns one schema-validated result. Independent analysis may run in parallel, but tool use and state transitions pass through the orchestrator.
+These nodes are deterministic specialist stages, not yet independent model-backed agents. Each consumes typed state and emits a bounded activity event plus a typed deliverable containing conclusions, evidence IDs, gaps, measurements and the next permitted action. Events contain identifiers and measurements, never raw prompts, credentials, session URLs or chain-of-thought.
+
+The multi-agent roadmap capability becomes complete only when provider-backed specialist ports consume bounded context packs, return schema-validated proposals, degrade deterministically when a provider is unavailable, and have independent negative/failure tests. Tool use and state transitions will continue to pass through the orchestrator.
 
 ## Provider profiles
 

@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "trusted_runners": [
+    {
+      "runner_id": "verified-test-runner",
+      "evidence_source": "verified-test-runner",
+      "maximum_clock_skew_seconds": 5,
+      "maximum_result_age_seconds": 86400
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "material_claim_evidence_coverage",
+      "description": "Coverage of material claims by independently validated confirmed evidence.",
+      "numerator_definition": "Count of material claims marked supported with one or more cited evidence IDs, all resolving to confirmed evidence.",
+      "denominator_definition": "Count of material claims emitted for the current assurance run.",
+      "comparator": "AT_LEAST",
+      "target": 1.0,
+      "minimum_sample_size": 1,
+      "zero_denominator": "NOT_APPLICABLE",
+      "gate": "BLOCK"
+    },
+    {
+      "metric": "impact_evidence_coverage",
+      "description": "Coverage of reported impacts by confirmed evidence identifiers.",
+      "numerator_definition": "Count of impact findings with one or more cited evidence IDs, all resolving to confirmed evidence.",
+      "denominator_definition": "Count of impact findings emitted for the current assurance run.",
+      "comparator": "AT_LEAST",
+      "target": 1.0,
+      "minimum_sample_size": 1,
+      "zero_denominator": "NOT_APPLICABLE",
+      "gate": "BLOCK"
+    },
+    {
+      "metric": "selected_test_evidence_coverage",
+      "description": "Coverage of selected validations by confirmed graph or source evidence.",
+      "numerator_definition": "Count of selected validations with one or more cited evidence IDs, all resolving to confirmed evidence.",
+      "denominator_definition": "Count of validations selected for the current assurance run.",
+      "comparator": "AT_LEAST",
+      "target": 1.0,
+      "minimum_sample_size": 1,
+      "zero_denominator": "NOT_APPLICABLE",
+      "gate": "BLOCK"
+    }
+  ],
+  "controls": [
+    {
+      "control_id": "evidence.confirmed-present",
+      "version": "1.0.0",
+      "stage": "POST_ANALYSIS",
+      "evaluator": "confirmed_evidence_present",
+      "failure_outcome": "ABSTAIN",
+      "failure_reason_code": "CONFIRMED_EVIDENCE_NOT_AVAILABLE",
+      "blocking": true
+    },
+    {
+      "control_id": "analysis.semantics-complete",
+      "version": "1.0.0",
+      "stage": "POST_ANALYSIS",
+      "evaluator": "no_blocking_analysis_gaps",
+      "failure_outcome": "REVIEW_REQUIRED",
+      "failure_reason_code": "UNREVIEWED_ANALYSIS_SEMANTICS",
+      "blocking": true
+    },
+    {
+      "control_id": "claims.confirmed-evidence-coverage",
+      "version": "1.0.0",
+      "stage": "POST_ANALYSIS",
+      "evaluator": "metric_threshold",
+      "metric": "material_claim_evidence_coverage",
+      "failure_outcome": "ABSTAIN",
+      "failure_reason_code": "MATERIAL_CLAIM_EVIDENCE_BELOW_THRESHOLD",
+      "blocking": true
+    },
+    {
+      "control_id": "impacts.confirmed-evidence-coverage",
+      "version": "1.0.0",
+      "stage": "POST_ANALYSIS",
+      "evaluator": "metric_threshold",
+      "metric": "impact_evidence_coverage",
+      "failure_outcome": "ABSTAIN",
+      "failure_reason_code": "IMPACT_EVIDENCE_BELOW_THRESHOLD",
+      "blocking": true
+    },
+    {
+      "control_id": "tests.confirmed-evidence-coverage",
+      "version": "1.0.0",
+      "stage": "POST_ANALYSIS",
+      "evaluator": "metric_threshold",
+      "metric": "selected_test_evidence_coverage",
+      "failure_outcome": "ABSTAIN",
+      "failure_reason_code": "SELECTED_TEST_EVIDENCE_BELOW_THRESHOLD",
+      "blocking": true
+    }
+  ],
+  "decision_mapping": {
+    "DENY": "NO_GO",
+    "ABSTAIN": "INCOMPLETE",
+    "REVIEW_REQUIRED": "INCOMPLETE",
+    "REQUIRE_APPROVAL": "CONDITIONAL_GO"
+  }
+}

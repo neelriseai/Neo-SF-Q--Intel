@@ -3,7 +3,7 @@ import subprocess
 
 import pytest
 
-from neo_sf_q_intel.salesforce_cli import SalesforceCLI
+from neo_sf_q_intel.salesforce_cli import SalesforceCLI, SalesforceCLIError
 
 
 def test_org_status_returns_allowlisted_fields_and_never_auth_material() -> None:
@@ -51,3 +51,20 @@ def test_rest_get_accepts_generic_relative_data_route() -> None:
     )
 
     assert "/services/data/v99.0/sobjects/Example__c/describe" in captured[0]
+
+
+def test_cli_error_does_not_publish_urls_or_tokens() -> None:
+    def runner(*args, **kwargs):  # noqa: ANN002, ANN003
+        body = {
+            "status": 1,
+            "name": "AuthorizationError",
+            "message": "token secret-value at https://instance.example.test/session",
+        }
+        return subprocess.CompletedProcess(args[0], 1, json.dumps(body), "")
+
+    with pytest.raises(SalesforceCLIError) as exc_info:
+        SalesforceCLI("test-alias", runner=runner).org_status()
+
+    rendered = str(exc_info.value)
+    assert "secret-value" not in rendered
+    assert "https://" not in rendered

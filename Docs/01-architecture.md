@@ -1,15 +1,18 @@
 # Architecture
 
-## Components
+## Target components and current boundaries
+
+Solid nodes exist at least as a foundation. Nodes marked `NEXT` are target adapters and must not be
+presented as executed behavior.
 
 ```mermaid
 flowchart TB
   WEB[Next.js dashboard] --> API[FastAPI]
   API --> WF[LangGraph orchestrator]
-  WF --> CA[Change Analyst Agent]
-  WF --> TA[Test Intelligence Agent]
-  WF --> UH[UI Healing Agent]
-  WF --> GA[Governance Review Agent]
+  WF --> CA[Change Analyst stage]
+  WF --> TA[Test Intelligence stage]
+  WF --> UH[UI Healing strategy stage]
+  WF --> GA[Governance Review stage]
   CA --> SVC[Application services]
   TA --> SVC
   UH --> SVC
@@ -17,7 +20,7 @@ flowchart TB
   SVC --> EG[Evidence graph and hybrid retrieval]
   EG -. future semantic index .-> CHROMA[(ChromaDB)]
   SVC --> SF[Salesforce CLI adapter]
-  SVC --> PW[Playwright TypeScript worker]
+  SVC -. NEXT .-> PW[Playwright TypeScript worker]
   SVC --> MCP[Local MCP adapter]
   WF --> PG[(PostgreSQL)]
   EG --> PG
@@ -30,12 +33,14 @@ flowchart TB
 ## Dependency direction
 
 ```text
-domain <- application <- agents
+domain <- application <- workflow stages / future model-backed agents
 domain <- application <- API / MCP / CLI / Playwright adapters
 domain <- persistence interfaces <- PostgreSQL adapter
 ```
 
-Domain modules never import FastAPI, LangGraph, MCP, Salesforce CLI or Playwright. Agents receive typed inputs and return typed proposals. Deterministic application services validate and persist them.
+Domain modules never import FastAPI, LangGraph, MCP, Salesforce CLI or Playwright. Current
+deterministic stages exchange typed state and persist typed deliverables. Future model-backed agents
+must use the same contracts; deterministic application services remain the authority.
 
 ## Runtime boundaries
 
@@ -52,6 +57,10 @@ Domain modules never import FastAPI, LangGraph, MCP, Salesforce CLI or Playwrigh
   derived and rebuildable from authoritative source snapshots.
 - OpenAI/Azure OpenAI: replaceable reasoning and embedding providers.
 
-## Debugging model
+## Current debugging model
 
-Every run has `run_id`, `trace_id` and ordered `step_id` values. Agent prompts, model/deployment names, policy versions, graph snapshot, evidence IDs and tool outcomes are recorded without secrets or raw frontdoor URLs. Each node can be replayed from its typed input.
+Every run has `run_id` and `trace_id`. Each executed stage emits a bounded timestamped activity and
+typed deliverable with capability IDs, opaque logged evidence/artifact references, policy identity,
+measurements, gaps, sanitized failure class and next action. Complete ordered replay—step/parent
+sequence, source/input digest, model/deployment records and tool outcomes—is a follow-up
+observability milestone and is not implied by the current dashboard.

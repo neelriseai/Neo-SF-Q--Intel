@@ -4,16 +4,18 @@ from pathlib import Path
 import pytest
 
 from neo_sf_q_intel.analysis import ChangeIntelligenceService
-from neo_sf_q_intel.domain import ChangeRequest
+from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest
 from neo_sf_q_intel.retrieval import EvidenceRetriever
 from neo_sf_q_intel.salesforce_source import SalesforceSourceSnapshot
+from neo_sf_q_intel.service import AssuranceService
 
 
 def topology(prefix: str) -> SalesforceSourceSnapshot:
     return SalesforceSourceSnapshot(
         root=Path("."),
-        contract={},
+        contract={"application": f"{prefix} Fixture"},
         project_index={"sourceSnapshot": prefix},
+        trusted_graph_sha256=f"{prefix.casefold()}-digest",
         graph={
             "sourceSnapshot": prefix,
             "nodes": [
@@ -35,7 +37,7 @@ def topology(prefix: str) -> SalesforceSourceSnapshot:
 
 def analyze(source: SalesforceSourceSnapshot, requirement: str):
     return ChangeIntelligenceService(EvidenceRetriever(source)).analyze(
-        ChangeRequest(requirement=requirement)
+        ChangeRequest(requirement=requirement, change_intent=ChangeIntent.PLANNED_CHANGE)
     )
 
 
@@ -82,3 +84,25 @@ def test_ambiguous_high_overlap_request_abstains() -> None:
     evidence, impacts, tests, gaps = analyze(source, "change permission access")
 
     assert (evidence, impacts, tests, gaps) == ([], [], [], [])
+
+
+def test_benign_context_relation_is_observed_without_blocking_material_reasoning() -> None:
+    source = topology("Alpha")
+    source.graph["nodes"].append(
+        {"id": "file:Guide", "kind": "file", "label": "Architecture guide"}
+    )
+    source.graph["edges"].append(
+        {"from": "file:Guide", "relation": "describes", "to": "config:Alpha"}
+    )
+
+    run = AssuranceService(source).analyze(
+        ChangeRequest(
+            requirement="Alpha policy",
+            change_intent=ChangeIntent.PLANNED_CHANGE,
+        )
+    )
+
+    assert ("UNTRAVERSED_CONTEXT_RELATION", False) in {
+        (item.code, item.blocking) for item in run.analysis_gaps
+    }
+    assert run.governance and run.governance.passed

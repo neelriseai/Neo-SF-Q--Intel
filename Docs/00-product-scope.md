@@ -4,9 +4,10 @@
 
 Given a Salesforce requirement or source change, determine affected business rules, metadata, implementation, permissions and tests; collect current evidence; propose safe validation; recover selected UI automation when presentation changes; and return an auditable recommendation.
 
-## Two-day showcase
+## Two-day showcase target
 
-The first release demonstrates reusable horizontal capabilities rather than a scenario-coded answer:
+The intended first release demonstrates reusable horizontal capabilities rather than a
+scenario-coded answer:
 
 1. contract-aware source and graph ingestion;
 2. evidence-grounded change and impact reasoning;
@@ -17,6 +18,13 @@ The first release demonstrates reusable horizontal capabilities rather than a sc
 7. a polished dashboard and measurable governance scorecard.
 
 The strategic-deal Salesforce app is the first system-under-test, not a hardcoded domain inside the platform.
+
+The current checkpoint fully demonstrates contract/source ingestion and deterministic evidence
+governance, with foundations for graph impact, test selection, persistence fallback, MCP, semantic
+retrieval, locator strategy and the dashboard. Provider-backed specialists, governed live-org
+evidence, trusted test execution, browser capture/apply, complete relational memory ports and the
+three golden scenarios remain gated roadmap work. Capability status in
+`config/capability-scope.json` is the authoritative current truth.
 
 ## Non-goals for the first release
 

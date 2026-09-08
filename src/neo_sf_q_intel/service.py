@@ -42,9 +42,11 @@ class AssuranceService:
         self.repository = repository or InMemoryRunRepository()
         self.persistence_mode = persistence_mode or self._repository_mode(self.repository)
         self.persistence_warning = persistence_warning
-        retriever = EvidenceRetriever(source)
+        active_reasoning_policy = reasoning_policy or ReasoningPolicy.load()
+        retriever = EvidenceRetriever(source, active_reasoning_policy)
         self.workflow = AssuranceWorkflow(
-            ChangeIntelligenceService(retriever, reasoning_policy), checkpointer=checkpointer
+            ChangeIntelligenceService(retriever, active_reasoning_policy),
+            checkpointer=checkpointer,
         )
         self.semantic_index = (
             SemanticEvidenceIndex(source, model_provider) if model_provider else None
@@ -59,7 +61,16 @@ class AssuranceService:
                 f"Request project {request.project_id!r} does not match loaded source "
                 f"{self.source.project_id!r}"
             )
-        result = self.workflow.run(AssuranceRun(request=request))
+        policy = self.workflow.analysis.policy
+        result = self.workflow.run(
+            AssuranceRun(
+                request=request,
+                reasoning_policy_version=policy.schema_version,
+                reasoning_policy_sha256=policy.policy_sha256,
+                reasoning_eval_set_id=policy.retrieval_eval_set_id,
+                reasoning_eval_set_sha256=policy.retrieval_eval_set_sha256,
+            )
+        )
         self.repository.save(result)
         return result
 

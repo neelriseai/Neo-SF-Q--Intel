@@ -47,7 +47,11 @@ class SemanticEvidenceIndex:
         query_vector = (await self.provider.embed([query]))[0]
         hits = [
             SemanticHit(
-                evidence=node_to_evidence(node, self.source.snapshot_id),
+                evidence=node_to_evidence(
+                    node,
+                    self.source.snapshot_id,
+                    self.source.trusted_graph_sha256,
+                ),
                 score=cosine_similarity(query_vector, vector),
             )
             for node, vector in self._rows

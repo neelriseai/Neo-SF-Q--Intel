@@ -1,6 +1,6 @@
 # Neo SF Q-Intel
 
-Neo SF Q-Intel is an evidence-grounded, multi-agent Salesforce change-assurance platform. It combines deterministic source/graph analysis, bounded LLM reasoning, risk-based test selection, governed Salesforce tools, metadata-aware Playwright healing and measurable AI-governance controls.
+Neo SF Q-Intel is an evidence-grounded Salesforce change-assurance platform under active development. The current vertical slice combines deterministic source/graph analysis, typed specialist workflow stages, risk-based test selection, healing-strategy proposals and executable AI-governance controls. Provider-backed specialist reasoning, governed live Salesforce reads, trusted test execution, browser capture/healing and persistent ChromaDB retrieval remain explicit roadmap capabilities.
 
 The authoritative Salesforce system-under-test remains the sibling `SalesForceAgentApp/strategic-deal-assurance` repository. This repository consumes its versioned contract and generated evidence graph; it does not copy Salesforce authentication or app source.
 
@@ -18,11 +18,11 @@ confirmed evidence.
 
 ```text
 apps/web/            Next.js dashboard
-packages/browser/    TypeScript Playwright worker
-src/neo_sf_q_intel/  FastAPI, domain, agents, retrieval, tools and persistence
+packages/browser/    TypeScript locator-ranking foundation and browser-worker roadmap
+src/neo_sf_q_intel/  FastAPI, domain, workflow stages, retrieval, tools and persistence
 migrations/          PostgreSQL schema
 Docs/                Canonical numbered docs plus supplied reference material
-tests/               Python unit, contract and golden evaluations
+tests/               Python unit, contract and frozen evaluation-boundary tests
 ```
 
 Read [Docs/README.md](Docs/README.md) before implementation or ingestion.

@@ -4,6 +4,7 @@
     "src/neo_sf_q_intel",
     "apps/web/src",
     "packages/browser/src",
+    "config/governance-policy.json",
     "config/reasoning-policy.json"
   ],
   "scanExemptPaths": [
@@ -71,10 +72,26 @@
   ],
   "scopeControlledPaths": [
     "config/capability-scope.json",
+    "config/governance-policy.json",
     "config/quality-policy.json",
-    "config/reasoning-policy.json"
+    "config/reasoning-policy.json",
+    "quality/evals/retrieval-boundaries-v1.json",
+    "src/neo_sf_q_intel/analysis.py",
+    "src/neo_sf_q_intel/domain.py",
+    "src/neo_sf_q_intel/governance.py",
+    "src/neo_sf_q_intel/governance_policy.py",
+    "src/neo_sf_q_intel/policy.py",
+    "src/neo_sf_q_intel/retrieval.py",
+    "src/neo_sf_q_intel/salesforce_source.py",
+    "src/neo_sf_q_intel/salesforce_cli.py",
+    "src/neo_sf_q_intel/service.py",
+    "src/neo_sf_q_intel/workflow.py",
+    "src/neo_sf_q_intel/mcp_server.py",
+    "src/neo_sf_q_intel/observability.py",
+    "apps/web/src/app/page.tsx"
   ],
   "reviewLedgerRoot": "quality/reviews/",
+  "scopeReviewManifestPath": "quality/reviews/current-scope-review.json",
   "scenarioLiteralPatterns": [
     "(?i)strategic[_ -]?deal",
     "(?i)discount__c",
@@ -93,10 +110,12 @@
     "reasoning.semantic-retrieval",
     "retrieval.chromadb",
     "orchestration.multi-agent",
+    "observability.agent-trace",
     "quality.test-selection",
     "automation.locator-healing",
     "governance.claim-grounding",
     "governance.release-decision",
+    "governance.measurement-contract",
     "memory.postgresql",
     "memory.resilient-fallback",
     "tools.mcp",

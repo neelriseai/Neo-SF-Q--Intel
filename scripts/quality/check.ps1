@@ -14,6 +14,8 @@ if (-not (Test-Path -LiteralPath $python)) {
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & $python (Join-Path $repoRoot "scripts\quality\check_genericity.py") --skip-knowledge
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& $python (Join-Path $repoRoot "scripts\quality\check_governance_policy.py")
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 if ($Full) {
     & (Join-Path $repoRoot ".venv\Scripts\ruff.exe") check $repoRoot
@@ -25,6 +27,10 @@ if ($Full) {
         npm run lint
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         npm run test:browser
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        npm run test:e2e
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        npm run build
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
     finally {

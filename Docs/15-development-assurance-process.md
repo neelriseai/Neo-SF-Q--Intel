@@ -3,15 +3,18 @@
 ## Purpose
 
 Keep the platform generic, evidence-grounded and architecturally complete while development
-moves quickly. Automated checks handle mechanical regressions; one read-only reviewer agent
-handles design judgment in parallel.
+moves quickly. Automated checks handle mechanical regressions; two independent read-only reviewer
+agents handle genericity and governance precision in parallel.
 
 ## Per-slice loop
 
-1. Select capability IDs from `config/capability-scope.json`; do not redefine scope in code.
+1. Route the task through `knowledge/project-index.json` and
+   `knowledge/application-graph.json`; select the affected capability IDs, files, imports and tests
+   before opening broader docs. Do not redefine scope in code.
 2. Implement through domain, service, adapter and verification layers as applicable.
 3. Continue the next independent task while a reviewer agent inspects the coherent diff.
-4. Reconcile P0/P1 findings at the next natural boundary, not after every file write.
+4. Reconcile every P0/P1 finding at the next natural boundary and record its disposition in the
+   structured scope-review manifest.
 5. Rebuild repository knowledge and run the fast genericity gate.
 6. Run the full gate before a milestone commit and record unresolved findings honestly.
 
@@ -25,6 +28,10 @@ handles design judgment in parallel.
 - Are implementation-status claims supported by positive, negative and failure-path tests?
 - Did the change remove or silently narrow an agreed capability?
 - Is persistence/retrieval real, or is schema/documentation being mistaken for behavior?
+- Does each metric define its exact population, formula, comparator, threshold, sample rule and
+  zero-denominator behavior?
+- Does a guardrail protect a real trust/action boundary without duplicating another control or
+  blocking benign context?
 
 ## Commands
 
@@ -40,5 +47,8 @@ Enable the repository hook once per checkout:
 git config core.hooksPath .githooks
 ```
 
-The hook is intentionally fast: knowledge freshness, forbidden hardcoding, layer boundaries and
-scope-manifest integrity. The full command adds lint and automated tests.
+The pre-commit hook is intentionally fast: knowledge freshness, forbidden hardcoding, layer
+boundaries, exact structured review coverage and governance-policy validation. A policy change is
+approved only when `quality/reviews/current-scope-review.json` names every changed controlled path,
+contains two distinct reviewers and has status `APPROVED`. The pre-push hook and `-Full` command add
+lint and automated tests.

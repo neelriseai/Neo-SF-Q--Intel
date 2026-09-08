@@ -19,7 +19,8 @@ def propose_safe_healing(impacts: list[ImpactFinding]) -> list[HealingProposal]:
                     "Re-identify the target from Salesforce metadata and fresh DOM identity "
                     "signals; abstain when identity is ambiguous."
                 ),
-                confidence=min(0.95, impact.confidence),
+                ranking_score=min(0.95, impact.evidence_strength),
+                score_basis=f"{impact.strength_basis}:METADATA_STRATEGY_MATCH",
                 evidence_ids=impact.evidence_ids,
             )
         )

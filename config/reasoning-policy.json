@@ -1,12 +1,32 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "unknownKindAction": "ABSTAIN",
+  "lowInformationTokens": [
+    "about", "add", "an", "and", "any", "are", "as", "assess", "at", "be", "by",
+    "change", "for", "from", "how", "in", "into", "is", "it", "modify", "of", "on",
+    "refactor", "salesforce", "something", "that", "the", "this", "thing", "update",
+    "what", "with"
+  ],
   "limits": {
     "seedCount": 6,
     "traversalDepth": 2,
     "maxTraversalNodes": 100,
     "maxImpacts": 24,
     "maxSelectedTests": 12
+  },
+  "retrieval": {
+    "shortQueryMinimumScore": 0.45,
+    "longQueryMinimumScore": 0.25,
+    "ambiguityTieLimit": 6,
+    "relativeCutoffRatio": 0.65,
+    "directMinimumStrength": 0.6,
+    "graphBaseStrength": 0.9,
+    "graphDepthPenalty": 0.1,
+    "minimumGraphStrength": 0.6,
+    "rationale": "Conservative lexical candidate ranking; scores order evidence and are not calibrated probabilities or governance gates.",
+    "evalSetId": "retrieval-boundaries-v1",
+    "evalSetPath": "quality/evals/retrieval-boundaries-v1.json",
+    "evalSetSha256": "52a11a0e0f1d065e141dc5c7d37f3a2c85926b066b6864ed512a6624d0c05c11"
   },
   "nodeKinds": {
     "apex-class": {"role": "IMPACT", "severity": "MEDIUM"},
