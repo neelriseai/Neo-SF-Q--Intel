@@ -32,6 +32,19 @@ These nodes are deterministic specialist stages, not yet independent model-backe
 
 The multi-agent roadmap capability becomes complete only when provider-backed specialist ports consume bounded context packs, return schema-validated proposals, degrade deterministically when a provider is unavailable, and have independent negative/failure tests. Tool use and state transitions will continue to pass through the orchestrator.
 
+## Graph-grounded specialist contract
+
+Every provider-backed specialist will receive a deterministic `GraphContextPack` containing the
+project and source snapshot, request/input digest, canonical ontology version, seed entities,
+confirmed paths with evidence receipts, relevant source fragments, selected prior outcomes,
+blocking/nonblocking gaps and explicit item/token limits. It returns a `GraphReasoningProposal`
+containing only proposed relations/conclusions, cited pack evidence IDs, assumptions and unresolved
+conflicts. The verifier rejects any endpoint or citation outside the pack.
+
+This pattern applies to impact, security, test intelligence, healing and RCA. The agent helps
+interpret ambiguity; deterministic graph traversal, authorization, evidence promotion, test truth
+and release decisions remain ordinary application logic.
+
 ## Provider profiles
 
 - Local development: `AI_PROVIDER=openai`.

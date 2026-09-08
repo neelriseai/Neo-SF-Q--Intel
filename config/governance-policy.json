@@ -1,5 +1,17 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
+  "release_authority": {
+    "enabled": false,
+    "reason_code": "RELEASE_EVIDENCE_MODEL_INCOMPLETE",
+    "evidence_model_requirements": [
+      "explicit trusted edge provenance envelope",
+      "complete typed graph path receipts and replay",
+      "immutable release-input digest and expiry",
+      "verified candidate build and per-impact test obligations",
+      "scoped expiring human evidence approvals",
+      "deterministic authoritative conflict handling"
+    ]
+  },
   "trusted_runners": [
     {
       "runner_id": "verified-test-runner",

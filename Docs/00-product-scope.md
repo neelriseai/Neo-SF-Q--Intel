@@ -26,6 +26,13 @@ evidence, trusted test execution, browser capture/apply, complete relational mem
 three golden scenarios remain gated roadmap work. Capability status in
 `config/capability-scope.json` is the authoritative current truth.
 
+## Intelligence moat
+
+The central product asset is the governed Change Evidence Graph connecting requirements, business
+rules, Salesforce metadata/code/security, tests, execution evidence, incidents, release outcomes
+and human corrections. Specialist agents reason over bounded subgraphs compiled from that asset;
+they do not replace it. Frameworks, model providers, MCP clients and UI channels remain replaceable.
+
 ## Non-goals for the first release
 
 - Autonomous production deployment or unrestricted DML.

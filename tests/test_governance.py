@@ -1,6 +1,7 @@
 import hashlib
 import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -32,7 +33,8 @@ def test_stale_evidence_cannot_support_a_material_claim() -> None:
             change_intent=ChangeIntent.PLANNED_CHANGE,
         )
     )
-    run.evidence[0].state = EvidenceState.STALE
+    for item in run.evidence:
+        item.state = EvidenceState.STALE
     run.claims = build_grounded_claims(run)
     assessment = assess_run(run)
 
@@ -186,27 +188,31 @@ def test_high_risk_requires_execution_evidence_for_mandatory_validation() -> Non
     assert decide(run).code == "INCOMPLETE"
 
 
-def test_failed_selected_validation_is_no_go() -> None:
+def test_failed_selected_validation_remains_incomplete_while_release_authority_is_disabled() -> (
+    None
+):
     run = _analyzed_run()
     _record_result(run, ExecutionOutcome.FAILED)
 
-    assert decide(run).code == "NO_GO"
+    decision = decide(run)
+    assert decision.code == "INCOMPLETE"
+    assert decision.reasons == ["RELEASE_EVIDENCE_MODEL_INCOMPLETE"]
 
 
-def test_passed_mandatory_validation_is_conditional_for_high_risk() -> None:
+def test_passed_mandatory_validation_cannot_bypass_release_authority_interlock() -> None:
     run = _analyzed_run()
     run.impacts[0].severity = "HIGH"
     run.selected_tests[0].classification = "MANDATORY"
     _record_result(run, ExecutionOutcome.PASSED)
 
-    assert decide(run).code == "CONDITIONAL_GO"
+    assert decide(run).code == "INCOMPLETE"
 
 
-def test_all_selected_validations_pass_for_lower_risk() -> None:
+def test_all_selected_validations_cannot_bypass_release_authority_interlock() -> None:
     run = _analyzed_run()
     _record_result(run, ExecutionOutcome.PASSED)
 
-    assert decide(run).code == "GO"
+    assert decide(run).code == "INCOMPLETE"
 
 
 def test_inconclusive_selected_validation_is_incomplete() -> None:
@@ -314,11 +320,66 @@ def test_graph_derived_impacts_are_bound_to_original_analysis_input() -> None:
         )
     )
     _record_result(run, ExecutionOutcome.PASSED)
-    assert decide(run).code == "GO"
+    assert decide(run).code == "INCOMPLETE"
 
     run.request.requirement = "A completely unrelated requirement"
 
     assert decide(run).code == "INCOMPLETE"
+
+
+def test_mutated_graph_hash_and_lowered_risk_cannot_create_release_authority() -> None:
+    run = _analyzed_run()
+    _record_result(run, ExecutionOutcome.PASSED)
+    forged_hash = "f" * 64
+    run.impacts[0].severity = "LOW"
+    for item in run.evidence:
+        if item.attributes.get("source_hash"):
+            item.attributes["source_hash"] = forged_hash
+        receipt = item.attributes.get("relevance_receipt", {})
+        if receipt.get("source_hash"):
+            receipt["source_hash"] = forged_hash
+
+    decision = decide(run)
+
+    assert decision.code == "INCOMPLETE"
+    assert decision.reasons == ["RELEASE_EVIDENCE_MODEL_INCOMPLETE"]
+
+
+def test_release_interlock_precedes_a_deny_class_control() -> None:
+    from neo_sf_q_intel.governance_policy import GovernancePolicy
+
+    policy_path = Path("config/governance-policy.json")
+    raw = json.loads(policy_path.read_text(encoding="utf-8"))
+    raw["controls"][0]["failure_outcome"] = "DENY"
+    policy = GovernancePolicy.model_validate(raw)
+    run = _analyzed_run()
+    for item in run.evidence:
+        item.state = EvidenceState.STALE
+    run.claims = build_grounded_claims(run)
+    run.governance = assess_run(run, policy)
+
+    decision = decide(run, policy)
+
+    assert decision.code == "INCOMPLETE"
+    assert decision.reasons == ["RELEASE_EVIDENCE_MODEL_INCOMPLETE"]
+
+
+def test_release_boundary_revalidates_policy_copy_updates() -> None:
+    from neo_sf_q_intel.governance_policy import GovernancePolicy
+
+    policy = GovernancePolicy.load()
+    bypassed = policy.model_copy(
+        update={
+            "release_authority": policy.release_authority.model_copy(update={"enabled": True})
+        }
+    )
+    run = _analyzed_run()
+    _record_result(run, ExecutionOutcome.PASSED)
+
+    decision = decide(run, bypassed)
+
+    assert decision.code == "INCOMPLETE"
+    assert decision.reasons == ["GOVERNANCE_POLICY_INVALID"]
 
 
 def test_release_rejects_assessment_from_another_policy() -> None:

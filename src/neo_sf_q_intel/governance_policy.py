@@ -80,8 +80,24 @@ class TrustedRunner(StrictModel):
     maximum_result_age_seconds: int = Field(ge=1, le=604800)
 
 
+class ReleaseAuthority(StrictModel):
+    enabled: bool
+    reason_code: str = Field(pattern=r"^[A-Z][A-Z0-9_]+$")
+    evidence_model_requirements: list[str] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def prevent_unreviewed_enablement(self) -> ReleaseAuthority:
+        if self.enabled:
+            raise ValueError(
+                "release authority cannot be enabled until the graph evidence model "
+                "has an independently verified enablement contract"
+            )
+        return self
+
+
 class GovernancePolicy(StrictModel):
     schema_version: str = Field(pattern=r"^\d+\.\d+\.\d+$")
+    release_authority: ReleaseAuthority
     trusted_runners: list[TrustedRunner] = Field(min_length=1)
     metrics: list[MetricDefinition] = Field(min_length=1)
     controls: list[GuardrailDefinition] = Field(min_length=1)

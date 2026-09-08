@@ -1,9 +1,11 @@
 from uuid import UUID
 
+import pytest
 from fastapi.testclient import TestClient
 
 from neo_sf_q_intel.api import create_app
 from neo_sf_q_intel.config import Settings
+from neo_sf_q_intel.domain import ChangeRequest, DecisionCode, ReleaseDecision
 from neo_sf_q_intel.repository import InMemoryRunRepository
 from neo_sf_q_intel.service import AssuranceService
 from tests.test_workflow import source
@@ -72,3 +74,64 @@ def test_api_returns_persisted_incomplete_decision_for_stage_failure() -> None:
         "evidence_ids": [],
     }
     assert repository.get(UUID(payload["run_id"])) is not None
+
+
+@pytest.mark.parametrize(
+    "recorded_code",
+    [DecisionCode.GO, DecisionCode.CONDITIONAL_GO, DecisionCode.NO_GO, None],
+)
+def test_api_revalidates_historical_release_decisions_on_get_and_list(
+    recorded_code: DecisionCode | None,
+) -> None:
+    repository = InMemoryRunRepository()
+    service = AssuranceService(source(), repository)
+    run = service.analyze(ChangeRequest(requirement="Assess a metadata change"))
+    recorded_decision = (
+        ReleaseDecision(
+            code=recorded_code,
+            reasons=["historical-policy-result"],
+        )
+        if recorded_code is not None
+        else None
+    )
+    historical = run.model_copy(
+        update={"decision": recorded_decision},
+        deep=True,
+    )
+    repository.save(historical)
+    client = TestClient(create_app(settings=Settings(allow_llm=False), service=service))
+
+    get_payload = client.get(f"/api/v1/assurance-runs/{run.run_id}").json()
+    list_payload = client.get("/api/v1/assurance-runs").json()[0]
+
+    for payload in (get_payload, list_payload):
+        assert payload["decision"]["code"] == "INCOMPLETE"
+        assert payload["decision"]["reasons"] == ["RELEASE_EVIDENCE_MODEL_INCOMPLETE"]
+        if recorded_code is None:
+            assert payload["recorded_decision"] is None
+        else:
+            assert payload["recorded_decision"]["code"] == recorded_code
+            assert payload["recorded_decision"]["reasons"] == ["historical-policy-result"]
+    assert repository.get(run.run_id).decision == historical.decision
+
+
+def test_api_read_fails_closed_when_current_governance_policy_is_invalid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = InMemoryRunRepository()
+    service = AssuranceService(source(), repository)
+    run = service.analyze(ChangeRequest(requirement="Assess a metadata change"))
+    recorded = repository.get(run.run_id)
+    assert recorded and recorded.decision
+    monkeypatch.setattr(
+        "neo_sf_q_intel.service.GovernancePolicy.load",
+        lambda: (_ for _ in ()).throw(ValueError("invalid policy")),
+    )
+    client = TestClient(create_app(settings=Settings(allow_llm=False), service=service))
+
+    payload = client.get(f"/api/v1/assurance-runs/{run.run_id}").json()
+
+    assert payload["decision"]["code"] == "INCOMPLETE"
+    assert payload["decision"]["reasons"] == ["GOVERNANCE_POLICY_INVALID"]
+    assert payload["recorded_decision"] == recorded.decision.model_dump(mode="json")
+    assert repository.get(run.run_id) == recorded

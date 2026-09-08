@@ -4,13 +4,13 @@ from pathlib import Path
 import pytest
 
 from neo_sf_q_intel.config import Settings
-from neo_sf_q_intel.domain import ChangeRequest
+from neo_sf_q_intel.domain import ChangeRequest, DecisionCode, ReleaseDecision
 from neo_sf_q_intel.repository import (
     InMemoryRunRepository,
     PersistenceSchemaError,
     SQLiteRunRepository,
 )
-from neo_sf_q_intel.service import create_service
+from neo_sf_q_intel.service import AssuranceService, create_service
 from tests.test_workflow import source
 
 
@@ -70,3 +70,31 @@ def test_postgresql_schema_defect_is_not_hidden_by_fallback(tmp_path: Path, monk
         create_service(fallback_settings(tmp_path), tmp_path)
 
     assert not (tmp_path / "fallback.db").exists()
+
+
+def test_sqlite_history_is_preserved_but_service_reads_use_current_release_policy(
+    tmp_path: Path,
+) -> None:
+    repository = SQLiteRunRepository(tmp_path / "runs.db")
+    repository.setup()
+    service = AssuranceService(source(), repository)
+    run = service.analyze(ChangeRequest(requirement="Assess durable metadata"))
+    historical = run.model_copy(
+        update={
+            "decision": ReleaseDecision(
+                code=DecisionCode.GO,
+                reasons=["historical-policy-result"],
+            )
+        },
+        deep=True,
+    )
+    repository.save(historical)
+
+    effective = service.get(run.run_id)
+    stored = repository.get(run.run_id)
+
+    assert effective and effective.decision
+    assert effective.decision.code is DecisionCode.INCOMPLETE
+    assert effective.recorded_decision == historical.decision
+    assert stored and stored.decision == historical.decision
+    assert stored.recorded_decision is None

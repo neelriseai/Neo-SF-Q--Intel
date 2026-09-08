@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "2343e2aa65e686d2ed10ae5ccb6d449ae7db1f931e963f1d7c71a1b88ce48efb",
+  "sourceSnapshot": "561f0e2939c44b1dfcb257db9035203349ed10c0855db74cd14cd1716e423d00",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -306,6 +306,14 @@
       "kind": "file",
       "label": "10-connectors-and-external-integrations.md",
       "source": "Docs/10-connectors-and-external-integrations.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/10-graph-grounded-agent-reasoning.md",
+      "kind": "file",
+      "label": "10-graph-grounded-agent-reasoning.md",
+      "source": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "reference-documentation",
       "authority": "reference-only"
     },
@@ -634,6 +642,14 @@
       "kind": "file",
       "label": "retrieval-boundaries-v1.json",
       "source": "quality/evals/retrieval-boundaries-v1.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-graph-grounded-reasoning-design.md",
+      "kind": "file",
+      "label": "2026-09-09-graph-grounded-reasoning-design.md",
+      "source": "quality/reviews/2026-09-09-graph-grounded-reasoning-design.md",
       "category": "project",
       "authority": "supporting"
     },
@@ -1040,7 +1056,39 @@
       "kind": "capability",
       "label": "reasoning.graph-impact",
       "status": "FOUNDATION",
-      "summary": "Operates on typed nodes and versioned ontology policy without business-object names; richer relation semantics remain planned.",
+      "summary": "Operates on typed nodes and a versioned allowlist without business-object names; canonical source profiles, direction-aware propagation/path receipts and a separate risk policy remain planned.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:knowledge.evidence-graph",
+      "kind": "capability",
+      "label": "knowledge.evidence-graph",
+      "status": "FOUNDATION",
+      "summary": "Treats the project- and snapshot-bound evidence graph as the authority substrate; current source JSON ingestion and trusted traversal precede canonical relation profiles and durable graph ports.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:knowledge.canonical-ontology",
+      "kind": "capability",
+      "label": "knowledge.canonical-ontology",
+      "status": "NEXT",
+      "summary": "Will map source-owned node and relation vocabulary into versioned canonical classes, directions, endpoint roles and materiality without first-application names in core policy.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:reasoning.graph-context-compiler",
+      "kind": "capability",
+      "label": "reasoning.graph-context-compiler",
+      "status": "NEXT",
+      "summary": "Will compile a deterministic bounded subgraph, provenance paths, source fragments, policies and prior outcomes without depending on demo entity names.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:reasoning.graph-grounded-agent",
+      "kind": "capability",
+      "label": "reasoning.graph-grounded-agent",
+      "status": "NEXT",
+      "summary": "Will constrain provider-backed specialist proposals to the exact context-pack endpoints and evidence IDs while keeping inferred semantics outside deterministic release authority.",
       "authority": "policy"
     },
     {
@@ -1104,7 +1152,15 @@
       "kind": "capability",
       "label": "governance.release-decision",
       "status": "FOUNDATION",
-      "summary": "Deterministic policy consumes typed risk and validation state.",
+      "summary": "Deterministic policy consumes typed risk and validation state, but a non-bypassable evidence-model interlock currently limits every release posture to INCOMPLETE.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:governance.release-input-integrity",
+      "kind": "capability",
+      "label": "governance.release-input-integrity",
+      "status": "FOUNDATION",
+      "summary": "Currently provides a versioned policy-validated non-bypassable INCOMPLETE interlock and revalidates persisted decisions on service/API reads without rewriting audit history; full authority requires explicit edge/path provenance, immutable release-input binding, verified builds/obligations, scoped human approvals and deterministic conflicts.",
       "authority": "policy"
     },
     {
@@ -1129,6 +1185,14 @@
       "label": "memory.resilient-fallback",
       "status": "FOUNDATION",
       "summary": "Automatically falls back from PostgreSQL to an auto-created SQLite run store, then versioned JSON evidence plus a declared process cache.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:memory.release-outcomes",
+      "kind": "capability",
+      "label": "memory.release-outcomes",
+      "status": "NEXT",
+      "summary": "Will retain append-only test, incident, decision, override and production outcomes linked to exact project/source snapshots for governed historical reasoning.",
       "authority": "policy"
     },
     {
@@ -1266,6 +1330,86 @@
       "to": "file:tests/test_workflow.py"
     },
     {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "implemented_by",
+      "to": "file:config/governance-policy.json"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "owned_by",
+      "to": "owner:Governance Review"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "verified_by",
+      "to": "file:tests/test_api.py"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "verified_by",
+      "to": "file:tests/test_governance.py"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "verified_by",
+      "to": "file:tests/test_governance_policy.py"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "verified_by",
+      "to": "file:tests/test_service_fallback.py"
+    },
+    {
+      "from": "capability:knowledge.canonical-ontology",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:knowledge.evidence-graph",
+      "relation": "implemented_by",
+      "to": "file:migrations/001_assurance_runs.sql"
+    },
+    {
+      "from": "capability:knowledge.evidence-graph",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/retrieval.py"
+    },
+    {
+      "from": "capability:knowledge.evidence-graph",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "capability:knowledge.evidence-graph",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:knowledge.evidence-graph",
+      "relation": "verified_by",
+      "to": "file:tests/test_reasoning_policy.py"
+    },
+    {
+      "from": "capability:knowledge.evidence-graph",
+      "relation": "verified_by",
+      "to": "file:tests/test_salesforce_source.py"
+    },
+    {
       "from": "capability:memory.postgresql",
       "relation": "implemented_by",
       "to": "file:migrations/001_assurance_runs.sql"
@@ -1299,6 +1443,11 @@
       "from": "capability:memory.postgresql",
       "relation": "verified_by",
       "to": "file:tests/test_service_fallback.py"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "owned_by",
+      "to": "owner:Governance Review"
     },
     {
       "from": "capability:memory.resilient-fallback",
@@ -1399,6 +1548,16 @@
       "from": "capability:quality.test-selection",
       "relation": "verified_by",
       "to": "file:tests/test_scenario_independence.py"
+    },
+    {
+      "from": "capability:reasoning.graph-context-compiler",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:reasoning.graph-grounded-agent",
+      "relation": "owned_by",
+      "to": "owner:Orchestrator"
     },
     {
       "from": "capability:reasoning.graph-impact",
@@ -1578,6 +1737,11 @@
     {
       "from": "file:Docs/README.md",
       "relation": "references",
+      "to": "file:Docs/10-graph-grounded-agent-reasoning.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
       "to": "file:Docs/15-development-assurance-process.md"
     },
     {
@@ -1748,6 +1912,16 @@
     {
       "from": "file:src/neo_sf_q_intel/service.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/policy.py"
     },
     {
@@ -1843,6 +2017,11 @@
     {
       "from": "file:tests/test_api.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_api.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/repository.py"
     },
     {
@@ -1874,6 +2053,16 @@
       "from": "file:tests/test_governance.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
     },
     {
       "from": "file:tests/test_governance.py",

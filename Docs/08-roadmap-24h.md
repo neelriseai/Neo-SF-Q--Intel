@@ -48,6 +48,50 @@ Semantic results are not yet fused into assurance decisions. Live PostgreSQL, mo
 Salesforce evidence, trusted test execution and browser-worker verification remain environment or
 implementation gates and must not be represented as completed until they are exercised end to end.
 
+## Reprioritized graph-reasoning sequence
+
+Graph-grounded reasoning is now the primary intelligence path and precedes broad connector or UI
+breadth. Existing deterministic graph work is preserved; semantic and agent work must converge on
+the same typed context contract.
+
+### Analysis and demo lane
+
+This lane can proceed while release authority remains permanently fail-closed. It produces useful
+impact, test and evidence-path analysis, but every public release decision remains `INCOMPLETE`.
+
+| Priority | Capability slice | Acceptance result |
+|---:|---|---|
+| A1 | Canonical ontology plus source-profile relation mapping | First source behavior unchanged; a renamed second fixture works without editing core policy; unmapped material relations abstain |
+| A2 | Direction-aware propagation and versioned analysis-risk policy | Relation/endpoint matrix and ordered path receipts; inverse/cycle/diamond tests; required risk inputs cannot default silently |
+| A3 | Deterministic `GraphContextPack` compiler | Stable pack hash; confirmed paths/provenance; explicit budgets/truncation; project/snapshot isolation |
+| A4 | Hybrid candidate fusion | Exact/graph/lexical plus in-process or ChromaDB semantic candidates; semantic hits remain non-authoritative |
+| A5 | Graph-grounded specialist proposal/verifier | Typed output; citations/endpoints restricted to pack; invalid schema/hallucinated IDs/provider outage tested |
+| A6 | Assurance workflow integration | Impact/security/test stages consume the pack; unsupported narrative cannot change deterministic facts or lift `INCOMPLETE` |
+| A7 | Outcome/evaluation memory | Test/incident/human-correction outcomes linked to source snapshot; policy changes require reviewed eval/version promotion |
+| A8 | Dashboard evidence-path view | Viewer can distinguish confirmed paths, inferred proposals, conflicts, unavailable semantic dependencies and disabled release authority |
+
+### Release-authority lane
+
+These slices are required before the platform can emit any current `GO`, `CONDITIONAL_GO` or
+`NO_GO`. They do not block the analysis/demo lane; the runtime interlock isolates the two concerns.
+
+| Priority | Capability slice | Acceptance result |
+|---:|---|---|
+| R0.1 | Explicit trusted edge envelope | Missing/unknown extractor, state, artifact hash, project or snapshot blocks release evidence; LLM output cannot claim confirmed authority |
+| R0.2 | Complete graph-path replay | Every material release input cites every typed edge; tamper/removal/reversal/illegal signature makes release incomplete |
+| R0.3 | Immutable release-input binding | Canonical digest covers change/build, graph/evidence/paths, risk, obligations/execution, conflicts and all policies; mutation/policy/expiry fails closed |
+| R0.4 | Verified change and obligation matrix | Planned text alone cannot authorize release; each impact/control maps to exact-build mandatory test receipts |
+| R0.5 | Scoped human confirmation and conflict sets | Separate expiring approval receipts; order-independent proposition conflicts; unresolved authoritative conflict blocks |
+| R0.6 | Historical-decision revalidation | API/service reads expose only a current-policy effective decision; recorded legacy decisions remain audit-only |
+
+Live Salesforce, test runners and browser capture remain necessary evidence producers, but their
+interfaces should feed this graph/context architecture rather than creating parallel reasoning
+paths. MCP remains a distribution adapter and does not move ahead of the intelligence slices above.
+
+The current `RELEASE_EVIDENCE_MODEL_INCOMPLETE` interlock remains enabled throughout R0.1–R0.6 and
+cannot be removed by a policy toggle. Release-authorizing decisions resume only through a reviewed
+new governance/evidence schema with adversarial tests for every prerequisite.
+
 ## Post-demo vector milestone
 
 Add ChromaDB behind `SemanticEvidenceIndex` only after the governed ingestion and retrieval contract

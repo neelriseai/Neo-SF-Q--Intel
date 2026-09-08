@@ -50,6 +50,28 @@ allowed only when the manifest names the capability, old state, new state and a 
 
 ## Release decision truth table
 
+### Current release-authority interlock
+
+The default policy currently sets `release_authority.enabled=false`. Analysis, evidence metrics and
+gaps remain usable, but the runtime cannot emit `GO`, `CONDITIONAL_GO` or `NO_GO`; after other
+blocking checks it returns `INCOMPLETE / RELEASE_EVIDENCE_MODEL_INCOMPLETE`. This is a deliberate
+P0 safety interlock because the current evidence model does not yet bind complete edge provenance,
+full graph paths, verified candidate builds/per-impact obligations, scoped human approvals,
+authoritative conflicts and every release-relevant field into one immutable release input.
+
+The required interlock field is a breaking governance-policy contract change, so the executable
+policy is version `2.0.0`. The interlock cannot be enabled by a configuration toggle in policy
+version 2.x. A future reviewed
+enablement contract, schema version and adversarial verification suite must change the validator.
+The truth table below is therefore the target decision behavior after that gate, not a claim that
+the current analysis-only runtime can authorize release.
+
+Persisted decisions are audit facts, not permanent authority. Service and API read paths revalidate
+every historical `GO`, `CONDITIONAL_GO` and `NO_GO` against the current release policy. While the
+interlock is active, the public `decision` is `INCOMPLETE / RELEASE_EVIDENCE_MODEL_INCOMPLETE` and
+the original value is exposed only as `recorded_decision`, explicitly non-authoritative. Raw
+repositories retain the original run document for audit replay.
+
 Guardrail outcomes map deterministically: `DENY -> NO_GO`, `ABSTAIN -> INCOMPLETE`,
 `REVIEW_REQUIRED -> INCOMPLETE`, and `REQUIRE_APPROVAL -> CONDITIONAL_GO`. `DENY` wins if several
 blocking outcomes coexist.
@@ -58,7 +80,7 @@ Evidence absence, staleness or expiry is an epistemic gap and therefore abstains
 it is not proof of an unsafe release. `NO_GO` is reserved for a confirmed failed validation or a
 future explicit deny-class security/policy violation.
 
-After governance passes:
+After governance and the future release-authority contract pass:
 
 | Condition | Decision |
 |---|---|

@@ -42,6 +42,11 @@ ephemeral index may rank the active source snapshot, while exact, graph and lexi
 5. Build an evidence pack with token budget, provenance and freshness.
 6. Validate every agent-returned evidence ID against the pack.
 
+This sequence is the retrieval half of graph-grounded agent reasoning. It is not implemented as a
+single generic GraphRAG product or an LLM-generated graph. The deterministic context compiler owns
+selection and budgets; the agent receives a read-only `GraphContextPack`; an output verifier
+accepts only typed proposals whose endpoints and evidence IDs are present in that pack.
+
 No PostgreSQL vector extension is permitted or required. The `SemanticEvidenceIndex` port must keep
 the current in-process implementation and the future ChromaDB adapter interchangeable.
 
@@ -52,3 +57,12 @@ the current in-process implementation and the future ChromaDB adapter interchang
 - The LLM cannot create confirmed `READS`, `WRITES`, `CALLS`, `GRANTS_ACCESS_TO` or `TESTS` edges.
 - Snapshot mismatch invalidates earlier decisions.
 - The supplied Salesforce graph is ingested from the configured sibling repository and is never silently replaced by an LLM-extracted graph.
+- Canonical relation classes remain source-independent. A source profile maps source-specific
+  relation names to canonical classes and declares direction, evidence requirements and allowed
+  endpoint roles; an unmapped material relation causes abstention.
+- Graph expansion follows a reviewed propagation matrix keyed by canonical relation, changed
+  endpoint and direction. The current bidirectional allowlist traversal is only a foundation and
+  must not be described as causal reasoning. Every accepted impact path carries an ordered path
+  receipt; cycles and diamonds are deduplicated without reversing causality.
+- Release/outcome memory is append-only governed evidence. Historical similarity may rank a
+  candidate or flag a prior incident, but cannot prove that the current change is safe.

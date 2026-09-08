@@ -19,9 +19,41 @@
       "id": "reasoning.graph-impact",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Operates on typed nodes and versioned ontology policy without business-object names; richer relation semantics remain planned.",
+      "genericity": "Operates on typed nodes and a versioned allowlist without business-object names; canonical source profiles, direction-aware propagation/path receipts and a separate risk policy remain planned.",
       "implementation": ["src/neo_sf_q_intel/analysis.py", "src/neo_sf_q_intel/retrieval.py", "src/neo_sf_q_intel/policy.py", "config/reasoning-policy.json"],
       "verification": ["tests/test_analysis.py", "tests/test_scenario_independence.py", "tests/test_reasoning_policy.py"]
+    },
+    {
+      "id": "knowledge.evidence-graph",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Treats the project- and snapshot-bound evidence graph as the authority substrate; current source JSON ingestion and trusted traversal precede canonical relation profiles and durable graph ports.",
+      "implementation": ["src/neo_sf_q_intel/salesforce_source.py", "src/neo_sf_q_intel/retrieval.py", "migrations/001_assurance_runs.sql"],
+      "verification": ["tests/test_salesforce_source.py", "tests/test_reasoning_policy.py"]
+    },
+    {
+      "id": "knowledge.canonical-ontology",
+      "owner": "Change Analyst",
+      "status": "NEXT",
+      "genericity": "Will map source-owned node and relation vocabulary into versioned canonical classes, directions, endpoint roles and materiality without first-application names in core policy.",
+      "implementation": [],
+      "verification": []
+    },
+    {
+      "id": "reasoning.graph-context-compiler",
+      "owner": "Change Analyst",
+      "status": "NEXT",
+      "genericity": "Will compile a deterministic bounded subgraph, provenance paths, source fragments, policies and prior outcomes without depending on demo entity names.",
+      "implementation": [],
+      "verification": []
+    },
+    {
+      "id": "reasoning.graph-grounded-agent",
+      "owner": "Orchestrator",
+      "status": "NEXT",
+      "genericity": "Will constrain provider-backed specialist proposals to the exact context-pack endpoints and evidence IDs while keeping inferred semantics outside deterministic release authority.",
+      "implementation": [],
+      "verification": []
     },
     {
       "id": "reasoning.semantic-retrieval",
@@ -83,9 +115,17 @@
       "id": "governance.release-decision",
       "owner": "Governance Review",
       "status": "FOUNDATION",
-      "genericity": "Deterministic policy consumes typed risk and validation state.",
+      "genericity": "Deterministic policy consumes typed risk and validation state, but a non-bypassable evidence-model interlock currently limits every release posture to INCOMPLETE.",
       "implementation": ["src/neo_sf_q_intel/governance.py"],
       "verification": ["tests/test_governance.py", "tests/test_workflow.py"]
+    },
+    {
+      "id": "governance.release-input-integrity",
+      "owner": "Governance Review",
+      "status": "FOUNDATION",
+      "genericity": "Currently provides a versioned policy-validated non-bypassable INCOMPLETE interlock and revalidates persisted decisions on service/API reads without rewriting audit history; full authority requires explicit edge/path provenance, immutable release-input binding, verified builds/obligations, scoped human approvals and deterministic conflicts.",
+      "implementation": ["config/governance-policy.json", "src/neo_sf_q_intel/governance_policy.py", "src/neo_sf_q_intel/governance.py", "src/neo_sf_q_intel/service.py"],
+      "verification": ["tests/test_governance_policy.py", "tests/test_governance.py", "tests/test_api.py", "tests/test_service_fallback.py"]
     },
     {
       "id": "governance.measurement-contract",
@@ -110,6 +150,14 @@
       "genericity": "Automatically falls back from PostgreSQL to an auto-created SQLite run store, then versioned JSON evidence plus a declared process cache.",
       "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/config.py"],
       "verification": ["tests/test_repository.py", "tests/test_service_fallback.py"]
+    },
+    {
+      "id": "memory.release-outcomes",
+      "owner": "Governance Review",
+      "status": "NEXT",
+      "genericity": "Will retain append-only test, incident, decision, override and production outcomes linked to exact project/source snapshots for governed historical reasoning.",
+      "implementation": [],
+      "verification": []
     },
     {
       "id": "tools.mcp",

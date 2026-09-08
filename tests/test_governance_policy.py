@@ -13,6 +13,7 @@ def policy_document() -> dict:
 def test_governance_policy_defines_executable_measurements_and_controls() -> None:
     policy = GovernancePolicy.load()
 
+    assert policy.schema_version == "2.0.0"
     assert all(item.numerator_definition != item.denominator_definition for item in policy.metrics)
     assert all(item.minimum_sample_size >= 1 for item in policy.metrics)
     assert {item.metric for item in policy.metrics} == {
@@ -20,6 +21,23 @@ def test_governance_policy_defines_executable_measurements_and_controls() -> Non
         "impact_evidence_coverage",
         "selected_test_evidence_coverage",
     }
+    assert not policy.release_authority.enabled
+    assert policy.release_authority.reason_code == "RELEASE_EVIDENCE_MODEL_INCOMPLETE"
+
+
+def test_release_authority_cannot_be_enabled_before_evidence_model_contract() -> None:
+    raw = policy_document()
+    raw["release_authority"]["enabled"] = True
+
+    with pytest.raises(ValidationError, match="release authority cannot be enabled"):
+        GovernancePolicy.model_validate(raw)
+
+
+def test_release_authority_rejects_nested_assignment_bypass() -> None:
+    policy = GovernancePolicy.load()
+
+    with pytest.raises(ValidationError, match="release authority cannot be enabled"):
+        policy.release_authority.enabled = True
 
 
 def test_blocking_metric_requires_an_explicit_guardrail_hook() -> None:

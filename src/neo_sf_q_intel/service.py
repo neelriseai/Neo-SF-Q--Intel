@@ -11,7 +11,9 @@ from psycopg import OperationalError
 
 from neo_sf_q_intel.analysis import ChangeIntelligenceService
 from neo_sf_q_intel.config import Settings
-from neo_sf_q_intel.domain import AssuranceRun, ChangeRequest
+from neo_sf_q_intel.domain import AssuranceRun, ChangeRequest, DecisionCode, ReleaseDecision
+from neo_sf_q_intel.governance import decide
+from neo_sf_q_intel.governance_policy import GovernancePolicy
 from neo_sf_q_intel.policy import ReasoningPolicy
 from neo_sf_q_intel.providers import ModelProvider, create_model_provider
 from neo_sf_q_intel.repository import (
@@ -75,10 +77,42 @@ class AssuranceService:
         return result
 
     def get(self, run_id: UUID) -> AssuranceRun | None:
-        return self.repository.get(run_id)
+        run = self.repository.get(run_id)
+        return self._effective_view(run) if run else None
 
     def list_recent(self, limit: int = 20) -> list[AssuranceRun]:
-        return self.repository.list_recent(limit)
+        return [self._effective_view(run) for run in self.repository.list_recent(limit)]
+
+    @staticmethod
+    def _effective_view(run: AssuranceRun) -> AssuranceRun:
+        """Return a current-policy view without rewriting historical audit state."""
+        view = run.model_copy(deep=True)
+        try:
+            policy = GovernancePolicy.load()
+        except (OSError, ValueError):
+            effective = ReleaseDecision(
+                code=DecisionCode.INCOMPLETE,
+                reasons=["GOVERNANCE_POLICY_INVALID"],
+            )
+        else:
+            if (
+                not policy.release_authority.enabled
+                and view.decision is not None
+                and view.decision.code is DecisionCode.INCOMPLETE
+            ):
+                return view
+            effective = (
+                ReleaseDecision(
+                    code=DecisionCode.INCOMPLETE,
+                    reasons=[policy.release_authority.reason_code],
+                )
+                if not policy.release_authority.enabled
+                else decide(view, policy)
+            )
+        if view.decision != effective:
+            view.recorded_decision = view.decision
+            view.decision = effective
+        return view
 
     async def semantic_search(self, query: str, limit: int = 8) -> list[SemanticHit]:
         if self.semantic_index is None:

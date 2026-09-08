@@ -115,3 +115,26 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
   and identify which policy, source snapshot, runner and adapter produced each fact.
 - Capability review evidence belongs in the structured review ledger. Runtime facts belong in
   governed stores. Chat messages are coordination context, not the system of record.
+
+## Graph-grounded reasoning
+
+- The evidence graph and its ontology are the primary reasoning substrate. Before any future
+  model-backed specialist reasons about impact, security, tests, healing or RCA, a deterministic
+  context compiler must select a project/snapshot-isolated subgraph, evidence paths, source
+  fragments, policies and prior outcomes within an explicit budget.
+- Model/vector output is a proposal plane, never the authority plane. An agent may propose typed
+  semantic relations only between entities visible in its context pack and must cite pack evidence.
+  It may not create confirmed structural edges, grant permissions, satisfy execution gates or
+  choose a release decision.
+- Deterministic validation must reject cross-project/snapshot references, missing or expired
+  evidence, unknown ontology mappings, unsupported paths and conflicting facts. Inferred edges stay
+  `INFERRED` until independently confirmed; they cannot satisfy a blocking release gate.
+- Keep the canonical ontology independent of the first Salesforce application. Source-owned
+  profiles map application/vendor relation names into canonical relation classes. Adding a source
+  must not require demo literals or business fields in the core reasoning policy.
+- PostgreSQL owns authoritative graph provenance and outcome memory when those ports are complete;
+  JSON/SQLite provide degraded factual continuity. ChromaDB is a rebuildable semantic candidate
+  index only and must never become evidence authority.
+- Do not call the platform or a capability `GraphRAG` unless it actually implements and evaluates
+  the claimed GraphRAG retrieval modes, summaries, provenance and refresh semantics. Use
+  “graph-grounded reasoning” or “ontology-guided evidence retrieval” for the architecture here.

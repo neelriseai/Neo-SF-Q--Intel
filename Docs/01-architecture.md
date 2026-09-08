@@ -17,8 +17,11 @@ flowchart TB
   TA --> SVC
   UH --> SVC
   GA --> SVC
-  SVC --> EG[Evidence graph and hybrid retrieval]
-  EG -. future semantic index .-> CHROMA[(ChromaDB)]
+  SVC --> CC[Deterministic context compiler - NEXT]
+  CC --> EG[Change Evidence Graph]
+  CC -. bounded context pack .-> CA
+  CC -. bounded context pack .-> TA
+  EG -. semantic candidate index .-> CHROMA[(ChromaDB - NEXT)]
   SVC --> SF[Salesforce CLI adapter]
   SVC -. NEXT .-> PW[Playwright TypeScript worker]
   SVC --> MCP[Local MCP adapter]
@@ -41,6 +44,13 @@ domain <- persistence interfaces <- PostgreSQL adapter
 Domain modules never import FastAPI, LangGraph, MCP, Salesforce CLI or Playwright. Current
 deterministic stages exchange typed state and persist typed deliverables. Future model-backed agents
 must use the same contracts; deterministic application services remain the authority.
+
+The Change Evidence Graph is the central intelligence fabric, not merely a dependency lookup.
+Deterministic parsers and verified runtime/test receipts populate the authority plane. A future
+context compiler selects a snapshot-isolated subgraph and supporting source/outcome evidence for
+each specialist. Model/vector components may propose semantic links in a separate inference plane;
+only deterministic verification or human confirmation can promote them. See
+`Docs/10-graph-grounded-agent-reasoning.md`.
 
 ## Runtime boundaries
 

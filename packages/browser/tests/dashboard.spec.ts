@@ -36,6 +36,7 @@ test("dashboard renders a governed incomplete decision without false confidence"
         deliverables: [],
         governance: { metrics: [{ metric: "material_claim_evidence_coverage", numerator: 1, denominator: 1, target: 1, comparator: "AT_LEAST", minimum_sample_size: 1, status: "PASSED", blocking: true }], violations: [], passed: true },
         decision: { code: "INCOMPLETE", reasons: ["Selected validation lacks an execution receipt"], evidence_ids: [] },
+        recorded_decision: null,
       }),
     });
   });

@@ -47,6 +47,12 @@ export interface GovernanceMetric {
   blocking: boolean;
 }
 
+export interface ReleaseDecision {
+  code: DecisionCode;
+  reasons: string[];
+  evidence_ids: string[];
+}
+
 export interface AssuranceRun {
   run_id: string;
   trace_id: string;
@@ -65,5 +71,6 @@ export interface AssuranceRun {
   activities: AgentActivity[];
   deliverables: Array<{ agent: string; capability_ids: string[]; status: string; conclusion: string; evidence_ids: string[]; assumptions: string[]; blocking_gaps: string[]; nonblocking_gaps: string[]; measurements: Record<string, string | number>; next_permitted_action: string }>;
   governance: { metrics: GovernanceMetric[]; violations: string[]; passed: boolean } | null;
-  decision: { code: DecisionCode; reasons: string[]; evidence_ids: string[] } | null;
+  decision: ReleaseDecision | null;
+  recorded_decision: ReleaseDecision | null;
 }

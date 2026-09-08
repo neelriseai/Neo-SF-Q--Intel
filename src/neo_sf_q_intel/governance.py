@@ -4,6 +4,8 @@ import hashlib
 import json
 from datetime import UTC, datetime, timedelta
 
+from pydantic import ValidationError
+
 from neo_sf_q_intel.domain import (
     AssuranceRun,
     Claim,
@@ -284,7 +286,14 @@ def assess_run(run: AssuranceRun, policy: GovernancePolicy | None = None) -> Gov
 
 
 def decide(run: AssuranceRun, policy: GovernancePolicy | None = None) -> ReleaseDecision:
-    active_policy = policy or GovernancePolicy.load()
+    candidate_policy = policy or GovernancePolicy.load()
+    try:
+        active_policy = GovernancePolicy.model_validate(candidate_policy.model_dump(mode="python"))
+    except ValidationError:
+        return ReleaseDecision(
+            code=DecisionCode.INCOMPLETE,
+            reasons=["GOVERNANCE_POLICY_INVALID"],
+        )
     if not run.evidence:
         return ReleaseDecision(code=DecisionCode.INCOMPLETE, reasons=["No evidence available"])
     if run.governance is None:
@@ -307,6 +316,11 @@ def decide(run: AssuranceRun, policy: GovernancePolicy | None = None) -> Release
         return ReleaseDecision(
             code=DecisionCode.INCOMPLETE,
             reasons=["Analysis input changed after governance assessment"],
+        )
+    if not active_policy.release_authority.enabled:
+        return ReleaseDecision(
+            code=DecisionCode.INCOMPLETE,
+            reasons=[active_policy.release_authority.reason_code],
         )
     blocking = [item for item in current_assessment.guardrails if item.blocking]
     if blocking:

@@ -285,3 +285,4 @@ class AssuranceRun(StrictModel):
     claims: list[Claim] = Field(default_factory=list)
     governance: GovernanceAssessment | None = None
     decision: ReleaseDecision | None = None
+    recorded_decision: ReleaseDecision | None = None
