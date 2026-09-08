@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0.0",
+  "unknownKindAction": "ABSTAIN",
+  "limits": {
+    "seedCount": 6,
+    "traversalDepth": 2,
+    "maxTraversalNodes": 100,
+    "maxImpacts": 24,
+    "maxSelectedTests": 12
+  },
+  "nodeKinds": {
+    "apex-class": {"role": "IMPACT", "severity": "MEDIUM"},
+    "apex-test": {"role": "VALIDATION"},
+    "apex-trigger": {"role": "IMPACT", "severity": "HIGH"},
+    "api-use-case": {"role": "VALIDATION"},
+    "approval-process": {"role": "IMPACT", "severity": "HIGH"},
+    "capability": {"role": "CONTEXT"},
+    "component-test": {"role": "VALIDATION"},
+    "custom-metadata-record": {"role": "IMPACT", "severity": "HIGH"},
+    "field": {"role": "IMPACT", "severity": "MEDIUM"},
+    "file": {"role": "EVIDENCE"},
+    "flow": {"role": "IMPACT", "severity": "HIGH"},
+    "lightning-app": {"role": "IMPACT", "severity": "LOW"},
+    "lightning-component": {"role": "IMPACT", "severity": "MEDIUM"},
+    "lightning-page": {"role": "IMPACT", "severity": "MEDIUM"},
+    "list-view": {"role": "IMPACT", "severity": "LOW"},
+    "locator-use-case": {"role": "VALIDATION"},
+    "manual-use-case": {"role": "VALIDATION"},
+    "object": {"role": "IMPACT", "severity": "MEDIUM"},
+    "permission-set": {"role": "IMPACT", "severity": "HIGH"},
+    "persona": {"role": "CONTEXT"},
+    "presentation-configuration": {"role": "IMPACT", "severity": "MEDIUM"},
+    "requirement": {"role": "CONTEXT"},
+    "saved-report": {"role": "IMPACT", "severity": "LOW"},
+    "synthetic-dataset": {"role": "EVIDENCE"},
+    "synthetic-fixture": {"role": "EVIDENCE"},
+    "workflow-field-update": {"role": "IMPACT", "severity": "HIGH"}
+  },
+  "traversableRelations": [
+    "appends", "authorizes_parent", "calls", "calls_internal_apex",
+    "changes_locator_for", "class_access", "configures", "contains", "covers",
+    "creates", "defined_in", "field_grant", "guards_save_of", "has_field",
+    "implemented_by", "instance_of", "invokes", "lists", "manages",
+    "object_grant", "offers_configuration", "reads",
+    "reads_dataset", "reads_private_summary", "reads_user_mode", "rechecks",
+    "references", "relevant_change_triggers", "routes_via", "tests",
+    "tests_configuration", "tests_requirement", "triggers", "uses_dataset",
+    "uses_final_or_recall_action", "writes"
+  ]
+}

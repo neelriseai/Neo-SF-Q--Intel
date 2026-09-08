@@ -5,6 +5,7 @@ import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlsplit
 
 
 class SalesforceCLIError(RuntimeError):
@@ -65,9 +66,11 @@ class SalesforceCLI:
             "username": result.get("username", "Unknown"),
         }
 
-    def get_policy(self, opportunity_id: str, limit: int = 10) -> dict[str, Any]:
-        if not opportunity_id.isalnum() or len(opportunity_id) not in {15, 18}:
-            raise ValueError("A 15- or 18-character Salesforce record ID is required")
-        bounded_limit = min(50, max(1, limit))
-        route = f"/services/apexrest/sda/v1/policy/{opportunity_id}?limit={bounded_limit}"
+    def rest_get(self, route: str) -> dict[str, Any]:
+        parsed = urlsplit(route)
+        allowed_prefixes = ("/services/data/", "/services/apexrest/")
+        if parsed.scheme or parsed.netloc or not parsed.path.startswith(allowed_prefixes):
+            raise ValueError("Only relative Salesforce data or Apex REST routes are allowed")
+        if any(part == ".." for part in parsed.path.split("/")):
+            raise ValueError("Salesforce REST routes cannot contain parent traversal")
         return self._run_json(["api", "request", "rest", route, "--method", "GET"])

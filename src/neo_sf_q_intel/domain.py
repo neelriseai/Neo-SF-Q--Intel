@@ -44,7 +44,7 @@ class AgentStatus(StrEnum):
 class ChangeRequest(StrictModel):
     requirement: str = Field(min_length=3, max_length=20_000)
     changed_paths: list[str] = Field(default_factory=list, max_length=500)
-    project_id: str = "strategic-deal-assurance"
+    project_id: str | None = Field(default=None, min_length=1, max_length=200)
     source_ref: str = "working-tree"
 
 
@@ -74,6 +74,13 @@ class TestSelection(StrictModel):
     classification: str
     reason: str
     evidence_ids: list[str] = Field(min_length=1)
+
+
+class AnalysisGap(StrictModel):
+    code: str
+    message: str
+    entity_id: str | None = None
+    relation: str | None = None
 
 
 class HealingProposal(StrictModel):
@@ -136,6 +143,7 @@ class AssuranceRun(StrictModel):
     evidence: list[EvidenceRef] = Field(default_factory=list)
     impacts: list[ImpactFinding] = Field(default_factory=list)
     selected_tests: list[TestSelection] = Field(default_factory=list)
+    analysis_gaps: list[AnalysisGap] = Field(default_factory=list)
     healing_proposals: list[HealingProposal] = Field(default_factory=list)
     activities: list[AgentActivity] = Field(default_factory=list)
     claims: list[Claim] = Field(default_factory=list)

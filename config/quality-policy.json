@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0.0",
+  "runtimeRoots": [
+    "src/neo_sf_q_intel",
+    "apps/web/src",
+    "packages/browser/src",
+    "config/reasoning-policy.json"
+  ],
+  "scanExemptPaths": [
+    "config/quality-policy.json"
+  ],
+  "absolutePathPatterns": [
+    "[A-Za-z]:\\\\Users\\\\",
+    "[A-Za-z]:/Users/",
+    "file://"
+  ],
+  "secretPatterns": [
+    "(?i)\\bsk-[A-Za-z0-9_-]{20,}",
+    "(?i)postgres(?:ql)?://[^\\s:@]+:[^\\s@]+@"
+  ],
+  "blankExampleSecrets": [
+    "OPENAI_API_KEY",
+    "AZURE_OPENAI_API_KEY",
+    "DATABASE_URL"
+  ],
+  "scopeControlledPaths": [
+    "config/capability-scope.json",
+    "config/quality-policy.json",
+    "config/reasoning-policy.json"
+  ],
+  "reviewLedgerRoot": "quality/reviews/",
+  "scenarioLiteralPatterns": [
+    "(?i)strategic[_ -]?deal",
+    "(?i)discount__c",
+    "(?i)caip-(dev|vp)",
+    "(?i)/sda/v[0-9]"
+  ],
+  "scenarioAllowedPaths": [
+    ".env.example",
+    "Docs/",
+    "tests/",
+    "packages/browser/tests/"
+  ],
+  "requiredCapabilityIds": [
+    "source.contract-ingestion",
+    "reasoning.graph-impact",
+    "reasoning.semantic-retrieval",
+    "orchestration.multi-agent",
+    "quality.test-selection",
+    "automation.locator-healing",
+    "governance.claim-grounding",
+    "governance.release-decision",
+    "memory.postgresql",
+    "tools.mcp",
+    "runtime.salesforce-live-evidence",
+    "quality.live-test-execution",
+    "automation.browser-worker"
+  ],
+  "layerImportRules": {
+    "src/neo_sf_q_intel/domain.py": [
+      "fastapi",
+      "langgraph",
+      "mcp",
+      "openai",
+      "psycopg",
+      "playwright"
+    ],
+    "src/neo_sf_q_intel/api.py": [
+      "psycopg",
+      "subprocess"
+    ],
+    "src/neo_sf_q_intel/mcp_server.py": [
+      "psycopg",
+      "subprocess"
+    ],
+    "src/neo_sf_q_intel/workflow.py": [
+      "fastapi",
+      "mcp",
+      "openai",
+      "psycopg",
+      "playwright",
+      "subprocess"
+    ]
+  }
+}

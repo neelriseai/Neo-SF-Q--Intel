@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from neo_sf_q_intel.domain import ChangeRequest, DecisionCode, RunStatus
 from neo_sf_q_intel.repository import InMemoryRunRepository
 from neo_sf_q_intel.salesforce_source import SalesforceSourceSnapshot
@@ -9,7 +11,7 @@ from neo_sf_q_intel.service import AssuranceService
 def source() -> SalesforceSourceSnapshot:
     return SalesforceSourceSnapshot(
         root=Path("."),
-        contract={"schemaVersion": "1.4.0"},
+        contract={"schemaVersion": "1.4.0", "application": "Workflow Fixture"},
         project_index={"sourceSnapshot": "demo"},
         graph={
             "sourceSnapshot": "demo",
@@ -55,6 +57,7 @@ def test_specialist_agents_produce_traceable_governed_run() -> None:
     assert run.governance and run.governance.passed
     assert run.decision and run.decision.code is DecisionCode.CONDITIONAL_GO
     assert repository.get(run.run_id) == run
+    assert run.request.project_id == "workflow-fixture"
 
 
 def test_no_evidence_causes_abstention_instead_of_invention() -> None:
@@ -64,3 +67,15 @@ def test_no_evidence_causes_abstention_instead_of_invention() -> None:
     assert not run.evidence
     assert run.decision and run.decision.code is DecisionCode.INCOMPLETE
     assert run.activities[0].status == "ABSTAINED"
+
+
+def test_rejects_cross_project_evidence_use() -> None:
+    service = AssuranceService(source())
+
+    with pytest.raises(ValueError, match="does not match loaded source"):
+        service.analyze(
+            ChangeRequest(
+                requirement="Assess the workbench",
+                project_id="another-project",
+            )
+        )

@@ -51,7 +51,7 @@ def build_mcp(
     @server.tool()
     def inspect_salesforce() -> dict:
         """Check the configured non-production org without returning auth material."""
-        return SalesforceCLI(settings.sf_operator_alias).org_status()
+        return SalesforceCLI(settings.require_operator_alias()).org_status()
 
     return server
 

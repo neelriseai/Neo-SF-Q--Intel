@@ -1,0 +1,1687 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": "Neo SF Q-Intel",
+  "sourceSnapshot": "f9b3647f409860d1d7311871551c08238c877e43169a211274aa1bf2c620d2c1",
+  "provenance": "Static repository structure and explicit import/reference relationships.",
+  "authorization": "Discovery only; graph edges grant no tool or write authority.",
+  "nodes": [
+    {
+      "id": "file:.env.example",
+      "kind": "file",
+      "label": ".env.example",
+      "source": ".env.example",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:.gitattributes",
+      "kind": "file",
+      "label": ".gitattributes",
+      "source": ".gitattributes",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:.githooks/pre-commit",
+      "kind": "file",
+      "label": "pre-commit",
+      "source": ".githooks/pre-commit",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:.gitignore",
+      "kind": "file",
+      "label": ".gitignore",
+      "source": ".gitignore",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:AGENTS.md",
+      "kind": "file",
+      "label": "AGENTS.md",
+      "source": "AGENTS.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:Docs/00-agentic-ai-assurance-retrofit-master.md",
+      "kind": "file",
+      "label": "00-agentic-ai-assurance-retrofit-master.md",
+      "source": "Docs/00-agentic-ai-assurance-retrofit-master.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/00-integration-layer-master.md",
+      "kind": "file",
+      "label": "00-integration-layer-master.md",
+      "source": "Docs/00-integration-layer-master.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/00-product-scope.md",
+      "kind": "file",
+      "label": "00-product-scope.md",
+      "source": "Docs/00-product-scope.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/01-architecture-conformance-and-deviation-audit.md",
+      "kind": "file",
+      "label": "01-architecture-conformance-and-deviation-audit.md",
+      "source": "Docs/01-architecture-conformance-and-deviation-audit.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/01-architecture.md",
+      "kind": "file",
+      "label": "01-architecture.md",
+      "source": "Docs/01-architecture.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/01-contracts-and-domain-model.md",
+      "kind": "file",
+      "label": "01-contracts-and-domain-model.md",
+      "source": "Docs/01-contracts-and-domain-model.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/02-agentic-observability-and-traceability.md",
+      "kind": "file",
+      "label": "02-agentic-observability-and-traceability.md",
+      "source": "Docs/02-agentic-observability-and-traceability.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/02-domain-contracts.md",
+      "kind": "file",
+      "label": "02-domain-contracts.md",
+      "source": "Docs/02-domain-contracts.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/02-source-ingestion-and-change-detection.md",
+      "kind": "file",
+      "label": "02-source-ingestion-and-change-detection.md",
+      "source": "Docs/02-source-ingestion-and-change-detection.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/03-data-memory-and-retrieval.md",
+      "kind": "file",
+      "label": "03-data-memory-and-retrieval.md",
+      "source": "Docs/03-data-memory-and-retrieval.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/03-evaluation-and-golden-dataset-engineering.md",
+      "kind": "file",
+      "label": "03-evaluation-and-golden-dataset-engineering.md",
+      "source": "Docs/03-evaluation-and-golden-dataset-engineering.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/03-evidence-graph-and-memory.md",
+      "kind": "file",
+      "label": "03-evidence-graph-and-memory.md",
+      "source": "Docs/03-evidence-graph-and-memory.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/04-agent-orchestration.md",
+      "kind": "file",
+      "label": "04-agent-orchestration.md",
+      "source": "Docs/04-agent-orchestration.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/04-guardrails-and-policy-enforcement.md",
+      "kind": "file",
+      "label": "04-guardrails-and-policy-enforcement.md",
+      "source": "Docs/04-guardrails-and-policy-enforcement.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/04-impact-and-security-intelligence.md",
+      "kind": "file",
+      "label": "04-impact-and-security-intelligence.md",
+      "source": "Docs/04-impact-and-security-intelligence.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/05-connectors-and-mcp.md",
+      "kind": "file",
+      "label": "05-connectors-and-mcp.md",
+      "source": "Docs/05-connectors-and-mcp.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/05-hallucination-grounding-and-claim-verification.md",
+      "kind": "file",
+      "label": "05-hallucination-grounding-and-claim-verification.md",
+      "source": "Docs/05-hallucination-grounding-and-claim-verification.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/05-risk-coverage-and-test-selection.md",
+      "kind": "file",
+      "label": "05-risk-coverage-and-test-selection.md",
+      "source": "Docs/05-risk-coverage-and-test-selection.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/06-rag-evidence-graph-and-memory-quality.md",
+      "kind": "file",
+      "label": "06-rag-evidence-graph-and-memory-quality.md",
+      "source": "Docs/06-rag-evidence-graph-and-memory-quality.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/06-test-automation-engineering.md",
+      "kind": "file",
+      "label": "06-test-automation-engineering.md",
+      "source": "Docs/06-test-automation-engineering.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/06-ui-automation-and-healing.md",
+      "kind": "file",
+      "label": "06-ui-automation-and-healing.md",
+      "source": "Docs/06-ui-automation-and-healing.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/07-fine-tuning-decision-and-model-customization.md",
+      "kind": "file",
+      "label": "07-fine-tuning-decision-and-model-customization.md",
+      "source": "Docs/07-fine-tuning-decision-and-model-customization.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/07-governance-and-evaluation.md",
+      "kind": "file",
+      "label": "07-governance-and-evaluation.md",
+      "source": "Docs/07-governance-and-evaluation.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/07-test-execution-and-rca.md",
+      "kind": "file",
+      "label": "07-test-execution-and-rca.md",
+      "source": "Docs/07-test-execution-and-rca.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/08-prompt-model-context-and-version-lifecycle.md",
+      "kind": "file",
+      "label": "08-prompt-model-context-and-version-lifecycle.md",
+      "source": "Docs/08-prompt-model-context-and-version-lifecycle.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/08-release-assurance.md",
+      "kind": "file",
+      "label": "08-release-assurance.md",
+      "source": "Docs/08-release-assurance.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/08-roadmap-24h.md",
+      "kind": "file",
+      "label": "08-roadmap-24h.md",
+      "source": "Docs/08-roadmap-24h.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/09-agent-llm-and-orchestration.md",
+      "kind": "file",
+      "label": "09-agent-llm-and-orchestration.md",
+      "source": "Docs/09-agent-llm-and-orchestration.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/09-demo-scenarios.md",
+      "kind": "file",
+      "label": "09-demo-scenarios.md",
+      "source": "Docs/09-demo-scenarios.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/09-tool-mcp-and-agent-security.md",
+      "kind": "file",
+      "label": "09-tool-mcp-and-agent-security.md",
+      "source": "Docs/09-tool-mcp-and-agent-security.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/10-agent-workflow-reliability-and-human-oversight.md",
+      "kind": "file",
+      "label": "10-agent-workflow-reliability-and-human-oversight.md",
+      "source": "Docs/10-agent-workflow-reliability-and-human-oversight.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/10-connectors-and-external-integrations.md",
+      "kind": "file",
+      "label": "10-connectors-and-external-integrations.md",
+      "source": "Docs/10-connectors-and-external-integrations.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
+      "kind": "file",
+      "label": "11-ai-governance-red-teaming-and-continuous-improvement.md",
+      "source": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/11-api-ui-and-mcp-experience.md",
+      "kind": "file",
+      "label": "11-api-ui-and-mcp-experience.md",
+      "source": "Docs/11-api-ui-and-mcp-experience.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/12-security-governance-and-audit.md",
+      "kind": "file",
+      "label": "12-security-governance-and-audit.md",
+      "source": "Docs/12-security-governance-and-audit.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/13-persistence-platform-and-operations.md",
+      "kind": "file",
+      "label": "13-persistence-platform-and-operations.md",
+      "source": "Docs/13-persistence-platform-and-operations.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/14-evaluation-and-quality-engineering.md",
+      "kind": "file",
+      "label": "14-evaluation-and-quality-engineering.md",
+      "source": "Docs/14-evaluation-and-quality-engineering.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/15-development-assurance-process.md",
+      "kind": "file",
+      "label": "15-development-assurance-process.md",
+      "source": "Docs/15-development-assurance-process.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/README.md",
+      "kind": "file",
+      "label": "README.md",
+      "source": "Docs/README.md",
+      "category": "canonical-documentation",
+      "authority": "canonical-guidance"
+    },
+    {
+      "id": "file:Docs/deep-research-report.md",
+      "kind": "file",
+      "label": "deep-research-report.md",
+      "source": "Docs/deep-research-report.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/salesforce-change-assurance-production-solution-design (1).md",
+      "kind": "file",
+      "label": "salesforce-change-assurance-production-solution-design (1).md",
+      "source": "Docs/salesforce-change-assurance-production-solution-design (1).md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/salesforce-change-assurance-production-solution-design.md",
+      "kind": "file",
+      "label": "salesforce-change-assurance-production-solution-design.md",
+      "source": "Docs/salesforce-change-assurance-production-solution-design.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/salesforce-playground-app-and-codex-implementation-guide-updated.md",
+      "kind": "file",
+      "label": "salesforce-playground-app-and-codex-implementation-guide-updated.md",
+      "source": "Docs/salesforce-playground-app-and-codex-implementation-guide-updated.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/salesforce-playground-app-and-codex-implementation-guide.md",
+      "kind": "file",
+      "label": "salesforce-playground-app-and-codex-implementation-guide.md",
+      "source": "Docs/salesforce-playground-app-and-codex-implementation-guide.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:README.md",
+      "kind": "file",
+      "label": "README.md",
+      "source": "README.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:apps/web/AGENTS.md",
+      "kind": "file",
+      "label": "AGENTS.md",
+      "source": "apps/web/AGENTS.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:apps/web/CLAUDE.md",
+      "kind": "file",
+      "label": "CLAUDE.md",
+      "source": "apps/web/CLAUDE.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:apps/web/next-env.d.ts",
+      "kind": "file",
+      "label": "next-env.d.ts",
+      "source": "apps/web/next-env.d.ts",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:apps/web/next.config.ts",
+      "kind": "file",
+      "label": "next.config.ts",
+      "source": "apps/web/next.config.ts",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:apps/web/package.json",
+      "kind": "file",
+      "label": "package.json",
+      "source": "apps/web/package.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:apps/web/src/app/layout.tsx",
+      "kind": "file",
+      "label": "layout.tsx",
+      "source": "apps/web/src/app/layout.tsx",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:apps/web/src/app/page.tsx",
+      "kind": "file",
+      "label": "page.tsx",
+      "source": "apps/web/src/app/page.tsx",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:apps/web/src/app/styles.css",
+      "kind": "file",
+      "label": "styles.css",
+      "source": "apps/web/src/app/styles.css",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:apps/web/src/lib/types.ts",
+      "kind": "file",
+      "label": "types.ts",
+      "source": "apps/web/src/lib/types.ts",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:apps/web/tsconfig.json",
+      "kind": "file",
+      "label": "tsconfig.json",
+      "source": "apps/web/tsconfig.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:config/capability-scope.json",
+      "kind": "file",
+      "label": "capability-scope.json",
+      "source": "config/capability-scope.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:config/quality-policy.json",
+      "kind": "file",
+      "label": "quality-policy.json",
+      "source": "config/quality-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:config/reasoning-policy.json",
+      "kind": "file",
+      "label": "reasoning-policy.json",
+      "source": "config/reasoning-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:knowledge/README.md",
+      "kind": "file",
+      "label": "README.md",
+      "source": "knowledge/README.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:migrations/001_assurance_runs.sql",
+      "kind": "file",
+      "label": "001_assurance_runs.sql",
+      "source": "migrations/001_assurance_runs.sql",
+      "category": "persistence",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:package-lock.json",
+      "kind": "file",
+      "label": "package-lock.json",
+      "source": "package-lock.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:package.json",
+      "kind": "file",
+      "label": "package.json",
+      "source": "package.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:packages/browser/package.json",
+      "kind": "file",
+      "label": "package.json",
+      "source": "packages/browser/package.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:packages/browser/playwright.config.ts",
+      "kind": "file",
+      "label": "playwright.config.ts",
+      "source": "packages/browser/playwright.config.ts",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:packages/browser/src/locator-healer.ts",
+      "kind": "file",
+      "label": "locator-healer.ts",
+      "source": "packages/browser/src/locator-healer.ts",
+      "category": "browser-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:packages/browser/tests/dashboard.spec.ts",
+      "kind": "file",
+      "label": "dashboard.spec.ts",
+      "source": "packages/browser/tests/dashboard.spec.ts",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:packages/browser/tests/locator-healer.spec.ts",
+      "kind": "file",
+      "label": "locator-healer.spec.ts",
+      "source": "packages/browser/tests/locator-healer.spec.ts",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:packages/browser/tsconfig.json",
+      "kind": "file",
+      "label": "tsconfig.json",
+      "source": "packages/browser/tsconfig.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:pyproject.toml",
+      "kind": "file",
+      "label": "pyproject.toml",
+      "source": "pyproject.toml",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-initial-genericity-audit.md",
+      "kind": "file",
+      "label": "2026-09-09-initial-genericity-audit.md",
+      "source": "quality/reviews/2026-09-09-initial-genericity-audit.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:scripts/catalog/build_project_index.py",
+      "kind": "file",
+      "label": "build_project_index.py",
+      "source": "scripts/catalog/build_project_index.py",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:scripts/quality/check.ps1",
+      "kind": "file",
+      "label": "check.ps1",
+      "source": "scripts/quality/check.ps1",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:scripts/quality/check_genericity.py",
+      "kind": "file",
+      "label": "check_genericity.py",
+      "source": "scripts/quality/check_genericity.py",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/__init__.py",
+      "kind": "file",
+      "label": "__init__.py",
+      "source": "src/neo_sf_q_intel/__init__.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/analysis.py",
+      "kind": "file",
+      "label": "analysis.py",
+      "source": "src/neo_sf_q_intel/analysis.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/api.py",
+      "kind": "file",
+      "label": "api.py",
+      "source": "src/neo_sf_q_intel/api.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/config.py",
+      "kind": "file",
+      "label": "config.py",
+      "source": "src/neo_sf_q_intel/config.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/domain.py",
+      "kind": "file",
+      "label": "domain.py",
+      "source": "src/neo_sf_q_intel/domain.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/governance.py",
+      "kind": "file",
+      "label": "governance.py",
+      "source": "src/neo_sf_q_intel/governance.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/healing.py",
+      "kind": "file",
+      "label": "healing.py",
+      "source": "src/neo_sf_q_intel/healing.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/mcp_server.py",
+      "kind": "file",
+      "label": "mcp_server.py",
+      "source": "src/neo_sf_q_intel/mcp_server.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/policy.py",
+      "kind": "file",
+      "label": "policy.py",
+      "source": "src/neo_sf_q_intel/policy.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/preflight.py",
+      "kind": "file",
+      "label": "preflight.py",
+      "source": "src/neo_sf_q_intel/preflight.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/providers.py",
+      "kind": "file",
+      "label": "providers.py",
+      "source": "src/neo_sf_q_intel/providers.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/repository.py",
+      "kind": "file",
+      "label": "repository.py",
+      "source": "src/neo_sf_q_intel/repository.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/retrieval.py",
+      "kind": "file",
+      "label": "retrieval.py",
+      "source": "src/neo_sf_q_intel/retrieval.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/salesforce_cli.py",
+      "kind": "file",
+      "label": "salesforce_cli.py",
+      "source": "src/neo_sf_q_intel/salesforce_cli.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/salesforce_source.py",
+      "kind": "file",
+      "label": "salesforce_source.py",
+      "source": "src/neo_sf_q_intel/salesforce_source.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/semantic.py",
+      "kind": "file",
+      "label": "semantic.py",
+      "source": "src/neo_sf_q_intel/semantic.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/service.py",
+      "kind": "file",
+      "label": "service.py",
+      "source": "src/neo_sf_q_intel/service.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/workflow.py",
+      "kind": "file",
+      "label": "workflow.py",
+      "source": "src/neo_sf_q_intel/workflow.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:tests/__init__.py",
+      "kind": "file",
+      "label": "__init__.py",
+      "source": "tests/__init__.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_analysis.py",
+      "kind": "file",
+      "label": "test_analysis.py",
+      "source": "tests/test_analysis.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_api.py",
+      "kind": "file",
+      "label": "test_api.py",
+      "source": "tests/test_api.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_config.py",
+      "kind": "file",
+      "label": "test_config.py",
+      "source": "tests/test_config.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_governance.py",
+      "kind": "file",
+      "label": "test_governance.py",
+      "source": "tests/test_governance.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_mcp_server.py",
+      "kind": "file",
+      "label": "test_mcp_server.py",
+      "source": "tests/test_mcp_server.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_reasoning_policy.py",
+      "kind": "file",
+      "label": "test_reasoning_policy.py",
+      "source": "tests/test_reasoning_policy.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_repository_knowledge.py",
+      "kind": "file",
+      "label": "test_repository_knowledge.py",
+      "source": "tests/test_repository_knowledge.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_salesforce_cli.py",
+      "kind": "file",
+      "label": "test_salesforce_cli.py",
+      "source": "tests/test_salesforce_cli.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_salesforce_source.py",
+      "kind": "file",
+      "label": "test_salesforce_source.py",
+      "source": "tests/test_salesforce_source.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_scenario_independence.py",
+      "kind": "file",
+      "label": "test_scenario_independence.py",
+      "source": "tests/test_scenario_independence.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_semantic.py",
+      "kind": "file",
+      "label": "test_semantic.py",
+      "source": "tests/test_semantic.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_workflow.py",
+      "kind": "file",
+      "label": "test_workflow.py",
+      "source": "tests/test_workflow.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "owner:Change Analyst",
+      "kind": "owner",
+      "label": "Change Analyst",
+      "authority": "policy"
+    },
+    {
+      "id": "owner:Governance Review",
+      "kind": "owner",
+      "label": "Governance Review",
+      "authority": "policy"
+    },
+    {
+      "id": "owner:Orchestrator",
+      "kind": "owner",
+      "label": "Orchestrator",
+      "authority": "policy"
+    },
+    {
+      "id": "owner:Test Intelligence",
+      "kind": "owner",
+      "label": "Test Intelligence",
+      "authority": "policy"
+    },
+    {
+      "id": "owner:UI Healing",
+      "kind": "owner",
+      "label": "UI Healing",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:source.contract-ingestion",
+      "kind": "capability",
+      "label": "source.contract-ingestion",
+      "status": "IMPLEMENTED",
+      "summary": "Version and required capabilities are configuration, not application constants.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:reasoning.graph-impact",
+      "kind": "capability",
+      "label": "reasoning.graph-impact",
+      "status": "FOUNDATION",
+      "summary": "Operates on typed nodes and versioned ontology policy without business-object names; richer relation semantics remain planned.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:reasoning.semantic-retrieval",
+      "kind": "capability",
+      "label": "reasoning.semantic-retrieval",
+      "status": "FOUNDATION",
+      "summary": "Provider-neutral embeddings and standard cosine ranking.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:orchestration.multi-agent",
+      "kind": "capability",
+      "label": "orchestration.multi-agent",
+      "status": "FOUNDATION",
+      "summary": "Typed specialist stages share governed state; deeper model-backed specialist ports remain planned.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:quality.test-selection",
+      "kind": "capability",
+      "label": "quality.test-selection",
+      "status": "FOUNDATION",
+      "summary": "Selects graph-connected test kinds rather than named test cases.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:automation.locator-healing",
+      "kind": "capability",
+      "label": "automation.locator-healing",
+      "status": "FOUNDATION",
+      "summary": "Uses metadata identity, accessibility semantics and ambiguity abstention.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:governance.claim-grounding",
+      "kind": "capability",
+      "label": "governance.claim-grounding",
+      "status": "FOUNDATION",
+      "summary": "Validates evidence identifiers independently of business domain.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:governance.release-decision",
+      "kind": "capability",
+      "label": "governance.release-decision",
+      "status": "FOUNDATION",
+      "summary": "Deterministic policy consumes typed risk and validation state.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:memory.postgresql",
+      "kind": "capability",
+      "label": "memory.postgresql",
+      "status": "FOUNDATION",
+      "summary": "Stores versioned run documents, graph, chunks, audit and checkpoints.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:tools.mcp",
+      "kind": "capability",
+      "label": "tools.mcp",
+      "status": "FOUNDATION",
+      "summary": "Tools delegate to shared services and expose no scenario-specific endpoint.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:runtime.salesforce-live-evidence",
+      "kind": "capability",
+      "label": "runtime.salesforce-live-evidence",
+      "status": "NEXT",
+      "summary": "Read routes come from validated contracts and policy allowlists.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:quality.live-test-execution",
+      "kind": "capability",
+      "label": "quality.live-test-execution",
+      "status": "NEXT",
+      "summary": "Execution consumes selected obligations and configured runners.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:automation.browser-worker",
+      "kind": "capability",
+      "label": "automation.browser-worker",
+      "status": "NEXT",
+      "summary": "Typed worker accepts a generic intent and ephemeral session handoff.",
+      "authority": "policy"
+    }
+  ],
+  "edges": [
+    {
+      "from": "capability:automation.browser-worker",
+      "relation": "implemented_by",
+      "to": "file:packages/browser/src/locator-healer.ts"
+    },
+    {
+      "from": "capability:automation.browser-worker",
+      "relation": "owned_by",
+      "to": "owner:UI Healing"
+    },
+    {
+      "from": "capability:automation.locator-healing",
+      "relation": "implemented_by",
+      "to": "file:packages/browser/src/locator-healer.ts"
+    },
+    {
+      "from": "capability:automation.locator-healing",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/healing.py"
+    },
+    {
+      "from": "capability:automation.locator-healing",
+      "relation": "owned_by",
+      "to": "owner:UI Healing"
+    },
+    {
+      "from": "capability:automation.locator-healing",
+      "relation": "verified_by",
+      "to": "file:packages/browser/tests/locator-healer.spec.ts"
+    },
+    {
+      "from": "capability:governance.claim-grounding",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "capability:governance.claim-grounding",
+      "relation": "owned_by",
+      "to": "owner:Governance Review"
+    },
+    {
+      "from": "capability:governance.claim-grounding",
+      "relation": "verified_by",
+      "to": "file:tests/test_governance.py"
+    },
+    {
+      "from": "capability:governance.claim-grounding",
+      "relation": "verified_by",
+      "to": "file:tests/test_workflow.py"
+    },
+    {
+      "from": "capability:governance.release-decision",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "capability:governance.release-decision",
+      "relation": "owned_by",
+      "to": "owner:Governance Review"
+    },
+    {
+      "from": "capability:governance.release-decision",
+      "relation": "verified_by",
+      "to": "file:tests/test_workflow.py"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "implemented_by",
+      "to": "file:migrations/001_assurance_runs.sql"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "owned_by",
+      "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:orchestration.multi-agent",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "capability:orchestration.multi-agent",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/workflow.py"
+    },
+    {
+      "from": "capability:orchestration.multi-agent",
+      "relation": "owned_by",
+      "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:orchestration.multi-agent",
+      "relation": "verified_by",
+      "to": "file:tests/test_workflow.py"
+    },
+    {
+      "from": "capability:quality.live-test-execution",
+      "relation": "owned_by",
+      "to": "owner:Test Intelligence"
+    },
+    {
+      "from": "capability:quality.test-selection",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/analysis.py"
+    },
+    {
+      "from": "capability:quality.test-selection",
+      "relation": "owned_by",
+      "to": "owner:Test Intelligence"
+    },
+    {
+      "from": "capability:quality.test-selection",
+      "relation": "verified_by",
+      "to": "file:tests/test_analysis.py"
+    },
+    {
+      "from": "capability:quality.test-selection",
+      "relation": "verified_by",
+      "to": "file:tests/test_scenario_independence.py"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "implemented_by",
+      "to": "file:config/reasoning-policy.json"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/analysis.py"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/retrieval.py"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "verified_by",
+      "to": "file:tests/test_analysis.py"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "verified_by",
+      "to": "file:tests/test_reasoning_policy.py"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "verified_by",
+      "to": "file:tests/test_scenario_independence.py"
+    },
+    {
+      "from": "capability:reasoning.semantic-retrieval",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/providers.py"
+    },
+    {
+      "from": "capability:reasoning.semantic-retrieval",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/semantic.py"
+    },
+    {
+      "from": "capability:reasoning.semantic-retrieval",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:reasoning.semantic-retrieval",
+      "relation": "verified_by",
+      "to": "file:tests/test_semantic.py"
+    },
+    {
+      "from": "capability:runtime.salesforce-live-evidence",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/salesforce_cli.py"
+    },
+    {
+      "from": "capability:runtime.salesforce-live-evidence",
+      "relation": "owned_by",
+      "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:source.contract-ingestion",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "capability:source.contract-ingestion",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "capability:source.contract-ingestion",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:source.contract-ingestion",
+      "relation": "verified_by",
+      "to": "file:tests/test_config.py"
+    },
+    {
+      "from": "capability:source.contract-ingestion",
+      "relation": "verified_by",
+      "to": "file:tests/test_salesforce_source.py"
+    },
+    {
+      "from": "capability:tools.mcp",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/mcp_server.py"
+    },
+    {
+      "from": "capability:tools.mcp",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/salesforce_cli.py"
+    },
+    {
+      "from": "capability:tools.mcp",
+      "relation": "owned_by",
+      "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:tools.mcp",
+      "relation": "verified_by",
+      "to": "file:tests/test_mcp_server.py"
+    },
+    {
+      "from": "capability:tools.mcp",
+      "relation": "verified_by",
+      "to": "file:tests/test_salesforce_cli.py"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/00-product-scope.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/01-architecture.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/02-domain-contracts.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/03-data-memory-and-retrieval.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/04-agent-orchestration.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/05-connectors-and-mcp.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/06-ui-automation-and-healing.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/07-governance-and-evaluation.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/08-roadmap-24h.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/09-demo-scenarios.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/15-development-assurance-process.md"
+    },
+    {
+      "from": "file:README.md",
+      "relation": "references",
+      "to": "file:Docs/README.md"
+    },
+    {
+      "from": "file:apps/web/src/app/layout.tsx",
+      "relation": "imports",
+      "to": "file:apps/web/src/app/styles.css"
+    },
+    {
+      "from": "file:packages/browser/tests/locator-healer.spec.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/locator-healer.ts"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/analysis.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/analysis.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/analysis.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/retrieval.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/healing.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/mcp_server.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/mcp_server.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/mcp_server.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_cli.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/mcp_server.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/preflight.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/preflight.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/providers.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/retrieval.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/retrieval.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/salesforce_source.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/semantic.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/semantic.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/providers.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/semantic.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/analysis.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/providers.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/retrieval.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/semantic.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/workflow.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/analysis.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/healing.py"
+    },
+    {
+      "from": "file:tests/test_analysis.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/analysis.py"
+    },
+    {
+      "from": "file:tests/test_analysis.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_analysis.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/retrieval.py"
+    },
+    {
+      "from": "file:tests/test_analysis.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:tests/test_api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/api.py"
+    },
+    {
+      "from": "file:tests/test_api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
+      "from": "file:tests/test_api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_config.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_mcp_server.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_mcp_server.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/mcp_server.py"
+    },
+    {
+      "from": "file:tests/test_mcp_server.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/analysis.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/retrieval.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_salesforce_cli.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_cli.py"
+    },
+    {
+      "from": "file:tests/test_salesforce_source.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:tests/test_scenario_independence.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/analysis.py"
+    },
+    {
+      "from": "file:tests/test_scenario_independence.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_scenario_independence.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/retrieval.py"
+    },
+    {
+      "from": "file:tests/test_scenario_independence.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:tests/test_semantic.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:tests/test_semantic.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/semantic.py"
+    },
+    {
+      "from": "file:tests/test_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
+      "from": "file:tests/test_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:tests/test_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    }
+  ]
+}

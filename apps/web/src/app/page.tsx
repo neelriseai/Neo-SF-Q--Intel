@@ -6,7 +6,7 @@ import type { AssuranceRun, DecisionCode } from "@/lib/types";
 const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 const demoRequirement =
-  "Assess changing the strategic discount policy and the Deal Workbench layout";
+  "Assess changes to an approval policy, permission set, and Lightning record-page layout";
 
 function decisionLabel(code?: DecisionCode) {
   return code?.replaceAll("_", " ") ?? "AWAITING RUN";

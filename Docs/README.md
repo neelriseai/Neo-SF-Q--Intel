@@ -16,6 +16,7 @@ not ingested wholesale.
 8. [Governance and evaluation](07-governance-and-evaluation.md)
 9. [24-hour roadmap](08-roadmap-24h.md)
 10. [Demo scenarios](09-demo-scenarios.md)
+11. [Development assurance process](15-development-assurance-process.md)
 
 ## Authority and exclusions
 

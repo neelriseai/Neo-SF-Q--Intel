@@ -32,9 +32,12 @@ class Settings(BaseSettings):
     azure_openai_embedding_deployment: str | None = None
 
     database_url: SecretStr | None = None
-    salesforce_app_root: Path = Path("../SalesForceAgentApp/strategic-deal-assurance")
-    sf_operator_alias: str = "caip-dev"
-    sf_vp_alias: str = "caip-vp"
+    salesforce_app_root: Path | None = None
+    source_min_contract_version: str = "1.0.0"
+    source_required_capabilities: str = ""
+    source_graph_sha256: str | None = None
+    sf_operator_alias: str | None = None
+    sf_vp_alias: str | None = None
     sf_min_cli_version: str = "2.148.3"
 
     allow_llm: bool = True
@@ -64,6 +67,26 @@ class Settings(BaseSettings):
 
     def resolved_salesforce_root(self, repository_root: Path | None = None) -> Path:
         root = self.salesforce_app_root
+        if root is None:
+            raise ValueError("SALESFORCE_APP_ROOT must identify a configured source project")
         if root.is_absolute():
             return root.resolve()
         return ((repository_root or Path.cwd()) / root).resolve()
+
+    @property
+    def required_capabilities(self) -> tuple[str, ...]:
+        return tuple(
+            capability.strip()
+            for capability in self.source_required_capabilities.split(",")
+            if capability.strip()
+        )
+
+    def require_operator_alias(self) -> str:
+        if not self.sf_operator_alias:
+            raise ValueError("SF_OPERATOR_ALIAS is required for Salesforce inspection")
+        return self.sf_operator_alias
+
+    def require_graph_sha256(self) -> str:
+        if not self.source_graph_sha256:
+            raise ValueError("SOURCE_GRAPH_SHA256 must pin the trusted source graph")
+        return self.source_graph_sha256

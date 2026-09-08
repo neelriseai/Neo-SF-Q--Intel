@@ -9,11 +9,10 @@ from neo_sf_q_intel.domain import (
     AgentActivity,
     AgentStatus,
     AssuranceRun,
-    Claim,
     RunStatus,
     TestSelection,
 )
-from neo_sf_q_intel.governance import assess_run, decide
+from neo_sf_q_intel.governance import assess_run, build_grounded_claims, decide
 from neo_sf_q_intel.healing import propose_safe_healing
 
 
@@ -51,14 +50,18 @@ class AssuranceWorkflow:
 
     def _change_analyst(self, state: WorkflowState) -> WorkflowState:
         run = state["run"].model_copy(deep=True)
-        evidence, impacts, tests = self.analysis.analyze(run.request)
+        evidence, impacts, tests, gaps = self.analysis.analyze(run.request)
         run.evidence = evidence
         run.impacts = impacts
+        run.analysis_gaps = gaps
         run.activities.append(
             AgentActivity(
                 agent="Change Analyst",
                 status=AgentStatus.COMPLETED if evidence else AgentStatus.ABSTAINED,
-                summary=f"Grounded {len(impacts)} impacts in {len(evidence)} evidence items.",
+                summary=(
+                    f"Grounded {len(impacts)} impacts in {len(evidence)} evidence items; "
+                    f"recorded {len(gaps)} analysis gaps."
+                ),
                 evidence_ids=[item.evidence_id for item in evidence[:20]],
             )
         )
@@ -94,15 +97,7 @@ class AssuranceWorkflow:
 
     def _governance_review(self, state: WorkflowState) -> WorkflowState:
         run = state["run"].model_copy(deep=True)
-        run.claims = [
-            Claim(
-                claim_id=f"impact:{index}",
-                text=f"{impact.label} is impacted through {impact.relation}.",
-                evidence_ids=impact.evidence_ids,
-                supported=True,
-            )
-            for index, impact in enumerate(run.impacts, start=1)
-        ]
+        run.claims = build_grounded_claims(run)
         run.governance = assess_run(run)
         run.decision = decide(run)
         run.status = RunStatus.COMPLETED

@@ -1,0 +1,748 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": "Neo SF Q-Intel",
+  "pathBase": "repository-root",
+  "sourceSnapshot": "f9b3647f409860d1d7311871551c08238c877e43169a211274aa1bf2c620d2c1",
+  "generatedOutputs": [
+    "knowledge/application-graph.json",
+    "knowledge/project-index.json"
+  ],
+  "readOrder": [
+    "AGENTS.md",
+    "Docs/README.md",
+    "Docs/00-product-scope.md",
+    "Docs/01-architecture.md",
+    "Docs/02-domain-contracts.md",
+    "Docs/03-data-memory-and-retrieval.md",
+    "Docs/04-agent-orchestration.md",
+    "Docs/05-connectors-and-mcp.md",
+    "Docs/06-ui-automation-and-healing.md",
+    "Docs/07-governance-and-evaluation.md",
+    "Docs/08-roadmap-24h.md",
+    "Docs/09-demo-scenarios.md",
+    "Docs/15-development-assurance-process.md",
+    "config/capability-scope.json"
+  ],
+  "capabilities": [
+    {
+      "id": "source.contract-ingestion",
+      "owner": "Change Analyst",
+      "status": "IMPLEMENTED",
+      "genericity": "Version and required capabilities are configuration, not application constants.",
+      "implementation": [
+        "src/neo_sf_q_intel/salesforce_source.py",
+        "src/neo_sf_q_intel/config.py"
+      ],
+      "verification": [
+        "tests/test_salesforce_source.py",
+        "tests/test_config.py"
+      ],
+      "verificationCases": {
+        "positive": [
+          "tests/test_salesforce_source.py"
+        ],
+        "negative": [
+          "tests/test_salesforce_source.py"
+        ],
+        "failure": [
+          "tests/test_salesforce_source.py"
+        ]
+      }
+    },
+    {
+      "id": "reasoning.graph-impact",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Operates on typed nodes and versioned ontology policy without business-object names; richer relation semantics remain planned.",
+      "implementation": [
+        "src/neo_sf_q_intel/analysis.py",
+        "src/neo_sf_q_intel/retrieval.py",
+        "src/neo_sf_q_intel/policy.py",
+        "config/reasoning-policy.json"
+      ],
+      "verification": [
+        "tests/test_analysis.py",
+        "tests/test_scenario_independence.py",
+        "tests/test_reasoning_policy.py"
+      ]
+    },
+    {
+      "id": "reasoning.semantic-retrieval",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Provider-neutral embeddings and standard cosine ranking.",
+      "implementation": [
+        "src/neo_sf_q_intel/semantic.py",
+        "src/neo_sf_q_intel/providers.py"
+      ],
+      "verification": [
+        "tests/test_semantic.py"
+      ]
+    },
+    {
+      "id": "orchestration.multi-agent",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Typed specialist stages share governed state; deeper model-backed specialist ports remain planned.",
+      "implementation": [
+        "src/neo_sf_q_intel/workflow.py",
+        "src/neo_sf_q_intel/domain.py"
+      ],
+      "verification": [
+        "tests/test_workflow.py"
+      ]
+    },
+    {
+      "id": "quality.test-selection",
+      "owner": "Test Intelligence",
+      "status": "FOUNDATION",
+      "genericity": "Selects graph-connected test kinds rather than named test cases.",
+      "implementation": [
+        "src/neo_sf_q_intel/analysis.py"
+      ],
+      "verification": [
+        "tests/test_analysis.py",
+        "tests/test_scenario_independence.py"
+      ]
+    },
+    {
+      "id": "automation.locator-healing",
+      "owner": "UI Healing",
+      "status": "FOUNDATION",
+      "genericity": "Uses metadata identity, accessibility semantics and ambiguity abstention.",
+      "implementation": [
+        "src/neo_sf_q_intel/healing.py",
+        "packages/browser/src/locator-healer.ts"
+      ],
+      "verification": [
+        "packages/browser/tests/locator-healer.spec.ts"
+      ]
+    },
+    {
+      "id": "governance.claim-grounding",
+      "owner": "Governance Review",
+      "status": "FOUNDATION",
+      "genericity": "Validates evidence identifiers independently of business domain.",
+      "implementation": [
+        "src/neo_sf_q_intel/governance.py"
+      ],
+      "verification": [
+        "tests/test_governance.py",
+        "tests/test_workflow.py"
+      ]
+    },
+    {
+      "id": "governance.release-decision",
+      "owner": "Governance Review",
+      "status": "FOUNDATION",
+      "genericity": "Deterministic policy consumes typed risk and validation state.",
+      "implementation": [
+        "src/neo_sf_q_intel/governance.py"
+      ],
+      "verification": [
+        "tests/test_workflow.py"
+      ]
+    },
+    {
+      "id": "memory.postgresql",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Stores versioned run documents, graph, chunks, audit and checkpoints.",
+      "implementation": [
+        "src/neo_sf_q_intel/repository.py",
+        "src/neo_sf_q_intel/service.py",
+        "migrations/001_assurance_runs.sql"
+      ],
+      "verification": []
+    },
+    {
+      "id": "tools.mcp",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Tools delegate to shared services and expose no scenario-specific endpoint.",
+      "implementation": [
+        "src/neo_sf_q_intel/mcp_server.py",
+        "src/neo_sf_q_intel/salesforce_cli.py"
+      ],
+      "verification": [
+        "tests/test_mcp_server.py",
+        "tests/test_salesforce_cli.py"
+      ]
+    },
+    {
+      "id": "runtime.salesforce-live-evidence",
+      "owner": "Orchestrator",
+      "status": "NEXT",
+      "genericity": "Read routes come from validated contracts and policy allowlists.",
+      "implementation": [
+        "src/neo_sf_q_intel/salesforce_cli.py"
+      ],
+      "verification": []
+    },
+    {
+      "id": "quality.live-test-execution",
+      "owner": "Test Intelligence",
+      "status": "NEXT",
+      "genericity": "Execution consumes selected obligations and configured runners.",
+      "implementation": [],
+      "verification": []
+    },
+    {
+      "id": "automation.browser-worker",
+      "owner": "UI Healing",
+      "status": "NEXT",
+      "genericity": "Typed worker accepts a generic intent and ephemeral session handoff.",
+      "implementation": [
+        "packages/browser/src/locator-healer.ts"
+      ],
+      "verification": []
+    }
+  ],
+  "files": [
+    {
+      "path": ".env.example",
+      "category": "project",
+      "sha256": "f44855b849d3406e57ba055dc8ffc3e16b3f76d8ff8b24485f6fb62c6752c2a0"
+    },
+    {
+      "path": ".gitattributes",
+      "category": "project",
+      "sha256": "8d75fbed0329d55480242ea79c61cbdd3da312c700298bfba9572b81ec325cc6"
+    },
+    {
+      "path": ".githooks/pre-commit",
+      "category": "project",
+      "sha256": "e67f0bc326e60b738c0ab63e2cd1168216d4435474c35dfdf41b8d09da547485"
+    },
+    {
+      "path": ".gitignore",
+      "category": "project",
+      "sha256": "7cb38caa7298b5ea4fb6f2f3e42443b1704cf493b854cf32ce5e26c41f8a23c8"
+    },
+    {
+      "path": "AGENTS.md",
+      "category": "project",
+      "sha256": "600eb86732477367b50ea08a3258860999b6c81ef2173f1ccf6a1f126430cbe6"
+    },
+    {
+      "path": "Docs/00-agentic-ai-assurance-retrofit-master.md",
+      "category": "reference-documentation",
+      "sha256": "13bea871419f215e66e3824aac62298f14eb6ba40cb6a75a981403c0c1667c2a"
+    },
+    {
+      "path": "Docs/00-integration-layer-master.md",
+      "category": "reference-documentation",
+      "sha256": "fc5d43c53695d1e958b435a91ba53c6085c8c11697624c6e58b11bdda692272e"
+    },
+    {
+      "path": "Docs/00-product-scope.md",
+      "category": "canonical-documentation",
+      "sha256": "4c912e839f2d8bcfc39839a6d5c2ae54a4c9018f910d94cb5e7d20916a3dc317"
+    },
+    {
+      "path": "Docs/01-architecture-conformance-and-deviation-audit.md",
+      "category": "reference-documentation",
+      "sha256": "12e1d4f6dfc8457ee510ba43fecaf10a84ab56827f49fb8d4f8ec243a844f30b"
+    },
+    {
+      "path": "Docs/01-architecture.md",
+      "category": "canonical-documentation",
+      "sha256": "73ccedb56468fa96f09dcb310ccc03ed32289f66d599f09835cb353f7072cbdd"
+    },
+    {
+      "path": "Docs/01-contracts-and-domain-model.md",
+      "category": "reference-documentation",
+      "sha256": "9ac9cf11ea8cb1d1029f9eb3c4b9787a7a16567e621bcf73f496df2d2f34db7c"
+    },
+    {
+      "path": "Docs/02-agentic-observability-and-traceability.md",
+      "category": "reference-documentation",
+      "sha256": "1dbf1a1026c1c322c36f40086b2f13a877f4155e97484c1d3e524b40eee6f66d"
+    },
+    {
+      "path": "Docs/02-domain-contracts.md",
+      "category": "canonical-documentation",
+      "sha256": "764c5efcba770add67993cab4e71a0fa1796207cb98b63fce9d4722d6f4c5ec5"
+    },
+    {
+      "path": "Docs/02-source-ingestion-and-change-detection.md",
+      "category": "reference-documentation",
+      "sha256": "b03de54cb0242508ff520da17c3f4163cdeea44467ae0ef4b3ae45e71d160a08"
+    },
+    {
+      "path": "Docs/03-data-memory-and-retrieval.md",
+      "category": "canonical-documentation",
+      "sha256": "455b0caf2fdf51aa4015373bbe56da2c0cad9f1cd4c49c66d7c161d7308f62b6"
+    },
+    {
+      "path": "Docs/03-evaluation-and-golden-dataset-engineering.md",
+      "category": "reference-documentation",
+      "sha256": "da57d6fe70cc1fe64062b6b4d4a0d3d9a621e35f8457154233292d52314f32e4"
+    },
+    {
+      "path": "Docs/03-evidence-graph-and-memory.md",
+      "category": "reference-documentation",
+      "sha256": "087d659470a3ba15334a748c24670ad540e8fb98c697975c1f1930914e93ad81"
+    },
+    {
+      "path": "Docs/04-agent-orchestration.md",
+      "category": "canonical-documentation",
+      "sha256": "e405daeb3a6c62e69444a49273bc14deb2450324bdac63e9a75f5f9e59a236ec"
+    },
+    {
+      "path": "Docs/04-guardrails-and-policy-enforcement.md",
+      "category": "reference-documentation",
+      "sha256": "f77cdd47102bdbaa23db28e75ab380aef95483783c23ab85e7ee169c25a6a0a2"
+    },
+    {
+      "path": "Docs/04-impact-and-security-intelligence.md",
+      "category": "reference-documentation",
+      "sha256": "5d1625428ba540f574518ada72621e580cc4174734dabec4dec8e8c01b3b4855"
+    },
+    {
+      "path": "Docs/05-connectors-and-mcp.md",
+      "category": "canonical-documentation",
+      "sha256": "014689f34dd9ab3022b8b070fbe4216d54eb683b5853951f3d47409b1e76968e"
+    },
+    {
+      "path": "Docs/05-hallucination-grounding-and-claim-verification.md",
+      "category": "reference-documentation",
+      "sha256": "b95ddd1e0d4bc6eaf13e0ed7e5be6e583788b2813aa52c7f44001ab9398c486c"
+    },
+    {
+      "path": "Docs/05-risk-coverage-and-test-selection.md",
+      "category": "reference-documentation",
+      "sha256": "4b67710c998a503cc8f2f89d742fa2194d18bb1b8ffe59070fa9ba77ceb54247"
+    },
+    {
+      "path": "Docs/06-rag-evidence-graph-and-memory-quality.md",
+      "category": "reference-documentation",
+      "sha256": "cb3c27bbaa2e2d84068cca994d2aaa965ca90178a04a1347bcbe5644db41c127"
+    },
+    {
+      "path": "Docs/06-test-automation-engineering.md",
+      "category": "reference-documentation",
+      "sha256": "e378d582460d1aac412ea6010560760558b18f9b73f0d84b8a3b429e73983943"
+    },
+    {
+      "path": "Docs/06-ui-automation-and-healing.md",
+      "category": "canonical-documentation",
+      "sha256": "a0d850465d30c54a5fe2324160ad7223a77dfe97f702a4254e23a07dc22f9330"
+    },
+    {
+      "path": "Docs/07-fine-tuning-decision-and-model-customization.md",
+      "category": "reference-documentation",
+      "sha256": "a605e31c73b229236b6d847b06cefa9cf29bc4b9fa1a94fd611067c8bd0ff3bf"
+    },
+    {
+      "path": "Docs/07-governance-and-evaluation.md",
+      "category": "canonical-documentation",
+      "sha256": "db037b00f9389f772ba1f7d56fa970fff1ec173c96963db82396be4912f37087"
+    },
+    {
+      "path": "Docs/07-test-execution-and-rca.md",
+      "category": "reference-documentation",
+      "sha256": "a9a568eee7a4377f0694a7ba3fbc48c847fa7107e30841692fe41f6fc5494386"
+    },
+    {
+      "path": "Docs/08-prompt-model-context-and-version-lifecycle.md",
+      "category": "reference-documentation",
+      "sha256": "9c8fec0d64cfd7353371c34bb3b1b749beb12562d7594d7542b9c60440ce720d"
+    },
+    {
+      "path": "Docs/08-release-assurance.md",
+      "category": "reference-documentation",
+      "sha256": "744eca6f7d483885344ceba3729b71d77c1dd0774106923f2974530d9a448017"
+    },
+    {
+      "path": "Docs/08-roadmap-24h.md",
+      "category": "canonical-documentation",
+      "sha256": "904c5bea9c7b2780bac294df1ca7c0c6d34f7b391e43860c4dee2c5823b6ac16"
+    },
+    {
+      "path": "Docs/09-agent-llm-and-orchestration.md",
+      "category": "reference-documentation",
+      "sha256": "caccb55104a2b3b85e0ad45d88117cffe0d0064753576476c03547929cc84876"
+    },
+    {
+      "path": "Docs/09-demo-scenarios.md",
+      "category": "canonical-documentation",
+      "sha256": "2e86039ae96851bc5f64c1b466b69c93dc8821033958f69969916013dba7143c"
+    },
+    {
+      "path": "Docs/09-tool-mcp-and-agent-security.md",
+      "category": "reference-documentation",
+      "sha256": "31b036be9682119cdf2c21f667d7529601e628bad00fb19a0339aea965818dcc"
+    },
+    {
+      "path": "Docs/10-agent-workflow-reliability-and-human-oversight.md",
+      "category": "reference-documentation",
+      "sha256": "7b3ebbbe233ab22ad2b2b6e465dc2a2112fa7bd559d623a4b41c971c3ad2241e"
+    },
+    {
+      "path": "Docs/10-connectors-and-external-integrations.md",
+      "category": "reference-documentation",
+      "sha256": "8342e0c5b1b36bfcd2c803bb505198c8c971e65aadafec60a15559e45db68dcf"
+    },
+    {
+      "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
+      "category": "reference-documentation",
+      "sha256": "c8b785035cc15329a27604eb3e31cdbe60136e4fa05420f22f580a7ecf2741c6"
+    },
+    {
+      "path": "Docs/11-api-ui-and-mcp-experience.md",
+      "category": "reference-documentation",
+      "sha256": "ac5e07b901f8f91bba09431d2d03b281f0266f67869942b32eebc1af497b3ed4"
+    },
+    {
+      "path": "Docs/12-security-governance-and-audit.md",
+      "category": "reference-documentation",
+      "sha256": "5ddb95a107bfcef5b85824040794873cfe36a33a88ae70f5f60e982b03fc4c34"
+    },
+    {
+      "path": "Docs/13-persistence-platform-and-operations.md",
+      "category": "reference-documentation",
+      "sha256": "5fb9c0d7e491099b5c0f7727c46033f67f574eb03e7ebd55903198ef7f3bdf85"
+    },
+    {
+      "path": "Docs/14-evaluation-and-quality-engineering.md",
+      "category": "reference-documentation",
+      "sha256": "371a6984550f39843c8283b4c597f59b37f391ed4253b972e47af7946a9c04d8"
+    },
+    {
+      "path": "Docs/15-development-assurance-process.md",
+      "category": "canonical-documentation",
+      "sha256": "e651619cc7281486147737b0e28d63533f7ff16e6fdcba10cc34f80ce20ccf99"
+    },
+    {
+      "path": "Docs/README.md",
+      "category": "canonical-documentation",
+      "sha256": "23e1389326369578f3bc3d450177762a32d02265cf898b7a77fb26908cbd95aa"
+    },
+    {
+      "path": "Docs/deep-research-report.md",
+      "category": "reference-documentation",
+      "sha256": "cf76b7de18b579731888c528c8e414dbbae8cbf8da7564cc2e61c9181fe63f9e"
+    },
+    {
+      "path": "Docs/salesforce-change-assurance-production-solution-design (1).md",
+      "category": "reference-documentation",
+      "sha256": "239b7d256ace6d3a775d028e8c56a66dee32c25b235255873f1f96446df317e9"
+    },
+    {
+      "path": "Docs/salesforce-change-assurance-production-solution-design.md",
+      "category": "reference-documentation",
+      "sha256": "9ec54d78ad1049fb53e181a79a80a5cca7f8e5074ecc1bc7d21d23460de70000"
+    },
+    {
+      "path": "Docs/salesforce-playground-app-and-codex-implementation-guide-updated.md",
+      "category": "reference-documentation",
+      "sha256": "9d7f864b3eb61935daa4ced9aba688a2cc147fe248b822f8d4e3353bffe82627"
+    },
+    {
+      "path": "Docs/salesforce-playground-app-and-codex-implementation-guide.md",
+      "category": "reference-documentation",
+      "sha256": "8ad27d8baf4a74bd6db3c22212a162db6d9f3dafc07c24113303ecad2604156b"
+    },
+    {
+      "path": "README.md",
+      "category": "project",
+      "sha256": "11f65061c7b8ae54fcf97717b8bbf52ab260551ffe3bccc55d01fdac47273943"
+    },
+    {
+      "path": "apps/web/AGENTS.md",
+      "category": "project",
+      "sha256": "63f2c50380ed6303237cce215ce27af1d620d094c215e28d1b1538a3c070e3bb"
+    },
+    {
+      "path": "apps/web/CLAUDE.md",
+      "category": "project",
+      "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
+    },
+    {
+      "path": "apps/web/next-env.d.ts",
+      "category": "project",
+      "sha256": "0f70629890b72a0a82e91972cc032c04b658b26c265373cb711cf576bfbf8fcc"
+    },
+    {
+      "path": "apps/web/next.config.ts",
+      "category": "project",
+      "sha256": "c5efcdb15ee66db5a3a749082d8a2d68abdd0555ce251baee0e3fd920b4c55b5"
+    },
+    {
+      "path": "apps/web/package.json",
+      "category": "project",
+      "sha256": "e5ed1265283d9295199c26e683757747d095a7b6eae5e75f91b9ee7ec74fd875"
+    },
+    {
+      "path": "apps/web/src/app/layout.tsx",
+      "category": "web-runtime",
+      "sha256": "6405f319baf361483a10bf0d871d800650353aeef7ded8eb3ba302f2889b32b8"
+    },
+    {
+      "path": "apps/web/src/app/page.tsx",
+      "category": "web-runtime",
+      "sha256": "401cedb15d959d51c8aab23daba5ebe4418ac3cbb7ee19261a4e271b09b0bb4e"
+    },
+    {
+      "path": "apps/web/src/app/styles.css",
+      "category": "web-runtime",
+      "sha256": "038a0b6aedebf96dee0c6b913f6a32bd9185ff57c6e92093b29988317d08fad9"
+    },
+    {
+      "path": "apps/web/src/lib/types.ts",
+      "category": "web-runtime",
+      "sha256": "35b70400d236547a155eaacba69bcbbed1c483e37b1da980d40c938bea896a07"
+    },
+    {
+      "path": "apps/web/tsconfig.json",
+      "category": "project",
+      "sha256": "2b3ac9eae37da08f007642ea5330075af4438c95d6a35cc5e3a31cd7b1b441c9"
+    },
+    {
+      "path": "config/capability-scope.json",
+      "category": "policy",
+      "sha256": "906880f567b739d00d0747abe3e9156d1d30a127fc36db4aaad0223b80665050"
+    },
+    {
+      "path": "config/quality-policy.json",
+      "category": "policy",
+      "sha256": "c006fb55ab9329f6417260f02c7b1512ca0d589cb5625b049ccc131dc66863ec"
+    },
+    {
+      "path": "config/reasoning-policy.json",
+      "category": "policy",
+      "sha256": "d4f7b07175ca5c13e9eca4836f3762960e04ab2df26eae1def5f0c42bcf931d1"
+    },
+    {
+      "path": "knowledge/README.md",
+      "category": "project",
+      "sha256": "47368f088e5c5117982e825d1518eeb42ac03505cb0354bb448528e1db36c322"
+    },
+    {
+      "path": "migrations/001_assurance_runs.sql",
+      "category": "persistence",
+      "sha256": "564ee8de213b436d83332e906cd26e7e5b7fa2c4aab3112b74ab802b1b848757"
+    },
+    {
+      "path": "package-lock.json",
+      "category": "project",
+      "sha256": "dd4f269d02ab09a4258c0bacdd9256d8a9700272d8e53b5a8790dcabc98f07be"
+    },
+    {
+      "path": "package.json",
+      "category": "project",
+      "sha256": "e956f41a478b0b5697ca7992d1b69be88dba0e0155f1abb5caa22f1cdc4cbb5c"
+    },
+    {
+      "path": "packages/browser/package.json",
+      "category": "project",
+      "sha256": "1b96e05a8d8ad21681c68a97ebc4cbf9c3322de45a697b8c2621c548741ceed8"
+    },
+    {
+      "path": "packages/browser/playwright.config.ts",
+      "category": "project",
+      "sha256": "c1ad3e213d87cbdebbf1a6adb304ad75b2e4d22b943ceb1fbf980b570af42538"
+    },
+    {
+      "path": "packages/browser/src/locator-healer.ts",
+      "category": "browser-runtime",
+      "sha256": "b0620239072e6c100c318d74bef17c7d5368c27b19425988d55f26a65422aa74"
+    },
+    {
+      "path": "packages/browser/tests/dashboard.spec.ts",
+      "category": "test",
+      "sha256": "0b8ff9ae70b713ab77526a5d1f1ade8f52c8648ee13567504c85c5a26e809727"
+    },
+    {
+      "path": "packages/browser/tests/locator-healer.spec.ts",
+      "category": "test",
+      "sha256": "e135be5740a3a5a92552585d2668bc81bb9d374d4dcffff7c9dc8a1496fcc8cd"
+    },
+    {
+      "path": "packages/browser/tsconfig.json",
+      "category": "project",
+      "sha256": "b6bb7fb4ec1dd1da107e008eca219fd8b0f455e560fa27178f8088a5e4168682"
+    },
+    {
+      "path": "pyproject.toml",
+      "category": "project",
+      "sha256": "d4eb321ee74a36c188f86db2303fcc4fa653b1dee356409cc8f68cbec9a4692b"
+    },
+    {
+      "path": "quality/reviews/2026-09-09-initial-genericity-audit.md",
+      "category": "project",
+      "sha256": "19fed3485e4e8bc60e9ef115ea595f4c08e61ff702653c5f7c239131a111cc3f"
+    },
+    {
+      "path": "scripts/catalog/build_project_index.py",
+      "category": "project",
+      "sha256": "eb6b424ecf54d413dfef067c620a2a78e837c0cc3c8c736640a877c74d43a37b"
+    },
+    {
+      "path": "scripts/quality/check.ps1",
+      "category": "project",
+      "sha256": "ce55498efc79203d8cb50e9d1844faed36fb738d7cd91617c021326a132189a4"
+    },
+    {
+      "path": "scripts/quality/check_genericity.py",
+      "category": "project",
+      "sha256": "8ebe6c4c220e368250c3874576bfb733349a4d83dd5925c914e53ba1ef8d7694"
+    },
+    {
+      "path": "src/neo_sf_q_intel/__init__.py",
+      "category": "python-runtime",
+      "sha256": "67ee71348aa2e217bd3878b1129b294580449b94d9984bae2c0baa8385cb79df"
+    },
+    {
+      "path": "src/neo_sf_q_intel/analysis.py",
+      "category": "python-runtime",
+      "sha256": "81e941f45f2f10b617db50185289d379700218db0264130bd5fd2acaee6e83ac"
+    },
+    {
+      "path": "src/neo_sf_q_intel/api.py",
+      "category": "python-runtime",
+      "sha256": "7d5a3a9ffe1501a61d831be2fcd48b2fe749aca546085780d36841444cf93c3a"
+    },
+    {
+      "path": "src/neo_sf_q_intel/config.py",
+      "category": "python-runtime",
+      "sha256": "21c96faa626ad311424ba8aa1cc86f9d931a1066a8aea14ac4e0a02c8c139c6d"
+    },
+    {
+      "path": "src/neo_sf_q_intel/domain.py",
+      "category": "python-runtime",
+      "sha256": "35459678a1acb94aa759eea2a9182fe64a1d79bdbc5d17b7185d6e1bf8ed27e1"
+    },
+    {
+      "path": "src/neo_sf_q_intel/governance.py",
+      "category": "python-runtime",
+      "sha256": "a0ee011407bb46f95ae778d46c40c9522c053dcec7160467e6de93270f2bc5d7"
+    },
+    {
+      "path": "src/neo_sf_q_intel/healing.py",
+      "category": "python-runtime",
+      "sha256": "a049b800f4321d2478ae0ecdb6b7ffd952107f5422a76cdfb3ad75b5615fbbb3"
+    },
+    {
+      "path": "src/neo_sf_q_intel/mcp_server.py",
+      "category": "python-runtime",
+      "sha256": "a0e7a2fc03ef3e905c828604ffe1dfceeb5fc3da8b69fc297002e7160b0e789e"
+    },
+    {
+      "path": "src/neo_sf_q_intel/policy.py",
+      "category": "python-runtime",
+      "sha256": "cda5f83e5a7e7a4b12e0bfd39fbf7c39fec634602282e220d436e3ab52f92ab2"
+    },
+    {
+      "path": "src/neo_sf_q_intel/preflight.py",
+      "category": "python-runtime",
+      "sha256": "4b59f61868348375eb43350ca48c2dbfe3ed501a558acd71396149a4d2fbb311"
+    },
+    {
+      "path": "src/neo_sf_q_intel/providers.py",
+      "category": "python-runtime",
+      "sha256": "c38b2848ceabdbae2fb2d1ba5beca1ecc7cb327b0bc268193558170069af4c1d"
+    },
+    {
+      "path": "src/neo_sf_q_intel/repository.py",
+      "category": "python-runtime",
+      "sha256": "9dd8f5798dc629535e3ebb68fea253f2bf14303e154df7c769c6568bd4ac4a10"
+    },
+    {
+      "path": "src/neo_sf_q_intel/retrieval.py",
+      "category": "python-runtime",
+      "sha256": "90b89e274aaee7510fc28ba2756f9265272130824da708b3fb5703655ed0dd54"
+    },
+    {
+      "path": "src/neo_sf_q_intel/salesforce_cli.py",
+      "category": "python-runtime",
+      "sha256": "92230beb664e69da6c7bf86d7327e091092fdf91e7bc46d3e1f8982875aa72cb"
+    },
+    {
+      "path": "src/neo_sf_q_intel/salesforce_source.py",
+      "category": "python-runtime",
+      "sha256": "b501008c65dec0b8b67368fadf06644a89718f2cc8a0b4ada1a5e4fb5f2eacd9"
+    },
+    {
+      "path": "src/neo_sf_q_intel/semantic.py",
+      "category": "python-runtime",
+      "sha256": "b25f09ccd43e35dfcd07ac5b584c2fdd7dd3e5dbf0d0f29b7e333f9196103efa"
+    },
+    {
+      "path": "src/neo_sf_q_intel/service.py",
+      "category": "python-runtime",
+      "sha256": "dbbf62df0ca4fbb426fc5b89105ad971864c79db459a895bd62aba7b75403486"
+    },
+    {
+      "path": "src/neo_sf_q_intel/workflow.py",
+      "category": "python-runtime",
+      "sha256": "9fd2d1c8730ab257de97b88f8366b8b389e201199178447fa67e66c76ae62c12"
+    },
+    {
+      "path": "tests/__init__.py",
+      "category": "test",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/test_analysis.py",
+      "category": "test",
+      "sha256": "5988dc60d807ed166d0d647fcfa05bd307d3921d7e936e70d1a7c995082d5ba7"
+    },
+    {
+      "path": "tests/test_api.py",
+      "category": "test",
+      "sha256": "cdafcc8131917f6230b6083809bf9bc6528e7ef205420c70ad3e1adf69485b4d"
+    },
+    {
+      "path": "tests/test_config.py",
+      "category": "test",
+      "sha256": "512c26ce38156d2c30f7cedc0a8c53e4de36151f8799f3a528917e3a295ee9f2"
+    },
+    {
+      "path": "tests/test_governance.py",
+      "category": "test",
+      "sha256": "c61a8d268e2d0edfb3e473e4f2c0d09b885e701c713100364f1ce2a3a5815b21"
+    },
+    {
+      "path": "tests/test_mcp_server.py",
+      "category": "test",
+      "sha256": "553312073aa226739b7a966513c65340f4170918d62f063f61400dd048a0843f"
+    },
+    {
+      "path": "tests/test_reasoning_policy.py",
+      "category": "test",
+      "sha256": "5cffce1fb04302b37a505cbc34ca08e96f414b239f7ca8a1de8e0e1d135215a5"
+    },
+    {
+      "path": "tests/test_repository_knowledge.py",
+      "category": "test",
+      "sha256": "2504001df6a11dcead6934b1555dff4a38cc1b4a458d8e503644fdbca12a3f24"
+    },
+    {
+      "path": "tests/test_salesforce_cli.py",
+      "category": "test",
+      "sha256": "6dcbacc382190e6dd2f7340a82a17e093b9c3b09b9294ce3d1c5ffc64b96077c"
+    },
+    {
+      "path": "tests/test_salesforce_source.py",
+      "category": "test",
+      "sha256": "5e3c0e18351a3053b708d63726568032c264b75b7c98d53dcd774b60614553db"
+    },
+    {
+      "path": "tests/test_scenario_independence.py",
+      "category": "test",
+      "sha256": "35e126d0df37bbf6cf29f27d30703acc9089b93de9fdb85741ed33744da2160c"
+    },
+    {
+      "path": "tests/test_semantic.py",
+      "category": "test",
+      "sha256": "74717baf057b7681e70085c267c1880e84ed0adba2e71757db3e99a843522b6d"
+    },
+    {
+      "path": "tests/test_workflow.py",
+      "category": "test",
+      "sha256": "78cd62fcfacd91e20fd9b75b28a1fb19a9a28541eb7ebb2b1ad90dae88c9eb1d"
+    }
+  ]
+}

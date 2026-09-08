@@ -29,9 +29,25 @@ def test_org_status_returns_allowlisted_fields_and_never_auth_material() -> None
     assert "do-not-return" not in json.dumps(result)
 
 
-def test_policy_request_rejects_non_record_identifier_before_cli_call() -> None:
+def test_rest_get_rejects_external_or_unscoped_routes_before_cli_call() -> None:
     def should_not_run(*args, **kwargs):  # noqa: ANN002, ANN003
         raise AssertionError("runner should not execute")
 
-    with pytest.raises(ValueError, match="record ID"):
-        SalesforceCLI("caip-dev", runner=should_not_run).get_policy("not/an/id")
+    with pytest.raises(ValueError, match="relative Salesforce"):
+        SalesforceCLI("test-alias", runner=should_not_run).rest_get(
+            "https://example.test/services/data/v1"
+        )
+
+
+def test_rest_get_accepts_generic_relative_data_route() -> None:
+    captured = []
+
+    def runner(*args, **kwargs):  # noqa: ANN002, ANN003
+        captured.append(args[0])
+        return subprocess.CompletedProcess(args[0], 0, '{"status": 0, "result": {}}', "")
+
+    SalesforceCLI("test-alias", runner=runner).rest_get(
+        "/services/data/v99.0/sobjects/Example__c/describe"
+    )
+
+    assert "/services/data/v99.0/sobjects/Example__c/describe" in captured[0]

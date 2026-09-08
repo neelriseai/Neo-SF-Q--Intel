@@ -47,6 +47,23 @@ def _minimum_version(check: Check, minimum: tuple[int, ...]) -> Check:
     )
 
 
+def _hook_check(repository_root: Path) -> Check:
+    completed = subprocess.run(
+        ["git", "config", "--get", "core.hooksPath"],
+        cwd=repository_root,
+        check=False,
+        capture_output=True,
+        text=True,
+        shell=False,
+    )
+    configured = completed.stdout.strip().replace("\\", "/")
+    return Check(
+        "review-hook",
+        completed.returncode == 0 and configured == ".githooks",
+        configured or "not configured; run: git config core.hooksPath .githooks",
+    )
+
+
 def collect_checks(settings: Settings, repository_root: Path) -> list[Check]:
     checks = [
         Check(
@@ -59,11 +76,17 @@ def collect_checks(settings: Settings, repository_root: Path) -> list[Check]:
             _tool_check("sf", ["--version"]),
             tuple(int(part) for part in settings.sf_min_cli_version.split(".")),
         ),
+        _hook_check(repository_root),
     ]
     try:
-        source = load_salesforce_source(settings.resolved_salesforce_root(repository_root))
+        source = load_salesforce_source(
+            settings.resolved_salesforce_root(repository_root),
+            expected_graph_sha256=settings.require_graph_sha256(),
+            minimum_contract_version=settings.source_min_contract_version,
+            required_capabilities=settings.required_capabilities,
+        )
         checks.append(Check("salesforce-source", True, source.snapshot_id))
-    except SourceContractError as exc:
+    except (SourceContractError, ValueError) as exc:
         checks.append(Check("salesforce-source", False, str(exc)))
     checks.append(
         Check(

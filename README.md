@@ -10,6 +10,9 @@ The authoritative Salesforce system-under-test remains the sibling `SalesForceAg
 - `AI_PROVIDER=azure_openai`: org-machine execution with Azure OpenAI deployments.
 
 Both profiles use the same `ReasoningModel` and `EmbeddingModel` ports. Provider secrets are environment-only.
+`SOURCE_GRAPH_SHA256` is a non-secret trust anchor: update it only after independently reviewing
+and regenerating the configured source graph. A mismatch prevents its nodes from becoming
+confirmed evidence.
 
 ## Repository map
 
@@ -47,3 +50,22 @@ npm run dev
 
 The API uses PostgreSQL and durable LangGraph checkpoints when `DATABASE_URL` is configured.
 Without it, the health endpoint reports `in-memory-demo`; that mode is for local UI work only.
+
+## Genericity and architecture gates
+
+The platform core is checked for scenario-specific project names, object/field identifiers, org
+aliases, REST routes, absolute paths and forbidden layer imports. Capability maturity is tracked
+in `config/capability-scope.json`; incomplete layers stay `FOUNDATION` or `NEXT` rather than being
+presented as finished. Node roles, severities, traversable relations and result bounds live in
+the reviewed, versioned `config/reasoning-policy.json`, not in business-scenario code.
+
+```powershell
+python scripts/catalog/build_project_index.py
+.\scripts\quality\check.ps1 -Full
+git config core.hooksPath .githooks
+```
+
+The generated `knowledge/project-index.json` is the fast context entry point. It contains the
+canonical reading order, content hashes and capability inventory. `knowledge/application-graph.json`
+contains deterministic local import/reference edges. Run the generator after material changes;
+the hook refuses stale knowledge.

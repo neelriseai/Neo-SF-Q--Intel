@@ -29,3 +29,13 @@ def test_relative_salesforce_root_is_resolved_from_repository() -> None:
     settings = Settings(allow_llm=False, salesforce_app_root=Path("../app"))
     expected = Path("workspace/app").resolve()
     assert settings.resolved_salesforce_root(Path("workspace/agent")) == expected
+
+
+def test_source_project_must_be_explicitly_configured() -> None:
+    with pytest.raises(ValueError, match="SALESFORCE_APP_ROOT"):
+        Settings(allow_llm=False).resolved_salesforce_root()
+
+
+def test_source_graph_digest_must_be_explicitly_configured() -> None:
+    with pytest.raises(ValueError, match="SOURCE_GRAPH_SHA256"):
+        Settings(allow_llm=False).require_graph_sha256()

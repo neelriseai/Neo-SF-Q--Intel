@@ -31,3 +31,35 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
 - PostgreSQL owns durable run/evidence state; chat history is not product memory.
 - Add unit and contract tests for every capability and a failure-path test for every tool.
 - Run formatting, type, unit and integration checks before commits.
+
+## Genericity and scope protection
+
+- Runtime code must not contain project names, Salesforce object/field names, org aliases,
+  record IDs, or application-specific REST routes. Put examples in tests/docs and selected
+  source-profile values in environment configuration.
+- A capability is `IMPLEMENTED` only when its domain behavior, adapter, positive case,
+  negative case and failure path exist. Use `FOUNDATION` for a real but incomplete vertical
+  slice and `NEXT` for planned work; never let the dashboard imply a stronger status.
+- Preserve the capability IDs in `config/capability-scope.json`. A design change may alter
+  implementation, but silently deleting or narrowing an agreed capability is not allowed.
+- Vague input must abstain. Renaming business entities or adding disconnected graph nodes must
+  not change control flow or decision class.
+
+## Fast context and knowledge maintenance
+
+- Read `knowledge/project-index.json` and `knowledge/application-graph.json` before scanning
+  broad documentation. Follow the index `readOrder` for authoritative context.
+- After adding, removing, moving or materially changing code, policy or canonical docs, run
+  `python scripts/catalog/build_project_index.py`. Before commit, `--check` must pass.
+- Generated graph edges are discovery aids, not authority or permission.
+
+## Independent review lane
+
+- For every coherent capability or design slice, start one read-only reviewer sub-agent when
+  available. The developer continues independent work while it checks scenario coupling,
+  weak/thin layers, scope erosion, evidence/governance gaps and missing failure tests.
+- Send the reviewer a concise diff/design summary at the next natural boundary rather than
+  blocking each file edit. Resolve all P0/P1 findings before commit or record the owner/status
+  in `quality/reviews/` and keep the capability below `IMPLEMENTED`.
+- When sub-agents are unavailable, run `scripts/quality/check.ps1 -Full` and apply the checklist
+  in `Docs/15-development-assurance-process.md` as the fallback independent review.

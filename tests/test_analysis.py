@@ -47,10 +47,15 @@ def source() -> SalesforceSourceSnapshot:
 
 def test_generic_change_analysis_traverses_graph_and_selects_tests() -> None:
     service = ChangeIntelligenceService(EvidenceRetriever(source()))
-    evidence, impacts, tests = service.analyze(
+    evidence, impacts, tests, gaps = service.analyze(
         ChangeRequest(requirement="Change Opportunity Discount policy")
     )
-    assert {item.entity_id for item in impacts} >= {"flow:Approval", "test:Policy"}
+    assert {item.entity_id for item in impacts} >= {
+        "field:Opportunity.Discount__c",
+        "flow:Approval",
+    }
+    assert "test:Policy" not in {item.entity_id for item in impacts}
     assert [item.test_id for item in tests] == ["test:Policy"]
     assert all(item.evidence_ids for item in impacts)
     assert len(evidence) == 3
+    assert not gaps

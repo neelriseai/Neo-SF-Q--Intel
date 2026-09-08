@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "1.0.0",
+  "productInvariant": "Reusable Salesforce change assurance; the first source application is evidence, not runtime business logic.",
+  "capabilities": [
+    {
+      "id": "source.contract-ingestion",
+      "owner": "Change Analyst",
+      "status": "IMPLEMENTED",
+      "genericity": "Version and required capabilities are configuration, not application constants.",
+      "implementation": ["src/neo_sf_q_intel/salesforce_source.py", "src/neo_sf_q_intel/config.py"],
+      "verification": ["tests/test_salesforce_source.py", "tests/test_config.py"],
+      "verificationCases": {
+        "positive": ["tests/test_salesforce_source.py"],
+        "negative": ["tests/test_salesforce_source.py"],
+        "failure": ["tests/test_salesforce_source.py"]
+      }
+    },
+    {
+      "id": "reasoning.graph-impact",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Operates on typed nodes and versioned ontology policy without business-object names; richer relation semantics remain planned.",
+      "implementation": ["src/neo_sf_q_intel/analysis.py", "src/neo_sf_q_intel/retrieval.py", "src/neo_sf_q_intel/policy.py", "config/reasoning-policy.json"],
+      "verification": ["tests/test_analysis.py", "tests/test_scenario_independence.py", "tests/test_reasoning_policy.py"]
+    },
+    {
+      "id": "reasoning.semantic-retrieval",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Provider-neutral embeddings and standard cosine ranking.",
+      "implementation": ["src/neo_sf_q_intel/semantic.py", "src/neo_sf_q_intel/providers.py"],
+      "verification": ["tests/test_semantic.py"]
+    },
+    {
+      "id": "orchestration.multi-agent",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Typed specialist stages share governed state; deeper model-backed specialist ports remain planned.",
+      "implementation": ["src/neo_sf_q_intel/workflow.py", "src/neo_sf_q_intel/domain.py"],
+      "verification": ["tests/test_workflow.py"]
+    },
+    {
+      "id": "quality.test-selection",
+      "owner": "Test Intelligence",
+      "status": "FOUNDATION",
+      "genericity": "Selects graph-connected test kinds rather than named test cases.",
+      "implementation": ["src/neo_sf_q_intel/analysis.py"],
+      "verification": ["tests/test_analysis.py", "tests/test_scenario_independence.py"]
+    },
+    {
+      "id": "automation.locator-healing",
+      "owner": "UI Healing",
+      "status": "FOUNDATION",
+      "genericity": "Uses metadata identity, accessibility semantics and ambiguity abstention.",
+      "implementation": ["src/neo_sf_q_intel/healing.py", "packages/browser/src/locator-healer.ts"],
+      "verification": ["packages/browser/tests/locator-healer.spec.ts"]
+    },
+    {
+      "id": "governance.claim-grounding",
+      "owner": "Governance Review",
+      "status": "FOUNDATION",
+      "genericity": "Validates evidence identifiers independently of business domain.",
+      "implementation": ["src/neo_sf_q_intel/governance.py"],
+      "verification": ["tests/test_governance.py", "tests/test_workflow.py"]
+    },
+    {
+      "id": "governance.release-decision",
+      "owner": "Governance Review",
+      "status": "FOUNDATION",
+      "genericity": "Deterministic policy consumes typed risk and validation state.",
+      "implementation": ["src/neo_sf_q_intel/governance.py"],
+      "verification": ["tests/test_workflow.py"]
+    },
+    {
+      "id": "memory.postgresql",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Stores versioned run documents, graph, chunks, audit and checkpoints.",
+      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/service.py", "migrations/001_assurance_runs.sql"],
+      "verification": []
+    },
+    {
+      "id": "tools.mcp",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Tools delegate to shared services and expose no scenario-specific endpoint.",
+      "implementation": ["src/neo_sf_q_intel/mcp_server.py", "src/neo_sf_q_intel/salesforce_cli.py"],
+      "verification": ["tests/test_mcp_server.py", "tests/test_salesforce_cli.py"]
+    },
+    {
+      "id": "runtime.salesforce-live-evidence",
+      "owner": "Orchestrator",
+      "status": "NEXT",
+      "genericity": "Read routes come from validated contracts and policy allowlists.",
+      "implementation": ["src/neo_sf_q_intel/salesforce_cli.py"],
+      "verification": []
+    },
+    {
+      "id": "quality.live-test-execution",
+      "owner": "Test Intelligence",
+      "status": "NEXT",
+      "genericity": "Execution consumes selected obligations and configured runners.",
+      "implementation": [],
+      "verification": []
+    },
+    {
+      "id": "automation.browser-worker",
+      "owner": "UI Healing",
+      "status": "NEXT",
+      "genericity": "Typed worker accepts a generic intent and ephemeral session handoff.",
+      "implementation": ["packages/browser/src/locator-healer.ts"],
+      "verification": []
+    }
+  ]
+}
