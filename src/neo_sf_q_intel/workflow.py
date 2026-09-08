@@ -178,7 +178,7 @@ class AssuranceWorkflow:
             ),
             input_evidence_ids=[],
             output_artifact_ids=[item.entity_id for item in impacts],
-            policy_refs=[f"reasoning:{run.reasoning_policy_sha256}"],
+            policy_refs=self._reasoning_refs(run),
             gap_codes=[gap.code for gap in gaps],
         )
         run.activities.append(activity)
@@ -215,7 +215,7 @@ class AssuranceWorkflow:
             summary=f"Selected {len(selected)} graph-connected validations.",
             input_evidence_ids=evidence_ids,
             output_artifact_ids=[item.test_id for item in selected],
-            policy_refs=[f"reasoning:{run.reasoning_policy_sha256}"],
+            policy_refs=self._reasoning_refs(run),
             gap_codes=[],
         )
         run.activities.append(activity)
@@ -318,6 +318,19 @@ class AssuranceWorkflow:
             )
         )
         return {"run": run}
+
+    @staticmethod
+    def _reasoning_refs(run: AssuranceRun) -> list[str]:
+        pairs = (
+            ("reasoning", run.reasoning_policy_sha256),
+            ("project", run.request.project_id),
+            ("source-snapshot", run.source_snapshot),
+            ("ontology", run.ontology_sha256),
+            ("source-profile", run.source_profile_sha256),
+            ("normalized-graph", run.normalized_graph_sha256),
+            ("source-graph", run.source_graph_sha256),
+        )
+        return [f"{label}:{value}" for label, value in pairs if value]
 
     @staticmethod
     def _activity(

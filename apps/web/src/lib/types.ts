@@ -5,7 +5,7 @@ export interface EvidenceRef {
   kind: string;
   label: string;
   source: string;
-  state: "CONFIRMED" | "HUMAN_CONFIRMED" | "INFERRED" | "CONTRADICTORY" | "STALE" | "REJECTED";
+  state: "CONFIRMED" | "UNVERIFIED" | "HUMAN_CONFIRMED" | "INFERRED" | "CONTRADICTORY" | "STALE" | "REJECTED";
 }
 
 export interface ImpactFinding {
@@ -54,6 +54,7 @@ export interface ReleaseDecision {
 }
 
 export interface AssuranceRun {
+  schema_version: "1.0.0" | "2.0.0";
   run_id: string;
   trace_id: string;
   created_at: string;
@@ -61,6 +62,15 @@ export interface AssuranceRun {
   reasoning_policy_sha256: string;
   reasoning_eval_set_id: string;
   reasoning_eval_set_sha256: string;
+  source_snapshot: string | null;
+  source_graph_sha256: string | null;
+  ontology_id: string | null;
+  ontology_version: string | null;
+  ontology_sha256: string | null;
+  source_profile_id: string | null;
+  source_profile_version: string | null;
+  source_profile_sha256: string | null;
+  normalized_graph_sha256: string | null;
   status: string;
   request: { requirement: string; changed_paths: string[]; change_intent: "INFORMATIONAL" | "PLANNED_CHANGE" | "OBSERVED_CHANGE"; source_ref: string };
   evidence: EvidenceRef[];

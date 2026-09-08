@@ -84,6 +84,9 @@ def collect_checks(settings: Settings, repository_root: Path) -> list[Check]:
             expected_graph_sha256=settings.require_graph_sha256(),
             minimum_contract_version=settings.source_min_contract_version,
             required_capabilities=settings.required_capabilities,
+            ontology_path=settings.resolved_canonical_ontology_path(repository_root),
+            source_profile_path=settings.resolved_source_graph_profile_path(repository_root),
+            expected_source_profile_sha256=settings.require_source_profile_sha256(),
         )
         checks.append(Check("salesforce-source", True, source.snapshot_id))
     except (SourceContractError, ValueError) as exc:

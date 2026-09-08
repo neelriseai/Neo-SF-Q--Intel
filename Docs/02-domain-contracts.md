@@ -14,6 +14,14 @@
 - `TestExecution`: selected test ID, typed outcome, runner ID, immutable result hash, source snapshot, execution/expiry time and confirmed execution-receipt IDs.
 - `GovernanceAssessment`: policy identity, exact metric values, typed guardrail decisions and violations.
 - `ReleaseDecision`: `GO`, `CONDITIONAL_GO`, `NO_GO` or `INCOMPLETE` plus deterministic reasons.
+- `CanonicalOntology` / `SourceGraphProfile`: strict source-neutral classes, legal relation
+  signatures and exhaustive source vocabulary mappings with pinned identities.
+- `NormalizedGraph`: deterministic canonical nodes/edges, mapping and trust gaps, source/profile/
+  ontology identities and a stable normalized-graph SHA-256.
+- `AssuranceRun` schema `2.0.0`: binds raw source snapshot/digest plus ontology, source-profile and
+  normalized-graph identities used by the analysis in addition to reasoning/governance policy
+  identities. Pre-A1 documents load explicitly as schema `1.0.0` with unavailable identities and
+  remain subject to the current fail-closed decision view.
 
 ## Target contracts
 
@@ -25,9 +33,10 @@ The complete tool, test-execution and browser verticals will add domain-level `T
 
 | State | Meaning |
 |---|---|
+| `UNVERIFIED` | A source record is missing a complete evidence envelope or an independently valid human-approval receipt |
 | `CONFIRMED` | Parsed source, signed contract, deterministic test or live runtime evidence |
 | `INFERRED` | LLM/vector-derived proposal awaiting confirmation |
-| `HUMAN_CONFIRMED` | Reviewed semantic relationship with identity and timestamp |
+| `HUMAN_CONFIRMED` | Reviewed semantic relationship backed by a separate scoped identity, timestamp and validity receipt |
 | `STALE` | Evidence snapshot no longer matches current source/runtime |
 | `REJECTED` | Invalid, contradictory or outside the allowed evidence set |
 

@@ -1,6 +1,12 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "2.0.0",
   "unknownKindAction": "ABSTAIN",
+  "ontologyRef": {
+    "id": "change-evidence-core",
+    "version": "1.0.0",
+    "path": "config/ontology/canonical-ontology.json",
+    "sha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+  },
   "lowInformationTokens": [
     "about", "add", "an", "and", "any", "are", "as", "assess", "at", "be", "by",
     "change", "for", "from", "how", "in", "into", "is", "it", "modify", "of", "on",
@@ -29,42 +35,27 @@
     "evalSetSha256": "52a11a0e0f1d065e141dc5c7d37f3a2c85926b066b6864ed512a6624d0c05c11"
   },
   "nodeKinds": {
-    "apex-class": {"role": "IMPACT", "severity": "MEDIUM"},
-    "apex-test": {"role": "VALIDATION"},
-    "apex-trigger": {"role": "IMPACT", "severity": "HIGH"},
-    "api-use-case": {"role": "VALIDATION"},
-    "approval-process": {"role": "IMPACT", "severity": "HIGH"},
+    "actor": {"role": "CONTEXT"},
+    "automated-test": {"role": "VALIDATION"},
+    "automation": {"role": "IMPACT", "severity": "HIGH"},
+    "business-process": {"role": "IMPACT", "severity": "HIGH"},
     "capability": {"role": "CONTEXT"},
-    "component-test": {"role": "VALIDATION"},
-    "custom-metadata-record": {"role": "IMPACT", "severity": "HIGH"},
-    "field": {"role": "IMPACT", "severity": "MEDIUM"},
-    "file": {"role": "EVIDENCE"},
-    "flow": {"role": "IMPACT", "severity": "HIGH"},
-    "lightning-app": {"role": "IMPACT", "severity": "LOW"},
-    "lightning-component": {"role": "IMPACT", "severity": "MEDIUM"},
-    "lightning-page": {"role": "IMPACT", "severity": "MEDIUM"},
-    "list-view": {"role": "IMPACT", "severity": "LOW"},
-    "locator-use-case": {"role": "VALIDATION"},
-    "manual-use-case": {"role": "VALIDATION"},
-    "object": {"role": "IMPACT", "severity": "MEDIUM"},
-    "permission-set": {"role": "IMPACT", "severity": "HIGH"},
-    "persona": {"role": "CONTEXT"},
-    "presentation-configuration": {"role": "IMPACT", "severity": "MEDIUM"},
+    "code": {"role": "IMPACT", "severity": "MEDIUM"},
+    "configuration": {"role": "IMPACT", "severity": "HIGH"},
+    "data-entity": {"role": "IMPACT", "severity": "MEDIUM"},
+    "data-field": {"role": "IMPACT", "severity": "MEDIUM"},
+    "data-fixture": {"role": "EVIDENCE"},
+    "dataset": {"role": "EVIDENCE"},
     "requirement": {"role": "CONTEXT"},
-    "saved-report": {"role": "IMPACT", "severity": "LOW"},
-    "synthetic-dataset": {"role": "EVIDENCE"},
-    "synthetic-fixture": {"role": "EVIDENCE"},
-    "workflow-field-update": {"role": "IMPACT", "severity": "HIGH"}
+    "security-policy": {"role": "IMPACT", "severity": "HIGH"},
+    "source-artifact": {"role": "EVIDENCE"},
+    "test-specification": {"role": "VALIDATION"},
+    "user-interface": {"role": "IMPACT", "severity": "MEDIUM"}
   },
   "traversableRelations": [
-    "appends", "authorizes_parent", "calls", "calls_internal_apex",
-    "changes_locator_for", "class_access", "configures", "contains", "covers",
-    "creates", "defined_in", "field_grant", "guards_save_of", "has_field",
-    "implemented_by", "instance_of", "invokes", "lists", "manages",
-    "object_grant", "offers_configuration", "reads",
-    "reads_dataset", "reads_private_summary", "reads_user_mode", "rechecks",
-    "references", "relevant_change_triggers", "routes_via", "tests",
-    "tests_configuration", "tests_requirement", "triggers", "uses_dataset",
-    "uses_final_or_recall_action", "writes"
+    "authorizes", "configures", "contains", "covers", "creates", "declared-in",
+    "guards", "implements", "instance-of", "invokes", "manages", "presents",
+    "reads", "references", "revalidates", "routes", "tests", "triggers", "uses",
+    "writes"
   ]
 }

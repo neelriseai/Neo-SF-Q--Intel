@@ -19,25 +19,33 @@
       "id": "reasoning.graph-impact",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Operates on typed nodes and a versioned allowlist without business-object names; canonical source profiles, direction-aware propagation/path receipts and a separate risk policy remain planned.",
-      "implementation": ["src/neo_sf_q_intel/analysis.py", "src/neo_sf_q_intel/retrieval.py", "src/neo_sf_q_intel/policy.py", "config/reasoning-policy.json"],
-      "verification": ["tests/test_analysis.py", "tests/test_scenario_independence.py", "tests/test_reasoning_policy.py"]
+      "genericity": "Operates on canonical typed nodes and relations without source vocabulary in core policy; direction-aware propagation, complete ordered path receipts and a separate risk policy remain A2.",
+      "implementation": ["src/neo_sf_q_intel/analysis.py", "src/neo_sf_q_intel/retrieval.py", "src/neo_sf_q_intel/policy.py", "src/neo_sf_q_intel/ontology.py", "config/reasoning-policy.json"],
+      "verification": ["tests/test_analysis.py", "tests/test_ontology.py", "tests/test_scenario_independence.py", "tests/test_reasoning_policy.py"]
+    },
+    {
+      "id": "reasoning.directional-propagation",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Uses source-neutral canonical relations and endpoint roles with explicit direction, depth, evidence-state and path-receipt policies; runtime workflow integration remains pending.",
+      "implementation": ["src/neo_sf_q_intel/propagation.py", "config/propagation-policy.json", "config/analysis-risk-policy.json"],
+      "verification": ["tests/test_propagation.py"]
     },
     {
       "id": "knowledge.evidence-graph",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Treats the project- and snapshot-bound evidence graph as the authority substrate; current source JSON ingestion and trusted traversal precede canonical relation profiles and durable graph ports.",
-      "implementation": ["src/neo_sf_q_intel/salesforce_source.py", "src/neo_sf_q_intel/retrieval.py", "migrations/001_assurance_runs.sql"],
-      "verification": ["tests/test_salesforce_source.py", "tests/test_reasoning_policy.py"]
+      "genericity": "Treats project-, snapshot-, ontology- and profile-bound normalized evidence as the authority substrate; missing record envelopes remain unverified while durable graph ports and complete path replay remain planned.",
+      "implementation": ["src/neo_sf_q_intel/ontology.py", "src/neo_sf_q_intel/salesforce_source.py", "src/neo_sf_q_intel/retrieval.py", "migrations/001_assurance_runs.sql"],
+      "verification": ["tests/test_ontology.py", "tests/test_salesforce_source.py", "tests/test_reasoning_policy.py"]
     },
     {
       "id": "knowledge.canonical-ontology",
       "owner": "Change Analyst",
-      "status": "NEXT",
-      "genericity": "Will map source-owned node and relation vocabulary into versioned canonical classes, directions, endpoint roles and materiality without first-application names in core policy.",
-      "implementation": [],
-      "verification": []
+      "status": "FOUNDATION",
+      "genericity": "Deterministically normalizes the current source vocabulary into versioned canonical classes and preserves mapping/trust gaps. Completion requires upstream record envelopes and proof that trusted first-source behavior is preserved; propagation/risk remain separate A2 policy.",
+      "implementation": ["src/neo_sf_q_intel/ontology.py", "config/ontology/canonical-ontology.json", "config/source-profiles/salesforce-application-graph.json"],
+      "verification": ["tests/test_ontology.py", "tests/test_reasoning_policy.py", "tests/test_workflow.py"]
     },
     {
       "id": "reasoning.graph-context-compiler",

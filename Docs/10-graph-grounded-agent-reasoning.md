@@ -9,8 +9,9 @@ allowing models to interpret ambiguous business language.
 
 The design is influenced by the repository's deep-research report, but does not claim the current
 runtime is Microsoft GraphRAG or that an LLM has built the authoritative graph. The current code has
-trusted source-graph ingestion, lexical/path seeding, deterministic traversal and evidence receipts.
-Semantic search is standalone and not yet fused into assurance runs.
+source-graph ingestion, strict ontology/profile normalization, lexical/path seeding, deterministic
+foundation traversal and evidence receipts. Source records without complete envelopes stay
+`UNVERIFIED`. Semantic search is standalone and not yet fused into assurance runs.
 
 ## Four planes
 
@@ -47,10 +48,11 @@ record, alias or route names in core code:
 - test case, obligation, execution and coverage evidence;
 - incident, causal hypothesis, release decision and human override/outcome.
 
-Canonical relation classes include implementation, dependency, data access, authorization,
-coverage, change, execution, causality and decision-evidence relationships. Source-owned profiles
-map concrete relation names to these classes and declare valid directions/endpoints. The current
-flat relation allowlist is a foundation and must be replaced without changing first-source behavior.
+The implemented ontology defines source-neutral node classes, relation classes, materiality and
+legal endpoint signatures. The implemented Salesforce profile maps all current concrete node and
+relation terms into those classes and pins the ontology identity. Contract/profile tampering,
+duplicate or ambiguous mapping and illegal signatures fail closed. Causal propagation remains a
+separate A2 policy; normalization itself never declares reachability or risk.
 
 ## Directional propagation and risk
 
@@ -102,8 +104,8 @@ outcomes cannot change runtime decisions until a reviewed policy/evaluation vers
 
 | Capability | Current truth | Next acceptance boundary |
 |---|---|---|
-| Trusted evidence graph | Source JSON graph, digest/snapshot checks and deterministic traversal exist | Normalize into canonical relation classes through tested source profiles |
-| Directional propagation/risk | Current traversal is relation-allowlisted and bidirectional; severity is primarily node-kind-based | Relation/direction propagation matrix, ordered path receipts and separate versioned risk policy |
+| Trusted evidence graph | Source JSON graph plus canonical ontology/source-profile normalization, stable normalized digest and explicit mapping/trust gaps exist; the real source currently lacks record envelopes | Add upstream record-level evidence envelopes, prove first-source trusted-behavior equivalence and add durable graph ports |
+| Directional propagation/risk | Separately pinned propagation/risk policies and deterministic path/risk evaluators pass inverse/cycle/diamond, bounded-enumeration, artifact-tamper, source/profile-binding, endpoint-trust and missing-factor tests, but are not yet consumed by assurance runs | Add grounded risk-factor receipts and freshness; then integrate identities, paths and risk gaps into the workflow and retire bidirectional traversal |
 | Graph context compiler | Not implemented | Deterministic bounded pack with stable hash, explicit truncation and no cross-snapshot leakage |
 | Semantic retrieval | Ephemeral standalone cosine search exists | Fuse ChromaDB/in-process candidates into context packs without promoting evidence state |
 | Graph-grounded specialist | Model provider port exists but is unused by assurance stages | Schema-validated proposal, citation subset checks, provider degradation and adversarial tests |

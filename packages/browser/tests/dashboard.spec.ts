@@ -13,6 +13,7 @@ test("dashboard renders a governed incomplete decision without false confidence"
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
+        schema_version: "2.0.0",
         run_id: "11111111-1111-4111-8111-111111111111",
         trace_id: "22222222-2222-4222-8222-222222222222",
         created_at: "2026-09-09T00:00:00Z",
@@ -20,6 +21,15 @@ test("dashboard renders a governed incomplete decision without false confidence"
         reasoning_policy_sha256: "a".repeat(64),
         reasoning_eval_set_id: "retrieval-boundaries-v1",
         reasoning_eval_set_sha256: "b".repeat(64),
+        source_snapshot: "fixture-snapshot",
+        source_graph_sha256: "f".repeat(64),
+        ontology_id: "change-evidence-core",
+        ontology_version: "1.0.0",
+        ontology_sha256: "c".repeat(64),
+        source_profile_id: "salesforce-application-graph",
+        source_profile_version: "1.0.0",
+        source_profile_sha256: "d".repeat(64),
+        normalized_graph_sha256: "e".repeat(64),
         status: "COMPLETED",
         request: {
           requirement: "Assess a planned metadata change",

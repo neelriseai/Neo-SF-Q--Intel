@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "canonical-propagation",
+  "policyVersion": "1.0.0",
+  "sha256": "66c83e8cb13b68cbffb363a582f0a3b5927f4ec04bddc3dcab5b560b02c2cdf5",
+  "ontology": {
+    "ontologyId": "change-evidence-core",
+    "ontologyVersion": "1.0.0",
+    "ontologySha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+  },
+  "maximumTotalDepth": 4,
+  "maximumPathsPerTarget": 20,
+  "maximumTotalPaths": 1000,
+  "relationRules": [
+    {
+      "relationClass": "authorizes",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["IMPLEMENTATION"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["SECURITY"], "edgeTargetRoles": ["IMPLEMENTATION", "DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["IMPLEMENTATION"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["SECURITY"], "edgeTargetRoles": ["IMPLEMENTATION", "DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "configures",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["CONFIGURATION"], "edgeTargetRoles": ["IMPLEMENTATION", "DATA_SCHEMA", "EXPERIENCE"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["CONFIGURATION"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["CONFIGURATION"], "edgeTargetRoles": ["IMPLEMENTATION", "DATA_SCHEMA", "EXPERIENCE"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["CONFIGURATION"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "contains",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["DATA_SCHEMA"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["DATA_FIXTURE"], "edgeTargetRoles": ["DATA_FIXTURE"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["EXPERIENCE"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["DATA_SCHEMA"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["DATA_FIXTURE"], "edgeTargetRoles": ["DATA_FIXTURE"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["EXPERIENCE"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "covers",
+      "routes": [
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["TEST"], "edgeTargetRoles": ["PROCESS", "DATA_SCHEMA", "EXPERIENCE"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "creates",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["PROCESS"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["PROCESS"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "declared-in",
+      "routes": [
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["TEST", "AUTOMATION", "PROCESS", "CAPABILITY", "IMPLEMENTATION", "CONFIGURATION", "DATA_SCHEMA", "DATA_FIXTURE", "REQUIREMENT", "SECURITY", "EXPERIENCE"], "edgeTargetRoles": ["ARTIFACT"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "guards",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["CONFIGURATION"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["CONFIGURATION"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "implements",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["REQUIREMENT"], "edgeTargetRoles": ["IMPLEMENTATION"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "instance-of",
+      "routes": [
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["CONFIGURATION", "DATA_FIXTURE"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "invokes",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["AUTOMATION"], "edgeTargetRoles": ["IMPLEMENTATION"], "maximumDepth": 4, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["IMPLEMENTATION"], "edgeTargetRoles": ["PROCESS", "IMPLEMENTATION"], "maximumDepth": 4, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["IMPLEMENTATION"], "maximumDepth": 4, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["AUTOMATION"], "edgeTargetRoles": ["IMPLEMENTATION"], "maximumDepth": 4, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["IMPLEMENTATION"], "edgeTargetRoles": ["PROCESS", "IMPLEMENTATION"], "maximumDepth": 4, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["IMPLEMENTATION"], "maximumDepth": 4, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "manages",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["ARTIFACT"], "edgeTargetRoles": ["DATA_FIXTURE"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["ARTIFACT"], "edgeTargetRoles": ["DATA_FIXTURE"], "maximumDepth": 1, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "presents",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["DATA_SCHEMA", "EXPERIENCE"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["DATA_SCHEMA", "EXPERIENCE"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "reads",
+      "routes": [
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["AUTOMATION"], "edgeTargetRoles": ["CONFIGURATION", "DATA_SCHEMA"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["IMPLEMENTATION"], "edgeTargetRoles": ["CONFIGURATION", "DATA_SCHEMA"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["EXPERIENCE"], "edgeTargetRoles": ["DATA_FIXTURE"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "references",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["DATA_SCHEMA"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["DATA_FIXTURE"], "edgeTargetRoles": ["ACTOR", "DATA_SCHEMA", "DATA_FIXTURE"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["DATA_SCHEMA"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["DATA_FIXTURE"], "edgeTargetRoles": ["ACTOR", "DATA_SCHEMA", "DATA_FIXTURE"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "revalidates",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["IMPLEMENTATION"], "edgeTargetRoles": ["IMPLEMENTATION"], "maximumDepth": 4, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["IMPLEMENTATION"], "edgeTargetRoles": ["IMPLEMENTATION"], "maximumDepth": 4, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "routes",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["PROCESS"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["PROCESS"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "tests",
+      "routes": [
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["TEST"], "edgeTargetRoles": ["AUTOMATION", "PROCESS", "IMPLEMENTATION", "CONFIGURATION", "DATA_SCHEMA", "REQUIREMENT", "EXPERIENCE"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["DATA_FIXTURE"], "edgeTargetRoles": ["REQUIREMENT"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "triggers",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["DATA_SCHEMA"], "edgeTargetRoles": ["AUTOMATION", "IMPLEMENTATION"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "uses",
+      "routes": [
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["PROCESS"], "edgeTargetRoles": ["AUTOMATION"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["TEST"], "edgeTargetRoles": ["DATA_FIXTURE"], "maximumDepth": 2, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    },
+    {
+      "relationClass": "writes",
+      "routes": [
+        {"direction": "SOURCE_TO_TARGET", "edgeSourceRoles": ["AUTOMATION"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]},
+        {"direction": "TARGET_TO_SOURCE", "edgeSourceRoles": ["AUTOMATION"], "edgeTargetRoles": ["DATA_SCHEMA"], "maximumDepth": 3, "requiredEvidenceStates": ["CONFIRMED"]}
+      ]
+    }
+  ]
+}

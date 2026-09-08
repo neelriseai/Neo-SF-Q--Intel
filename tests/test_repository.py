@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from neo_sf_q_intel.repository import (
     PersistenceSchemaError,
     PostgresRunRepository,
     SQLiteRunRepository,
+    _parse_run_document,
 )
 
 
@@ -41,6 +43,15 @@ def test_sqlite_repository_self_creates_and_round_trips_runs(tmp_path: Path) -> 
         reasoning_policy_sha256="0" * 64,
         reasoning_eval_set_id="unit-fixture",
         reasoning_eval_set_sha256="1" * 64,
+        source_snapshot="fixture-snapshot",
+        source_graph_sha256="5" * 64,
+        ontology_id="fixture-ontology",
+        ontology_version="1.0.0",
+        ontology_sha256="2" * 64,
+        source_profile_id="fixture-profile",
+        source_profile_version="1.0.0",
+        source_profile_sha256="3" * 64,
+        normalized_graph_sha256="4" * 64,
     )
 
     repository.setup()
@@ -55,6 +66,57 @@ def test_sqlite_repository_self_creates_and_round_trips_runs(tmp_path: Path) -> 
         }
     assert "run_document" in columns
     assert "embedding" not in columns
+
+
+def test_pre_ontology_run_documents_remain_readable_as_explicit_legacy(tmp_path: Path) -> None:
+    database = tmp_path / "legacy.db"
+    repository = SQLiteRunRepository(database)
+    run = AssuranceRun(
+        request=ChangeRequest(requirement="Assess configured metadata", project_id="fixture"),
+        reasoning_policy_version="1.1.0",
+        reasoning_policy_sha256="0" * 64,
+        reasoning_eval_set_id="unit-fixture",
+        reasoning_eval_set_sha256="1" * 64,
+        source_snapshot="fixture-snapshot",
+        source_graph_sha256="5" * 64,
+        ontology_id="fixture-ontology",
+        ontology_version="1.0.0",
+        ontology_sha256="2" * 64,
+        source_profile_id="fixture-profile",
+        source_profile_version="1.0.0",
+        source_profile_sha256="3" * 64,
+        normalized_graph_sha256="4" * 64,
+    )
+    repository.setup()
+    repository.save(run)
+    legacy = run.model_dump(mode="json")
+    legacy.pop("schema_version")
+    for field in (
+        "source_snapshot",
+        "source_graph_sha256",
+        "ontology_id",
+        "ontology_version",
+        "ontology_sha256",
+        "source_profile_id",
+        "source_profile_version",
+        "source_profile_sha256",
+        "normalized_graph_sha256",
+    ):
+        legacy.pop(field)
+    with sqlite3.connect(database) as connection:
+        connection.execute(
+            "UPDATE assurance_runs SET run_document = ? WHERE run_id = ?",
+            (json.dumps(legacy), str(run.run_id)),
+        )
+
+    restored = repository.get(run.run_id)
+
+    assert restored is not None
+    assert restored.schema_version == "1.0.0"
+    assert restored.ontology_id is None
+    assert restored.source_graph_sha256 is None
+    assert repository.list_recent() == [restored]
+    assert _parse_run_document(legacy) == restored
 
 
 def test_postgresql_setup_auto_creates_and_applies_vector_boundary_migration(monkeypatch) -> None:

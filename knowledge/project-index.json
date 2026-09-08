@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "561f0e2939c44b1dfcb257db9035203349ed10c0855db74cd14cd1716e423d00",
+  "sourceSnapshot": "105addb02ef0bf33ac4bc1e87a5d3267c5cc7bd4bf4e93b81d65dc862ae2f54c",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -53,30 +53,48 @@
       "id": "reasoning.graph-impact",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Operates on typed nodes and a versioned allowlist without business-object names; canonical source profiles, direction-aware propagation/path receipts and a separate risk policy remain planned.",
+      "genericity": "Operates on canonical typed nodes and relations without source vocabulary in core policy; direction-aware propagation, complete ordered path receipts and a separate risk policy remain A2.",
       "implementation": [
         "src/neo_sf_q_intel/analysis.py",
         "src/neo_sf_q_intel/retrieval.py",
         "src/neo_sf_q_intel/policy.py",
+        "src/neo_sf_q_intel/ontology.py",
         "config/reasoning-policy.json"
       ],
       "verification": [
         "tests/test_analysis.py",
+        "tests/test_ontology.py",
         "tests/test_scenario_independence.py",
         "tests/test_reasoning_policy.py"
+      ]
+    },
+    {
+      "id": "reasoning.directional-propagation",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Uses source-neutral canonical relations and endpoint roles with explicit direction, depth, evidence-state and path-receipt policies; runtime workflow integration remains pending.",
+      "implementation": [
+        "src/neo_sf_q_intel/propagation.py",
+        "config/propagation-policy.json",
+        "config/analysis-risk-policy.json"
+      ],
+      "verification": [
+        "tests/test_propagation.py"
       ]
     },
     {
       "id": "knowledge.evidence-graph",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Treats the project- and snapshot-bound evidence graph as the authority substrate; current source JSON ingestion and trusted traversal precede canonical relation profiles and durable graph ports.",
+      "genericity": "Treats project-, snapshot-, ontology- and profile-bound normalized evidence as the authority substrate; missing record envelopes remain unverified while durable graph ports and complete path replay remain planned.",
       "implementation": [
+        "src/neo_sf_q_intel/ontology.py",
         "src/neo_sf_q_intel/salesforce_source.py",
         "src/neo_sf_q_intel/retrieval.py",
         "migrations/001_assurance_runs.sql"
       ],
       "verification": [
+        "tests/test_ontology.py",
         "tests/test_salesforce_source.py",
         "tests/test_reasoning_policy.py"
       ]
@@ -84,10 +102,18 @@
     {
       "id": "knowledge.canonical-ontology",
       "owner": "Change Analyst",
-      "status": "NEXT",
-      "genericity": "Will map source-owned node and relation vocabulary into versioned canonical classes, directions, endpoint roles and materiality without first-application names in core policy.",
-      "implementation": [],
-      "verification": []
+      "status": "FOUNDATION",
+      "genericity": "Deterministically normalizes the current source vocabulary into versioned canonical classes and preserves mapping/trust gaps. Completion requires upstream record envelopes and proof that trusted first-source behavior is preserved; propagation/risk remain separate A2 policy.",
+      "implementation": [
+        "src/neo_sf_q_intel/ontology.py",
+        "config/ontology/canonical-ontology.json",
+        "config/source-profiles/salesforce-application-graph.json"
+      ],
+      "verification": [
+        "tests/test_ontology.py",
+        "tests/test_reasoning_policy.py",
+        "tests/test_workflow.py"
+      ]
     },
     {
       "id": "reasoning.graph-context-compiler",
@@ -324,7 +350,7 @@
     {
       "path": ".env.example",
       "category": "project",
-      "sha256": "98167e60b57fd1e9c09cf00f1ec22b1ad2835b235c45d888d7ca6ad3100635a0"
+      "sha256": "6336752c1421508e9745db9bcce712da5a9a93bd71c07593c5a7e9889f61e0b3"
     },
     {
       "path": ".gitattributes",
@@ -374,7 +400,7 @@
     {
       "path": "Docs/01-architecture.md",
       "category": "canonical-documentation",
-      "sha256": "806c5debb5ae0a58610db5f0bc6edffc8f821cb3580df177cd32b499b5ad1090"
+      "sha256": "9bbb3f6ae21295d23cd52fe120ea59d7fd0375d30eaa378cdad2a52180e1e972"
     },
     {
       "path": "Docs/01-contracts-and-domain-model.md",
@@ -389,7 +415,7 @@
     {
       "path": "Docs/02-domain-contracts.md",
       "category": "canonical-documentation",
-      "sha256": "f902c3d62ffae1e02098469d39b2efad350c6f756c797dff47c2ed1cd267fabc"
+      "sha256": "a475dde9b00b72e3b1e447cb93e017ae971a79cb1fd7e6ae6df05b31783d564c"
     },
     {
       "path": "Docs/02-source-ingestion-and-change-detection.md",
@@ -399,7 +425,7 @@
     {
       "path": "Docs/03-data-memory-and-retrieval.md",
       "category": "canonical-documentation",
-      "sha256": "c2b89141971c9adf5084f4f1ff99ee0b8d6357b82d9c4baaf14d6e937f1ecc82"
+      "sha256": "c0257420b5e0c3b5fab396989f1993f5a2928d7d824a17514b83d0ce5080797c"
     },
     {
       "path": "Docs/03-evaluation-and-golden-dataset-engineering.md",
@@ -464,7 +490,7 @@
     {
       "path": "Docs/07-governance-and-evaluation.md",
       "category": "canonical-documentation",
-      "sha256": "615254e99f02636db2ba76320c647794d6642a1fbb8180cc56f71b58bf585f4c"
+      "sha256": "e3c57906d7b4e699d3c476e9a4b795e5a90b80f9aaaf7b149de6fade74726a0e"
     },
     {
       "path": "Docs/07-test-execution-and-rca.md",
@@ -484,7 +510,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "cbcc83ffd2a346b93bc6b44472412debd631a9e81bb70076999ba33472b60662"
+      "sha256": "855ae85f9616a0be4136f02b5fc73f790766af10bab170641d9fce5c646dae35"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -514,7 +540,7 @@
     {
       "path": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "reference-documentation",
-      "sha256": "f8166d51bd48b0df63311009f59416be5670bed9dd34acd174763692253f8ec3"
+      "sha256": "5f0fe117e8b517ca96f7806d245cf61c3cf2fd92ee09f9a4b25d16f017b61b9b"
     },
     {
       "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
@@ -624,7 +650,7 @@
     {
       "path": "apps/web/src/lib/types.ts",
       "category": "web-runtime",
-      "sha256": "7eba62237f2886fb54865d85f697da9b496c5cbeaf9cc9598f3d3dd0e225d506"
+      "sha256": "9ac414c656d366b7b5e566d74aaf40d478996745b1eb4eb97aebce481afc48aa"
     },
     {
       "path": "apps/web/tsconfig.json",
@@ -632,9 +658,14 @@
       "sha256": "2b3ac9eae37da08f007642ea5330075af4438c95d6a35cc5e3a31cd7b1b441c9"
     },
     {
+      "path": "config/analysis-risk-policy.json",
+      "category": "policy",
+      "sha256": "83aa538eec3a7e0839ba49f60aecf5d731f5b287e2e7654945c2a9aa9401effd"
+    },
+    {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "4165708ed451c28a3ba1b1482be3938de151d869acee59404b3587e8c9d4f0f2"
+      "sha256": "f1bbd7e256ab2b952ac11f1c8521d3c1f7102a759619431afec902123c40c2af"
     },
     {
       "path": "config/governance-policy.json",
@@ -642,14 +673,29 @@
       "sha256": "45c9baeaa13038d6af8c5935355a951371a8e47270b0429a5068ac87610c554f"
     },
     {
+      "path": "config/ontology/canonical-ontology.json",
+      "category": "policy",
+      "sha256": "2f684b0507f84283a0393e84e272ce212380291b9574e54730f8130cba050955"
+    },
+    {
+      "path": "config/propagation-policy.json",
+      "category": "policy",
+      "sha256": "8d46e892f610134b6a1048959429570f50f8dc1a0ee11cd700869d9a26f168bc"
+    },
+    {
       "path": "config/quality-policy.json",
       "category": "policy",
-      "sha256": "420b44110fdc55c008b24c3240383feeb69d407410fb77b5dd9dc744e6759209"
+      "sha256": "d0b37d752cfac19974ffb246d8669515659c329f38e3731e2b340d1c5c03e1fd"
     },
     {
       "path": "config/reasoning-policy.json",
       "category": "policy",
-      "sha256": "47653e9bb15d38931426faa9dcaf995540b05a20e762e8a42c865d9eaccb45e0"
+      "sha256": "618f12ec4c601b9f9a96d6c7b51dafd1f34cc2c5a2a7dfd8c1854766df79375b"
+    },
+    {
+      "path": "config/source-profiles/salesforce-application-graph.json",
+      "category": "policy",
+      "sha256": "e3cfffe57fe2a397b40de1a1ce99c1abf013a9e55e589705a17a4e5b0c25002a"
     },
     {
       "path": "knowledge/README.md",
@@ -699,7 +745,7 @@
     {
       "path": "packages/browser/tests/dashboard.spec.ts",
       "category": "test",
-      "sha256": "35c77cc655862f119178f9438a94fdb0e86348c0de20f480833fbec247b20f14"
+      "sha256": "4692c830046a52889cc9d72fe404be8104c0680c44900c0a6a0a528b7e80c204"
     },
     {
       "path": "packages/browser/tests/locator-healer.spec.ts",
@@ -722,6 +768,11 @@
       "sha256": "32e05c6a40d8ec16d7919e2d7773d00bb50b0d5b6c1ff191d8f10750812e766d"
     },
     {
+      "path": "quality/reviews/2026-09-09-canonical-ontology-propagation.md",
+      "category": "project",
+      "sha256": "623a64507008d1277ca7bb5447a8f00ec06c25d8f51b83a33b7cd5b40a5e25d4"
+    },
+    {
       "path": "quality/reviews/2026-09-09-graph-grounded-reasoning-design.md",
       "category": "project",
       "sha256": "b5f5ef8b7d3f6fc457a083e6e2a4ef57a26f33579388602bcd17aba7abc23de9"
@@ -739,7 +790,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "855e60238148441b353c942a79c3381d0f23e4fd88ee72d982ecdb963ce71cfe"
+      "sha256": "b3e925f48a66deaf3d774f53770a9769fbe590407d7db29d65e67dd0c1d36379"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -769,7 +820,7 @@
     {
       "path": "src/neo_sf_q_intel/analysis.py",
       "category": "python-runtime",
-      "sha256": "774f5644f4b9d4bf00837ce47078f6fa7a4d9dfcd0af3e9761501893837492f9"
+      "sha256": "26215c7402f69152527b9cdb246852e97a5843557c2a5b4a2d300d0649f7c6c6"
     },
     {
       "path": "src/neo_sf_q_intel/api.py",
@@ -779,17 +830,17 @@
     {
       "path": "src/neo_sf_q_intel/config.py",
       "category": "python-runtime",
-      "sha256": "ec5fd345cccc26c21ec764add21c6e0e8d1020fba82ad1c367f8142487644b68"
+      "sha256": "1ce1f1cff8743c7aa776c524bc06a7529920f2aa53e5937d82a39dd221e35c4b"
     },
     {
       "path": "src/neo_sf_q_intel/domain.py",
       "category": "python-runtime",
-      "sha256": "35502bc319ed4c01c3a0bfc75363e8cb485f13fe07b664c21fb78c9946ff4fd9"
+      "sha256": "26e5f92bac39f87ac5162e9d5f7920d743d023be2cfca1f98fb563dcef8f28ee"
     },
     {
       "path": "src/neo_sf_q_intel/governance.py",
       "category": "python-runtime",
-      "sha256": "2c4c3cfbfd1711edcb99effe6c314bd192262137e362e213d446b65a5a132f6d"
+      "sha256": "38d2249b4b7ad2f6f2198d916e48c24d64396dd2ea8f1ef7eceb95c97957246e"
     },
     {
       "path": "src/neo_sf_q_intel/governance_policy.py",
@@ -799,7 +850,7 @@
     {
       "path": "src/neo_sf_q_intel/healing.py",
       "category": "python-runtime",
-      "sha256": "6eee1d73863fdd1242e15b3f010314dea6bb0852f58e0d78a1c37fcbe90006f1"
+      "sha256": "b2c8a064498220fc75d3043fef2600ce433c8204e92a9bcdb0094468d2656042"
     },
     {
       "path": "src/neo_sf_q_intel/mcp_server.py",
@@ -812,14 +863,24 @@
       "sha256": "0065be5b7ed95105604a0e76f3d5ff17f5db6846f78ea161359f9a324647c0f5"
     },
     {
+      "path": "src/neo_sf_q_intel/ontology.py",
+      "category": "python-runtime",
+      "sha256": "5bacd25d9060e25e22945177ce5fc15913024b64942c9cb27c9fda3fc1a8493c"
+    },
+    {
       "path": "src/neo_sf_q_intel/policy.py",
       "category": "python-runtime",
-      "sha256": "dfaa523e9de575f94c5f0f1880a3d62f220661fe42233e296d64b42bc704c146"
+      "sha256": "00bf4c6cac526fe94f54da2945bfedb3d411776e792a799ab50f66f6023d2fc6"
     },
     {
       "path": "src/neo_sf_q_intel/preflight.py",
       "category": "python-runtime",
-      "sha256": "4b59f61868348375eb43350ca48c2dbfe3ed501a558acd71396149a4d2fbb311"
+      "sha256": "90498ad6a744b0e98faf856ceb9b9c85d91522e676b05cc4abe30e3b6c34f9f1"
+    },
+    {
+      "path": "src/neo_sf_q_intel/propagation.py",
+      "category": "python-runtime",
+      "sha256": "773bb3c0b70949d413dc689b13b6dd797992197007864ead6b9a23b1ddf424d7"
     },
     {
       "path": "src/neo_sf_q_intel/providers.py",
@@ -829,12 +890,12 @@
     {
       "path": "src/neo_sf_q_intel/repository.py",
       "category": "python-runtime",
-      "sha256": "06c12c0ee7b9c0db47ebedb6e1371f9f41555470a05da5053a6f21b2c7ae1694"
+      "sha256": "1bea3d21193a9884b54aad6dbd17d25aa385d9650a65a45095f24bc3362f395b"
     },
     {
       "path": "src/neo_sf_q_intel/retrieval.py",
       "category": "python-runtime",
-      "sha256": "8c9bae008b235a969c43cc57b711a1e0ca799ec7aa1edab910aab4311f4756bd"
+      "sha256": "0f7304a859a0c9adc99b9849bb43ecf413f4439fb2589c74b12b4248b11f9294"
     },
     {
       "path": "src/neo_sf_q_intel/salesforce_cli.py",
@@ -844,7 +905,7 @@
     {
       "path": "src/neo_sf_q_intel/salesforce_source.py",
       "category": "python-runtime",
-      "sha256": "603314a7a3721511347d86bd3a32273fa4e20c1c4f685be1d3ff30746ae8a79e"
+      "sha256": "7d9340f02b4274d8bb313b43500451ff32e39fc4d6e1de11171a2250f2776cf0"
     },
     {
       "path": "src/neo_sf_q_intel/semantic.py",
@@ -854,12 +915,12 @@
     {
       "path": "src/neo_sf_q_intel/service.py",
       "category": "python-runtime",
-      "sha256": "28b1f4106a714409ebfeccc90fb70270627996ec22e19637bacaa5c117fcad41"
+      "sha256": "e85b9f61e85dc5fbb688270879b22f28b96d79031aecb011ee5865d613f845a4"
     },
     {
       "path": "src/neo_sf_q_intel/workflow.py",
       "category": "python-runtime",
-      "sha256": "519cbf8a55b8cbd76066c6a282986313fb2e6bda313e2a11f583726f33f8aecd"
+      "sha256": "35b9172bc4fe125f22c3aa15bf8a3e3315ec620c4e47005d6918b8ce3ce86a22"
     },
     {
       "path": "tests/__init__.py",
@@ -867,9 +928,14 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "path": "tests/graph_fixtures.py",
+      "category": "test",
+      "sha256": "7f9b368886398014a3350f814c5840d2ab93e8ecafe1c42c6f4ffc50e82a73ea"
+    },
+    {
       "path": "tests/test_analysis.py",
       "category": "test",
-      "sha256": "2d778268007c3d4c18d093cf8ce8e7ee040c656ed086e3aa5268705febfab19d"
+      "sha256": "f15ec64b56f9462bf43bc4eb1197bff3ab4fe21db9057538d7a8fe10b7ab545d"
     },
     {
       "path": "tests/test_api.py",
@@ -879,12 +945,12 @@
     {
       "path": "tests/test_config.py",
       "category": "test",
-      "sha256": "73889f3fd3291e89f22c3a4d1a117e2aef97fb3158d0a5d801234086f71cc697"
+      "sha256": "824b30139917e65cfea122537acaacaa645bdcc7581cb61ec538132ac7a89a9d"
     },
     {
       "path": "tests/test_governance.py",
       "category": "test",
-      "sha256": "bff368858e6a57dd590bd616d4bc83c87fa182fef6cab526056e8a76ce2bc17e"
+      "sha256": "d8f7dbf105c77971c89933897dd12a2f2afa5830c885f9d8ff0d1ab7ade08105"
     },
     {
       "path": "tests/test_governance_policy.py",
@@ -897,14 +963,24 @@
       "sha256": "378411c5018c86c9d365c47913f48f3e6d32087144c2c2a289d0ad3f5c258d00"
     },
     {
+      "path": "tests/test_ontology.py",
+      "category": "test",
+      "sha256": "7487765020a1517a3eca19e47e58eb28b8e0281af4fa5d1a569b734fee324ee1"
+    },
+    {
+      "path": "tests/test_propagation.py",
+      "category": "test",
+      "sha256": "ac0868c3d18ba260b49d972b8e917e5fef4c03a6918fc02cc9dd287c2fab35ee"
+    },
+    {
       "path": "tests/test_reasoning_policy.py",
       "category": "test",
-      "sha256": "b7cace655177516aa6f0f5420174939dd539f354f6aa15ab9ca822221125c73a"
+      "sha256": "d9031cd9ac38bb814d95fb346cc9b7b880154de86d82918bde5552e683bdab5b"
     },
     {
       "path": "tests/test_repository.py",
       "category": "test",
-      "sha256": "bf594eaa89e7d9b232d36921a217e3af665aeb36feae6d3029aa4b0a9c6bc5bc"
+      "sha256": "84d57cf0411f35cdbbc61deef54e8d8d3d9587fa1c996edf79faa6f8a93dace0"
     },
     {
       "path": "tests/test_repository_knowledge.py",
@@ -919,12 +995,12 @@
     {
       "path": "tests/test_salesforce_source.py",
       "category": "test",
-      "sha256": "84d822cfc358b5ae008b1f807d15419f311078f97d89500d08e93c4b0daad9f2"
+      "sha256": "48c1ae83ddaab9d98bcf0efccb5c721f0228edff7473a71c5935fa3fde8436b5"
     },
     {
       "path": "tests/test_scenario_independence.py",
       "category": "test",
-      "sha256": "ea9b28c015aba94566988dc8eeeeac78c3112db09e91672aad28582448dbb717"
+      "sha256": "44dd82e5e3b6aebc00cf9d4ce0bd9af4aa13122dba8473e06198c21b06444494"
     },
     {
       "path": "tests/test_scope_review_policy.py",
@@ -934,7 +1010,7 @@
     {
       "path": "tests/test_semantic.py",
       "category": "test",
-      "sha256": "2a109cc2ad0430d34c53fd6cf388f7992b4414b4665cec2efc6f3a25d78647d7"
+      "sha256": "15b276a84dc7076213a7a9f11a772b8b17053afbd79f996ad885153ad9ba7c4a"
     },
     {
       "path": "tests/test_service_fallback.py",
@@ -949,7 +1025,7 @@
     {
       "path": "tests/test_workflow.py",
       "category": "test",
-      "sha256": "20dc32322d5156e64d9ed6feb826bef4a347a117b6bc2ab088583cf6fdac67cc"
+      "sha256": "94a26a270609669a1a021798a354d7aba9e0f7fcc2a101d79a45df6665359d85"
     }
   ]
 }

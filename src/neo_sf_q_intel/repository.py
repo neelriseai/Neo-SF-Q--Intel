@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 from typing import Protocol
@@ -9,6 +10,25 @@ import psycopg
 from psycopg.rows import dict_row
 
 from neo_sf_q_intel.domain import AssuranceRun
+
+
+def _parse_run_document(document: str | dict) -> AssuranceRun:
+    body = json.loads(document) if isinstance(document, str) else dict(document)
+    if "schema_version" not in body:
+        body["schema_version"] = "1.0.0"
+        for field in (
+            "source_snapshot",
+            "source_graph_sha256",
+            "ontology_id",
+            "ontology_version",
+            "ontology_sha256",
+            "source_profile_id",
+            "source_profile_version",
+            "source_profile_sha256",
+            "normalized_graph_sha256",
+        ):
+            body.setdefault(field, None)
+    return AssuranceRun.model_validate(body)
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -182,7 +202,7 @@ class SQLiteRunRepository:
             row = connection.execute(
                 "SELECT run_document FROM assurance_runs WHERE run_id = ?", (str(run_id),)
             ).fetchone()
-        return AssuranceRun.model_validate_json(row[0]) if row else None
+        return _parse_run_document(row[0]) if row else None
 
     def list_recent(self, limit: int = 20) -> list[AssuranceRun]:
         with sqlite3.connect(self.path) as connection:
@@ -190,7 +210,7 @@ class SQLiteRunRepository:
                 "SELECT run_document FROM assurance_runs ORDER BY created_at DESC LIMIT ?",
                 (limit,),
             ).fetchall()
-        return [AssuranceRun.model_validate_json(row[0]) for row in rows]
+        return [_parse_run_document(row[0]) for row in rows]
 
 
 class PostgresRunRepository:
@@ -238,7 +258,7 @@ class PostgresRunRepository:
             row = connection.execute(
                 "SELECT run_document FROM assurance_runs WHERE run_id = %s", (run_id,)
             ).fetchone()
-        return AssuranceRun.model_validate(row["run_document"]) if row else None
+        return _parse_run_document(row["run_document"]) if row else None
 
     def list_recent(self, limit: int = 20) -> list[AssuranceRun]:
         with psycopg.connect(self.database_url, row_factory=dict_row) as connection:
@@ -249,4 +269,4 @@ class PostgresRunRepository:
                 """,
                 (limit,),
             ).fetchall()
-        return [AssuranceRun.model_validate(row["run_document"]) for row in rows]
+        return [_parse_run_document(row["run_document"]) for row in rows]

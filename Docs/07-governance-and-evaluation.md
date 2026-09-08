@@ -26,6 +26,9 @@ state, source hash, snapshot identity, relation direction or validity window.
 Each run also stores the reasoning-policy version/SHA-256 and the frozen retrieval evaluation-set
 ID/SHA-256. The reasoning identity covers both canonical policy and evaluation-set content, so
 candidate selection can be replayed and an in-place corpus edit cannot retain the old identity.
+The run additionally stores canonical ontology ID/version/SHA-256, source-profile
+ID/version/SHA-256 and normalized-graph SHA-256. The analysis-input digest binds those identities;
+a profile, ontology or normalized topology change cannot retain the old analysis identity.
 
 ## Implemented guardrails and hooks
 
@@ -37,9 +40,11 @@ candidate selection can be replayed and an in-place corpus edit cannot retain th
 | `impacts.confirmed-evidence-coverage` | post-analysis | Impact coverage is failed or sample is insufficient | `ABSTAIN`, blocking |
 | `tests.confirmed-evidence-coverage` | post-analysis | Selected-test coverage is failed or sample is insufficient | `ABSTAIN`, blocking |
 
-Recommended-test truncation is observable but nonblocking. Unknown relations block only when the
-untraversed neighbor is an impact/validation node or can bridge to one. Benign context relations do
-not block. The system does not use broad keyword filters for prompt injection; structural input
+Recommended-test truncation is observable but nonblocking. Unmapped relations are classified from
+the canonical materiality of both endpoints: any material endpoint blocks, while a relation solely
+between supporting endpoints is visible and nonblocking. Missing evidence-envelope fields remain
+`UNVERIFIED`; raw `HUMAN_CONFIRMED` values are denied because approval is a separate governed
+receipt. The system does not use broad keyword filters for prompt injection; structural input
 schemas, provenance, source trust, tool authorization and output validation provide the boundary
 without rejecting legitimate content.
 

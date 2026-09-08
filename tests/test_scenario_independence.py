@@ -8,30 +8,38 @@ from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest
 from neo_sf_q_intel.retrieval import EvidenceRetriever
 from neo_sf_q_intel.salesforce_source import SalesforceSourceSnapshot
 from neo_sf_q_intel.service import AssuranceService
+from tests.graph_fixtures import add_trusted_envelopes, fixture_digest
 
 
 def topology(prefix: str) -> SalesforceSourceSnapshot:
+    source_hash = fixture_digest(f"{prefix.casefold()}-graph")
+    graph = {
+        "sourceSnapshot": prefix,
+        "nodes": [
+            {
+                "id": f"config:{prefix}",
+                "kind": "custom-metadata-record",
+                "label": f"{prefix} policy",
+            },
+            {"id": f"flow:{prefix}", "kind": "flow", "label": f"{prefix} automation"},
+            {"id": f"test:{prefix}", "kind": "apex-test", "label": f"{prefix} validation"},
+        ],
+        "edges": [
+            {"from": f"flow:{prefix}", "relation": "reads", "to": f"config:{prefix}"},
+            {"from": f"test:{prefix}", "relation": "tests", "to": f"flow:{prefix}"},
+        ],
+    }
+    add_trusted_envelopes(
+        graph,
+        snapshot_id=prefix,
+        source_hash=source_hash,
+    )
     return SalesforceSourceSnapshot(
         root=Path("."),
         contract={"application": f"{prefix} Fixture"},
         project_index={"sourceSnapshot": prefix},
-        trusted_graph_sha256=f"{prefix.casefold()}-digest",
-        graph={
-            "sourceSnapshot": prefix,
-            "nodes": [
-                {
-                    "id": f"config:{prefix}",
-                    "kind": "custom-metadata-record",
-                    "label": f"{prefix} policy",
-                },
-                {"id": f"flow:{prefix}", "kind": "flow", "label": f"{prefix} automation"},
-                {"id": f"test:{prefix}", "kind": "apex-test", "label": f"{prefix} validation"},
-            ],
-            "edges": [
-                {"from": f"flow:{prefix}", "relation": "reads", "to": f"config:{prefix}"},
-                {"from": f"test:{prefix}", "relation": "tests", "to": f"flow:{prefix}"},
-            ],
-        },
+        trusted_graph_sha256=source_hash,
+        graph=graph,
     )
 
 
@@ -86,13 +94,18 @@ def test_ambiguous_high_overlap_request_abstains() -> None:
     assert (evidence, impacts, tests, gaps) == ([], [], [], [])
 
 
-def test_benign_context_relation_is_observed_without_blocking_material_reasoning() -> None:
+def test_unmapped_relation_touching_material_endpoint_blocks_reasoning() -> None:
     source = topology("Alpha")
     source.graph["nodes"].append(
         {"id": "file:Guide", "kind": "file", "label": "Architecture guide"}
     )
     source.graph["edges"].append(
         {"from": "file:Guide", "relation": "describes", "to": "config:Alpha"}
+    )
+    add_trusted_envelopes(
+        source.graph,
+        snapshot_id=source.snapshot_id,
+        source_hash=source.trusted_graph_sha256 or "",
     )
 
     run = AssuranceService(source).analyze(
@@ -102,7 +115,29 @@ def test_benign_context_relation_is_observed_without_blocking_material_reasoning
         )
     )
 
-    assert ("UNTRAVERSED_CONTEXT_RELATION", False) in {
+    assert ("UNMAPPED_RELATION", True) in {(item.code, item.blocking) for item in run.analysis_gaps}
+    assert run.governance and not run.governance.passed
+
+
+def test_unmapped_context_only_relation_is_visible_and_nonblocking() -> None:
+    source = topology("Alpha")
+    source.graph["nodes"].extend(
+        [
+            {"id": "file:One", "kind": "file", "label": "One"},
+            {"id": "file:Two", "kind": "file", "label": "Two"},
+        ]
+    )
+    source.graph["edges"].append({"from": "file:One", "relation": "describes", "to": "file:Two"})
+    add_trusted_envelopes(
+        source.graph,
+        snapshot_id=source.snapshot_id,
+        source_hash=source.trusted_graph_sha256 or "",
+    )
+
+    run = AssuranceService(source).analyze(
+        ChangeRequest(requirement="One", change_intent=ChangeIntent.PLANNED_CHANGE)
+    )
+
+    assert ("UNMAPPED_RELATION", False) in {
         (item.code, item.blocking) for item in run.analysis_gaps
     }
-    assert run.governance and run.governance.passed

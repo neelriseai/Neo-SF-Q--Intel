@@ -6,6 +6,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from neo_sf_q_intel.ontology import (
+    Materiality,
+    NodeRole,
+    OntologyContractError,
+    load_canonical_ontology,
+)
+
 
 class ReasoningPolicyError(RuntimeError):
     pass
@@ -20,6 +27,9 @@ class NodeKindPolicy:
 @dataclass(frozen=True)
 class ReasoningPolicy:
     schema_version: str
+    ontology_id: str
+    ontology_version: str
+    ontology_sha256: str
     unknown_kind_action: str
     seed_count: int
     traversal_depth: int
@@ -54,6 +64,7 @@ class ReasoningPolicy:
             raise ReasoningPolicyError("Reasoning policy is missing or invalid") from exc
         limits = body.get("limits", {})
         retrieval = body.get("retrieval", {})
+        ontology_ref = body.get("ontologyRef", {})
         kinds = body.get("nodeKinds", {})
         low_information_tokens = body.get("lowInformationTokens")
         if body.get("unknownKindAction") != "ABSTAIN" or not isinstance(kinds, dict):
@@ -75,6 +86,37 @@ class ReasoningPolicy:
             if role == "IMPACT" and severity not in valid_severities:
                 raise ReasoningPolicyError(f"Impact node kind {kind} needs a severity")
             parsed[str(kind)] = NodeKindPolicy(role=role, severity=severity)
+        ontology_path_value = ontology_ref.get("path")
+        if not isinstance(ontology_path_value, str) or not ontology_path_value.endswith(".json"):
+            raise ReasoningPolicyError("Reasoning policy needs a canonical ontology path")
+        repository_root = policy_path.resolve().parent.parent
+        resolved_ontology_path = (repository_root / ontology_path_value).resolve()
+        try:
+            resolved_ontology_path.relative_to(repository_root)
+            ontology = load_canonical_ontology(resolved_ontology_path)
+        except (ValueError, OntologyContractError) as exc:
+            raise ReasoningPolicyError("Canonical ontology is missing or invalid") from exc
+        expected_ontology = (
+            ontology_ref.get("id"),
+            ontology_ref.get("version"),
+            ontology_ref.get("sha256"),
+        )
+        actual_ontology = (
+            ontology.ontology_id,
+            ontology.ontology_version,
+            ontology.sha256,
+        )
+        if expected_ontology != actual_ontology:
+            raise ReasoningPolicyError("Reasoning policy ontology identity does not match")
+        expected_roles = {
+            node.id: _reasoning_role(node.role, node.materiality) for node in ontology.node_classes
+        }
+        if not set(parsed) <= set(expected_roles) or any(
+            parsed[node_id].role != expected_roles[node_id] for node_id in parsed
+        ):
+            raise ReasoningPolicyError(
+                "Reasoning node classes must be an explicit canonical ontology subset"
+            )
         numeric_limits = [
             limits.get("seedCount"),
             limits.get("traversalDepth"),
@@ -110,7 +152,6 @@ class ReasoningPolicy:
             raise ReasoningPolicyError("Retrieval thresholds need a versioned evaluation-set ID")
         if not isinstance(eval_set_path, str) or not eval_set_path.endswith(".json"):
             raise ReasoningPolicyError("Retrieval thresholds need a JSON evaluation-set path")
-        repository_root = policy_path.resolve().parent.parent
         resolved_eval_path = (repository_root / eval_set_path).resolve()
         try:
             resolved_eval_path.relative_to(repository_root)
@@ -138,8 +179,15 @@ class ReasoningPolicy:
             or not all(isinstance(item, str) and item for item in relations)
         ):
             raise ReasoningPolicyError("Reasoning policy needs traversable relations")
+        if not set(relations) <= set(ontology.relations_by_id):
+            raise ReasoningPolicyError(
+                "Reasoning relations must be an explicit canonical ontology subset"
+            )
         return cls(
             schema_version=str(body.get("schemaVersion", "")),
+            ontology_id=ontology.ontology_id,
+            ontology_version=ontology.ontology_version,
+            ontology_sha256=ontology.sha256,
             unknown_kind_action="ABSTAIN",
             seed_count=numeric_limits[0],
             traversal_depth=numeric_limits[1],
@@ -161,7 +209,11 @@ class ReasoningPolicy:
             retrieval_eval_set_sha256=actual_eval_sha256,
             policy_sha256=hashlib.sha256(
                 json.dumps(
-                    {"policy": body, "evaluationSet": eval_body},
+                    {
+                        "policy": body,
+                        "evaluationSet": eval_body,
+                        "ontology": ontology.model_dump(mode="json", by_alias=True),
+                    },
                     sort_keys=True,
                     separators=(",", ":"),
                 ).encode()
@@ -169,3 +221,13 @@ class ReasoningPolicy:
             node_kinds=parsed,
             traversable_relations=frozenset(relations),
         )
+
+
+def _reasoning_role(role: NodeRole, materiality: Materiality) -> str:
+    if materiality is Materiality.SUPPORTING:
+        return "EVIDENCE"
+    if role is NodeRole.TEST:
+        return "VALIDATION"
+    if role in {NodeRole.REQUIREMENT, NodeRole.CAPABILITY, NodeRole.ACTOR}:
+        return "CONTEXT"
+    return "IMPACT"

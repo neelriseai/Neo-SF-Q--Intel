@@ -64,6 +64,15 @@ def test_empty_metric_populations_are_not_applicable_without_false_blocking() ->
         reasoning_policy_sha256="0" * 64,
         reasoning_eval_set_id="unit-fixture",
         reasoning_eval_set_sha256="1" * 64,
+        source_snapshot="fixture-snapshot",
+        source_graph_sha256="5" * 64,
+        ontology_id="fixture-ontology",
+        ontology_version="1.0.0",
+        ontology_sha256="2" * 64,
+        source_profile_id="fixture-profile",
+        source_profile_version="1.0.0",
+        source_profile_sha256="3" * 64,
+        normalized_graph_sha256="4" * 64,
         evidence=[
             EvidenceRef(
                 evidence_id="source:one",
@@ -369,9 +378,7 @@ def test_release_boundary_revalidates_policy_copy_updates() -> None:
 
     policy = GovernancePolicy.load()
     bypassed = policy.model_copy(
-        update={
-            "release_authority": policy.release_authority.model_copy(update={"enabled": True})
-        }
+        update={"release_authority": policy.release_authority.model_copy(update={"enabled": True})}
     )
     run = _analyzed_run()
     _record_result(run, ExecutionOutcome.PASSED)

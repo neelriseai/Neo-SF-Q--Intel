@@ -18,38 +18,42 @@ from neo_sf_q_intel.observability import MAX_AUDIT_EVENT_BYTES, emit_agent_activ
 from neo_sf_q_intel.repository import InMemoryRunRepository
 from neo_sf_q_intel.salesforce_source import SalesforceSourceSnapshot
 from neo_sf_q_intel.service import AssuranceService
+from tests.graph_fixtures import add_trusted_envelopes, fixture_digest
 
 
 def source() -> SalesforceSourceSnapshot:
+    source_hash = fixture_digest("workflow-graph")
+    graph = {
+        "sourceSnapshot": "demo",
+        "nodes": [
+            {
+                "id": "lwc:Workbench",
+                "kind": "lightning-component",
+                "label": "Deal Workbench",
+                "source": "force-app/lwc/workbench/workbench.js",
+            },
+            {
+                "id": "test:Workbench",
+                "kind": "apex-test",
+                "label": "Workbench Test",
+                "source": "force-app/classes/WorkbenchTest.cls",
+            },
+        ],
+        "edges": [
+            {
+                "from": "test:Workbench",
+                "relation": "tests",
+                "to": "lwc:Workbench",
+            }
+        ],
+    }
+    add_trusted_envelopes(graph, snapshot_id="demo", source_hash=source_hash)
     return SalesforceSourceSnapshot(
         root=Path("."),
         contract={"schemaVersion": "1.4.0", "application": "Workflow Fixture"},
         project_index={"sourceSnapshot": "demo"},
-        trusted_graph_sha256="demo-digest",
-        graph={
-            "sourceSnapshot": "demo",
-            "nodes": [
-                {
-                    "id": "lwc:Workbench",
-                    "kind": "lightning-component",
-                    "label": "Deal Workbench",
-                    "source": "force-app/lwc/workbench/workbench.js",
-                },
-                {
-                    "id": "test:Workbench",
-                    "kind": "apex-test",
-                    "label": "Workbench Test",
-                    "source": "force-app/classes/WorkbenchTest.cls",
-                },
-            ],
-            "edges": [
-                {
-                    "from": "test:Workbench",
-                    "relation": "tests",
-                    "to": "lwc:Workbench",
-                }
-            ],
-        },
+        trusted_graph_sha256=source_hash,
+        graph=graph,
     )
 
 
@@ -64,10 +68,32 @@ def test_specialist_agents_produce_traceable_governed_run() -> None:
     )
 
     assert run.status is RunStatus.COMPLETED
-    assert run.reasoning_policy_version == "1.1.0"
+    assert run.reasoning_policy_version == "2.0.0"
     assert len(run.reasoning_policy_sha256) == 64
     assert run.reasoning_eval_set_id == "retrieval-boundaries-v1"
     assert len(run.reasoning_eval_set_sha256) == 64
+    assert run.schema_version == "2.0.0"
+    assert run.source_snapshot == "demo"
+    assert run.source_graph_sha256 == fixture_digest("workflow-graph")
+    assert run.ontology_id == "change-evidence-core"
+    assert run.ontology_version == "1.0.0"
+    assert len(run.ontology_sha256) == 64
+    assert run.source_profile_id == "salesforce-application-graph"
+    assert run.source_profile_version == "1.0.0"
+    assert len(run.source_profile_sha256) == 64
+    assert len(run.normalized_graph_sha256) == 64
+    assert {
+        reference.split(":", 1)[0]
+        for reference in run.activities[0].policy_refs
+    } == {
+        "reasoning",
+        "project",
+        "source-snapshot",
+        "ontology",
+        "source-profile",
+        "normalized-graph",
+        "source-graph",
+    }
     assert [activity.agent for activity in run.activities] == [
         "Change Analyst",
         "Test Intelligence",
@@ -92,6 +118,9 @@ def test_no_evidence_causes_abstention_instead_of_invention() -> None:
     run = service.analyze(ChangeRequest(requirement="Unrelated quantum payroll change"))
 
     assert not run.evidence
+    assert run.source_snapshot == "demo"
+    assert run.source_graph_sha256 == fixture_digest("workflow-graph")
+    assert len(run.normalized_graph_sha256) == 64
     assert run.decision and run.decision.code is DecisionCode.INCOMPLETE
     assert run.activities[0].status == "ABSTAINED"
 

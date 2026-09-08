@@ -1,0 +1,217 @@
+{
+  "schemaVersion": "1.0.0",
+  "ontologyId": "change-evidence-core",
+  "ontologyVersion": "1.0.0",
+  "sha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a",
+  "nodeClasses": [
+    {"id": "requirement", "role": "REQUIREMENT", "materiality": "MATERIAL"},
+    {"id": "capability", "role": "CAPABILITY", "materiality": "MATERIAL"},
+    {"id": "code", "role": "IMPLEMENTATION", "materiality": "MATERIAL"},
+    {"id": "automation", "role": "AUTOMATION", "materiality": "MATERIAL"},
+    {"id": "configuration", "role": "CONFIGURATION", "materiality": "MATERIAL"},
+    {"id": "data-entity", "role": "DATA_SCHEMA", "materiality": "MATERIAL"},
+    {"id": "data-field", "role": "DATA_SCHEMA", "materiality": "MATERIAL"},
+    {"id": "security-policy", "role": "SECURITY", "materiality": "MATERIAL"},
+    {"id": "automated-test", "role": "TEST", "materiality": "MATERIAL"},
+    {"id": "test-specification", "role": "TEST", "materiality": "MATERIAL"},
+    {"id": "source-artifact", "role": "ARTIFACT", "materiality": "SUPPORTING"},
+    {"id": "user-interface", "role": "EXPERIENCE", "materiality": "MATERIAL"},
+    {"id": "business-process", "role": "PROCESS", "materiality": "MATERIAL"},
+    {"id": "actor", "role": "ACTOR", "materiality": "MATERIAL"},
+    {"id": "dataset", "role": "DATA_FIXTURE", "materiality": "SUPPORTING"},
+    {"id": "data-fixture", "role": "DATA_FIXTURE", "materiality": "SUPPORTING"}
+  ],
+  "relationClasses": [
+    {
+      "id": "authorizes",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "code", "targetClass": "data-entity"},
+        {"sourceClass": "security-policy", "targetClass": "code"},
+        {"sourceClass": "security-policy", "targetClass": "data-entity"},
+        {"sourceClass": "security-policy", "targetClass": "data-field"}
+      ]
+    },
+    {
+      "id": "configures",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "configuration", "targetClass": "code"},
+        {"sourceClass": "configuration", "targetClass": "data-field"},
+        {"sourceClass": "configuration", "targetClass": "user-interface"},
+        {"sourceClass": "user-interface", "targetClass": "configuration"}
+      ]
+    },
+    {
+      "id": "contains",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "data-entity", "targetClass": "data-field"},
+        {"sourceClass": "dataset", "targetClass": "data-fixture"},
+        {"sourceClass": "user-interface", "targetClass": "user-interface"}
+      ]
+    },
+    {
+      "id": "covers",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "test-specification", "targetClass": "business-process"},
+        {"sourceClass": "test-specification", "targetClass": "data-entity"},
+        {"sourceClass": "test-specification", "targetClass": "data-field"},
+        {"sourceClass": "test-specification", "targetClass": "user-interface"}
+      ]
+    },
+    {
+      "id": "creates",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "business-process", "targetClass": "data-entity"}
+      ]
+    },
+    {
+      "id": "declared-in",
+      "materiality": "SUPPORTING",
+      "legalEndpoints": [
+        {"sourceClass": "automated-test", "targetClass": "source-artifact"},
+        {"sourceClass": "automation", "targetClass": "source-artifact"},
+        {"sourceClass": "business-process", "targetClass": "source-artifact"},
+        {"sourceClass": "capability", "targetClass": "source-artifact"},
+        {"sourceClass": "code", "targetClass": "source-artifact"},
+        {"sourceClass": "configuration", "targetClass": "source-artifact"},
+        {"sourceClass": "data-entity", "targetClass": "source-artifact"},
+        {"sourceClass": "data-field", "targetClass": "source-artifact"},
+        {"sourceClass": "data-fixture", "targetClass": "source-artifact"},
+        {"sourceClass": "dataset", "targetClass": "source-artifact"},
+        {"sourceClass": "requirement", "targetClass": "source-artifact"},
+        {"sourceClass": "security-policy", "targetClass": "source-artifact"},
+        {"sourceClass": "test-specification", "targetClass": "source-artifact"},
+        {"sourceClass": "user-interface", "targetClass": "source-artifact"}
+      ]
+    },
+    {
+      "id": "guards",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "configuration", "targetClass": "data-entity"}
+      ]
+    },
+    {
+      "id": "implements",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "requirement", "targetClass": "code"}
+      ]
+    },
+    {
+      "id": "instance-of",
+      "materiality": "SUPPORTING",
+      "legalEndpoints": [
+        {"sourceClass": "configuration", "targetClass": "data-entity"},
+        {"sourceClass": "data-fixture", "targetClass": "data-entity"}
+      ]
+    },
+    {
+      "id": "invokes",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "automation", "targetClass": "code"},
+        {"sourceClass": "code", "targetClass": "business-process"},
+        {"sourceClass": "code", "targetClass": "code"},
+        {"sourceClass": "user-interface", "targetClass": "code"}
+      ]
+    },
+    {
+      "id": "manages",
+      "materiality": "SUPPORTING",
+      "legalEndpoints": [
+        {"sourceClass": "source-artifact", "targetClass": "dataset"}
+      ]
+    },
+    {
+      "id": "presents",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "user-interface", "targetClass": "data-entity"},
+        {"sourceClass": "user-interface", "targetClass": "user-interface"}
+      ]
+    },
+    {
+      "id": "reads",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "automation", "targetClass": "configuration"},
+        {"sourceClass": "automation", "targetClass": "data-field"},
+        {"sourceClass": "code", "targetClass": "configuration"},
+        {"sourceClass": "code", "targetClass": "data-entity"},
+        {"sourceClass": "code", "targetClass": "data-field"},
+        {"sourceClass": "user-interface", "targetClass": "dataset"}
+      ]
+    },
+    {
+      "id": "references",
+      "materiality": "SUPPORTING",
+      "legalEndpoints": [
+        {"sourceClass": "data-field", "targetClass": "data-entity"},
+        {"sourceClass": "data-fixture", "targetClass": "actor"},
+        {"sourceClass": "data-fixture", "targetClass": "data-field"},
+        {"sourceClass": "data-fixture", "targetClass": "data-fixture"}
+      ]
+    },
+    {
+      "id": "revalidates",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "code", "targetClass": "code"}
+      ]
+    },
+    {
+      "id": "routes",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "business-process", "targetClass": "data-field"}
+      ]
+    },
+    {
+      "id": "tests",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "automated-test", "targetClass": "automation"},
+        {"sourceClass": "automated-test", "targetClass": "business-process"},
+        {"sourceClass": "automated-test", "targetClass": "code"},
+        {"sourceClass": "automated-test", "targetClass": "configuration"},
+        {"sourceClass": "automated-test", "targetClass": "data-field"},
+        {"sourceClass": "automated-test", "targetClass": "requirement"},
+        {"sourceClass": "automated-test", "targetClass": "user-interface"},
+        {"sourceClass": "dataset", "targetClass": "requirement"},
+        {"sourceClass": "test-specification", "targetClass": "code"},
+        {"sourceClass": "test-specification", "targetClass": "configuration"},
+        {"sourceClass": "test-specification", "targetClass": "requirement"}
+      ]
+    },
+    {
+      "id": "triggers",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "data-entity", "targetClass": "automation"},
+        {"sourceClass": "data-entity", "targetClass": "code"},
+        {"sourceClass": "data-field", "targetClass": "automation"}
+      ]
+    },
+    {
+      "id": "uses",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "business-process", "targetClass": "automation"},
+        {"sourceClass": "test-specification", "targetClass": "dataset"}
+      ]
+    },
+    {
+      "id": "writes",
+      "materiality": "MATERIAL",
+      "legalEndpoints": [
+        {"sourceClass": "automation", "targetClass": "data-entity"},
+        {"sourceClass": "automation", "targetClass": "data-field"}
+      ]
+    }
+  ]
+}

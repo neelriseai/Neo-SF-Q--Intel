@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "path-bound-analysis-risk",
+  "policyVersion": "1.0.0",
+  "sha256": "57ab48f6c9016e20d599aee4ff9070e34b7583b566251ded78019d895c683e6a",
+  "ontology": {
+    "ontologyId": "change-evidence-core",
+    "ontologyVersion": "1.0.0",
+    "ontologySha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+  },
+  "propagationPolicy": {
+    "policyId": "canonical-propagation",
+    "policyVersion": "1.0.0",
+    "policySha256": "66c83e8cb13b68cbffb363a582f0a3b5927f4ec04bddc3dcab5b560b02c2cdf5"
+  },
+  "requiredFactors": ["businessCriticality", "changeIntent", "securityReach"],
+  "factors": [
+    {"factorId": "businessCriticality", "values": [{"value": "LOW", "score": 0}, {"value": "MEDIUM", "score": 2}, {"value": "HIGH", "score": 4}]},
+    {"factorId": "changeIntent", "values": [{"value": "INFORMATIONAL", "score": 0}, {"value": "PLANNED_CHANGE", "score": 1}, {"value": "OBSERVED_CHANGE", "score": 2}]},
+    {"factorId": "securityReach", "values": [{"value": "NONE", "score": 0}, {"value": "INDIRECT", "score": 2}, {"value": "DIRECT", "score": 4}]}
+  ],
+  "relationScores": [
+    {"relationClass": "authorizes", "score": 3},
+    {"relationClass": "configures", "score": 2},
+    {"relationClass": "contains", "score": 1},
+    {"relationClass": "covers", "score": 1},
+    {"relationClass": "creates", "score": 2},
+    {"relationClass": "declared-in", "score": 0},
+    {"relationClass": "guards", "score": 3},
+    {"relationClass": "implements", "score": 2},
+    {"relationClass": "instance-of", "score": 0},
+    {"relationClass": "invokes", "score": 2},
+    {"relationClass": "manages", "score": 0},
+    {"relationClass": "presents", "score": 1},
+    {"relationClass": "reads", "score": 2},
+    {"relationClass": "references", "score": 1},
+    {"relationClass": "revalidates", "score": 2},
+    {"relationClass": "routes", "score": 3},
+    {"relationClass": "tests", "score": 0},
+    {"relationClass": "triggers", "score": 2},
+    {"relationClass": "uses", "score": 1},
+    {"relationClass": "writes", "score": 3}
+  ],
+  "materialityScores": [
+    {"materiality": "MATERIAL", "score": 2},
+    {"materiality": "SUPPORTING", "score": 0}
+  ],
+  "depthBands": [
+    {"minimumDepth": 1, "maximumDepth": 1, "score": 2},
+    {"minimumDepth": 2, "maximumDepth": 2, "score": 1},
+    {"minimumDepth": 3, "maximumDepth": 4, "score": 0}
+  ],
+  "thresholds": [
+    {"level": "HIGH", "minimumScore": 10},
+    {"level": "MEDIUM", "minimumScore": 6},
+    {"level": "LOW", "minimumScore": 0}
+  ]
+}

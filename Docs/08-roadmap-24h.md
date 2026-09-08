@@ -44,6 +44,9 @@ The repository now contains a typed LangGraph workflow with four deterministic s
 deterministic governance, source graph traversal, OpenAI/Azure provider adapters, a standalone
 extension-free semantic index, PostgreSQL run/checkpoint wiring and relational foundation schema,
 three MCP tools, a bounded Salesforce CLI adapter, locator ranking and the first dashboard.
+The source graph now normalizes through a strict canonical ontology and source-owned profile; the
+ontology/profile/normalized-graph identities are bound to every run. Missing record provenance
+remains explicitly unverified rather than inheriting trust from the whole graph.
 Semantic results are not yet fused into assurance decisions. Live PostgreSQL, model-provider,
 Salesforce evidence, trusted test execution and browser-worker verification remain environment or
 implementation gates and must not be represented as completed until they are exercised end to end.
@@ -61,8 +64,8 @@ impact, test and evidence-path analysis, but every public release decision remai
 
 | Priority | Capability slice | Acceptance result |
 |---:|---|---|
-| A1 | Canonical ontology plus source-profile relation mapping | First source behavior unchanged; a renamed second fixture works without editing core policy; unmapped material relations abstain |
-| A2 | Direction-aware propagation and versioned analysis-risk policy | Relation/endpoint matrix and ordered path receipts; inverse/cycle/diamond tests; required risk inputs cannot default silently |
+| A1 | Canonical ontology plus source-profile relation mapping — foundation implemented | Normalization, independent profile pinning, source-schema bounds and adversarial mapping tests pass; completion still requires upstream record envelopes and proof that trusted first-source behavior is preserved |
+| A2 | Direction-aware propagation and versioned analysis-risk policy — isolated foundation implemented | Policy/domain tests now prove relation direction/depth, bounded path enumeration, source/profile-bound ordered edge receipts, inverse/cycle/diamond behavior and no default risk; grounded risk-factor receipts, freshness fields and assurance-workflow integration remain |
 | A3 | Deterministic `GraphContextPack` compiler | Stable pack hash; confirmed paths/provenance; explicit budgets/truncation; project/snapshot isolation |
 | A4 | Hybrid candidate fusion | Exact/graph/lexical plus in-process or ChromaDB semantic candidates; semantic hits remain non-authoritative |
 | A5 | Graph-grounded specialist proposal/verifier | Typed output; citations/endpoints restricted to pack; invalid schema/hallucinated IDs/provider outage tested |

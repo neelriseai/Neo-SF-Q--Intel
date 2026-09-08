@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -14,6 +14,7 @@ class StrictModel(BaseModel):
 
 class EvidenceState(StrEnum):
     CONFIRMED = "CONFIRMED"
+    UNVERIFIED = "UNVERIFIED"
     INFERRED = "INFERRED"
     HUMAN_CONFIRMED = "HUMAN_CONFIRMED"
     CONTRADICTORY = "CONTRADICTORY"
@@ -265,6 +266,7 @@ class ReleaseDecision(StrictModel):
 
 
 class AssuranceRun(StrictModel):
+    schema_version: Literal["1.0.0", "2.0.0"] = "2.0.0"
     run_id: UUID = Field(default_factory=uuid4)
     trace_id: UUID = Field(default_factory=uuid4)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -272,6 +274,15 @@ class AssuranceRun(StrictModel):
     reasoning_policy_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     reasoning_eval_set_id: str
     reasoning_eval_set_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    source_snapshot: str | None = None
+    source_graph_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    ontology_id: str | None = None
+    ontology_version: str | None = None
+    ontology_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    source_profile_id: str | None = None
+    source_profile_version: str | None = None
+    source_profile_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    normalized_graph_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     status: RunStatus = RunStatus.PENDING
     request: ChangeRequest
     evidence: list[EvidenceRef] = Field(default_factory=list)
@@ -286,3 +297,23 @@ class AssuranceRun(StrictModel):
     governance: GovernanceAssessment | None = None
     decision: ReleaseDecision | None = None
     recorded_decision: ReleaseDecision | None = None
+
+    @model_validator(mode="after")
+    def require_current_graph_identity(self) -> AssuranceRun:
+        if self.schema_version == "1.0.0":
+            return self
+        required = {
+            "source_snapshot": self.source_snapshot,
+            "source_graph_sha256": self.source_graph_sha256,
+            "ontology_id": self.ontology_id,
+            "ontology_version": self.ontology_version,
+            "ontology_sha256": self.ontology_sha256,
+            "source_profile_id": self.source_profile_id,
+            "source_profile_version": self.source_profile_version,
+            "source_profile_sha256": self.source_profile_sha256,
+            "normalized_graph_sha256": self.normalized_graph_sha256,
+        }
+        missing = [name for name, value in required.items() if not value]
+        if missing:
+            raise ValueError("Current assurance run lacks graph identity: " + ", ".join(missing))
+        return self

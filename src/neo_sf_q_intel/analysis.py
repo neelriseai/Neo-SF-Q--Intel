@@ -27,6 +27,16 @@ class ChangeIntelligenceService:
         seeds = self.retriever.search(
             request.requirement, request.changed_paths, limit=self.policy.seed_count
         )
+        source_gaps = [
+            AnalysisGap(
+                code=gap.code,
+                message="The source graph contains an unmapped or illegal ontology record.",
+                entity_id=gap.entity_id,
+                relation=gap.raw_term,
+                blocking=gap.blocking,
+            )
+            for gap in self.retriever.normalization_gaps
+        ]
         evidence: list[EvidenceRef] = []
         impacts: list[ImpactFinding] = []
         test_selections: list[TestSelection] = []
@@ -44,13 +54,14 @@ class ChangeIntelligenceService:
                             "Observed change intent requires a verified diff receipt; "
                             "supplied text or paths are only candidate context."
                         ),
-                    )
+                    ),
+                    *source_gaps,
                 ],
             )
         change_seeds = seeds if request.change_intent is ChangeIntent.PLANNED_CHANGE else []
         if not change_seeds:
             context = [self.retriever.evidence_for(hit.node) for hit in seeds]
-            return context, [], [], []
+            return context, [], [], source_gaps
         requirement_hash = hashlib.sha256(request.requirement.strip().encode()).hexdigest()
         direct = [
             (
@@ -63,10 +74,11 @@ class ChangeIntelligenceService:
                     "reasons": list(hit.reasons),
                     "change_intent": request.change_intent,
                     "requirement_hash": requirement_hash,
-                    "project_id": request.project_id,
+                    "project_id": self.retriever.project_id,
                     "source_ref": request.source_ref,
-                    "source_snapshot": self.retriever.source.snapshot_id,
-                    "source_hash": self.retriever.source.trusted_graph_sha256,
+                    "source_snapshot": self.retriever.source_snapshot,
+                    "source_hash": self.retriever.source_graph_sha256,
+                    **self.retriever.ontology_identity,
                 },
             )
             for hit in change_seeds
@@ -77,13 +89,25 @@ class ChangeIntelligenceService:
             limit=self.policy.max_traversal_nodes,
             allowed_relations=self.policy.traversable_relations,
         )
-        gaps = []
+        gaps = list(source_gaps)
         for gap in traversal_gaps:
             neighbor = self.retriever.nodes.get(gap.neighbor_id, {})
+            endpoints = [
+                self.retriever.nodes.get(gap.source_id, {}),
+                self.retriever.nodes.get(gap.target_id, {}),
+            ]
             neighbor_policy = self.policy.node_kinds.get(str(neighbor.get("kind", "unknown")))
+            endpoint_policies = [
+                self.policy.node_kinds.get(str(endpoint.get("kind", "unknown")))
+                for endpoint in endpoints
+            ]
             material = (
                 neighbor_policy is None
                 or neighbor_policy.role in {"IMPACT", "VALIDATION"}
+                or any(
+                    endpoint_policy is None or endpoint_policy.role in {"IMPACT", "VALIDATION"}
+                    for endpoint_policy in endpoint_policies
+                )
                 or self._context_bridges_material_node(
                     gap.neighbor_id, excluded_ids={gap.source_id, gap.target_id}
                 )
@@ -125,12 +149,14 @@ class ChangeIntelligenceService:
                     "kind": "graph-edge",
                     "source_id": hit.source_id,
                     "relation": hit.relation,
+                    "source_relation": hit.source_relation,
                     "target_id": hit.target_id,
                     "direction": hit.direction,
                     "evidence_state": hit.evidence_state,
                     "source_snapshot": hit.source_snapshot,
                     "source_hash": hit.source_hash,
                     "valid_until": hit.valid_until,
+                    **self.retriever.ontology_identity,
                 },
             )
             for hit in traversal_hits
@@ -138,6 +164,18 @@ class ChangeIntelligenceService:
         candidate_tests: list[Candidate] = []
         candidate_impacts: list[Candidate] = []
         for candidate in [*direct, *expanded]:
+            trust_gaps = self.retriever.node_trust_gaps(candidate[0])
+            if trust_gaps:
+                evidence.append(self.retriever.evidence_for(candidate[0]))
+                gaps.extend(
+                    AnalysisGap(
+                        code=trust_gap,
+                        message="A graph node lacks an explicit trusted evidence envelope.",
+                        entity_id=str(candidate[0].get("id", "unknown")),
+                    )
+                    for trust_gap in trust_gaps
+                )
+                continue
             kind = str(candidate[0].get("kind", "unknown"))
             kind_policy = self.policy.node_kinds.get(kind)
             if kind_policy is None:
@@ -158,7 +196,7 @@ class ChangeIntelligenceService:
         ranked_impacts = sorted(
             self._unique_candidates(candidate_impacts),
             key=lambda item: (
-                -severity_rank[self.policy.node_kinds[str(item[0]["kind"])].severity or "MEDIUM"],
+                -severity_rank[self._impact_severity(str(item[0]["kind"]))],
                 -item[3],
                 str(item[0]["id"]),
             ),
@@ -181,7 +219,7 @@ class ChangeIntelligenceService:
                     label=str(node.get("label", node["id"])),
                     kind=kind,
                     relation=f"{direction}:{relation}",
-                    severity=self.policy.node_kinds[kind].severity or "MEDIUM",
+                    severity=self._impact_severity(kind),
                     evidence_strength=evidence_strength,
                     strength_basis=self._strength_basis(receipt),
                     evidence_ids=[item.evidence_id],
@@ -242,6 +280,14 @@ class ChangeIntelligenceService:
 
     def _direct_strength(self, hit: RetrievalHit) -> float:
         return min(1.0, max(self.policy.direct_minimum_strength, hit.score))
+
+    def _impact_severity(self, canonical_kind: str) -> str:
+        severity = self.policy.node_kinds[canonical_kind].severity
+        if severity is None:
+            raise ValueError(
+                f"Canonical impact class {canonical_kind!r} has no configured risk severity"
+            )
+        return severity
 
     @staticmethod
     def _strength_basis(receipt: dict) -> str:

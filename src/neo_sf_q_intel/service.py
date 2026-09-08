@@ -46,6 +46,10 @@ class AssuranceService:
         self.persistence_warning = persistence_warning
         active_reasoning_policy = reasoning_policy or ReasoningPolicy.load()
         retriever = EvidenceRetriever(source, active_reasoning_policy)
+        self._source_project_id = retriever.project_id
+        self._source_snapshot = retriever.source_snapshot
+        self._source_graph_sha256 = retriever.source_graph_sha256
+        self._ontology_identity = dict(retriever.ontology_identity)
         self.workflow = AssuranceWorkflow(
             ChangeIntelligenceService(retriever, active_reasoning_policy),
             checkpointer=checkpointer,
@@ -57,13 +61,14 @@ class AssuranceService:
 
     def analyze(self, request: ChangeRequest) -> AssuranceRun:
         if request.project_id is None:
-            request = request.model_copy(update={"project_id": self.source.project_id})
-        elif request.project_id != self.source.project_id:
+            request = request.model_copy(update={"project_id": self._source_project_id})
+        elif request.project_id != self._source_project_id:
             raise ValueError(
                 f"Request project {request.project_id!r} does not match loaded source "
-                f"{self.source.project_id!r}"
+                f"{self._source_project_id!r}"
             )
         policy = self.workflow.analysis.policy
+        ontology_identity = self._ontology_identity
         result = self.workflow.run(
             AssuranceRun(
                 request=request,
@@ -71,6 +76,15 @@ class AssuranceService:
                 reasoning_policy_sha256=policy.policy_sha256,
                 reasoning_eval_set_id=policy.retrieval_eval_set_id,
                 reasoning_eval_set_sha256=policy.retrieval_eval_set_sha256,
+                source_snapshot=self._source_snapshot,
+                source_graph_sha256=self._source_graph_sha256,
+                ontology_id=ontology_identity["ontologyId"],
+                ontology_version=ontology_identity["ontologyVersion"],
+                ontology_sha256=ontology_identity["ontologySha256"],
+                source_profile_id=ontology_identity["sourceProfileId"],
+                source_profile_version=ontology_identity["sourceProfileVersion"],
+                source_profile_sha256=ontology_identity["sourceProfileSha256"],
+                normalized_graph_sha256=ontology_identity["normalizedGraphSha256"],
             )
         )
         self.repository.save(result)
@@ -139,6 +153,9 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
         expected_graph_sha256=settings.require_graph_sha256(),
         minimum_contract_version=settings.source_min_contract_version,
         required_capabilities=settings.required_capabilities,
+        ontology_path=settings.resolved_canonical_ontology_path(repository_root),
+        source_profile_path=settings.resolved_source_graph_profile_path(repository_root),
+        expected_source_profile_sha256=settings.require_source_profile_sha256(),
     )
     repository: RunRepository | None = None
     checkpoint_context = None

@@ -4,10 +4,29 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
 from neo_sf_q_intel.domain import EvidenceRef, EvidenceState
+from neo_sf_q_intel.ontology import (
+    CanonicalOntology,
+    NormalizedGraph,
+    OntologyContractError,
+    OntologyNormalizationError,
+    SourceGraphProfile,
+    load_canonical_ontology,
+    load_source_graph_profile,
+    normalize_source_graph,
+)
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_ONTOLOGY_PATH = REPOSITORY_ROOT / "config" / "ontology" / "canonical-ontology.json"
+DEFAULT_SOURCE_PROFILE_PATH = (
+    REPOSITORY_ROOT / "config" / "source-profiles" / "salesforce-application-graph.json"
+)
+DEFAULT_SOURCE_PROFILE_SHA256 = "4cf073120c223126be161243bb394d57b808346a8011b25730b52a8917648e10"
+SOURCE_ADAPTER_TYPE = "salesforce-application-graph"
 
 
 class SourceContractError(RuntimeError):
@@ -21,20 +40,91 @@ class SalesforceSourceSnapshot:
     graph: dict[str, Any]
     project_index: dict[str, Any]
     trusted_graph_sha256: str | None = None
+    ontology: CanonicalOntology | None = None
+    source_profile: SourceGraphProfile | None = None
 
-    @property
+    def __post_init__(self) -> None:
+        ontology = self.ontology or load_canonical_ontology(DEFAULT_ONTOLOGY_PATH)
+        profile = self.source_profile or load_source_graph_profile(
+            DEFAULT_SOURCE_PROFILE_PATH, ontology
+        )
+        object.__setattr__(self, "ontology", ontology)
+        object.__setattr__(self, "source_profile", profile)
+
+    @cached_property
+    def normalized_graph(self) -> NormalizedGraph:
+        assert self.ontology is not None
+        assert self.source_profile is not None
+        return normalize_source_graph(
+            self.graph,
+            self.ontology,
+            self.source_profile,
+            project_id=self.project_id,
+            source_graph_sha256=self.trusted_graph_sha256,
+        )
+
+    @cached_property
     def snapshot_id(self) -> str:
-        return str(self.graph["sourceSnapshot"])
+        snapshot = self.graph.get("sourceSnapshot")
+        if not snapshot:
+            raise SourceContractError("Source graph must identify its snapshot")
+        return str(snapshot)
 
     @property
     def nodes(self) -> list[dict[str, Any]]:
-        return list(self.graph["nodes"])
+        normalized = self.normalized_graph
+        gaps_by_id = _gap_codes_by_entity(normalized.trust_gaps)
+        identity = _ontology_identity(normalized)
+        return [
+            {
+                **node.attributes,
+                "id": node.node_id,
+                "kind": node.canonical_class,
+                "sourceKind": node.raw_kind,
+                "label": node.label,
+                "source": node.source,
+                "evidenceState": node.evidence_state,
+                "sourceSnapshot": node.source_snapshot,
+                "sourceHash": node.source_hash,
+                "extractorId": node.extractor_id,
+                "ontologyRole": node.role,
+                "ontologyMateriality": node.materiality,
+                "ontologyTrustGaps": gaps_by_id.get(node.node_id, []),
+                **identity,
+            }
+            for node in normalized.nodes
+        ]
 
     @property
     def edges(self) -> list[dict[str, Any]]:
-        return list(self.graph["edges"])
+        normalized = self.normalized_graph
+        gaps_by_id = _gap_codes_by_entity(normalized.trust_gaps)
+        identity = _ontology_identity(normalized)
+        return [
+            {
+                **edge.attributes,
+                "id": edge.edge_id,
+                "from": edge.source_id,
+                "relation": edge.canonical_relation,
+                "sourceRelation": edge.raw_relation,
+                "to": edge.target_id,
+                "source": edge.source,
+                "evidenceState": edge.evidence_state,
+                "sourceSnapshot": edge.source_snapshot,
+                "sourceHash": edge.source_hash,
+                "extractorId": edge.extractor_id,
+                "ontologyMateriality": edge.materiality,
+                "ontologyTrustGaps": gaps_by_id.get(edge.edge_id, []),
+                **identity,
+            }
+            for edge in normalized.edges
+        ]
 
     @property
+    def ontology_identity(self) -> dict[str, str]:
+        return _ontology_identity(self.normalized_graph)
+
+    @cached_property
     def project_id(self) -> str:
         candidate = str(
             self.contract.get("projectId")
@@ -48,16 +138,49 @@ class SalesforceSourceSnapshot:
         return normalized
 
 
+def _reject_duplicate_source_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise SourceContractError(f"Duplicate JSON key is not allowed: {key}")
+        result[key] = value
+    return result
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise SourceContractError(f"Required source artifact is missing: {path.name}")
     try:
-        body = json.loads(path.read_text(encoding="utf-8"))
+        body = json.loads(
+            path.read_text(encoding="utf-8"), object_pairs_hook=_reject_duplicate_source_keys
+        )
+    except SourceContractError:
+        raise
     except (OSError, json.JSONDecodeError) as exc:
         raise SourceContractError(f"Cannot read valid JSON from {path.name}") from exc
     if not isinstance(body, dict):
         raise SourceContractError(f"Expected an object in {path.name}")
     return body
+
+
+def _gap_codes_by_entity(gaps: tuple[Any, ...]) -> dict[str, list[str]]:
+    result: dict[str, list[str]] = {}
+    for gap in gaps:
+        if gap.entity_id:
+            result.setdefault(gap.entity_id, []).append(gap.code)
+    return {key: sorted(set(value)) for key, value in result.items()}
+
+
+def _ontology_identity(normalized: NormalizedGraph) -> dict[str, str]:
+    return {
+        "ontologyId": normalized.ontology_id,
+        "ontologyVersion": normalized.ontology_version,
+        "ontologySha256": normalized.ontology_sha256,
+        "sourceProfileId": normalized.profile_id,
+        "sourceProfileVersion": normalized.profile_version,
+        "sourceProfileSha256": normalized.profile_sha256,
+        "normalizedGraphSha256": normalized.graph_sha256,
+    }
 
 
 def _version_tuple(version: object) -> tuple[int, int, int]:
@@ -149,6 +272,9 @@ def load_salesforce_source(
     expected_graph_sha256: str,
     minimum_contract_version: str = "1.0.0",
     required_capabilities: tuple[str, ...] = (),
+    ontology_path: Path | None = None,
+    source_profile_path: Path | None = None,
+    expected_source_profile_sha256: str = DEFAULT_SOURCE_PROFILE_SHA256,
 ) -> SalesforceSourceSnapshot:
     resolved = root.resolve()
     contract = _read_json(resolved / "contracts" / "agent-interface.json")
@@ -180,28 +306,80 @@ def load_salesforce_source(
         raise SourceContractError(
             f"Required capabilities are unavailable: {', '.join(unavailable)}"
         )
-    return SalesforceSourceSnapshot(
-        resolved,
-        contract,
-        graph,
-        project_index,
-        trusted_graph_sha256=expected_graph_sha256.casefold(),
-    )
+    try:
+        ontology = load_canonical_ontology(ontology_path or DEFAULT_ONTOLOGY_PATH)
+        source_profile = load_source_graph_profile(
+            source_profile_path or DEFAULT_SOURCE_PROFILE_PATH,
+            ontology,
+            expected_sha256=expected_source_profile_sha256,
+        )
+        selector = source_profile.source_selector
+        if selector.source_type != SOURCE_ADAPTER_TYPE:
+            raise SourceContractError("Source profile does not target this source adapter")
+        contract_schema = str(contract.get("schemaVersion", ""))
+        graph_schema = str(graph.get("schemaVersion", ""))
+        try:
+            contract_supported = selector.contract_schema.supports(contract_schema)
+            graph_supported = selector.graph_schema.supports(graph_schema)
+        except ValueError as exc:
+            raise SourceContractError("Source schema version is invalid") from exc
+        if not contract_supported:
+            raise SourceContractError("Source contract schema is outside the profile range")
+        if not graph_supported:
+            raise SourceContractError("Source graph schema is outside the profile range")
+        source = SalesforceSourceSnapshot(
+            resolved,
+            contract,
+            graph,
+            project_index,
+            trusted_graph_sha256=expected_graph_sha256.casefold(),
+            ontology=ontology,
+            source_profile=source_profile,
+        )
+        normalized = source.normalized_graph
+    except (OntologyContractError, OntologyNormalizationError) as exc:
+        raise SourceContractError("Source ontology/profile normalization failed") from exc
+    blocking_mapping_gaps = [gap for gap in normalized.mapping_gaps if gap.blocking]
+    if blocking_mapping_gaps:
+        codes = ", ".join(sorted({gap.code for gap in blocking_mapping_gaps}))
+        raise SourceContractError(f"Source ontology mapping is incomplete: {codes}")
+    return source
 
 
 def node_to_evidence(
     node: dict[str, Any], snapshot_id: str, trusted_graph_sha256: str | None
 ) -> EvidenceRef:
     node_id = str(node["id"])
+    state = EvidenceState.UNVERIFIED
+    if (
+        node.get("evidenceState") == EvidenceState.CONFIRMED
+        and node.get("sourceSnapshot") == snapshot_id
+        and node.get("sourceHash") == trusted_graph_sha256
+        and node.get("extractorId")
+        and node.get("source")
+    ):
+        state = EvidenceState.CONFIRMED
     return EvidenceRef(
         evidence_id=f"graph:{snapshot_id}:{node_id}",
         kind=str(node.get("kind", "unknown")),
         label=str(node.get("label", node_id)),
-        source=str(node.get("source", "knowledge/application-graph.json")),
-        state=(EvidenceState.CONFIRMED if trusted_graph_sha256 else EvidenceState.STALE),
+        source=str(node.get("source") or "unverified:source-artifact-missing"),
+        state=state,
         attributes={
             "entity_id": node_id,
-            "snapshot_id": snapshot_id,
-            "source_hash": trusted_graph_sha256,
+            "snapshot_id": node.get("sourceSnapshot"),
+            "source_hash": node.get("sourceHash"),
+            "expected_graph_snapshot": snapshot_id,
+            "expected_graph_sha256": trusted_graph_sha256,
+            "extractor_id": node.get("extractorId"),
+            "source_kind": node.get("sourceKind"),
+            "canonical_class": node.get("kind"),
+            "ontology_id": node.get("ontologyId"),
+            "ontology_version": node.get("ontologyVersion"),
+            "ontology_sha256": node.get("ontologySha256"),
+            "source_profile_id": node.get("sourceProfileId"),
+            "source_profile_version": node.get("sourceProfileVersion"),
+            "source_profile_sha256": node.get("sourceProfileSha256"),
+            "normalized_graph_sha256": node.get("normalizedGraphSha256"),
         },
     )

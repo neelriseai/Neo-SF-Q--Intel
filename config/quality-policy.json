@@ -5,7 +5,11 @@
     "apps/web/src",
     "packages/browser/src",
     "config/governance-policy.json",
-    "config/reasoning-policy.json"
+    "config/reasoning-policy.json",
+    "config/ontology",
+    "config/source-profiles",
+    "config/propagation-policy.json",
+    "config/analysis-risk-policy.json"
   ],
   "scanExemptPaths": [
     "config/quality-policy.json"
@@ -75,12 +79,18 @@
     "config/governance-policy.json",
     "config/quality-policy.json",
     "config/reasoning-policy.json",
+    "config/ontology/canonical-ontology.json",
+    "config/source-profiles/salesforce-application-graph.json",
+    "config/propagation-policy.json",
+    "config/analysis-risk-policy.json",
     "quality/evals/retrieval-boundaries-v1.json",
     "src/neo_sf_q_intel/analysis.py",
     "src/neo_sf_q_intel/domain.py",
     "src/neo_sf_q_intel/governance.py",
     "src/neo_sf_q_intel/governance_policy.py",
     "src/neo_sf_q_intel/policy.py",
+    "src/neo_sf_q_intel/ontology.py",
+    "src/neo_sf_q_intel/propagation.py",
     "src/neo_sf_q_intel/retrieval.py",
     "src/neo_sf_q_intel/salesforce_source.py",
     "src/neo_sf_q_intel/salesforce_cli.py",
@@ -107,6 +117,7 @@
   "requiredCapabilityIds": [
     "source.contract-ingestion",
     "reasoning.graph-impact",
+    "reasoning.directional-propagation",
     "knowledge.evidence-graph",
     "knowledge.canonical-ontology",
     "reasoning.graph-context-compiler",

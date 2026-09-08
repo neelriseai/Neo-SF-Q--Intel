@@ -1,26 +1,25 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "graph-grounded-reasoning-design-2026-09-09",
+  "reviewId": "canonical-ontology-directional-propagation-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
     "config/capability-scope.json",
-    "config/governance-policy.json",
     "config/quality-policy.json",
     "config/reasoning-policy.json",
-    "quality/evals/retrieval-boundaries-v1.json",
+    "config/ontology/canonical-ontology.json",
+    "config/source-profiles/salesforce-application-graph.json",
+    "config/propagation-policy.json",
+    "config/analysis-risk-policy.json",
     "src/neo_sf_q_intel/analysis.py",
     "src/neo_sf_q_intel/domain.py",
     "src/neo_sf_q_intel/governance.py",
-    "src/neo_sf_q_intel/governance_policy.py",
     "src/neo_sf_q_intel/policy.py",
+    "src/neo_sf_q_intel/ontology.py",
+    "src/neo_sf_q_intel/propagation.py",
     "src/neo_sf_q_intel/retrieval.py",
     "src/neo_sf_q_intel/salesforce_source.py",
-    "src/neo_sf_q_intel/salesforce_cli.py",
     "src/neo_sf_q_intel/service.py",
-    "src/neo_sf_q_intel/workflow.py",
-    "src/neo_sf_q_intel/mcp_server.py",
-    "src/neo_sf_q_intel/observability.py",
-    "apps/web/src/app/page.tsx"
+    "src/neo_sf_q_intel/workflow.py"
   ],
   "reviewers": [
     "genericity_reviewer",
@@ -28,69 +27,54 @@
   ],
   "findings": [
     {
-      "code": "GOVERNANCE_EXECUTION_TRUTH_TABLE",
+      "code": "FIRST_SOURCE_RECORD_ENVELOPES_ABSENT",
       "severity": "P1",
-      "resolution": "Typed execution results and exhaustive release-decision tests added."
+      "resolution": "Retained knowledge.canonical-ontology and knowledge.evidence-graph as FOUNDATION. The current source maps without vocabulary gaps but its records remain UNVERIFIED until the upstream deterministic producer emits honest per-record envelopes and trusted-behavior equivalence is proven. Owner: source.contract-ingestion; acceptance: confirmed nodes/edges carry artifact, extractor, snapshot and trusted hash without test injection."
     },
     {
-      "code": "UNCALIBRATED_CONFIDENCE_PRESENTATION",
+      "code": "UNVERIFIED_RECORD_PROMOTION",
       "severity": "P1",
-      "resolution": "Dashboard now presents evidence basis rather than probability."
+      "resolution": "Unverified nodes are now emitted only as UNVERIFIED context with every trust gap and cannot create ImpactFinding or TestSelection objects; raw HUMAN_CONFIRMED remains untrusted without a separate approval receipt."
     },
     {
-      "code": "BYPASSABLE_SCOPE_REVIEW",
+      "code": "MUTABLE_SOURCE_IDENTITY_DIVERGENCE",
       "severity": "P1",
-      "resolution": "Exact structured manifest coverage and two-reviewer approval are enforced."
+      "resolution": "EvidenceRetriever binds one cached normalized graph, project, source snapshot, raw graph digest and ontology/profile identity at service construction; runs and analysis use that binding, with post-construction mutation coverage."
     },
     {
-      "code": "CAPABILITY_OVERCLAIMS",
+      "code": "PROFILE_AUTHENTICITY_AND_SEMANTIC_BOUNDS",
       "severity": "P1",
-      "resolution": "Dashboard and canonical docs now distinguish deterministic stages and strategy foundations from planned model, live-tool, browser and execution verticals."
+      "resolution": "The source profile is independently digest-pinned, adapter/schema-bounded and gives each raw relation its own legal endpoint subset. Duplicate JSON keys, cross-signature use, paired semantic rehash and incompatible source versions fail closed."
     },
     {
-      "code": "THIN_STAGE_OBSERVABILITY",
+      "code": "LEGACY_RUN_COMPATIBILITY",
       "severity": "P1",
-      "resolution": "Every executed workflow stage now emits a bounded typed success, abstention or sanitized failure event and deliverable with capabilities, opaque evidence/artifact references, policy identity, measurements, gaps and next action."
+      "resolution": "AssuranceRun now declares schema 2.0.0 and binds raw/canonical graph identities; pre-A1 documents load explicitly as schema 1.0.0 with unavailable identities and remain subject to the effective fail-closed decision view."
     },
     {
-      "code": "PRIOR_IMPLEMENTATION_GAPS",
+      "code": "A2_ARTIFACT_AND_ENDPOINT_INTEGRITY",
       "severity": "P1",
-      "resolution": "Open vertical-slice boundaries are recorded in the retrospective ledger and remain FOUNDATION or NEXT rather than being presented as complete."
+      "resolution": "Propagation now recomputes normalized graph and result/path digests, validates IDs/endpoints/relations, requires every receipted seed/target/edge source hash to equal the trusted raw-graph digest, and binds project, raw graph, snapshot, ontology, profile and policy identities through traversal and the independent risk-evaluation boundary."
     },
     {
-      "code": "ISOLATED_GRAPH_AND_SEMANTIC_REASONING",
+      "code": "A2_FRONTIER_TRUNCATION",
       "severity": "P1",
-      "resolution": "Canonical design now makes a deterministic graph context compiler the integration boundary for graph, lexical, semantic and historical evidence."
+      "resolution": "Path limits now bound deterministic frontier enumeration rather than trimming after enumeration; every limit emits a blocking gap, and risk abstains when propagation has a blocking gap."
     },
     {
-      "code": "SOURCE_SHAPED_RELATION_ONTOLOGY",
+      "code": "A2_RISK_FACTOR_PROVENANCE",
       "severity": "P1",
-      "resolution": "Roadmap now requires canonical relation classes with source-owned profile mappings and a renamed second-source fixture before portability is claimed."
+      "resolution": "Recorded as a truthful FOUNDATION boundary. Owner: reasoning.directional-propagation; acceptance: typed factor observations bind target, project, snapshot, request/change intent, evidence, extractor and observation validity; forged or lowering substitutions abstain."
     },
     {
-      "code": "BIDIRECTIONAL_REACHABILITY_AS_IMPACT",
+      "code": "A2_PATH_FRESHNESS",
       "severity": "P1",
-      "resolution": "Design and roadmap now identify current traversal as a foundation and require a canonical relation/endpoint propagation matrix, ordered path receipts, inverse/cycle/diamond tests and a separate versioned risk policy."
+      "resolution": "Recorded as a truthful FOUNDATION boundary. Owner: reasoning.directional-propagation; acceptance: hop receipts bind observation and validity times to an explicit evaluation time and reject expired, future or cross-snapshot evidence before workflow integration."
     },
     {
-      "code": "GRAPH_REASONING_OVERCLAIM",
-      "severity": "P1",
-      "resolution": "Scope and docs separate current trusted graph traversal from NEXT context compilation, semantic fusion, model-backed proposals and outcome memory."
-    },
-    {
-      "code": "RELEASE_EVIDENCE_INTEGRITY_GAPS",
+      "code": "RELEASE_AUTHORITY_REMAINS_INTERLOCKED",
       "severity": "P0",
-      "resolution": "A versioned policy-validated non-bypassable interlock now forces INCOMPLETE until explicit edge/path provenance, immutable release input, verified builds/obligations, scoped human approvals and deterministic conflict handling are implemented under a new reviewed schema. Service and API reads also revalidate historical decisions while repositories preserve the recorded audit fact."
-    },
-    {
-      "code": "RELEASE_AND_ANALYSIS_LANE_COUPLING",
-      "severity": "P1",
-      "resolution": "The roadmap now separates the fail-closed analysis/demo sequence from production release-authority prerequisites, allowing graph-grounded reasoning work without weakening the interlock."
-    },
-    {
-      "code": "GOVERNANCE_POLICY_VERSION_IDENTITY",
-      "severity": "P1",
-      "resolution": "The required release-authority contract is represented as governance policy schema version 2.0.0 rather than retaining the prior major version."
+      "resolution": "The non-bypassable governance 2.x interlock remains unchanged and forces INCOMPLETE; A1/A2 analysis work does not claim completion of R0 release-evidence prerequisites."
     }
   ],
   "statusDowngrades": []

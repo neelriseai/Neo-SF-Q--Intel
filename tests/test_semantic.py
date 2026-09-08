@@ -17,9 +17,9 @@ class FakeProvider:
 def source() -> SalesforceSourceSnapshot:
     return SalesforceSourceSnapshot(
         root=Path("."),
-        contract={},
+        contract={"application": "Semantic Fixture"},
         project_index={"sourceSnapshot": "semantic"},
-        trusted_graph_sha256="semantic-digest",
+        trusted_graph_sha256="a" * 64,
         graph={
             "sourceSnapshot": "semantic",
             "nodes": [

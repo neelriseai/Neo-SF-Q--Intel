@@ -143,6 +143,15 @@ def _analysis_input_sha256(run: AssuranceRun) -> str:
         "change_intent": run.request.change_intent,
         "requirement": run.request.requirement.strip(),
         "changed_paths": sorted(path.replace("\\", "/") for path in run.request.changed_paths),
+        "source_snapshot": run.source_snapshot,
+        "source_graph_sha256": run.source_graph_sha256,
+        "ontology_id": run.ontology_id,
+        "ontology_version": run.ontology_version,
+        "ontology_sha256": run.ontology_sha256,
+        "source_profile_id": run.source_profile_id,
+        "source_profile_version": run.source_profile_version,
+        "source_profile_sha256": run.source_profile_sha256,
+        "normalized_graph_sha256": run.normalized_graph_sha256,
     }
     canonical = json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(canonical).hexdigest()

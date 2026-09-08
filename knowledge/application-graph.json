@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "561f0e2939c44b1dfcb257db9035203349ed10c0855db74cd14cd1716e423d00",
+  "sourceSnapshot": "105addb02ef0bf33ac4bc1e87a5d3267c5cc7bd4bf4e93b81d65dc862ae2f54c",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -502,6 +502,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:config/analysis-risk-policy.json",
+      "kind": "file",
+      "label": "analysis-risk-policy.json",
+      "source": "config/analysis-risk-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/capability-scope.json",
       "kind": "file",
       "label": "capability-scope.json",
@@ -518,6 +526,22 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/ontology/canonical-ontology.json",
+      "kind": "file",
+      "label": "canonical-ontology.json",
+      "source": "config/ontology/canonical-ontology.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:config/propagation-policy.json",
+      "kind": "file",
+      "label": "propagation-policy.json",
+      "source": "config/propagation-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/quality-policy.json",
       "kind": "file",
       "label": "quality-policy.json",
@@ -530,6 +554,14 @@
       "kind": "file",
       "label": "reasoning-policy.json",
       "source": "config/reasoning-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:config/source-profiles/salesforce-application-graph.json",
+      "kind": "file",
+      "label": "salesforce-application-graph.json",
+      "source": "config/source-profiles/salesforce-application-graph.json",
       "category": "policy",
       "authority": "authoritative-source"
     },
@@ -642,6 +674,14 @@
       "kind": "file",
       "label": "retrieval-boundaries-v1.json",
       "source": "quality/evals/retrieval-boundaries-v1.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-canonical-ontology-propagation.md",
+      "kind": "file",
+      "label": "2026-09-09-canonical-ontology-propagation.md",
+      "source": "quality/reviews/2026-09-09-canonical-ontology-propagation.md",
       "category": "project",
       "authority": "supporting"
     },
@@ -790,6 +830,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/ontology.py",
+      "kind": "file",
+      "label": "ontology.py",
+      "source": "src/neo_sf_q_intel/ontology.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/policy.py",
       "kind": "file",
       "label": "policy.py",
@@ -802,6 +850,14 @@
       "kind": "file",
       "label": "preflight.py",
       "source": "src/neo_sf_q_intel/preflight.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/propagation.py",
+      "kind": "file",
+      "label": "propagation.py",
+      "source": "src/neo_sf_q_intel/propagation.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -878,6 +934,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/graph_fixtures.py",
+      "kind": "file",
+      "label": "graph_fixtures.py",
+      "source": "tests/graph_fixtures.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_analysis.py",
       "kind": "file",
       "label": "test_analysis.py",
@@ -922,6 +986,22 @@
       "kind": "file",
       "label": "test_mcp_server.py",
       "source": "tests/test_mcp_server.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_ontology.py",
+      "kind": "file",
+      "label": "test_ontology.py",
+      "source": "tests/test_ontology.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_propagation.py",
+      "kind": "file",
+      "label": "test_propagation.py",
+      "source": "tests/test_propagation.py",
       "category": "test",
       "authority": "verification"
     },
@@ -1056,7 +1136,15 @@
       "kind": "capability",
       "label": "reasoning.graph-impact",
       "status": "FOUNDATION",
-      "summary": "Operates on typed nodes and a versioned allowlist without business-object names; canonical source profiles, direction-aware propagation/path receipts and a separate risk policy remain planned.",
+      "summary": "Operates on canonical typed nodes and relations without source vocabulary in core policy; direction-aware propagation, complete ordered path receipts and a separate risk policy remain A2.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:reasoning.directional-propagation",
+      "kind": "capability",
+      "label": "reasoning.directional-propagation",
+      "status": "FOUNDATION",
+      "summary": "Uses source-neutral canonical relations and endpoint roles with explicit direction, depth, evidence-state and path-receipt policies; runtime workflow integration remains pending.",
       "authority": "policy"
     },
     {
@@ -1064,15 +1152,15 @@
       "kind": "capability",
       "label": "knowledge.evidence-graph",
       "status": "FOUNDATION",
-      "summary": "Treats the project- and snapshot-bound evidence graph as the authority substrate; current source JSON ingestion and trusted traversal precede canonical relation profiles and durable graph ports.",
+      "summary": "Treats project-, snapshot-, ontology- and profile-bound normalized evidence as the authority substrate; missing record envelopes remain unverified while durable graph ports and complete path replay remain planned.",
       "authority": "policy"
     },
     {
       "id": "capability:knowledge.canonical-ontology",
       "kind": "capability",
       "label": "knowledge.canonical-ontology",
-      "status": "NEXT",
-      "summary": "Will map source-owned node and relation vocabulary into versioned canonical classes, directions, endpoint roles and materiality without first-application names in core policy.",
+      "status": "FOUNDATION",
+      "summary": "Deterministically normalizes the current source vocabulary into versioned canonical classes and preserves mapping/trust gaps. Completion requires upstream record envelopes and proof that trusted first-source behavior is preserved; propagation/risk remain separate A2 policy.",
       "authority": "policy"
     },
     {
@@ -1376,13 +1464,48 @@
     },
     {
       "from": "capability:knowledge.canonical-ontology",
+      "relation": "implemented_by",
+      "to": "file:config/ontology/canonical-ontology.json"
+    },
+    {
+      "from": "capability:knowledge.canonical-ontology",
+      "relation": "implemented_by",
+      "to": "file:config/source-profiles/salesforce-application-graph.json"
+    },
+    {
+      "from": "capability:knowledge.canonical-ontology",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "capability:knowledge.canonical-ontology",
       "relation": "owned_by",
       "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:knowledge.canonical-ontology",
+      "relation": "verified_by",
+      "to": "file:tests/test_ontology.py"
+    },
+    {
+      "from": "capability:knowledge.canonical-ontology",
+      "relation": "verified_by",
+      "to": "file:tests/test_reasoning_policy.py"
+    },
+    {
+      "from": "capability:knowledge.canonical-ontology",
+      "relation": "verified_by",
+      "to": "file:tests/test_workflow.py"
     },
     {
       "from": "capability:knowledge.evidence-graph",
       "relation": "implemented_by",
       "to": "file:migrations/001_assurance_runs.sql"
+    },
+    {
+      "from": "capability:knowledge.evidence-graph",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
       "from": "capability:knowledge.evidence-graph",
@@ -1398,6 +1521,11 @@
       "from": "capability:knowledge.evidence-graph",
       "relation": "owned_by",
       "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:knowledge.evidence-graph",
+      "relation": "verified_by",
+      "to": "file:tests/test_ontology.py"
     },
     {
       "from": "capability:knowledge.evidence-graph",
@@ -1550,6 +1678,31 @@
       "to": "file:tests/test_scenario_independence.py"
     },
     {
+      "from": "capability:reasoning.directional-propagation",
+      "relation": "implemented_by",
+      "to": "file:config/analysis-risk-policy.json"
+    },
+    {
+      "from": "capability:reasoning.directional-propagation",
+      "relation": "implemented_by",
+      "to": "file:config/propagation-policy.json"
+    },
+    {
+      "from": "capability:reasoning.directional-propagation",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "capability:reasoning.directional-propagation",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:reasoning.directional-propagation",
+      "relation": "verified_by",
+      "to": "file:tests/test_propagation.py"
+    },
+    {
       "from": "capability:reasoning.graph-context-compiler",
       "relation": "owned_by",
       "to": "owner:Change Analyst"
@@ -1572,6 +1725,11 @@
     {
       "from": "capability:reasoning.graph-impact",
       "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/policy.py"
     },
     {
@@ -1588,6 +1746,11 @@
       "from": "capability:reasoning.graph-impact",
       "relation": "verified_by",
       "to": "file:tests/test_analysis.py"
+    },
+    {
+      "from": "capability:reasoning.graph-impact",
+      "relation": "verified_by",
+      "to": "file:tests/test_ontology.py"
     },
     {
       "from": "capability:reasoning.graph-impact",
@@ -1840,6 +2003,11 @@
       "to": "file:src/neo_sf_q_intel/domain.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/policy.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/preflight.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/config.py"
@@ -1848,6 +2016,11 @@
       "from": "file:src/neo_sf_q_intel/preflight.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/propagation.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/providers.py",
@@ -1878,6 +2051,11 @@
       "from": "file:src/neo_sf_q_intel/salesforce_source.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/salesforce_source.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/semantic.py",
@@ -2110,6 +2288,21 @@
       "to": "file:src/neo_sf_q_intel/service.py"
     },
     {
+      "from": "file:tests/test_ontology.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:tests/test_propagation.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:tests/test_propagation.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
       "from": "file:tests/test_reasoning_policy.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/analysis.py"
@@ -2153,6 +2346,11 @@
       "from": "file:tests/test_salesforce_cli.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/salesforce_cli.py"
+    },
+    {
+      "from": "file:tests/test_salesforce_source.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
       "from": "file:tests/test_salesforce_source.py",

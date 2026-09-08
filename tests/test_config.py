@@ -48,3 +48,24 @@ def test_sqlite_fallback_path_is_repository_relative() -> None:
 
     assert settings.resolved_sqlite_path(Path("workspace")).is_absolute()
     assert settings.resolved_sqlite_path(Path("workspace")).name == "fallback.db"
+
+
+def test_ontology_and_source_profile_paths_are_repository_relative() -> None:
+    settings = Settings(allow_llm=False)
+
+    ontology = settings.resolved_canonical_ontology_path(Path("workspace"))
+    profile = settings.resolved_source_graph_profile_path(Path("workspace"))
+
+    assert ontology == Path("workspace/config/ontology/canonical-ontology.json").resolve()
+    assert (
+        profile
+        == Path("workspace/config/source-profiles/salesforce-application-graph.json").resolve()
+    )
+    assert len(settings.require_source_profile_sha256()) == 64
+
+
+def test_source_profile_digest_pin_must_be_valid() -> None:
+    settings = Settings(allow_llm=False, source_graph_profile_sha256="not-a-digest")
+
+    with pytest.raises(ValueError, match="SOURCE_GRAPH_PROFILE_SHA256"):
+        settings.require_source_profile_sha256()

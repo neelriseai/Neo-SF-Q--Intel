@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from neo_sf_q_intel.domain import HealingProposal, ImpactFinding
 
-HEALABLE_KINDS = {"field", "lightning-component", "lightning-page"}
+HEALABLE_KINDS = {"data-field", "user-interface"}
 
 
 def propose_safe_healing(impacts: list[ImpactFinding]) -> list[HealingProposal]:

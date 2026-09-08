@@ -57,9 +57,15 @@ the current in-process implementation and the future ChromaDB adapter interchang
 - The LLM cannot create confirmed `READS`, `WRITES`, `CALLS`, `GRANTS_ACCESS_TO` or `TESTS` edges.
 - Snapshot mismatch invalidates earlier decisions.
 - The supplied Salesforce graph is ingested from the configured sibling repository and is never silently replaced by an LLM-extracted graph.
-- Canonical relation classes remain source-independent. A source profile maps source-specific
-  relation names to canonical classes and declares direction, evidence requirements and allowed
-  endpoint roles; an unmapped material relation causes abstention.
+- Canonical node/relation classes and legal endpoint signatures are implemented in the source-
+  independent ontology. The Salesforce source profile exhaustively maps its current vocabulary;
+  changing a source vocabulary requires a new profile rather than editing core policy. Both
+  contracts are self-hashed and pinned into the run identity.
+- Missing record-level state, source artifact, extractor, snapshot or hash remains `UNVERIFIED`.
+  A whole-graph digest does not silently promote incomplete records, and raw
+  `HUMAN_CONFIRMED` text cannot promote itself.
+- An unmapped relation touching a material endpoint or an illegal signature is blocking. A truly
+  supporting-to-supporting omission remains visible but nonblocking.
 - Graph expansion follows a reviewed propagation matrix keyed by canonical relation, changed
   endpoint and direction. The current bidirectional allowlist traversal is only a foundation and
   must not be described as causal reasoning. Every accepted impact path carries an ordered path

@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from neo_sf_q_intel.ontology import contract_sha256
 from neo_sf_q_intel.salesforce_source import SourceContractError, load_salesforce_source
 
 
@@ -13,6 +14,7 @@ def write_source(
     contract_status: str = "implemented",
     snapshots_match: bool = True,
     schema_version: str = "1.4.0",
+    graph_schema_version: str = "1.0.0",
 ) -> str:
     (root / "contracts").mkdir()
     (root / "knowledge").mkdir()
@@ -43,6 +45,7 @@ def write_source(
     graph_path.write_text(
         json.dumps(
             {
+                "schemaVersion": graph_schema_version,
                 "apiVersion": "67.0",
                 "application": "Example Salesforce Application",
                 "sourceSnapshot": snapshot,
@@ -82,6 +85,52 @@ def test_accepts_compatible_newer_contract_minor_version(tmp_path: Path) -> None
     )
 
     assert source.contract["schemaVersion"] == "1.5.0"
+
+
+@pytest.mark.parametrize("graph_schema", ["0.9.0", "2.0.0"])
+def test_rejects_graph_schema_outside_source_profile_range(
+    tmp_path: Path, graph_schema: str
+) -> None:
+    graph_hash = write_source(tmp_path, graph_schema_version=graph_schema)
+
+    with pytest.raises(SourceContractError, match="graph schema"):
+        load_salesforce_source(tmp_path, expected_graph_sha256=graph_hash)
+
+
+def test_rejects_source_profile_for_a_different_adapter(tmp_path: Path) -> None:
+    graph_hash = write_source(tmp_path)
+    profile = json.loads(
+        Path("config/source-profiles/salesforce-application-graph.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    profile["sourceSelector"]["sourceType"] = "different-graph-adapter"
+    profile["sha256"] = contract_sha256(profile)
+    profile_path = tmp_path / "wrong-profile.json"
+    profile_path.write_text(json.dumps(profile), encoding="utf-8")
+
+    with pytest.raises(SourceContractError, match="source adapter"):
+        load_salesforce_source(
+            tmp_path,
+            expected_graph_sha256=graph_hash,
+            source_profile_path=profile_path,
+            expected_source_profile_sha256=profile["sha256"],
+        )
+
+
+def test_rejects_duplicate_semantic_or_trust_json_keys(tmp_path: Path) -> None:
+    write_source(tmp_path)
+    graph_path = tmp_path / "knowledge" / "application-graph.json"
+    graph_path.write_text(
+        '{"schemaVersion":"1.0.0","apiVersion":"67.0",'
+        '"application":"Example","sourceSnapshot":"first",'
+        '"sourceSnapshot":"second","nodes":[],"edges":[]}',
+        encoding="utf-8",
+    )
+    graph_hash = hashlib.sha256(graph_path.read_bytes()).hexdigest()
+
+    with pytest.raises(SourceContractError, match="Duplicate JSON key"):
+        load_salesforce_source(tmp_path, expected_graph_sha256=graph_hash)
 
 
 def test_rejects_stale_graph(tmp_path: Path) -> None:

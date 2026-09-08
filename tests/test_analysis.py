@@ -4,45 +4,49 @@ from neo_sf_q_intel.analysis import ChangeIntelligenceService
 from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest
 from neo_sf_q_intel.retrieval import EvidenceRetriever
 from neo_sf_q_intel.salesforce_source import SalesforceSourceSnapshot
+from tests.graph_fixtures import add_trusted_envelopes, fixture_digest
 
 
 def source() -> SalesforceSourceSnapshot:
+    source_hash = fixture_digest("analysis-graph")
+    graph = {
+        "sourceSnapshot": "snapshot",
+        "nodes": [
+            {
+                "id": "field:Opportunity.Discount__c",
+                "kind": "field",
+                "label": "Discount",
+                "source": "force-app/objects/Opportunity/fields/Discount__c.field-meta.xml",
+            },
+            {
+                "id": "flow:Approval",
+                "kind": "flow",
+                "label": "Approval Flow",
+                "source": "force-app/flows/Approval.flow-meta.xml",
+            },
+            {
+                "id": "test:Policy",
+                "kind": "apex-test",
+                "label": "Policy Test",
+                "source": "force-app/classes/PolicyTest.cls",
+            },
+        ],
+        "edges": [
+            {
+                "from": "flow:Approval",
+                "relation": "reads",
+                "to": "field:Opportunity.Discount__c",
+            },
+            {"from": "test:Policy", "relation": "tests", "to": "flow:Approval"},
+        ],
+    }
+    add_trusted_envelopes(graph, snapshot_id="snapshot", source_hash=source_hash)
     return SalesforceSourceSnapshot(
         root=Path("."),
-        contract={"schemaVersion": "1.4.0"},
+        contract={"schemaVersion": "1.4.0", "application": "Analysis Fixture"},
         project_index={"sourceSnapshot": "snapshot"},
-        trusted_graph_sha256="snapshot-digest",
-        graph={
-            "sourceSnapshot": "snapshot",
-            "nodes": [
-                {
-                    "id": "field:Opportunity.Discount__c",
-                    "kind": "field",
-                    "label": "Discount",
-                    "source": "force-app/objects/Opportunity/fields/Discount__c.field-meta.xml",
-                },
-                {
-                    "id": "flow:Approval",
-                    "kind": "flow",
-                    "label": "Approval Flow",
-                    "source": "force-app/flows/Approval.flow-meta.xml",
-                },
-                {
-                    "id": "test:Policy",
-                    "kind": "apex-test",
-                    "label": "Policy Test",
-                    "source": "force-app/classes/PolicyTest.cls",
-                },
-            ],
-            "edges": [
-                {
-                    "from": "flow:Approval",
-                    "relation": "reads",
-                    "to": "field:Opportunity.Discount__c",
-                },
-                {"from": "test:Policy", "relation": "tests", "to": "flow:Approval"},
-            ],
-        },
+        trusted_graph_sha256=source_hash,
+        graph=graph,
     )
 
 
