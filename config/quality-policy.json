@@ -9,7 +9,8 @@
     "config/ontology",
     "config/source-profiles",
     "config/propagation-policy.json",
-    "config/analysis-risk-policy.json"
+    "config/analysis-risk-policy.json",
+    "config/context-compiler-policy.json"
   ],
   "scanExemptPaths": [
     "config/quality-policy.json"
@@ -83,6 +84,7 @@
     "config/source-profiles/salesforce-application-graph.json",
     "config/propagation-policy.json",
     "config/analysis-risk-policy.json",
+    "config/context-compiler-policy.json",
     "quality/evals/retrieval-boundaries-v1.json",
     "src/neo_sf_q_intel/analysis.py",
     "src/neo_sf_q_intel/domain.py",
@@ -91,6 +93,7 @@
     "src/neo_sf_q_intel/policy.py",
     "src/neo_sf_q_intel/ontology.py",
     "src/neo_sf_q_intel/propagation.py",
+    "src/neo_sf_q_intel/context_pack.py",
     "src/neo_sf_q_intel/retrieval.py",
     "src/neo_sf_q_intel/salesforce_source.py",
     "src/neo_sf_q_intel/salesforce_cli.py",

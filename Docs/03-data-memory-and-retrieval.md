@@ -42,10 +42,12 @@ ephemeral index may rank the active source snapshot, while exact, graph and lexi
 5. Build an evidence pack with token budget, provenance and freshness.
 6. Validate every agent-returned evidence ID against the pack.
 
-This sequence is the retrieval half of graph-grounded agent reasoning. It is not implemented as a
-single generic GraphRAG product or an LLM-generated graph. The deterministic context compiler owns
-selection and budgets; the agent receives a read-only `GraphContextPack`; an output verifier
-accepts only typed proposals whose endpoints and evidence IDs are present in that pack.
+This sequence is the retrieval half of graph-grounded agent reasoning. It is not represented as a
+generic GraphRAG product or an LLM-generated graph. The isolated deterministic context-compiler
+foundation now owns canonical structure/candidate selection, authority separation and atomic budgets.
+Governed source resolution, semantic-index/outcome receipts and workflow delivery remain pending;
+once integrated, an output verifier will accept only typed proposals whose endpoints and evidence
+IDs are present in the hash-valid context pack.
 
 No PostgreSQL vector extension is permitted or required. The `SemanticEvidenceIndex` port must keep
 the current in-process implementation and the future ChromaDB adapter interchangeable.

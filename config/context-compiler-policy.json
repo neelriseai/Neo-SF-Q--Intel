@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "graph-context-compiler",
+  "policyVersion": "1.0.0",
+  "sha256": "c513a7cc5d2f74991e9d15ff0eff38be7ed150e9e50c0d3f513ae9b69eccc3aa",
+  "posture": "ANALYSIS_ONLY",
+  "mandatoryPathMaterialities": ["MATERIAL"],
+  "limits": {
+    "maximumInputGraphNodes": 10000,
+    "maximumInputGraphEdges": 50000,
+    "maximumInputGraphBytes": 33554432,
+    "maximumGraphAttributeBytes": 65536,
+    "maximumGraphAttributeStringCharacters": 8192,
+    "maximumInputSeeds": 16,
+    "maximumInputPropagationPaths": 1000,
+    "maximumInputPropagationHops": 10000,
+    "maximumInputPropagationGaps": 1000,
+    "maximumInputSourceFragments": 256,
+    "maximumInputCandidateReceipts": 512,
+    "maximumAuthoritativePaths": 24,
+    "maximumAuthoritativeHops": 72,
+    "maximumSourceFragments": 24,
+    "maximumSourceCharacters": 12000,
+    "maximumCandidateReceipts": 12,
+    "maximumCandidateCharacters": 4000,
+    "maximumIdentifierCharacters": 256,
+    "maximumLocatorCharacters": 1024,
+    "maximumContentCharacters": 8192,
+    "maximumGapDetailCharacters": 1024,
+    "maximumTotalPackBytes": 262144
+  }
+}

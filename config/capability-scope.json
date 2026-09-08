@@ -50,10 +50,10 @@
     {
       "id": "reasoning.graph-context-compiler",
       "owner": "Change Analyst",
-      "status": "NEXT",
-      "genericity": "Will compile a deterministic bounded subgraph, provenance paths, source fragments, policies and prior outcomes without depending on demo entity names.",
-      "implementation": [],
-      "verification": []
+      "status": "FOUNDATION",
+      "genericity": "Compiles an analysis-only, project/snapshot-isolated context pack from replay-validated canonical structure under deterministic atomic count/character/byte budgets. Caller-supplied source fragments and semantic receipts remain non-authoritative candidates; governed resolution, seed-rationale receipts, provider token/time budgets, outcome memory and workflow consumption remain planned.",
+      "implementation": ["src/neo_sf_q_intel/context_pack.py", "config/context-compiler-policy.json"],
+      "verification": ["tests/test_context_pack.py"]
     },
     {
       "id": "reasoning.graph-grounded-agent",

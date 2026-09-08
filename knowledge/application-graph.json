@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "105addb02ef0bf33ac4bc1e87a5d3267c5cc7bd4bf4e93b81d65dc862ae2f54c",
+  "sourceSnapshot": "b62832784b09e062dbe1cf1bcf69ddb9d3f9448154ce60afe137264a3fdd5c0b",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -518,6 +518,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/context-compiler-policy.json",
+      "kind": "file",
+      "label": "context-compiler-policy.json",
+      "source": "config/context-compiler-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/governance-policy.json",
       "kind": "file",
       "label": "governance-policy.json",
@@ -686,6 +694,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-09-graph-context-pack.md",
+      "kind": "file",
+      "label": "2026-09-09-graph-context-pack.md",
+      "source": "quality/reviews/2026-09-09-graph-context-pack.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/2026-09-09-graph-grounded-reasoning-design.md",
       "kind": "file",
       "label": "2026-09-09-graph-grounded-reasoning-design.md",
@@ -778,6 +794,14 @@
       "kind": "file",
       "label": "config.py",
       "source": "src/neo_sf_q_intel/config.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/context_pack.py",
+      "kind": "file",
+      "label": "context_pack.py",
+      "source": "src/neo_sf_q_intel/context_pack.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -962,6 +986,14 @@
       "kind": "file",
       "label": "test_config.py",
       "source": "tests/test_config.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_context_pack.py",
+      "kind": "file",
+      "label": "test_context_pack.py",
+      "source": "tests/test_context_pack.py",
       "category": "test",
       "authority": "verification"
     },
@@ -1167,8 +1199,8 @@
       "id": "capability:reasoning.graph-context-compiler",
       "kind": "capability",
       "label": "reasoning.graph-context-compiler",
-      "status": "NEXT",
-      "summary": "Will compile a deterministic bounded subgraph, provenance paths, source fragments, policies and prior outcomes without depending on demo entity names.",
+      "status": "FOUNDATION",
+      "summary": "Compiles an analysis-only, project/snapshot-isolated context pack from replay-validated canonical structure under deterministic atomic count/character/byte budgets. Caller-supplied source fragments and semantic receipts remain non-authoritative candidates; governed resolution, seed-rationale receipts, provider token/time budgets, outcome memory and workflow consumption remain planned.",
       "authority": "policy"
     },
     {
@@ -1704,8 +1736,23 @@
     },
     {
       "from": "capability:reasoning.graph-context-compiler",
+      "relation": "implemented_by",
+      "to": "file:config/context-compiler-policy.json"
+    },
+    {
+      "from": "capability:reasoning.graph-context-compiler",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/context_pack.py"
+    },
+    {
+      "from": "capability:reasoning.graph-context-compiler",
       "relation": "owned_by",
       "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:reasoning.graph-context-compiler",
+      "relation": "verified_by",
+      "to": "file:tests/test_context_pack.py"
     },
     {
       "from": "capability:reasoning.graph-grounded-agent",
@@ -1956,6 +2003,21 @@
       "from": "file:src/neo_sf_q_intel/api.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/context_pack.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/context_pack.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/context_pack.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/governance.py",
@@ -2211,6 +2273,26 @@
       "from": "file:tests/test_config.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_context_pack.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_pack.py"
+    },
+    {
+      "from": "file:tests/test_context_pack.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:tests/test_context_pack.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "file:tests/test_context_pack.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
     },
     {
       "from": "file:tests/test_governance.py",

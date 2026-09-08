@@ -17,7 +17,7 @@ flowchart TB
   TA --> SVC
   UH --> SVC
   GA --> SVC
-  SVC --> CC[Deterministic context compiler - NEXT]
+  SVC --> CC[Deterministic context compiler - FOUNDATION]
   CC --> EG[Change Evidence Graph]
   CC -. bounded context pack .-> CA
   CC -. bounded context pack .-> TA
@@ -51,9 +51,10 @@ The Change Evidence Graph is the central intelligence fabric, not merely a depen
 The implemented normalization boundary maps source-owned node kinds and relations through a
 versioned, self-hashed source profile into a versioned, self-hashed canonical ontology. Illegal
 endpoint signatures and unmapped material vocabulary are explicit gaps, not guessed mappings.
-Deterministic parsers and verified runtime/test receipts populate the authority plane. A future
-context compiler selects a snapshot-isolated subgraph and supporting source/outcome evidence for
-each specialist. Model/vector components may propose semantic links in a separate inference plane;
+Deterministic parsers and verified runtime/test receipts populate the authority plane. The isolated
+context-compiler foundation selects snapshot-isolated structural paths and keeps unresolved source
+fragments non-authoritative under explicit atomic budgets. Outcome-memory ingestion, governed fragment resolution and workflow
+consumption remain planned. Model/vector components may propose semantic links in a separate inference plane;
 only deterministic verification or a separately scoped human-approval receipt can promote them. See
 `Docs/10-graph-grounded-agent-reasoning.md`.
 
