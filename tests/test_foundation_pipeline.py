@@ -91,6 +91,7 @@ def _pipeline(repository: Path) -> CandidateFoundationPipeline:
     return CandidateFoundationPipeline.from_host_configuration(
         project_id="fixture-project",
         repository_root=repository,
+        salesforce_app_root=repository / "workspace" / "dx",
         implementation_root=ROOT,
     )
 
@@ -145,6 +146,29 @@ def test_host_owned_pipeline_composes_three_replayed_foundations(tmp_path: Path)
 def test_capture_current_accepts_no_caller_scope() -> None:
     signature = inspect.signature(CandidateFoundationPipeline.capture_current)
     assert tuple(signature.parameters) == ("self",)
+
+
+def test_configured_application_root_must_match_discovered_candidate_project(
+    tmp_path: Path,
+) -> None:
+    repository = _repository(tmp_path)
+    pipeline = CandidateFoundationPipeline.from_host_configuration(
+        project_id="fixture-project",
+        repository_root=repository,
+        salesforce_app_root=repository,
+        implementation_root=ROOT,
+    )
+
+    result = pipeline.capture_current()
+
+    assert result.evidence.outcome is FoundationOutcome.ABSTAINED
+    assert tuple(stage.state for stage in result.evidence.stages) == (
+        FoundationStageState.EXECUTED,
+        FoundationStageState.FAILED,
+        FoundationStageState.NOT_RUN,
+    )
+    assert "CONFIGURED_PROJECT_ROOT_MISMATCH" in result.evidence.blocking_gap_codes
+    assert result.verified_change is result.produced_graph is result.operation_seeds is None
 
 
 def test_runtime_composer_policy_rotation_fails_closed(tmp_path: Path) -> None:

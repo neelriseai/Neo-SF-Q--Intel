@@ -122,6 +122,14 @@ bindings. `EXECUTED` means only that all three local foundation stages executed 
 evidence completeness remains `INCOMPLETE`, authority remains `ANALYSIS_ONLY`, release eligibility
 remains false and `RELEASE_EVIDENCE_MODEL_INCOMPLETE` cannot be removed.
 
+The application service exposes this as a fresh, non-persisted capture through
+`POST /api/v1/foundation/candidate-evidence`. The endpoint accepts no body, query scope or
+scope-bearing headers, returns only the bounded projection, and rejects unavailable or stale
+current verification with a fixed safe problem code. It never writes an assurance run or maps the
+projection into legacy impact, test or release-decision fields. The configured nested Salesforce
+application root must equal the unique candidate-side DX project discovered inside the configured
+Git repository; a mismatch abstains before operation-seed execution.
+
 ### Failure policy
 
 - One malformed artifact is isolated and reported; policy decides whether snapshot activation is blocked.

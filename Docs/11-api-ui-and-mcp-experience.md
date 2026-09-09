@@ -78,6 +78,15 @@ and degradation display, runtime client schema validation, zero-sample presentat
 automated accessibility/contrast audit remain follow-up work; the capability therefore remains
 `FOUNDATION`.
 
+The API separately exposes `POST /api/v1/foundation/candidate-evidence` for a fresh host-owned local
+Git candidate capture. It accepts an empty request only: any body, query parameter or scope-bearing
+header is rejected before service invocation. Successful or expected abstaining captures return
+only the bounded `CandidateFoundationEvidence`; the full verified-change, graph and operation-seed
+artifacts remain request-local. Missing configuration or current-verification races return a fixed,
+typed, `ANALYSIS_ONLY`/`INCOMPLETE`/release-false problem without exception or path text. There is no
+GET, list or persistence route. The endpoint does not extend `AssuranceRun` and cannot affect a
+release decision. A separately runtime-decoded dashboard panel remains the next UI slice.
+
 ### Engineering rules
 
 - UI and MCP never import domain or orchestration internals.

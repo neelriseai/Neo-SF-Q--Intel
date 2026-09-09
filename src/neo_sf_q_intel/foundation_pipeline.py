@@ -6,7 +6,7 @@ import json
 import re
 from dataclasses import dataclass
 from enum import StrEnum
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -74,7 +74,7 @@ class _Model(BaseModel):
 Sha256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 
 DEFAULT_FOUNDATION_PIPELINE_POLICY_SHA256 = (
-    "2d8d460eedcdcdabf0b1519f66d09653790ba803012ec0391d29f1f863c61769"
+    "2db12624614e6071a793bf780cd4ad950ced4d983181afd4041fc0ca1be03980"
 )
 
 
@@ -368,6 +368,7 @@ class CandidateFoundationPipeline:
 
     project_id: str
     repository_root: Path
+    salesforce_project_locator: str
     policy: FoundationPipelinePolicy
     change_producer: LocalGitChangeProducer
     graph_producer: LocalTreeGraphProducer
@@ -381,6 +382,7 @@ class CandidateFoundationPipeline:
         *,
         project_id: str,
         repository_root: Path,
+        salesforce_app_root: Path,
         implementation_root: Path | None = None,
     ) -> CandidateFoundationPipeline:
         """Resolve every producer and policy once in the trusted host composition root."""
@@ -388,6 +390,13 @@ class CandidateFoundationPipeline:
         if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,199}", project_id):
             raise ValueError("Project identity is not a bounded logical identifier")
         root = repository_root.resolve(strict=True)
+        app_root = salesforce_app_root.resolve(strict=True)
+        try:
+            project_locator = app_root.relative_to(root).as_posix()
+        except ValueError as exc:
+            raise ValueError("Salesforce application root is outside its Git repository") from exc
+        if not project_locator:
+            project_locator = "."
         config_root = (implementation_root or Path(__file__).resolve().parents[2]).resolve(
             strict=True
         )
@@ -426,6 +435,7 @@ class CandidateFoundationPipeline:
         return cls(
             project_id=project_id,
             repository_root=root,
+            salesforce_project_locator=project_locator,
             policy=pipeline_policy,
             change_producer=change_producer,
             graph_producer=LocalTreeGraphProducer(graph_policy),
@@ -485,6 +495,21 @@ class CandidateFoundationPipeline:
                 graph_stage,
                 None,
             )
+        if not _candidate_project_matches(graph.artifact, self.salesforce_project_locator):
+            graph_stage = _exception_stage(
+                FoundationStage.TREE_GRAPH_PRODUCTION,
+                2,
+                "source.tree-graph-production",
+                self.graph_producer.policy,
+                (
+                    ReceiptReference(
+                        role="verified-change",
+                        sha256=change.artifact.manifest_sha256,
+                    ),
+                ),
+                "CONFIGURED_PROJECT_ROOT_MISMATCH",
+            )
+            return self._blocked_result(change_stage, graph_stage, None)
 
         operation_inputs = OperationSeedInputs(
             graph_candidate=graph.artifact,
@@ -660,6 +685,15 @@ def _require_projection_artifact_binding(
         or third.valid_until != seeds.valid_until
     ):
         raise ValueError("Projection is not bound to its retained artifacts")
+
+
+def _candidate_project_matches(graph: GraphProductionArtifact, expected_locator: str) -> bool:
+    project_roots = tuple(
+        PurePosixPath(item.path).parent.as_posix()
+        for item in graph.candidate.dispositions
+        if PurePosixPath(item.path).name == "sfdx-project.json"
+    )
+    return project_roots == (expected_locator,)
 
 
 def _static_projection(evidence: CandidateFoundationEvidence) -> dict:

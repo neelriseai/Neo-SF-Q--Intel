@@ -13,6 +13,10 @@ from psycopg import OperationalError
 from neo_sf_q_intel.analysis import ChangeIntelligenceService
 from neo_sf_q_intel.config import Settings
 from neo_sf_q_intel.domain import AssuranceRun, ChangeRequest, DecisionCode, ReleaseDecision
+from neo_sf_q_intel.foundation_pipeline import (
+    CandidateFoundationEvidence,
+    CandidateFoundationPipeline,
+)
 from neo_sf_q_intel.governance import decide
 from neo_sf_q_intel.governance_policy import GovernancePolicy
 from neo_sf_q_intel.outcome_repository import (
@@ -48,6 +52,19 @@ from neo_sf_q_intel.semantic import SemanticEvidenceIndex, SemanticHit
 from neo_sf_q_intel.workflow import AssuranceWorkflow
 
 
+class FoundationPipelineUnavailable(RuntimeError):
+    """Stable, secret-safe application-boundary refusal."""
+
+    code = "FOUNDATION_PIPELINE_UNAVAILABLE"
+
+    def __init__(self) -> None:
+        super().__init__(self.code)
+
+
+FOUNDATION_PIPELINE_NOT_CONFIGURED = "FOUNDATION_PIPELINE_NOT_CONFIGURED"
+FOUNDATION_PIPELINE_CONFIGURATION_INVALID = "FOUNDATION_PIPELINE_CONFIGURATION_INVALID"
+
+
 class AssuranceService:
     def __init__(
         self,
@@ -63,6 +80,8 @@ class AssuranceService:
         outcome_persistence: str | None = None,
         degradation_codes: Iterable[str] = (),
         gap_codes: Iterable[str] = (),
+        foundation_pipeline: CandidateFoundationPipeline | None = None,
+        foundation_configuration_code: str | None = None,
     ) -> None:
         self.source = source
         self.repository = repository or InMemoryRunRepository()
@@ -70,9 +89,7 @@ class AssuranceService:
         self.persistence_warning = persistence_warning
         self.run_persistence = self.persistence_mode
         self.outcome_repository = (
-            outcome_repository
-            if outcome_repository is not None
-            else InMemoryOutcomeRepository()
+            outcome_repository if outcome_repository is not None else InMemoryOutcomeRepository()
         )
         self.outcome_persistence = outcome_persistence or self._outcome_repository_mode(
             self.outcome_repository
@@ -86,6 +103,12 @@ class AssuranceService:
         if not self.outcome_durable:
             configured_gaps.append("OUTCOME_PROCESS_CACHE_NON_DURABLE")
         self.gap_codes = tuple(dict.fromkeys(configured_gaps))
+        self._foundation_pipeline = foundation_pipeline
+        self.foundation_configuration_code = (
+            None
+            if foundation_pipeline is not None
+            else foundation_configuration_code or FOUNDATION_PIPELINE_NOT_CONFIGURED
+        )
         active_reasoning_policy = reasoning_policy or ReasoningPolicy.load()
         retriever = EvidenceRetriever(source, active_reasoning_policy)
         self._source_project_id = retriever.project_id
@@ -165,18 +188,14 @@ class AssuranceService:
         predecessor: OutcomeRecord | None,
         predecessor_chain: tuple[OutcomeRecord, ...],
     ) -> None:
-        history = predecessor_chain + (
-            (predecessor,) if predecessor is not None else ()
-        )
+        history = predecessor_chain + ((predecessor,) if predecessor is not None else ())
         for historical in history:
             self._require_source_project(historical.lineage.project_id)
             persisted = self.outcome_repository.get(
                 historical.lineage.project_id, historical.outcome_id
             )
             if persisted is None:
-                raise OutcomeReplayError(
-                    "Outcome history is not present in outcome persistence"
-                )
+                raise OutcomeReplayError("Outcome history is not present in outcome persistence")
             if persisted != historical:
                 raise OutcomeReplayError(
                     "Supplied outcome history differs from outcome persistence"
@@ -308,6 +327,25 @@ class AssuranceService:
             raise RuntimeError("Semantic retrieval requires an enabled model provider")
         return await self.semantic_index.search(query, limit)
 
+    @property
+    def foundation_capture_configured(self) -> bool:
+        """Report construction state only; runtime currency is probed by each POST."""
+
+        return self._foundation_pipeline is not None
+
+    def capture_candidate_foundation(self) -> CandidateFoundationEvidence:
+        """Capture fresh host-owned evidence without accepting or persisting caller scope."""
+
+        if self._foundation_pipeline is None:
+            raise FoundationPipelineUnavailable
+        try:
+            captured = self._foundation_pipeline.capture_current()
+            if not captured.evidence.foundation_execution_complete:
+                return captured.evidence
+            return self._foundation_pipeline.verify_current(captured).evidence
+        except Exception:
+            raise FoundationPipelineUnavailable from None
+
     def close(self) -> None:
         if self._checkpoint_context is not None:
             self._checkpoint_context.__exit__(None, None, None)
@@ -384,9 +422,7 @@ def _select_outcome_repository(
         gap_codes.append("OUTCOME_POSTGRESQL_NOT_CONFIGURED")
 
     try:
-        sqlite = SQLiteOutcomeRepository(
-            settings.resolved_outcome_sqlite_path(repository_root)
-        )
+        sqlite = SQLiteOutcomeRepository(settings.resolved_outcome_sqlite_path(repository_root))
         return sqlite, degradation_codes, gap_codes
     except (OSError, sqlite3.OperationalError) as exc:
         if not _is_sqlite_unavailable(exc):
@@ -415,6 +451,23 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
         source_profile_path=settings.resolved_source_graph_profile_path(repository_root),
         expected_source_profile_sha256=settings.require_source_profile_sha256(),
     )
+    foundation_pipeline = None
+    foundation_configuration_code = FOUNDATION_PIPELINE_NOT_CONFIGURED
+    if settings.salesforce_repository_root is not None:
+        try:
+            salesforce_repository_root, salesforce_app_root = settings.resolved_salesforce_roots(
+                repository_root
+            )
+            foundation_pipeline = CandidateFoundationPipeline.from_host_configuration(
+                project_id=source.project_id,
+                repository_root=salesforce_repository_root,
+                salesforce_app_root=salesforce_app_root,
+                implementation_root=repository_root,
+            )
+            foundation_configuration_code = None
+        except Exception:
+            foundation_pipeline = None
+            foundation_configuration_code = FOUNDATION_PIPELINE_CONFIGURATION_INVALID
     repository: RunRepository | None = None
     checkpoint_context = None
     checkpointer = None
@@ -455,8 +508,8 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
             degradation_codes.append("RUN_SQLITE_UNAVAILABLE")
             gap_codes.append("RUN_PROCESS_CACHE_NON_DURABLE")
     try:
-        outcome_repository, outcome_degradations, outcome_gaps = (
-            _select_outcome_repository(settings, repository_root)
+        outcome_repository, outcome_degradations, outcome_gaps = _select_outcome_repository(
+            settings, repository_root
         )
         degradation_codes.extend(outcome_degradations)
         gap_codes.extend(outcome_gaps)
@@ -472,6 +525,8 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
             outcome_persistence=AssuranceService._outcome_repository_mode(outcome_repository),
             degradation_codes=degradation_codes,
             gap_codes=gap_codes,
+            foundation_pipeline=foundation_pipeline,
+            foundation_configuration_code=foundation_configuration_code,
         )
     except Exception as exc:
         if checkpoint_context is not None:

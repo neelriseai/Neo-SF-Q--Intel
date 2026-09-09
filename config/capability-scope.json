@@ -49,15 +49,15 @@
       "id": "source.change-seed-mapping",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. A separately pinned zero-scope-argument host pipeline composes and current-verifies R0.4a/R0.4c/R0.4d, prevents downstream execution and artifact promotion after failure, and keeps execution status separate from invariant evidence incompleteness. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
-      "implementation": ["config/change-seed-policy.json", "config/operation-seed-policy.json", "config/foundation-pipeline-policy.json", "src/neo_sf_q_intel/change_seed.py", "src/neo_sf_q_intel/operation_seed.py", "src/neo_sf_q_intel/foundation_pipeline.py"],
-      "verification": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
+      "genericity": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. A separately pinned zero-scope-argument host pipeline composes and current-verifies R0.4a/R0.4c/R0.4d, binds the unique candidate DX root to the configured app root, prevents downstream execution and artifact promotion after failure, and keeps execution status separate from invariant evidence incompleteness. A fresh empty-request-only POST returns its bounded projection without persistence or AssuranceRun contamination. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family, live-org and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "implementation": ["config/change-seed-policy.json", "config/operation-seed-policy.json", "config/foundation-pipeline-policy.json", "src/neo_sf_q_intel/change_seed.py", "src/neo_sf_q_intel/operation_seed.py", "src/neo_sf_q_intel/foundation_pipeline.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/api.py"],
+      "verification": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py", "tests/test_service_foundation.py", "tests/test_api.py"],
       "verificationCases": {
-        "positive": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
-        "negative": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
-        "failure": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
-        "degradation": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
-        "scenarioIndependence": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"]
+        "positive": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py", "tests/test_service_foundation.py", "tests/test_api.py"],
+        "negative": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py", "tests/test_service_foundation.py", "tests/test_api.py"],
+        "failure": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py", "tests/test_service_foundation.py", "tests/test_api.py"],
+        "degradation": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py", "tests/test_service_foundation.py", "tests/test_api.py"],
+        "scenarioIndependence": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py", "tests/test_service_foundation.py", "tests/test_api.py"]
       }
     },
     {

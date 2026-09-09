@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "f7d8078d677e835312d9ccce6df3be92c389e4618d9f12e8fc6ec6b9deb55ed3",
+  "sourceSnapshot": "ddcc1ccf856c6899bcaacfe81c3ce7c714bde5a7d19b1937723e47d5e80d9922",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -974,6 +974,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-10-foundation-api-capture.md",
+      "kind": "file",
+      "label": "2026-09-10-foundation-api-capture.md",
+      "source": "quality/reviews/2026-09-10-foundation-api-capture.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/2026-09-10-foundation-pipeline.md",
       "kind": "file",
       "label": "2026-09-10-foundation-pipeline.md",
@@ -1638,6 +1646,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_service_foundation.py",
+      "kind": "file",
+      "label": "test_service_foundation.py",
+      "source": "tests/test_service_foundation.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_specialist.py",
       "kind": "file",
       "label": "test_specialist.py",
@@ -1720,7 +1736,7 @@
       "kind": "capability",
       "label": "source.change-seed-mapping",
       "status": "FOUNDATION",
-      "summary": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. A separately pinned zero-scope-argument host pipeline composes and current-verifies R0.4a/R0.4c/R0.4d, prevents downstream execution and artifact promotion after failure, and keeps execution status separate from invariant evidence incompleteness. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "summary": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. A separately pinned zero-scope-argument host pipeline composes and current-verifies R0.4a/R0.4c/R0.4d, binds the unique candidate DX root to the configured app root, prevents downstream execution and artifact promotion after failure, and keeps execution status separate from invariant evidence incompleteness. A fresh empty-request-only POST returns its bounded projection without persistence or AssuranceRun contamination. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family, live-org and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
       "authority": "policy"
     },
     {
@@ -2744,6 +2760,11 @@
     {
       "from": "capability:source.change-seed-mapping",
       "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/api.py"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/change_seed.py"
     },
     {
@@ -2758,8 +2779,18 @@
     },
     {
       "from": "capability:source.change-seed-mapping",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
       "relation": "owned_by",
       "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "verified_by",
+      "to": "file:tests/test_api.py"
     },
     {
       "from": "capability:source.change-seed-mapping",
@@ -2775,6 +2806,11 @@
       "from": "capability:source.change-seed-mapping",
       "relation": "verified_by",
       "to": "file:tests/test_operation_seed.py"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "verified_by",
+      "to": "file:tests/test_service_foundation.py"
     },
     {
       "from": "capability:source.contract-ingestion",
@@ -3055,6 +3091,11 @@
       "from": "file:src/neo_sf_q_intel/api.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/foundation_pipeline.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/api.py",
@@ -3460,6 +3501,11 @@
       "from": "file:src/neo_sf_q_intel/service.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/foundation_pipeline.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/service.py",
@@ -4158,6 +4204,21 @@
     },
     {
       "from": "file:tests/test_service_fallback.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_service_foundation.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_service_foundation.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
+      "from": "file:tests/test_service_foundation.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
     },
