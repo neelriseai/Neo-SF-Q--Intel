@@ -33,6 +33,8 @@ class Settings(BaseSettings):
 
     database_url: SecretStr | None = None
     sqlite_path: Path = Path(".runtime/neo_sf_q_intel.db")
+    outcome_sqlite_path: Path = Path(".runtime/outcome_memory.db")
+    outcome_json_path: Path = Path(".runtime/outcome_memory")
     salesforce_app_root: Path | None = None
     source_min_contract_version: str = "1.0.0"
     source_required_capabilities: str = ""
@@ -85,6 +87,12 @@ class Settings(BaseSettings):
         if self.sqlite_path.is_absolute():
             return self.sqlite_path.resolve()
         return ((repository_root or Path.cwd()) / self.sqlite_path).resolve()
+
+    def resolved_outcome_sqlite_path(self, repository_root: Path | None = None) -> Path:
+        return self._resolved_repository_path(self.outcome_sqlite_path, repository_root)
+
+    def resolved_outcome_json_path(self, repository_root: Path | None = None) -> Path:
+        return self._resolved_repository_path(self.outcome_json_path, repository_root)
 
     def resolved_canonical_ontology_path(self, repository_root: Path | None = None) -> Path:
         return self._resolved_repository_path(self.canonical_ontology_path, repository_root)

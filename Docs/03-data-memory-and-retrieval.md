@@ -7,19 +7,30 @@ LangGraph checkpoints, evidence and knowledge-chunk content/metadata, graph edge
 test/healing outcomes, evaluations and approvals. It does not store unrestricted chat transcripts,
 credentials or vector indexes.
 
-The current implemented checkpoint wires complete run documents and LangGraph checkpoints. Startup
-self-creates those tables, creates the relational foundation tables for chunks, edges and audit,
-applies reviewed idempotent migrations and validates that PostgreSQL has no vector columns. The
-application repository ports and ingestion paths for the remaining relational stores stay marked
-`FOUNDATION`; their presence in DDL is not reported as completed runtime behavior.
+The current implemented checkpoint wires complete run documents, LangGraph checkpoints and the A7
+outcome-memory foundation. Outcome memory has append-only PostgreSQL, SQLite, immutable-JSON and
+process-cache adapters behind one project-scoped port. Every append replays the complete originating
+run, module-pinned governance/outcome/evaluation contracts and any exact persisted incident chain
+before a storage or idempotency effect. Service reads replay again and fail closed on missing,
+corrupt, cross-project or inconsistent history. PostgreSQL and SQLite prevent row mutation;
+PostgreSQL also blocks table truncation. The remaining chunk, graph, audit, approval and evaluation
+ports stay `FOUNDATION`; DDL alone is never reported as completed runtime behavior.
 
-If PostgreSQL is missing or unreachable, startup automatically creates and uses the configured
-SQLite database for complete run documents. The versioned contract, project index and evidence
-graph remain available from defined JSON artifacts, while an in-process run cache is the final
-non-durable fallback if SQLite also cannot open. Health output identifies the active backend and
-degradation; fallback must never be represented as PostgreSQL durability. Schema defects and policy
-violations are not connectivity failures and therefore stop startup instead of silently falling
-back.
+If PostgreSQL is missing or unreachable, run storage automatically uses the configured SQLite
+database. Outcome storage independently falls back through auto-created SQLite, immutable JSON and
+a declared process cache. Health separates liveness from persistence readiness and reports
+`run_persistence`, `outcome_persistence`, `outcome_durable`, sanitized degradation codes and gap
+codes. An unknown/custom adapter is conservatively non-durable. Fallback occurs only during
+classified backend unavailability; schema defects, corruption, policy/replay failures, idempotency
+conflicts and ambiguous writes fail closed without switching stores. The versioned contract,
+project index and evidence graph remain available from defined JSON artifacts.
+
+This is an A7 `FOUNDATION`, not completed historical intelligence. PostgreSQL behavior still needs a
+live transaction/concurrency verification on the target machine. JSON publication is atomic per
+receipt and record but not a multi-file transaction; an identical retry repairs a receipt left by a
+crash, while a conflicting retry remains refused. HTTP/MCP exposure, signed or independently
+anchored tamper evidence, historical-policy replay, remaining outcome kinds and an adjudicated
+quality corpus remain planned.
 
 ## Vector-store decision
 

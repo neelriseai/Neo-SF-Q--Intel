@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "reasoning-workflow-policy",
+  "policy_version": "1.0.0",
+  "specialist_profiles": [
+    {
+      "profile_id": "change-analysis-profile",
+      "stage_id": "change-analysis",
+      "stage_order": 10,
+      "specialist_id": "change-analyst",
+      "specialist_version": "1.0.0",
+      "capability_id": "reasoning.graph-impact",
+      "eligible_change_intents": ["INFORMATIONAL", "OBSERVED_CHANGE", "PLANNED_CHANGE"],
+      "requires_context_seed": true
+    },
+    {
+      "profile_id": "test-profile",
+      "stage_id": "test-reasoning",
+      "stage_order": 20,
+      "specialist_id": "test-analyst",
+      "specialist_version": "1.0.0",
+      "capability_id": "quality.test-selection",
+      "eligible_change_intents": ["INFORMATIONAL", "OBSERVED_CHANGE", "PLANNED_CHANGE"],
+      "requires_context_seed": true
+    },
+    {
+      "profile_id": "healing-profile",
+      "stage_id": "healing-analysis",
+      "stage_order": 30,
+      "specialist_id": "healing-analyst",
+      "specialist_version": "1.0.0",
+      "capability_id": "automation.locator-healing",
+      "eligible_change_intents": ["PLANNED_CHANGE"],
+      "requires_context_seed": true
+    }
+  ],
+  "limits": {
+    "maximum_specialists": 8,
+    "maximum_artifact_bytes": 262144,
+    "maximum_capture_bytes": 4096,
+    "maximum_proposals_per_specialist": 1,
+    "maximum_total_proposals": 16,
+    "maximum_total_gaps": 32,
+    "maximum_result_bytes": 1048576,
+    "maximum_identifier_characters": 256,
+    "maximum_artifact_age_seconds": 3600,
+    "maximum_clock_skew_seconds": 5
+  },
+  "policy_sha256": "ec6195956b20f3c2e55b98757a6500bbbb236d8e86ca7ff8c52c10c6b46509a9"
+}

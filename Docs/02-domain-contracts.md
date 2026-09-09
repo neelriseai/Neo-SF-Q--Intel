@@ -22,12 +22,23 @@
   normalized-graph identities used by the analysis in addition to reasoning/governance policy
   identities. Pre-A1 documents load explicitly as schema `1.0.0` with unavailable identities and
   remain subject to the current fail-closed decision view.
+- `OutcomeRecord`: immutable, append-only historical candidate bound to the complete originating
+  run, project/source snapshot, graph/ontology/profile roots and module-pinned outcome/evaluation
+  policies. Implemented payloads cover trusted test execution, typed incident lifecycle events and
+  unverified human-correction claims. Incident targets carry kind, identifier and a canonical
+  run-derived artifact hash; identical bare identifiers in different artifact kinds stay distinct.
+
+Outcome records are always `HISTORICAL_CANDIDATE` / `NON_AUTHORIZING`. Recording or retrieving an
+outcome replays its originating run and current pinned contracts. It cannot confirm a graph edge,
+satisfy a release obligation, authorize a tool, approve a release or mutate the authoritative run.
 
 ## Target contracts
 
-The complete tool, test-execution and browser verticals will add domain-level `TestObligation` /
-`TestPlan`, authorized `ToolRequest` / `ToolResult`, and executable `HealingIntent` /
-`HealingDecision` contracts. Their absence is why those capabilities remain `FOUNDATION` or `NEXT`.
+The complete tool, live test-execution and browser verticals will add domain-level `TestObligation`
+/ `TestPlan`, authorized `ToolRequest` / `ToolResult`, and executable `HealingIntent` /
+`HealingDecision` contracts. Outcome memory still needs decision/override/production outcome kinds,
+historical-policy replay and public HTTP/MCP contracts. Their absence is why those capabilities
+remain `FOUNDATION` or `NEXT`.
 
 ## Evidence states
 

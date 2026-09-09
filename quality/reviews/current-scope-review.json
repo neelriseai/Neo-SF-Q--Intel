@@ -1,66 +1,63 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "graph-specialist-proposal-foundation-2026-09-09",
+  "reviewId": "reasoning-workflow-and-outcome-memory-foundations-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
     "config/capability-scope.json",
+    "config/outcome-memory-policy.json",
     "config/quality-policy.json",
-    "config/specialist-policy.json",
-    "quality/evals/graph-specialist-contract-v1.json",
-    "src/neo_sf_q_intel/specialist.py",
-    "tests/test_specialist.py",
-    "Docs/08-roadmap-24h.md",
-    "Docs/10-graph-grounded-agent-reasoning.md"
+    "config/reasoning-workflow-policy.json",
+    "migrations/003_outcome_memory.sql",
+    "quality/evals/outcome-memory-contract-v1.json",
+    "src/neo_sf_q_intel/api.py",
+    "src/neo_sf_q_intel/config.py",
+    "src/neo_sf_q_intel/governance.py",
+    "src/neo_sf_q_intel/outcome_repository.py",
+    "src/neo_sf_q_intel/outcomes.py",
+    "src/neo_sf_q_intel/reasoning_workflow.py",
+    "src/neo_sf_q_intel/safety.py",
+    "src/neo_sf_q_intel/service.py",
+    "src/neo_sf_q_intel/specialist.py"
   ],
   "reviewers": [
-    "a5_genericity_review",
-    "a5_governance_review"
+    "a7_full_genericity_review",
+    "a7_governance_review"
   ],
   "findings": [
     {
-      "code": "DIRECT_UPSTREAM_REPLAY",
-      "severity": "P0",
-      "resolution": "All specialist consumer paths retain typed original A3/A4 replay inputs and directly rerun their deterministic validators. Caller callbacks and importable seal objects were removed."
-    },
-    {
-      "code": "SPECIALIST_SECRET_AND_SESSION_SAFETY",
-      "severity": "P0",
-      "resolution": "Identifiers, prompts and captured output reject common API, GitHub, Slack, AWS, PEM, JWT, credential-URL, frontdoor and Salesforce session-token patterns. Only stable allowlisted provider and gap codes persist; raw exceptions do not."
-    },
-    {
-      "code": "PROPOSAL_ONLY_AUTHORITY_BOUNDARY",
-      "severity": "P0",
-      "resolution": "Documents, child proposals and artifacts are strict ANALYSIS_ONLY, CANDIDATE and INFERRED types with all authority and release-evidence flags false. No EvidenceRef, approval, tool execution or release-decision field is accepted."
-    },
-    {
-      "code": "IMMUTABLE_SPECIALIST_ROOTS",
+      "code": "A6_NON_AUTHORIZING_REPLAY_CONSUMER",
       "severity": "P1",
-      "resolution": "Repository policy, evaluation, prompt schema and ontology paths/digests are internally pinned and non-overridable at the public consumer boundary. Provider profiles and captured outcomes have full independent digests."
+      "resolution": "The separate advisory consumer replays module-pinned A3/A4/A5 inputs, complete request and graph roots, current governance and run immutability; specialist failures cannot mutate facts or release authority."
     },
     {
-      "code": "ORDERED_FACT_BOUND_CITATIONS",
+      "code": "A7_CANONICAL_APPEND_AND_READ_REPLAY",
       "severity": "P1",
-      "resolution": "Relation proposals are checked against the pinned ontology endpoint signature and the cited path's ordered source, target and canonical relation. Candidate propositions bind candidate, entity, evidence and assertion digest."
+      "resolution": "Every outcome append and service read replays the authoritative stored run, module-pinned contracts, exact evidence and bounded persisted incident history before exposing a non-authorizing candidate."
     },
     {
-      "code": "UNRESOLVED_CONFLICT_ABSTENTION",
+      "code": "A7_TYPED_TARGET_AND_IDENTITY_INTEGRITY",
       "severity": "P1",
-      "resolution": "Any unresolved fusion conflict forces document-level abstention, zero accepted proposals, a sanitized conclusion and a blocking UNRESOLVED_FUSION_CONFLICT gap; narrative winner selection cannot survive."
+      "resolution": "Incident and correction targets use typed keys and run-derived artifact hashes; duplicate evidence, tests, target keys, outcome IDs and ambiguous bare identifiers fail closed."
     },
     {
-      "code": "PROVIDER_RECEIPT_AND_BUDGET_INTEGRITY",
+      "code": "A7_SECRET_PATH_AND_PROJECT_ISOLATION",
       "severity": "P1",
-      "resolution": "The injected port owns the provider profile; host-measured timing replaces provider claims, token and response budgets are enforced, failure classifications are consistent and a full captured-outcome digest prevents paired receipt substitution."
+      "resolution": "A shared recursive safety boundary rejects credential, machine-path and file-URI variants without echoing them, while JSON and service reads enforce exact project scope and preserve safe HTTPS/API routes."
     },
     {
-      "code": "A5_REAL_PROVIDER_AND_WORKFLOW",
+      "code": "A7_APPEND_ONLY_DURABILITY",
       "severity": "P1",
-      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.graph-grounded-agent and orchestration.multi-agent. Acceptance: a trusted OpenAI/Azure adapter uses strict structured output, disabled tools and adapter-level hard cancellation, then A6 consumes replay-validated proposals without mutating deterministic facts or release authority."
+      "resolution": "PostgreSQL and SQLite reject mutation, PostgreSQL also rejects truncation, SQLite releases handles, and all adapters require exact stored predecessor chains before child effects."
     },
     {
-      "code": "A5_ADJUDICATED_QUALITY",
+      "code": "A7_DETERMINISTIC_FALLBACK_HEALTH",
       "severity": "P1",
-      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.graph-grounded-agent. Acceptance: at least twenty human-adjudicated, versioned specialist cases define inclusion, TP/FP/FN, conflict treatment and explicit thresholds. The current manifest remains NOT_RUN/0 and quality is 0/20."
+      "resolution": "Only classified initialization unavailability falls back through PostgreSQL, SQLite, JSON and process cache. Health reports run/outcome modes and conservative durability; schema, replay, corruption, conflict and ambiguous-write errors do not fall through."
+    },
+    {
+      "code": "A7_FOUNDATION_GAPS",
+      "severity": "P1",
+      "resolution": "The capability remains FOUNDATION. Live PostgreSQL verification, public HTTP/MCP access, signed anchoring, historical-policy replay, remaining outcome kinds, A3/A6 linkage and an adjudicated corpus are explicitly retained in canonical docs and the review ledger."
     }
   ],
   "statusDowngrades": []

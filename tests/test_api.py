@@ -26,8 +26,15 @@ def test_api_exposes_health_and_typed_analysis() -> None:
     )
 
     assert health.status_code == 200
+    assert health.json()["status"] == "ok"
+    assert health.json()["persistence_status"] == "degraded"
     assert health.json()["source_snapshot"] == "demo"
     assert health.json()["persistence"] == "memory-cache"
+    assert health.json()["run_persistence"] == "memory-cache"
+    assert health.json()["outcome_persistence"] == "process-cache"
+    assert health.json()["outcome_durable"] is False
+    assert health.json()["degradation_codes"] == []
+    assert health.json()["gap_codes"] == ["OUTCOME_PROCESS_CACHE_NON_DURABLE"]
     assert response.status_code == 200
     assert response.json()["decision"]["code"] == "INCOMPLETE"
 

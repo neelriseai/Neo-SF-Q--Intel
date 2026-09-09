@@ -103,6 +103,21 @@ execution time and validity window match the typed result. Future, expired and o
 are rejected. A policy allowlist is present, but a runtime test-execution producer is still `NEXT`;
 the analysis-only workflow therefore returns `INCOMPLETE` rather than manufacturing a pass.
 
+## Historical outcome-memory controls
+
+The A7 outcome policy and invariant manifest are independently self-hashed and module-pinned.
+Stored test outcomes must replay to one unique trusted execution receipt. Incident events require a
+legal, time-monotonic, bounded and already-persisted predecessor chain. Their targets are typed and
+bound to run-derived artifact hashes. Human corrections remain explicit unverified inferred claims;
+an opaque authority reference does not turn them into `HUMAN_CONFIRMED` evidence.
+
+Repositories accept only a replay request containing the exact originating run and incident history;
+the application service resolves that run from authoritative run persistence instead of trusting a
+caller copy. Append and read paths reject forged roots, future time, missing evidence, duplicate
+identities, cross-project data, unsafe credential/path text and corrupted normalized storage. These
+records are candidates for later reasoning only. The current evaluation manifest is `NOT_RUN`, has
+zero adjudicated cases and supports no outcome-quality claim.
+
 ## Planned corpus gates (not yet runtime claims)
 
 Corpus promotion gates activate only with at least 20 adjudicated cases and a frozen corpus ID.

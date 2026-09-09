@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "93360caca0d5116e0346fb542f01243d311a1f4779dc2c41cf98c26600f609d4",
+  "sourceSnapshot": "f98625e7cd87b6239fba9716a02c9aa8e6a0ea19cceee94eee8c1fa03971fa23",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -558,6 +558,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/outcome-memory-policy.json",
+      "kind": "file",
+      "label": "outcome-memory-policy.json",
+      "source": "config/outcome-memory-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/propagation-policy.json",
       "kind": "file",
       "label": "propagation-policy.json",
@@ -578,6 +586,14 @@
       "kind": "file",
       "label": "reasoning-policy.json",
       "source": "config/reasoning-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:config/reasoning-workflow-policy.json",
+      "kind": "file",
+      "label": "reasoning-workflow-policy.json",
+      "source": "config/reasoning-workflow-policy.json",
       "category": "policy",
       "authority": "authoritative-source"
     },
@@ -618,6 +634,14 @@
       "kind": "file",
       "label": "002_remove_postgres_embeddings.sql",
       "source": "migrations/002_remove_postgres_embeddings.sql",
+      "category": "persistence",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:migrations/003_outcome_memory.sql",
+      "kind": "file",
+      "label": "003_outcome_memory.sql",
+      "source": "migrations/003_outcome_memory.sql",
       "category": "persistence",
       "authority": "authoritative-source"
     },
@@ -718,6 +742,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/evals/outcome-memory-contract-v1.json",
+      "kind": "file",
+      "label": "outcome-memory-contract-v1.json",
+      "source": "quality/evals/outcome-memory-contract-v1.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/evals/retrieval-boundaries-v1.json",
       "kind": "file",
       "label": "retrieval-boundaries-v1.json",
@@ -770,6 +802,22 @@
       "kind": "file",
       "label": "2026-09-09-initial-genericity-audit.md",
       "source": "quality/reviews/2026-09-09-initial-genericity-audit.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-outcome-memory-foundation.md",
+      "kind": "file",
+      "label": "2026-09-09-outcome-memory-foundation.md",
+      "source": "quality/reviews/2026-09-09-outcome-memory-foundation.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-reasoning-workflow-consumer.md",
+      "kind": "file",
+      "label": "2026-09-09-reasoning-workflow-consumer.md",
+      "source": "quality/reviews/2026-09-09-reasoning-workflow-consumer.md",
       "category": "project",
       "authority": "supporting"
     },
@@ -926,6 +974,22 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/outcome_repository.py",
+      "kind": "file",
+      "label": "outcome_repository.py",
+      "source": "src/neo_sf_q_intel/outcome_repository.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/outcomes.py",
+      "kind": "file",
+      "label": "outcomes.py",
+      "source": "src/neo_sf_q_intel/outcomes.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/policy.py",
       "kind": "file",
       "label": "policy.py",
@@ -958,6 +1022,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/reasoning_workflow.py",
+      "kind": "file",
+      "label": "reasoning_workflow.py",
+      "source": "src/neo_sf_q_intel/reasoning_workflow.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/repository.py",
       "kind": "file",
       "label": "repository.py",
@@ -970,6 +1042,14 @@
       "kind": "file",
       "label": "retrieval.py",
       "source": "src/neo_sf_q_intel/retrieval.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/safety.py",
+      "kind": "file",
+      "label": "safety.py",
+      "source": "src/neo_sf_q_intel/safety.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -1110,6 +1190,22 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_outcome_repository.py",
+      "kind": "file",
+      "label": "test_outcome_repository.py",
+      "source": "tests/test_outcome_repository.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_outcomes.py",
+      "kind": "file",
+      "label": "test_outcomes.py",
+      "source": "tests/test_outcomes.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_propagation.py",
       "kind": "file",
       "label": "test_propagation.py",
@@ -1126,6 +1222,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_reasoning_workflow.py",
+      "kind": "file",
+      "label": "test_reasoning_workflow.py",
+      "source": "tests/test_reasoning_workflow.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_repository.py",
       "kind": "file",
       "label": "test_repository.py",
@@ -1138,6 +1242,14 @@
       "kind": "file",
       "label": "test_repository_knowledge.py",
       "source": "tests/test_repository_knowledge.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_safety.py",
+      "kind": "file",
+      "label": "test_safety.py",
+      "source": "tests/test_safety.py",
       "category": "test",
       "authority": "verification"
     },
@@ -1304,7 +1416,7 @@
       "kind": "capability",
       "label": "reasoning.graph-grounded-agent",
       "status": "FOUNDATION",
-      "summary": "Provides an isolated, provider-neutral proposal/verifier boundary that directly replays its A3/A4 inputs, derives relation legality from the pinned ontology, binds citations to ordered endpoints, preserves conflicts through abstention and emits only analysis-only candidate/inferred output. Completion requires a real structured-output provider adapter with hard cancellation, workflow consumption and an adjudicated quality corpus.",
+      "summary": "Provides a provider-neutral proposal/verifier plus a separately typed replay-validating workflow consumer. The consumer binds the complete change request and graph identity, replays current governance, isolates specialist failures, and can only emit bounded analysis-only candidate/inferred advisory results. Completion requires a real structured-output provider adapter with hard cancellation, independently persisted capture/consumption receipts, retry-safe workflow/checkpoint integration and an adjudicated quality corpus.",
       "authority": "policy"
     },
     {
@@ -1328,7 +1440,7 @@
       "kind": "capability",
       "label": "orchestration.multi-agent",
       "status": "FOUNDATION",
-      "summary": "Typed specialist stages share governed state; deeper model-backed specialist ports remain planned.",
+      "summary": "Typed deterministic stages share governed state, and an isolated policy-configured consumer deterministically merges multiple replay-verified specialist artifacts without mutating authoritative run state. Durable live-provider invocation, capture registry, checkpoint/CAS integration and event outbox remain planned.",
       "authority": "policy"
     },
     {
@@ -1392,7 +1504,7 @@
       "kind": "capability",
       "label": "memory.postgresql",
       "status": "FOUNDATION",
-      "summary": "Target primary non-vector memory. Run documents and checkpoints are wired now; evidence/chunk metadata, graph edges, audit and other governed state have schema foundations but still require application ports and tests.",
+      "summary": "Target primary non-vector memory. Run documents and checkpoints are wired, and outcome candidates have an append-only replay-validating adapter foundation. Live PostgreSQL outcome transactions/concurrency plus evidence/chunk, graph, audit, approval and evaluation application ports remain.",
       "authority": "policy"
     },
     {
@@ -1400,15 +1512,15 @@
       "kind": "capability",
       "label": "memory.resilient-fallback",
       "status": "FOUNDATION",
-      "summary": "Automatically falls back from PostgreSQL to an auto-created SQLite run store, then versioned JSON evidence plus a declared process cache.",
+      "summary": "Run storage falls back from PostgreSQL to auto-created SQLite/process memory; outcome storage independently falls back through auto-created SQLite, immutable JSON and process cache. Health exposes each active mode and never falls through on corruption, replay, schema, idempotency or ambiguous-write failures.",
       "authority": "policy"
     },
     {
       "id": "capability:memory.release-outcomes",
       "kind": "capability",
       "label": "memory.release-outcomes",
-      "status": "NEXT",
-      "summary": "Will retain append-only test, incident, decision, override and production outcomes linked to exact project/source snapshots for governed historical reasoning.",
+      "status": "FOUNDATION",
+      "summary": "Retains replay-validated, append-only and explicitly non-authorizing trusted-test, typed incident and unverified human-correction candidates linked to exact run/project/source and policy roots. Completion requires live PostgreSQL verification, HTTP/MCP exposure, signed/tamper-evident anchoring, historical-policy replay, decision/override/production kinds, prior-outcome retrieval integration and an adjudicated corpus.",
       "authority": "policy"
     },
     {
@@ -1678,6 +1790,16 @@
     {
       "from": "capability:memory.postgresql",
       "relation": "implemented_by",
+      "to": "file:migrations/003_outcome_memory.sql"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/outcome_repository.py"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/repository.py"
     },
     {
@@ -1689,6 +1811,11 @@
       "from": "capability:memory.postgresql",
       "relation": "owned_by",
       "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:memory.postgresql",
+      "relation": "verified_by",
+      "to": "file:tests/test_outcome_repository.py"
     },
     {
       "from": "capability:memory.postgresql",
@@ -1702,13 +1829,78 @@
     },
     {
       "from": "capability:memory.release-outcomes",
+      "relation": "implemented_by",
+      "to": "file:config/outcome-memory-policy.json"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "implemented_by",
+      "to": "file:migrations/003_outcome_memory.sql"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "implemented_by",
+      "to": "file:quality/evals/outcome-memory-contract-v1.json"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/outcome_repository.py"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/outcomes.py"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/safety.py"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
       "relation": "owned_by",
       "to": "owner:Governance Review"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "verified_by",
+      "to": "file:tests/test_outcome_repository.py"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "verified_by",
+      "to": "file:tests/test_outcomes.py"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "verified_by",
+      "to": "file:tests/test_safety.py"
+    },
+    {
+      "from": "capability:memory.release-outcomes",
+      "relation": "verified_by",
+      "to": "file:tests/test_service_fallback.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/api.py"
     },
     {
       "from": "capability:memory.resilient-fallback",
       "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/outcome_repository.py"
     },
     {
       "from": "capability:memory.resilient-fallback",
@@ -1724,6 +1916,21 @@
       "from": "capability:memory.resilient-fallback",
       "relation": "owned_by",
       "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "verified_by",
+      "to": "file:tests/test_api.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "verified_by",
+      "to": "file:tests/test_config.py"
+    },
+    {
+      "from": "capability:memory.resilient-fallback",
+      "relation": "verified_by",
+      "to": "file:tests/test_outcome_repository.py"
     },
     {
       "from": "capability:memory.resilient-fallback",
@@ -1763,7 +1970,17 @@
     {
       "from": "capability:orchestration.multi-agent",
       "relation": "implemented_by",
+      "to": "file:config/reasoning-workflow-policy.json"
+    },
+    {
+      "from": "capability:orchestration.multi-agent",
+      "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "capability:orchestration.multi-agent",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/reasoning_workflow.py"
     },
     {
       "from": "capability:orchestration.multi-agent",
@@ -1774,6 +1991,11 @@
       "from": "capability:orchestration.multi-agent",
       "relation": "owned_by",
       "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:orchestration.multi-agent",
+      "relation": "verified_by",
+      "to": "file:tests/test_reasoning_workflow.py"
     },
     {
       "from": "capability:orchestration.multi-agent",
@@ -1853,6 +2075,11 @@
     {
       "from": "capability:reasoning.graph-grounded-agent",
       "relation": "implemented_by",
+      "to": "file:config/reasoning-workflow-policy.json"
+    },
+    {
+      "from": "capability:reasoning.graph-grounded-agent",
+      "relation": "implemented_by",
       "to": "file:config/specialist-policy.json"
     },
     {
@@ -1863,12 +2090,22 @@
     {
       "from": "capability:reasoning.graph-grounded-agent",
       "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/reasoning_workflow.py"
+    },
+    {
+      "from": "capability:reasoning.graph-grounded-agent",
+      "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "capability:reasoning.graph-grounded-agent",
       "relation": "owned_by",
       "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:reasoning.graph-grounded-agent",
+      "relation": "verified_by",
+      "to": "file:tests/test_reasoning_workflow.py"
     },
     {
       "from": "capability:reasoning.graph-grounded-agent",
@@ -2216,6 +2453,46 @@
       "to": "file:src/neo_sf_q_intel/domain.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/outcome_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/outcome_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/outcome_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcomes.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/outcome_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/safety.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/safety.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/policy.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/ontology.py"
@@ -2239,6 +2516,26 @@
       "from": "file:src/neo_sf_q_intel/providers.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/repository.py",
@@ -2313,6 +2610,16 @@
     {
       "from": "file:src/neo_sf_q_intel/service.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcome_repository.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcomes.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/policy.py"
     },
     {
@@ -2329,6 +2636,11 @@
       "from": "file:src/neo_sf_q_intel/service.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/retrieval.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/safety.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/service.py",
@@ -2513,6 +2825,11 @@
     {
       "from": "file:tests/test_governance.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:tests/test_governance.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
     },
     {
@@ -2561,6 +2878,61 @@
       "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
+      "from": "file:tests/test_outcome_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_outcome_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcome_repository.py"
+    },
+    {
+      "from": "file:tests/test_outcome_repository.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcomes.py"
+    },
+    {
+      "from": "file:tests/test_outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:tests/test_outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcomes.py"
+    },
+    {
+      "from": "file:tests/test_outcomes.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcomes.py"
+    },
+    {
       "from": "file:tests/test_propagation.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/ontology.py"
@@ -2601,6 +2973,41 @@
       "to": "file:src/neo_sf_q_intel/service.py"
     },
     {
+      "from": "file:tests/test_reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/fusion.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/reasoning_workflow.py"
+    },
+    {
+      "from": "file:tests/test_reasoning_workflow.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
+    },
+    {
       "from": "file:tests/test_repository.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
@@ -2609,6 +3016,11 @@
       "from": "file:tests/test_repository.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/repository.py"
+    },
+    {
+      "from": "file:tests/test_safety.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/safety.py"
     },
     {
       "from": "file:tests/test_salesforce_cli.py",
@@ -2669,6 +3081,16 @@
       "from": "file:tests/test_service_fallback.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_service_fallback.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcome_repository.py"
+    },
+    {
+      "from": "file:tests/test_service_fallback.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/outcomes.py"
     },
     {
       "from": "file:tests/test_service_fallback.py",

@@ -20,7 +20,13 @@ from neo_sf_q_intel.domain import (
 from neo_sf_q_intel.domain import (
     TestOutcome as ExecutionOutcome,
 )
-from neo_sf_q_intel.governance import assess_run, build_grounded_claims, decide
+from neo_sf_q_intel.governance import (
+    assess_run,
+    build_grounded_claims,
+    decide,
+    validate_test_execution_receipt,
+)
+from neo_sf_q_intel.governance_policy import GovernancePolicy
 from tests.test_workflow import source
 
 
@@ -180,6 +186,89 @@ def _record_result(
         )
     )
     run.test_results = [execution]
+
+
+def test_shared_test_execution_validator_returns_typed_receipt() -> None:
+    run = _analyzed_run()
+    evaluated_at = datetime.now(UTC)
+    _record_result(run, ExecutionOutcome.PASSED, executed_at=evaluated_at)
+
+    validation = validate_test_execution_receipt(
+        run,
+        run.test_results[0],
+        GovernancePolicy.load(),
+        evaluated_at=evaluated_at,
+    )
+
+    assert validation.accepted
+    assert validation.diagnostics == ()
+    assert validation.receipt is not None
+    assert validation.receipt.test_id == run.test_results[0].test_id
+    assert validation.receipt.evidence_ids == tuple(run.test_results[0].evidence_ids)
+
+
+def test_shared_test_execution_validator_returns_stable_diagnostics() -> None:
+    run = _analyzed_run()
+    evaluated_at = datetime.now(UTC)
+    _record_result(run, ExecutionOutcome.PASSED, executed_at=evaluated_at)
+    run.evidence[-1].attributes["source_hash"] = "0" * 64
+
+    validation = validate_test_execution_receipt(
+        run,
+        run.test_results[0],
+        GovernancePolicy.load(),
+        evaluated_at=evaluated_at,
+    )
+
+    assert not validation.accepted
+    assert validation.receipt is None
+    assert validation.diagnostics == ("EXECUTION_RECEIPT_BINDING_MISMATCH",)
+
+
+def test_shared_test_execution_validator_rejects_duplicate_identifiers_stably() -> None:
+    policy = GovernancePolicy.load()
+    evaluated_at = datetime.now(UTC)
+
+    duplicate_selection_run = _analyzed_run()
+    _record_result(duplicate_selection_run, ExecutionOutcome.PASSED, executed_at=evaluated_at)
+    duplicate_selection_run.selected_tests.append(
+        duplicate_selection_run.selected_tests[0].model_copy(deep=True)
+    )
+    selection_validation = validate_test_execution_receipt(
+        duplicate_selection_run,
+        duplicate_selection_run.test_results[0],
+        policy,
+        evaluated_at=evaluated_at,
+    )
+    assert selection_validation.diagnostics == ("DUPLICATE_SELECTED_TEST_ID",)
+
+    duplicate_evidence_run = _analyzed_run()
+    _record_result(duplicate_evidence_run, ExecutionOutcome.PASSED, executed_at=evaluated_at)
+    duplicate_evidence_run.evidence.append(duplicate_evidence_run.evidence[-1].model_copy(deep=True))
+    evidence_validation = validate_test_execution_receipt(
+        duplicate_evidence_run,
+        duplicate_evidence_run.test_results[0],
+        policy,
+        evaluated_at=evaluated_at,
+    )
+    assert evidence_validation.diagnostics == ("DUPLICATE_RUN_EVIDENCE_ID",)
+
+    duplicate_result_evidence_run = _analyzed_run()
+    _record_result(
+        duplicate_result_evidence_run, ExecutionOutcome.PASSED, executed_at=evaluated_at
+    )
+    result = duplicate_result_evidence_run.test_results[0]
+    duplicated_result = result.model_copy(
+        update={"evidence_ids": [result.evidence_ids[0], result.evidence_ids[0]]}
+    )
+    duplicate_result_evidence_run.test_results = [duplicated_result]
+    result_evidence_validation = validate_test_execution_receipt(
+        duplicate_result_evidence_run,
+        duplicated_result,
+        policy,
+        evaluated_at=evaluated_at,
+    )
+    assert result_evidence_validation.diagnostics == ("DUPLICATE_EXECUTION_EVIDENCE_ID",)
 
 
 def test_high_risk_requires_a_mandatory_validation() -> None:

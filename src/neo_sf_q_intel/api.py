@@ -42,13 +42,23 @@ def create_app(
     )
 
     @app.get("/health")
-    def health() -> dict[str, str | None]:
+    def health() -> dict[str, object]:
         return {
             "status": "ok",
+            "persistence_status": (
+                "degraded"
+                if active_service.degradation_codes or active_service.gap_codes
+                else "ready"
+            ),
             "provider": active_settings.ai_provider,
             "source_snapshot": active_service.source.snapshot_id,
             "persistence": active_service.persistence_mode,
             "persistence_warning": active_service.persistence_warning,
+            "run_persistence": active_service.run_persistence,
+            "outcome_persistence": active_service.outcome_persistence,
+            "outcome_durable": active_service.outcome_durable,
+            "degradation_codes": list(active_service.degradation_codes),
+            "gap_codes": list(active_service.gap_codes),
         }
 
     @app.post("/api/v1/assurance-runs", response_model=AssuranceRun)

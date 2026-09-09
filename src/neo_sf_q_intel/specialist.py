@@ -900,6 +900,12 @@ def _contains_sensitive_text(value: str) -> bool:
     )
 
 
+def contains_sensitive_text(value: str) -> bool:
+    """Public bounded-artifact safety predicate shared by proposal consumers."""
+
+    return _contains_sensitive_text(value)
+
+
 def _strings(value: Any):
     if isinstance(value, str):
         yield value

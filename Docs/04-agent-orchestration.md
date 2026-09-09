@@ -32,6 +32,32 @@ These nodes are deterministic specialist stages, not yet independent model-backe
 
 The multi-agent roadmap capability becomes complete only when provider-backed specialist ports consume bounded context packs, return schema-validated proposals, degrade deterministically when a provider is unavailable, and have independent negative/failure tests. Tool use and state transitions will continue to pass through the orchestrator.
 
+## Isolated advisory consumer foundation
+
+`reasoning_workflow.py` now provides the first A6 consumption boundary without changing the four
+authoritative LangGraph nodes above. It accepts only configured, bound specialist stages and a
+module-pinned source-neutral workflow policy. Before any live port call it replay-validates the A3
+context, binds the complete change request plus graph/ontology/profile/policy identities, requires
+at least one graph seed and passes those roots in the immutable invocation input. A returned bundle
+must preserve that exact preflight context. Captured bundles are replayed through A3, A4 and A5
+again at consumption.
+
+The consumer returns a separate immutable `ReasoningWorkflowResult`. Its proposals are permanently
+`ANALYSIS_ONLY`, `CANDIDATE`, `INFERRED`, non-authorizing and ineligible as release evidence. It
+hashes the complete `AssuranceRun` before and after every specialist interaction, replays the
+current governance assessment and effective decision, and cannot write to evidence, impacts,
+selected or executed tests, healing proposals, claims, analysis gaps, governance or the release
+decision. Provider failures are isolated; exact duplicate advisory facts merge their evidence and
+provenance, while distinct multi-target facts remain distinct. A4/A5 explicit conflict sets still
+force abstention, and A6 does not invent conflict semantics from model prose.
+
+This is deliberately an isolated `FOUNDATION`, not durable workflow completion. The production
+composition still needs a real OpenAI/Azure structured-output adapter with hard cancellation, an
+independent durable invocation/capture registry, host-owned consumption-time receipts, idempotent
+CAS/checkpoint resume, an event outbox and service/API persistence. Until those exist the dashboard
+must not imply that configured profiles are running agents or that advisory results affected the
+deterministic assurance run.
+
 ## Graph-grounded specialist contract
 
 Every provider-backed specialist will receive a deterministic `GraphContextPack` containing the

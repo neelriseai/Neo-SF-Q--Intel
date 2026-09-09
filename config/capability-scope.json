@@ -74,15 +74,15 @@
       "id": "reasoning.graph-grounded-agent",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Provides an isolated, provider-neutral proposal/verifier boundary that directly replays its A3/A4 inputs, derives relation legality from the pinned ontology, binds citations to ordered endpoints, preserves conflicts through abstention and emits only analysis-only candidate/inferred output. Completion requires a real structured-output provider adapter with hard cancellation, workflow consumption and an adjudicated quality corpus.",
-      "implementation": ["src/neo_sf_q_intel/specialist.py", "config/specialist-policy.json", "quality/evals/graph-specialist-contract-v1.json"],
-      "verification": ["tests/test_specialist.py"],
+      "genericity": "Provides a provider-neutral proposal/verifier plus a separately typed replay-validating workflow consumer. The consumer binds the complete change request and graph identity, replays current governance, isolates specialist failures, and can only emit bounded analysis-only candidate/inferred advisory results. Completion requires a real structured-output provider adapter with hard cancellation, independently persisted capture/consumption receipts, retry-safe workflow/checkpoint integration and an adjudicated quality corpus.",
+      "implementation": ["src/neo_sf_q_intel/specialist.py", "src/neo_sf_q_intel/reasoning_workflow.py", "config/specialist-policy.json", "config/reasoning-workflow-policy.json", "quality/evals/graph-specialist-contract-v1.json"],
+      "verification": ["tests/test_specialist.py", "tests/test_reasoning_workflow.py"],
       "verificationCases": {
-        "positive": ["tests/test_specialist.py"],
-        "negative": ["tests/test_specialist.py"],
-        "failure": ["tests/test_specialist.py"],
-        "degradation": ["tests/test_specialist.py"],
-        "scenarioIndependence": ["tests/test_specialist.py"]
+        "positive": ["tests/test_specialist.py", "tests/test_reasoning_workflow.py"],
+        "negative": ["tests/test_specialist.py", "tests/test_reasoning_workflow.py"],
+        "failure": ["tests/test_specialist.py", "tests/test_reasoning_workflow.py"],
+        "degradation": ["tests/test_specialist.py", "tests/test_reasoning_workflow.py"],
+        "scenarioIndependence": ["tests/test_specialist.py", "tests/test_reasoning_workflow.py"]
       }
     },
     {
@@ -105,9 +105,9 @@
       "id": "orchestration.multi-agent",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Typed specialist stages share governed state; deeper model-backed specialist ports remain planned.",
-      "implementation": ["src/neo_sf_q_intel/workflow.py", "src/neo_sf_q_intel/domain.py"],
-      "verification": ["tests/test_workflow.py"]
+      "genericity": "Typed deterministic stages share governed state, and an isolated policy-configured consumer deterministically merges multiple replay-verified specialist artifacts without mutating authoritative run state. Durable live-provider invocation, capture registry, checkpoint/CAS integration and event outbox remain planned.",
+      "implementation": ["src/neo_sf_q_intel/workflow.py", "src/neo_sf_q_intel/domain.py", "src/neo_sf_q_intel/reasoning_workflow.py", "config/reasoning-workflow-policy.json"],
+      "verification": ["tests/test_workflow.py", "tests/test_reasoning_workflow.py"]
     },
     {
       "id": "observability.agent-trace",
@@ -169,25 +169,32 @@
       "id": "memory.postgresql",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Target primary non-vector memory. Run documents and checkpoints are wired now; evidence/chunk metadata, graph edges, audit and other governed state have schema foundations but still require application ports and tests.",
-      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/service.py", "migrations/001_assurance_runs.sql", "migrations/002_remove_postgres_embeddings.sql"],
-      "verification": ["tests/test_repository.py", "tests/test_service_fallback.py"]
+      "genericity": "Target primary non-vector memory. Run documents and checkpoints are wired, and outcome candidates have an append-only replay-validating adapter foundation. Live PostgreSQL outcome transactions/concurrency plus evidence/chunk, graph, audit, approval and evaluation application ports remain.",
+      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/outcome_repository.py", "src/neo_sf_q_intel/service.py", "migrations/001_assurance_runs.sql", "migrations/002_remove_postgres_embeddings.sql", "migrations/003_outcome_memory.sql"],
+      "verification": ["tests/test_repository.py", "tests/test_outcome_repository.py", "tests/test_service_fallback.py"]
     },
     {
       "id": "memory.resilient-fallback",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Automatically falls back from PostgreSQL to an auto-created SQLite run store, then versioned JSON evidence plus a declared process cache.",
-      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/config.py"],
-      "verification": ["tests/test_repository.py", "tests/test_service_fallback.py"]
+      "genericity": "Run storage falls back from PostgreSQL to auto-created SQLite/process memory; outcome storage independently falls back through auto-created SQLite, immutable JSON and process cache. Health exposes each active mode and never falls through on corruption, replay, schema, idempotency or ambiguous-write failures.",
+      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/outcome_repository.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/config.py", "src/neo_sf_q_intel/api.py"],
+      "verification": ["tests/test_repository.py", "tests/test_outcome_repository.py", "tests/test_service_fallback.py", "tests/test_api.py", "tests/test_config.py"]
     },
     {
       "id": "memory.release-outcomes",
       "owner": "Governance Review",
-      "status": "NEXT",
-      "genericity": "Will retain append-only test, incident, decision, override and production outcomes linked to exact project/source snapshots for governed historical reasoning.",
-      "implementation": [],
-      "verification": []
+      "status": "FOUNDATION",
+      "genericity": "Retains replay-validated, append-only and explicitly non-authorizing trusted-test, typed incident and unverified human-correction candidates linked to exact run/project/source and policy roots. Completion requires live PostgreSQL verification, HTTP/MCP exposure, signed/tamper-evident anchoring, historical-policy replay, decision/override/production kinds, prior-outcome retrieval integration and an adjudicated corpus.",
+      "implementation": ["src/neo_sf_q_intel/outcomes.py", "src/neo_sf_q_intel/outcome_repository.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/safety.py", "config/outcome-memory-policy.json", "quality/evals/outcome-memory-contract-v1.json", "migrations/003_outcome_memory.sql"],
+      "verification": ["tests/test_outcomes.py", "tests/test_outcome_repository.py", "tests/test_service_fallback.py", "tests/test_safety.py"],
+      "verificationCases": {
+        "positive": ["tests/test_outcomes.py", "tests/test_outcome_repository.py", "tests/test_service_fallback.py"],
+        "negative": ["tests/test_outcomes.py", "tests/test_outcome_repository.py", "tests/test_service_fallback.py", "tests/test_safety.py"],
+        "failure": ["tests/test_outcomes.py", "tests/test_outcome_repository.py", "tests/test_service_fallback.py"],
+        "degradation": ["tests/test_outcome_repository.py", "tests/test_service_fallback.py"],
+        "scenarioIndependence": ["tests/test_outcomes.py", "tests/test_outcome_repository.py"]
+      }
     },
     {
       "id": "tools.mcp",

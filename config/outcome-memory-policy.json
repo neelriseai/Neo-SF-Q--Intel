@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "outcome-memory-policy",
+  "policyVersion": "1.0.0",
+  "sha256": "f02d6f5cf4c725befce27556bf16c58e70b8b75f31a23bfb22a01c412c39fe44",
+  "posture": "HISTORICAL_CANDIDATE",
+  "authorityState": "NON_AUTHORIZING",
+  "evaluationSetId": "outcome-memory-contract-v1",
+  "evaluationSetPath": "quality/evals/outcome-memory-contract-v1.json",
+  "evaluationSetSha256": "64a2af0d71fa4cfce418d974609432d0c147ce0f267f9434963957d602c66583",
+  "incidentTransitions": {
+    "ACKNOWLEDGED": ["OPENED", "REOPENED"],
+    "OPENED": [],
+    "REOPENED": ["RESOLVED"],
+    "RESOLVED": ["ACKNOWLEDGED", "OPENED", "REOPENED"]
+  },
+  "limits": {
+    "maximumIdentifierCharacters": 256,
+    "maximumTextCharacters": 2000,
+    "maximumEvidenceIds": 100,
+    "maximumTargetIds": 100,
+    "maximumClockSkewSeconds": 5,
+    "maximumRecordBytes": 131072,
+    "maximumIncidentChainDepth": 32
+  }
+}

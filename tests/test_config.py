@@ -50,6 +50,21 @@ def test_sqlite_fallback_path_is_repository_relative() -> None:
     assert settings.resolved_sqlite_path(Path("workspace")).name == "fallback.db"
 
 
+def test_outcome_fallback_paths_are_repository_relative() -> None:
+    settings = Settings(
+        allow_llm=False,
+        outcome_sqlite_path=Path("runtime/outcomes.db"),
+        outcome_json_path=Path("runtime/outcomes"),
+    )
+
+    assert settings.resolved_outcome_sqlite_path(Path("workspace")) == Path(
+        "workspace/runtime/outcomes.db"
+    ).resolve()
+    assert settings.resolved_outcome_json_path(Path("workspace")) == Path(
+        "workspace/runtime/outcomes"
+    ).resolve()
+
+
 def test_ontology_and_source_profile_paths_are_repository_relative() -> None:
     settings = Settings(allow_llm=False)
 

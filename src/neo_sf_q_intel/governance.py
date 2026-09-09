@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 from pydantic import ValidationError
@@ -20,6 +21,7 @@ from neo_sf_q_intel.domain import (
     ReleaseDecision,
     RiskSeverity,
     TestClassification,
+    TestExecution,
     TestOutcome,
 )
 from neo_sf_q_intel.governance_policy import (
@@ -121,11 +123,126 @@ def _valid_evidence_at_release(evidence: object) -> bool:
     return expires > datetime.now(UTC)
 
 
-def _artifact_sha256(artifact: object) -> str | None:
+def canonical_artifact_sha256(artifact: object) -> str | None:
     if not isinstance(artifact, dict):
         return None
     canonical = json.dumps(artifact, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(canonical).hexdigest()
+
+
+@dataclass(frozen=True, slots=True)
+class TrustedTestExecutionReceipt:
+    """Provider-neutral immutable view of a validated execution receipt."""
+
+    test_id: str
+    outcome: TestOutcome
+    runner_id: str
+    result_sha256: str
+    source_snapshot: str
+    executed_at: datetime
+    valid_until: datetime
+    evidence_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class TestExecutionReceiptValidation:
+    """Deterministic trust result with stable machine-readable diagnostics."""
+
+    receipt: TrustedTestExecutionReceipt | None
+    diagnostics: tuple[str, ...]
+
+    @property
+    def accepted(self) -> bool:
+        return self.receipt is not None and not self.diagnostics
+
+
+def validate_test_execution_receipt(
+    run: AssuranceRun,
+    result: TestExecution,
+    policy: GovernancePolicy,
+    *,
+    evaluated_at: datetime,
+) -> TestExecutionReceiptValidation:
+    """Validate exact runner, artifact, snapshot and time bindings without side effects."""
+
+    diagnostics: set[str] = set()
+    if evaluated_at.tzinfo is None or evaluated_at.utcoffset() is None:
+        return TestExecutionReceiptValidation(None, ("EVALUATION_TIME_INVALID",))
+    now = evaluated_at.astimezone(UTC)
+    selected_test_ids = [item.test_id for item in run.selected_tests]
+    if len(selected_test_ids) != len(set(selected_test_ids)):
+        diagnostics.add("DUPLICATE_SELECTED_TEST_ID")
+    run_evidence_ids = [item.evidence_id for item in run.evidence]
+    if len(run_evidence_ids) != len(set(run_evidence_ids)):
+        diagnostics.add("DUPLICATE_RUN_EVIDENCE_ID")
+    if len(result.evidence_ids) != len(set(result.evidence_ids)):
+        diagnostics.add("DUPLICATE_EXECUTION_EVIDENCE_ID")
+    result_counts: dict[str, int] = {}
+    for item in run.test_results:
+        result_counts[item.test_id] = result_counts.get(item.test_id, 0) + 1
+    if any(count > 1 for count in result_counts.values()):
+        diagnostics.add("DUPLICATE_TEST_RESULT")
+    if result.test_id not in set(selected_test_ids):
+        diagnostics.add("TEST_NOT_SELECTED")
+    runner = policy.trusted_runner_by_id.get(result.runner_id)
+    if runner is None:
+        diagnostics.add("RUNNER_NOT_TRUSTED")
+    if result.source_snapshot != run.source_snapshot:
+        diagnostics.add("SOURCE_SNAPSHOT_MISMATCH")
+    if runner is not None:
+        if result.executed_at > now + timedelta(seconds=runner.maximum_clock_skew_seconds):
+            diagnostics.add("EXECUTION_FROM_FUTURE")
+        if result.executed_at < now - timedelta(seconds=runner.maximum_result_age_seconds):
+            diagnostics.add("EXECUTION_TOO_OLD")
+    if result.valid_until <= now:
+        diagnostics.add("EXECUTION_RECEIPT_EXPIRED")
+
+    evidence_by_id = {item.evidence_id: item for item in run.evidence}
+    receipts = [evidence_by_id.get(evidence_id) for evidence_id in result.evidence_ids]
+    if not receipts:
+        diagnostics.add("EXECUTION_RECEIPT_MISSING")
+    for receipt in receipts:
+        if receipt is None:
+            diagnostics.add("EXECUTION_RECEIPT_MISSING")
+            continue
+        if receipt.state not in {EvidenceState.CONFIRMED, EvidenceState.HUMAN_CONFIRMED}:
+            diagnostics.add("EXECUTION_RECEIPT_NOT_CONFIRMED")
+        if receipt.kind != "test-execution":
+            diagnostics.add("EXECUTION_RECEIPT_KIND_MISMATCH")
+        if runner is None or receipt.source != runner.evidence_source:
+            diagnostics.add("EXECUTION_RECEIPT_SOURCE_MISMATCH")
+        bindings = {
+            "test_id": result.test_id,
+            "outcome": result.outcome,
+            "runner_id": result.runner_id,
+            "source_snapshot": result.source_snapshot,
+            "result_sha256": result.result_sha256,
+            "source_hash": result.result_sha256,
+            "executed_at": result.executed_at.isoformat(),
+            "valid_until": result.valid_until.isoformat(),
+        }
+        if any(receipt.attributes.get(key) != value for key, value in bindings.items()):
+            diagnostics.add("EXECUTION_RECEIPT_BINDING_MISMATCH")
+        if canonical_artifact_sha256(receipt.attributes.get("result_artifact")) != (
+            result.result_sha256
+        ):
+            diagnostics.add("EXECUTION_ARTIFACT_HASH_MISMATCH")
+    ordered = tuple(sorted(diagnostics))
+    if ordered:
+        return TestExecutionReceiptValidation(None, ordered)
+    return TestExecutionReceiptValidation(
+        TrustedTestExecutionReceipt(
+            test_id=result.test_id,
+            outcome=result.outcome,
+            runner_id=result.runner_id,
+            result_sha256=result.result_sha256,
+            source_snapshot=result.source_snapshot,
+            executed_at=result.executed_at,
+            valid_until=result.valid_until,
+            evidence_ids=tuple(sorted(result.evidence_ids)),
+        ),
+        (),
+    )
 
 
 def _analysis_input_sha256(run: AssuranceRun) -> str:
@@ -348,12 +465,6 @@ def decide(run: AssuranceRun, policy: GovernancePolicy | None = None) -> Release
             ),
         )
 
-    confirmed_ids = {
-        item.evidence_id
-        for item in run.evidence
-        if item.state in {EvidenceState.CONFIRMED, EvidenceState.HUMAN_CONFIRMED}
-    }
-    selected_by_id = {item.test_id: item for item in run.selected_tests}
     result_counts: dict[str, int] = {}
     for result in run.test_results:
         result_counts[result.test_id] = result_counts.get(result.test_id, 0) + 1
@@ -363,43 +474,11 @@ def decide(run: AssuranceRun, policy: GovernancePolicy | None = None) -> Release
             code=DecisionCode.INCOMPLETE,
             reasons=["Duplicate test results require reconciliation"],
         )
-    evidence_by_id = {item.evidence_id: item for item in run.evidence}
-    source_snapshots = {
-        item.attributes.get("snapshot_id")
-        for item in run.evidence
-        if item.attributes.get("snapshot_id")
-    }
     valid_results = {}
     now = datetime.now(UTC)
     for result in run.test_results:
-        receipts = [evidence_by_id.get(evidence_id) for evidence_id in result.evidence_ids]
-        runner = active_policy.trusted_runner_by_id.get(result.runner_id)
-        if (
-            runner is not None
-            and result.test_id in selected_by_id
-            and result.source_snapshot in source_snapshots
-            and result.executed_at <= now + timedelta(seconds=runner.maximum_clock_skew_seconds)
-            and result.executed_at >= now - timedelta(seconds=runner.maximum_result_age_seconds)
-            and result.valid_until > now
-            and receipts
-            and all(
-                receipt is not None
-                and receipt.evidence_id in confirmed_ids
-                and receipt.kind == "test-execution"
-                and receipt.source == runner.evidence_source
-                and receipt.attributes.get("test_id") == result.test_id
-                and receipt.attributes.get("outcome") == result.outcome
-                and receipt.attributes.get("runner_id") == result.runner_id
-                and receipt.attributes.get("source_snapshot") == result.source_snapshot
-                and receipt.attributes.get("result_sha256") == result.result_sha256
-                and receipt.attributes.get("source_hash") == result.result_sha256
-                and receipt.attributes.get("executed_at") == result.executed_at.isoformat()
-                and receipt.attributes.get("valid_until") == result.valid_until.isoformat()
-                and _artifact_sha256(receipt.attributes.get("result_artifact"))
-                == result.result_sha256
-                for receipt in receipts
-            )
-        ):
+        validation = validate_test_execution_receipt(run, result, active_policy, evaluated_at=now)
+        if validation.accepted:
             valid_results[result.test_id] = result
     failed = [item for item in valid_results.values() if item.outcome is TestOutcome.FAILED]
     if failed:

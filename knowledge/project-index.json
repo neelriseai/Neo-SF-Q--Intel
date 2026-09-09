@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "93360caca0d5116e0346fb542f01243d311a1f4779dc2c41cf98c26600f609d4",
+  "sourceSnapshot": "f98625e7cd87b6239fba9716a02c9aa8e6a0ea19cceee94eee8c1fa03971fa23",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -163,30 +163,38 @@
       "id": "reasoning.graph-grounded-agent",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Provides an isolated, provider-neutral proposal/verifier boundary that directly replays its A3/A4 inputs, derives relation legality from the pinned ontology, binds citations to ordered endpoints, preserves conflicts through abstention and emits only analysis-only candidate/inferred output. Completion requires a real structured-output provider adapter with hard cancellation, workflow consumption and an adjudicated quality corpus.",
+      "genericity": "Provides a provider-neutral proposal/verifier plus a separately typed replay-validating workflow consumer. The consumer binds the complete change request and graph identity, replays current governance, isolates specialist failures, and can only emit bounded analysis-only candidate/inferred advisory results. Completion requires a real structured-output provider adapter with hard cancellation, independently persisted capture/consumption receipts, retry-safe workflow/checkpoint integration and an adjudicated quality corpus.",
       "implementation": [
         "src/neo_sf_q_intel/specialist.py",
+        "src/neo_sf_q_intel/reasoning_workflow.py",
         "config/specialist-policy.json",
+        "config/reasoning-workflow-policy.json",
         "quality/evals/graph-specialist-contract-v1.json"
       ],
       "verification": [
-        "tests/test_specialist.py"
+        "tests/test_specialist.py",
+        "tests/test_reasoning_workflow.py"
       ],
       "verificationCases": {
         "positive": [
-          "tests/test_specialist.py"
+          "tests/test_specialist.py",
+          "tests/test_reasoning_workflow.py"
         ],
         "negative": [
-          "tests/test_specialist.py"
+          "tests/test_specialist.py",
+          "tests/test_reasoning_workflow.py"
         ],
         "failure": [
-          "tests/test_specialist.py"
+          "tests/test_specialist.py",
+          "tests/test_reasoning_workflow.py"
         ],
         "degradation": [
-          "tests/test_specialist.py"
+          "tests/test_specialist.py",
+          "tests/test_reasoning_workflow.py"
         ],
         "scenarioIndependence": [
-          "tests/test_specialist.py"
+          "tests/test_specialist.py",
+          "tests/test_reasoning_workflow.py"
         ]
       }
     },
@@ -215,13 +223,16 @@
       "id": "orchestration.multi-agent",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Typed specialist stages share governed state; deeper model-backed specialist ports remain planned.",
+      "genericity": "Typed deterministic stages share governed state, and an isolated policy-configured consumer deterministically merges multiple replay-verified specialist artifacts without mutating authoritative run state. Durable live-provider invocation, capture registry, checkpoint/CAS integration and event outbox remain planned.",
       "implementation": [
         "src/neo_sf_q_intel/workflow.py",
-        "src/neo_sf_q_intel/domain.py"
+        "src/neo_sf_q_intel/domain.py",
+        "src/neo_sf_q_intel/reasoning_workflow.py",
+        "config/reasoning-workflow-policy.json"
       ],
       "verification": [
-        "tests/test_workflow.py"
+        "tests/test_workflow.py",
+        "tests/test_reasoning_workflow.py"
       ]
     },
     {
@@ -327,15 +338,18 @@
       "id": "memory.postgresql",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Target primary non-vector memory. Run documents and checkpoints are wired now; evidence/chunk metadata, graph edges, audit and other governed state have schema foundations but still require application ports and tests.",
+      "genericity": "Target primary non-vector memory. Run documents and checkpoints are wired, and outcome candidates have an append-only replay-validating adapter foundation. Live PostgreSQL outcome transactions/concurrency plus evidence/chunk, graph, audit, approval and evaluation application ports remain.",
       "implementation": [
         "src/neo_sf_q_intel/repository.py",
+        "src/neo_sf_q_intel/outcome_repository.py",
         "src/neo_sf_q_intel/service.py",
         "migrations/001_assurance_runs.sql",
-        "migrations/002_remove_postgres_embeddings.sql"
+        "migrations/002_remove_postgres_embeddings.sql",
+        "migrations/003_outcome_memory.sql"
       ],
       "verification": [
         "tests/test_repository.py",
+        "tests/test_outcome_repository.py",
         "tests/test_service_fallback.py"
       ]
     },
@@ -343,24 +357,68 @@
       "id": "memory.resilient-fallback",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Automatically falls back from PostgreSQL to an auto-created SQLite run store, then versioned JSON evidence plus a declared process cache.",
+      "genericity": "Run storage falls back from PostgreSQL to auto-created SQLite/process memory; outcome storage independently falls back through auto-created SQLite, immutable JSON and process cache. Health exposes each active mode and never falls through on corruption, replay, schema, idempotency or ambiguous-write failures.",
       "implementation": [
         "src/neo_sf_q_intel/repository.py",
+        "src/neo_sf_q_intel/outcome_repository.py",
         "src/neo_sf_q_intel/service.py",
-        "src/neo_sf_q_intel/config.py"
+        "src/neo_sf_q_intel/config.py",
+        "src/neo_sf_q_intel/api.py"
       ],
       "verification": [
         "tests/test_repository.py",
-        "tests/test_service_fallback.py"
+        "tests/test_outcome_repository.py",
+        "tests/test_service_fallback.py",
+        "tests/test_api.py",
+        "tests/test_config.py"
       ]
     },
     {
       "id": "memory.release-outcomes",
       "owner": "Governance Review",
-      "status": "NEXT",
-      "genericity": "Will retain append-only test, incident, decision, override and production outcomes linked to exact project/source snapshots for governed historical reasoning.",
-      "implementation": [],
-      "verification": []
+      "status": "FOUNDATION",
+      "genericity": "Retains replay-validated, append-only and explicitly non-authorizing trusted-test, typed incident and unverified human-correction candidates linked to exact run/project/source and policy roots. Completion requires live PostgreSQL verification, HTTP/MCP exposure, signed/tamper-evident anchoring, historical-policy replay, decision/override/production kinds, prior-outcome retrieval integration and an adjudicated corpus.",
+      "implementation": [
+        "src/neo_sf_q_intel/outcomes.py",
+        "src/neo_sf_q_intel/outcome_repository.py",
+        "src/neo_sf_q_intel/service.py",
+        "src/neo_sf_q_intel/safety.py",
+        "config/outcome-memory-policy.json",
+        "quality/evals/outcome-memory-contract-v1.json",
+        "migrations/003_outcome_memory.sql"
+      ],
+      "verification": [
+        "tests/test_outcomes.py",
+        "tests/test_outcome_repository.py",
+        "tests/test_service_fallback.py",
+        "tests/test_safety.py"
+      ],
+      "verificationCases": {
+        "positive": [
+          "tests/test_outcomes.py",
+          "tests/test_outcome_repository.py",
+          "tests/test_service_fallback.py"
+        ],
+        "negative": [
+          "tests/test_outcomes.py",
+          "tests/test_outcome_repository.py",
+          "tests/test_service_fallback.py",
+          "tests/test_safety.py"
+        ],
+        "failure": [
+          "tests/test_outcomes.py",
+          "tests/test_outcome_repository.py",
+          "tests/test_service_fallback.py"
+        ],
+        "degradation": [
+          "tests/test_outcome_repository.py",
+          "tests/test_service_fallback.py"
+        ],
+        "scenarioIndependence": [
+          "tests/test_outcomes.py",
+          "tests/test_outcome_repository.py"
+        ]
+      }
     },
     {
       "id": "tools.mcp",
@@ -409,7 +467,7 @@
     {
       "path": ".env.example",
       "category": "project",
-      "sha256": "6336752c1421508e9745db9bcce712da5a9a93bd71c07593c5a7e9889f61e0b3"
+      "sha256": "9d1dada16c271403ce03541d320ed774152cb9eda8bbfed39a332ce441320373"
     },
     {
       "path": ".gitattributes",
@@ -474,7 +532,7 @@
     {
       "path": "Docs/02-domain-contracts.md",
       "category": "canonical-documentation",
-      "sha256": "a475dde9b00b72e3b1e447cb93e017ae971a79cb1fd7e6ae6df05b31783d564c"
+      "sha256": "d1c09df2830e1b28f26d878163762745d74eddc4a672bd92939410871ce276c0"
     },
     {
       "path": "Docs/02-source-ingestion-and-change-detection.md",
@@ -484,7 +542,7 @@
     {
       "path": "Docs/03-data-memory-and-retrieval.md",
       "category": "canonical-documentation",
-      "sha256": "9f24c2dba6dd84ee10a354e97dd7eac24a9985b54db1ffa6136e4b2cf5c9dbc0"
+      "sha256": "52cd91c5a53152abfc17d3935cfd11230bebbeae1ba06bfa3fa5859e95d11fea"
     },
     {
       "path": "Docs/03-evaluation-and-golden-dataset-engineering.md",
@@ -499,7 +557,7 @@
     {
       "path": "Docs/04-agent-orchestration.md",
       "category": "canonical-documentation",
-      "sha256": "983d0ec44360b718f39a2898636abce60a00427d531aef398937d29b66e429b3"
+      "sha256": "2d303525ebf4028671694f387024388f7773d186ec971ec66f3b68018967da74"
     },
     {
       "path": "Docs/04-guardrails-and-policy-enforcement.md",
@@ -549,7 +607,7 @@
     {
       "path": "Docs/07-governance-and-evaluation.md",
       "category": "canonical-documentation",
-      "sha256": "e3c57906d7b4e699d3c476e9a4b795e5a90b80f9aaaf7b149de6fade74726a0e"
+      "sha256": "7496b5223915481d6687899b5e5324db394ee36e53d1c6994c7747ce1700bdd7"
     },
     {
       "path": "Docs/07-test-execution-and-rca.md",
@@ -569,7 +627,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "ad97a5520a2b121a260e55128d7644d9136e3c31d97a6f895b52341be28dbbd3"
+      "sha256": "2cef67647c4284cb9dc1c4d96d062a950e82bf1d51d111090b3c3f62944f3f65"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -599,7 +657,7 @@
     {
       "path": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "reference-documentation",
-      "sha256": "8133c45316e8608690445fb5034ea6a8f57a0899ffc6cea039c612f1f918dfec"
+      "sha256": "c69cfccef7b0d57f24f3247da5431aaac2e2b3216558f5f954fedbdeac5a68ef"
     },
     {
       "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
@@ -729,7 +787,7 @@
     {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "d410ea25e9bb89dfb67942bff798f93837013d95bef888bec700f66089ddac2b"
+      "sha256": "66faf5d50735d9e662562bc530805f2731f174d7d951e75155044f6e623d48d2"
     },
     {
       "path": "config/context-compiler-policy.json",
@@ -752,6 +810,11 @@
       "sha256": "2f684b0507f84283a0393e84e272ce212380291b9574e54730f8130cba050955"
     },
     {
+      "path": "config/outcome-memory-policy.json",
+      "category": "policy",
+      "sha256": "469803ab174c23d533bf297692664f68be8531c2f5d3c86486f9db612101a0e1"
+    },
+    {
       "path": "config/propagation-policy.json",
       "category": "policy",
       "sha256": "8d46e892f610134b6a1048959429570f50f8dc1a0ee11cd700869d9a26f168bc"
@@ -759,12 +822,17 @@
     {
       "path": "config/quality-policy.json",
       "category": "policy",
-      "sha256": "9e61afa04869b750cc563b6390ff788f67840d6f64e1c3cf6c410ec3859d9dea"
+      "sha256": "8e4a6af928d0f8077c6e54e2b8d66cdf1d9c9cfb238d2dc097f464566b2736cb"
     },
     {
       "path": "config/reasoning-policy.json",
       "category": "policy",
       "sha256": "618f12ec4c601b9f9a96d6c7b51dafd1f34cc2c5a2a7dfd8c1854766df79375b"
+    },
+    {
+      "path": "config/reasoning-workflow-policy.json",
+      "category": "policy",
+      "sha256": "c4435d88148c94ee39b1a69670fb628182407181e22ca35e13f7d3837021403a"
     },
     {
       "path": "config/source-profiles/salesforce-application-graph.json",
@@ -790,6 +858,11 @@
       "path": "migrations/002_remove_postgres_embeddings.sql",
       "category": "persistence",
       "sha256": "ed3b4feeb31f93925c83e97e96ddf5419dbf1c4e0875dc669fcee585676d06d9"
+    },
+    {
+      "path": "migrations/003_outcome_memory.sql",
+      "category": "persistence",
+      "sha256": "08172d45e869a83b3261ed8bd18239fce0415fb2cdd3eb891785b6ef0b1f86a8"
     },
     {
       "path": "package-lock.json",
@@ -852,6 +925,11 @@
       "sha256": "ba161ffd2b3cc1a3dc565aea51fb031268df1de5f44ff1c087389bee04ce8657"
     },
     {
+      "path": "quality/evals/outcome-memory-contract-v1.json",
+      "category": "project",
+      "sha256": "5db0c189b78af7fa30bfb21027337dabb377325337ba66407265a851fac0cb2d"
+    },
+    {
       "path": "quality/evals/retrieval-boundaries-v1.json",
       "category": "project",
       "sha256": "32e05c6a40d8ec16d7919e2d7773d00bb50b0d5b6c1ff191d8f10750812e766d"
@@ -887,6 +965,16 @@
       "sha256": "79e01d9c9f3690ac48c4107e0334d22d56ac73aaefcb24f433dd9ed122da6303"
     },
     {
+      "path": "quality/reviews/2026-09-09-outcome-memory-foundation.md",
+      "category": "project",
+      "sha256": "e12095eff15fd9846d096e008a57bec006b79e540eec289912143cae691520c5"
+    },
+    {
+      "path": "quality/reviews/2026-09-09-reasoning-workflow-consumer.md",
+      "category": "project",
+      "sha256": "0fdc16084fbcdefb4b6e7f10410a1c40306c11ea96e923e683b34cf852ebd69d"
+    },
+    {
       "path": "quality/reviews/2026-09-09-retrospective-capability-audit.md",
       "category": "project",
       "sha256": "076c219e3eb262ff537ea575ee3b0018f4543a6d685e23d34b6e4d89fe94f124"
@@ -894,7 +982,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "5115b42e86675b9092871673f2ca6e0cab12105d698bc9dcafbdcb0110cd4764"
+      "sha256": "6255f5321795a0a32ed0e2c1aa6aa45ea5dd71eeafae38ff00aba827579b7008"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -929,12 +1017,12 @@
     {
       "path": "src/neo_sf_q_intel/api.py",
       "category": "python-runtime",
-      "sha256": "f9941e2e858625180152e4651e0674c6c850ccef2962d975f3913835d75ae7fc"
+      "sha256": "4a5354b7a0e0cb23551382cc88623efdd05ac88fc8f96b712da658c9202e8c1f"
     },
     {
       "path": "src/neo_sf_q_intel/config.py",
       "category": "python-runtime",
-      "sha256": "1ce1f1cff8743c7aa776c524bc06a7529920f2aa53e5937d82a39dd221e35c4b"
+      "sha256": "92a66cd37fa4786660008331f3775f245120bfa18efc639ef54e2b4f3efb9d9c"
     },
     {
       "path": "src/neo_sf_q_intel/context_pack.py",
@@ -954,7 +1042,7 @@
     {
       "path": "src/neo_sf_q_intel/governance.py",
       "category": "python-runtime",
-      "sha256": "38d2249b4b7ad2f6f2198d916e48c24d64396dd2ea8f1ef7eceb95c97957246e"
+      "sha256": "d8b7ade2223ac4caa8a748915e0b57e8af40e602cda5a751e86706662c0a572a"
     },
     {
       "path": "src/neo_sf_q_intel/governance_policy.py",
@@ -982,6 +1070,16 @@
       "sha256": "5bacd25d9060e25e22945177ce5fc15913024b64942c9cb27c9fda3fc1a8493c"
     },
     {
+      "path": "src/neo_sf_q_intel/outcome_repository.py",
+      "category": "python-runtime",
+      "sha256": "5bffffc5004024a51e60757352ea0eb61e3c115d8fc7057aa23b331038dd6ee4"
+    },
+    {
+      "path": "src/neo_sf_q_intel/outcomes.py",
+      "category": "python-runtime",
+      "sha256": "8e4fbf3e057dd1427762268099462a3d857986cb275203a7835cb8e48981d600"
+    },
+    {
       "path": "src/neo_sf_q_intel/policy.py",
       "category": "python-runtime",
       "sha256": "00bf4c6cac526fe94f54da2945bfedb3d411776e792a799ab50f66f6023d2fc6"
@@ -1002,6 +1100,11 @@
       "sha256": "c38b2848ceabdbae2fb2d1ba5beca1ecc7cb327b0bc268193558170069af4c1d"
     },
     {
+      "path": "src/neo_sf_q_intel/reasoning_workflow.py",
+      "category": "python-runtime",
+      "sha256": "54bc3d3101820541aab8eefb7706dabf94d87f1c90f9b4e49d5ad98c0f094d1a"
+    },
+    {
       "path": "src/neo_sf_q_intel/repository.py",
       "category": "python-runtime",
       "sha256": "1bea3d21193a9884b54aad6dbd17d25aa385d9650a65a45095f24bc3362f395b"
@@ -1010,6 +1113,11 @@
       "path": "src/neo_sf_q_intel/retrieval.py",
       "category": "python-runtime",
       "sha256": "0f7304a859a0c9adc99b9849bb43ecf413f4439fb2589c74b12b4248b11f9294"
+    },
+    {
+      "path": "src/neo_sf_q_intel/safety.py",
+      "category": "python-runtime",
+      "sha256": "e1147f06abc4cf0feda092343e24aa22b46d7223ae363a9828a6a31deeaad113"
     },
     {
       "path": "src/neo_sf_q_intel/salesforce_cli.py",
@@ -1029,12 +1137,12 @@
     {
       "path": "src/neo_sf_q_intel/service.py",
       "category": "python-runtime",
-      "sha256": "e85b9f61e85dc5fbb688270879b22f28b96d79031aecb011ee5865d613f845a4"
+      "sha256": "d9359ba0dc1d3fc0569e91976c1edb016588584b2639761c26205c6dd65edc50"
     },
     {
       "path": "src/neo_sf_q_intel/specialist.py",
       "category": "python-runtime",
-      "sha256": "7430794b4903e31edce510f6b5824386d501d9b3e3f59d0e94f1fb4565ee7f67"
+      "sha256": "40f29eb892ae48e63818c5d0f91eeae07db923941708da798fb8d8c805981067"
     },
     {
       "path": "src/neo_sf_q_intel/workflow.py",
@@ -1059,12 +1167,12 @@
     {
       "path": "tests/test_api.py",
       "category": "test",
-      "sha256": "de47e85e21d1deb97ae5f5d6711759638417fac4ebbc16ea1db2829c7d21555d"
+      "sha256": "770bdad40778b5e11cca6e73a8c0bd69764a66bf0b3d0d957f2d7df0affd6be7"
     },
     {
       "path": "tests/test_config.py",
       "category": "test",
-      "sha256": "824b30139917e65cfea122537acaacaa645bdcc7581cb61ec538132ac7a89a9d"
+      "sha256": "a94c72145e246274741d734fb5aac2c30f38bad06b38ba56e75a77728870aba7"
     },
     {
       "path": "tests/test_context_pack.py",
@@ -1079,7 +1187,7 @@
     {
       "path": "tests/test_governance.py",
       "category": "test",
-      "sha256": "d8f7dbf105c77971c89933897dd12a2f2afa5830c885f9d8ff0d1ab7ade08105"
+      "sha256": "f23785c2279c7852b978adc43e31635de2f8949ebe4cea53ac6f9fab7f8c1756"
     },
     {
       "path": "tests/test_governance_policy.py",
@@ -1097,6 +1205,16 @@
       "sha256": "7487765020a1517a3eca19e47e58eb28b8e0281af4fa5d1a569b734fee324ee1"
     },
     {
+      "path": "tests/test_outcome_repository.py",
+      "category": "test",
+      "sha256": "728ca9865c0f66426b4e2abc19e36f59d836763166255383f8b45caca8880b3d"
+    },
+    {
+      "path": "tests/test_outcomes.py",
+      "category": "test",
+      "sha256": "608edaa98ab8cce446e0bd0c4476737d461177af72e79992359c9b0fb450e0e9"
+    },
+    {
       "path": "tests/test_propagation.py",
       "category": "test",
       "sha256": "ac0868c3d18ba260b49d972b8e917e5fef4c03a6918fc02cc9dd287c2fab35ee"
@@ -1107,6 +1225,11 @@
       "sha256": "d9031cd9ac38bb814d95fb346cc9b7b880154de86d82918bde5552e683bdab5b"
     },
     {
+      "path": "tests/test_reasoning_workflow.py",
+      "category": "test",
+      "sha256": "b04ad5bd3e85a0e2a3dd7e4e0b4477c9ce2ff224116c236923594f3657fdddac"
+    },
+    {
       "path": "tests/test_repository.py",
       "category": "test",
       "sha256": "84d57cf0411f35cdbbc61deef54e8d8d3d9587fa1c996edf79faa6f8a93dace0"
@@ -1115,6 +1238,11 @@
       "path": "tests/test_repository_knowledge.py",
       "category": "test",
       "sha256": "2504001df6a11dcead6934b1555dff4a38cc1b4a458d8e503644fdbca12a3f24"
+    },
+    {
+      "path": "tests/test_safety.py",
+      "category": "test",
+      "sha256": "f438a411810938e1ebae4a00146b1aa687864fc811b70e4d6ca8a2e49758b1d3"
     },
     {
       "path": "tests/test_salesforce_cli.py",
@@ -1144,7 +1272,7 @@
     {
       "path": "tests/test_service_fallback.py",
       "category": "test",
-      "sha256": "505af4038fff29c475c0ae91eb36199728c032d9daac5118e69d4645a394280a"
+      "sha256": "07cbd73922d3e2ad99d586c03923d1dc79010596c4c130108d43487ac42100d7"
     },
     {
       "path": "tests/test_specialist.py",
