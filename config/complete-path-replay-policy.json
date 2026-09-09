@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "complete-material-path-replay",
+  "policyVersion": "1.0.0",
+  "sha256": "0c86193a76dd48dcdd04597e65ec202ba6cae61fc93537eee209df8bfdbc19aa",
+  "propagationPolicy": {
+    "policyId": "canonical-propagation",
+    "policyVersion": "1.0.0",
+    "policySha256": "66c83e8cb13b68cbffb363a582f0a3b5927f4ec04bddc3dcab5b560b02c2cdf5"
+  },
+  "trustedEdgePolicy": {
+    "policyId": "trusted-edge-envelope",
+    "policyVersion": "1.0.0",
+    "policySha256": "baf97c1ba7602cc7919e92e251948b659b343c88ef49e53f05cdca3a3e60f328"
+  },
+  "extractorRegistry": {
+    "registryId": "canonical-edge-extractors",
+    "registryVersion": "1.0.0",
+    "registrySha256": "43da9da63df0f148091aa6356865bb17f167be8721ef0bc87fb9eb619f7529e6"
+  },
+  "seedSelectionMode": "ALL_GRAPH_NODES",
+  "requiredTargetMaterialities": ["MATERIAL"],
+  "maximumRequiredSeeds": 5000,
+  "maximumRequiredPaths": 10000,
+  "maximumRequiredHops": 100000
+}

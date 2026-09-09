@@ -72,6 +72,17 @@ partially promote a path. These gaps do not suppress the legacy analysis/demo la
 states `UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED`, `release_eligible=false` and `ANALYSIS_ONLY`; it is a
 necessary input-integrity step, not a reason to relax `RELEASE_EVIDENCE_MODEL_INCOMPLETE`.
 
+R0.2 now adds complete local material-path replay without changing that conclusion. Its separately
+pinned policy derives seeds from every graph node and enumerates every reachable material target
+under the current propagation policy before applying evidence trust. The exact union of path edges
+must pass current R0.1 replay, and the resulting trusted ordered paths must exactly match the
+structural scope. Current UTC is sampled internally; a still-valid historical artifact is refreshed
+only after every static hop-provenance field matches current replay. Empty or capacity-limited scope,
+omission, addition, reorder, reversal, substitution, expiry and tamper produce deterministic
+blocking `RELEASE_ONLY` gaps. `CHANGE_SEED_SCOPE_NOT_ATTESTED` and
+`UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED` remain, so “coverage complete” means local envelope/path
+coverage only and cannot enable a release decision.
+
 The required interlock field is a breaking governance-policy contract change, so the executable
 policy is version `2.0.0`. The interlock cannot be enabled by a configuration toggle in policy
 version 2.x. A future reviewed

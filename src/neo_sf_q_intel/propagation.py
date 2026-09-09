@@ -382,6 +382,47 @@ class PropagationGap(PolicyModel):
     scope: Literal["ANALYSIS", "RELEASE_ONLY"] = "ANALYSIS"
 
 
+class StructuralPathHop(PolicyModel):
+    """Trust-neutral route candidate used only to derive a complete replay scope."""
+
+    edge_id: str = Field(min_length=1)
+    relation_class: str = Field(min_length=1)
+    direction: TraversalDirection
+    traversal_from_id: str = Field(min_length=1)
+    traversal_to_id: str = Field(min_length=1)
+    edge_source_id: str = Field(min_length=1)
+    edge_target_id: str = Field(min_length=1)
+    scope: Literal["CANDIDATE_STRUCTURE_ONLY"] = "CANDIDATE_STRUCTURE_ONLY"
+
+
+class StructuralPathCandidate(PolicyModel):
+    seed_id: str = Field(min_length=1)
+    target_id: str = Field(min_length=1)
+    hops: tuple[StructuralPathHop, ...] = Field(min_length=1)
+    scope: Literal["CANDIDATE_STRUCTURE_ONLY"] = "CANDIDATE_STRUCTURE_ONLY"
+
+    @model_validator(mode="after")
+    def validate_chain(self) -> StructuralPathCandidate:
+        if self.hops[0].traversal_from_id != self.seed_id:
+            raise ValueError("Structural path must begin at its seed")
+        if self.hops[-1].traversal_to_id != self.target_id:
+            raise ValueError("Structural path must end at its target")
+        for left, right in zip(self.hops, self.hops[1:], strict=False):
+            if left.traversal_to_id != right.traversal_from_id:
+                raise ValueError("Structural path hops must be contiguous")
+        visited = [self.seed_id, *(hop.traversal_to_id for hop in self.hops)]
+        if len(visited) != len(set(visited)):
+            raise ValueError("Structural path candidates must be simple paths")
+        return self
+
+
+class StructuralPropagationScope(PolicyModel):
+    seed_ids: tuple[str, ...] = Field(min_length=1)
+    paths: tuple[StructuralPathCandidate, ...]
+    gaps: tuple[PropagationGap, ...]
+    scope: Literal["CANDIDATE_STRUCTURE_ONLY"] = "CANDIDATE_STRUCTURE_ONLY"
+
+
 class PropagationResult(PolicyModel):
     project_id: str
     source_graph_sha256: str
@@ -795,6 +836,143 @@ def _node_is_receiptable(node: Any, graph: NormalizedGraph) -> bool:
         and node.source_snapshot == graph.source_snapshot
         and node.source_hash == graph.source_graph_sha256
         and node.extractor_id
+    )
+
+
+def enumerate_structural_propagation(
+    graph: NormalizedGraph,
+    seed_ids: list[str] | tuple[str, ...],
+    policy: PropagationPolicy,
+) -> StructuralPropagationScope:
+    """Enumerate policy-legal topology without interpreting provenance as authority."""
+
+    _require_runtime_policy_integrity(policy)
+    if (graph.ontology_id, graph.ontology_version, graph.ontology_sha256) != (
+        policy.ontology.ontology_id,
+        policy.ontology.ontology_version,
+        policy.ontology.ontology_sha256,
+    ):
+        raise PropagationEvaluationError("Graph and propagation ontology identities differ")
+    nodes = _require_normalized_graph_integrity(graph, policy)
+    ordered_seeds = tuple(sorted(set(seed_ids)))
+    gaps: list[PropagationGap] = []
+    valid_seeds: list[str] = []
+    for seed_id in ordered_seeds:
+        if seed_id not in nodes:
+            gaps.append(
+                PropagationGap(
+                    code="UNKNOWN_SEED", entity_id=seed_id, detail=None, blocking=True
+                )
+            )
+        else:
+            valid_seeds.append(seed_id)
+
+    edges = sorted(graph.edges, key=lambda item: item.edge_id)
+    paths: list[StructuralPathCandidate] = []
+    target_path_counts: dict[str, int] = {}
+    budget_exhausted = False
+    seen: set[tuple[str, tuple[tuple[str, str], ...]]] = set()
+    for seed_id in valid_seeds:
+        queue: deque[
+            tuple[str, tuple[StructuralPathHop, ...], frozenset[str]]
+        ] = deque([(seed_id, (), frozenset({seed_id}))])
+        while queue:
+            if budget_exhausted:
+                break
+            current_id, prior_hops, visited = queue.popleft()
+            next_depth = len(prior_hops) + 1
+            if next_depth > policy.maximum_total_depth:
+                continue
+            for edge in edges:
+                if budget_exhausted:
+                    break
+                rule = policy.rules_by_relation[edge.canonical_relation]
+                for route in rule.routes:
+                    neighbor = _route_neighbors(
+                        edge,
+                        current_id,
+                        nodes[edge.source_id].role,
+                        nodes[edge.target_id].role,
+                        route,
+                        next_depth,
+                    )
+                    if neighbor is None:
+                        continue
+                    neighbor_id, direction = neighbor
+                    if neighbor_id in visited:
+                        continue
+                    hop = StructuralPathHop(
+                        edge_id=edge.edge_id,
+                        relation_class=edge.canonical_relation,
+                        direction=direction,
+                        traversal_from_id=current_id,
+                        traversal_to_id=neighbor_id,
+                        edge_source_id=edge.source_id,
+                        edge_target_id=edge.target_id,
+                    )
+                    hops = (*prior_hops, hop)
+                    signature = (
+                        seed_id,
+                        tuple((item.edge_id, item.direction.value) for item in hops),
+                    )
+                    if signature in seen:
+                        continue
+                    seen.add(signature)
+                    if len(paths) >= policy.maximum_total_paths:
+                        gaps.append(
+                            PropagationGap(
+                                code="TOTAL_PATH_LIMIT_REACHED",
+                                detail=None,
+                                blocking=True,
+                            )
+                        )
+                        budget_exhausted = True
+                        break
+                    target_count = target_path_counts.get(neighbor_id, 0)
+                    if target_count >= policy.maximum_paths_per_target:
+                        gaps.append(
+                            PropagationGap(
+                                code="TARGET_PATH_LIMIT_REACHED",
+                                entity_id=neighbor_id,
+                                detail=None,
+                                blocking=True,
+                            )
+                        )
+                        continue
+                    paths.append(
+                        StructuralPathCandidate(
+                            seed_id=seed_id,
+                            target_id=neighbor_id,
+                            hops=hops,
+                        )
+                    )
+                    target_path_counts[neighbor_id] = target_count + 1
+                    queue.append((neighbor_id, hops, visited | {neighbor_id}))
+        if budget_exhausted:
+            break
+    paths.sort(
+        key=lambda item: (
+            item.target_id,
+            item.seed_id,
+            len(item.hops),
+            tuple((hop.edge_id, hop.direction.value) for hop in item.hops),
+        )
+    )
+    gaps = sorted(
+        set(gaps),
+        key=lambda item: (
+            item.code,
+            item.scope,
+            item.blocking,
+            item.entity_id or "",
+            item.edge_id or "",
+            item.detail or "",
+        ),
+    )
+    return StructuralPropagationScope(
+        seed_ids=ordered_seeds,
+        paths=tuple(paths),
+        gaps=tuple(gaps),
     )
 
 

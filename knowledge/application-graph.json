@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "f2c5f9ee5915bdcea8c5fe00fabdc0fff870821906104360dc85427e9ffc268c",
+  "sourceSnapshot": "888810367d5b7ff264fd2b5d01cd0f38736fd133423932a058b30b9212360abb",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -534,6 +534,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/complete-path-replay-policy.json",
+      "kind": "file",
+      "label": "complete-path-replay-policy.json",
+      "source": "config/complete-path-replay-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/context-compiler-policy.json",
       "kind": "file",
       "label": "context-compiler-policy.json",
@@ -786,6 +794,14 @@
       "kind": "file",
       "label": "2026-09-09-canonical-ontology-propagation.md",
       "source": "quality/reviews/2026-09-09-canonical-ontology-propagation.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-complete-path-replay.md",
+      "kind": "file",
+      "label": "2026-09-09-complete-path-replay.md",
+      "source": "quality/reviews/2026-09-09-complete-path-replay.md",
       "category": "project",
       "authority": "supporting"
     },
@@ -1046,6 +1062,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/path_replay.py",
+      "kind": "file",
+      "label": "path_replay.py",
+      "source": "src/neo_sf_q_intel/path_replay.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/policy.py",
       "kind": "file",
       "label": "policy.py",
@@ -1174,6 +1198,22 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/support/__init__.py",
+      "kind": "file",
+      "label": "__init__.py",
+      "source": "tests/support/__init__.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/support/path_replay_fixture.py",
+      "kind": "file",
+      "label": "path_replay_fixture.py",
+      "source": "tests/support/path_replay_fixture.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_analysis.py",
       "kind": "file",
       "label": "test_analysis.py",
@@ -1266,6 +1306,14 @@
       "kind": "file",
       "label": "test_outcomes.py",
       "source": "tests/test_outcomes.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_path_replay.py",
+      "kind": "file",
+      "label": "test_path_replay.py",
+      "source": "tests/test_path_replay.py",
       "category": "test",
       "authority": "verification"
     },
@@ -1457,6 +1505,14 @@
       "label": "knowledge.trusted-edge-envelope",
       "status": "FOUNDATION",
       "summary": "Compiles and replays source-neutral canonical-edge artifact envelopes against externally pinned project/snapshot, raw and normalized graph, ontology/profile, parser registry/implementation, policy, evidence-state and freshness roots. Release-only gaps are isolated from analysis, all results remain ANALYSIS_ONLY with upstream capture unattested, and no receipt can authorize release.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:knowledge.complete-path-replay",
+      "kind": "capability",
+      "label": "knowledge.complete-path-replay",
+      "status": "FOUNDATION",
+      "summary": "Derives a source-neutral, non-caller-narrowable candidate scope from all graph nodes and every reachable material target under independently pinned path, propagation and R0.1 trust roots; exact current envelope union and ordered path equality are required. Results remain ANALYSIS_ONLY and release-ineligible with change-seed and upstream-capture gaps.",
       "authority": "policy"
     },
     {
@@ -1816,6 +1872,41 @@
       "from": "capability:knowledge.canonical-ontology",
       "relation": "verified_by",
       "to": "file:tests/test_workflow.py"
+    },
+    {
+      "from": "capability:knowledge.complete-path-replay",
+      "relation": "implemented_by",
+      "to": "file:config/complete-path-replay-policy.json"
+    },
+    {
+      "from": "capability:knowledge.complete-path-replay",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/path_replay.py"
+    },
+    {
+      "from": "capability:knowledge.complete-path-replay",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "capability:knowledge.complete-path-replay",
+      "relation": "owned_by",
+      "to": "owner:Governance Review"
+    },
+    {
+      "from": "capability:knowledge.complete-path-replay",
+      "relation": "verified_by",
+      "to": "file:tests/test_edge_envelope.py"
+    },
+    {
+      "from": "capability:knowledge.complete-path-replay",
+      "relation": "verified_by",
+      "to": "file:tests/test_path_replay.py"
+    },
+    {
+      "from": "capability:knowledge.complete-path-replay",
+      "relation": "verified_by",
+      "to": "file:tests/test_propagation.py"
     },
     {
       "from": "capability:knowledge.evidence-graph",
@@ -2703,6 +2794,21 @@
       "to": "file:src/neo_sf_q_intel/safety.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/path_replay.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/path_replay.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/path_replay.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/policy.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/ontology.py"
@@ -2926,6 +3032,16 @@
       "from": "file:src/neo_sf_q_intel/workflow.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/observability.py"
+    },
+    {
+      "from": "file:tests/support/path_replay_fixture.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:tests/support/path_replay_fixture.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
       "from": "file:tests/test_analysis.py",
@@ -3161,6 +3277,26 @@
       "from": "file:tests/test_outcomes.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/outcomes.py"
+    },
+    {
+      "from": "file:tests/test_path_replay.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:tests/test_path_replay.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:tests/test_path_replay.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/path_replay.py"
+    },
+    {
+      "from": "file:tests/test_path_replay.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
     },
     {
       "from": "file:tests/test_propagation.py",

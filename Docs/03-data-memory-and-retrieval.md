@@ -100,5 +100,15 @@ the current in-process implementation and the future ChromaDB adapter interchang
   endpoint and direction. The current bidirectional allowlist traversal is only a foundation and
   must not be described as causal reasoning. Every accepted impact path carries an ordered path
   receipt; cycles and diamonds are deduplicated without reversing causality.
+- The R0.2 path-replay foundation separately enumerates candidate structure from every graph node
+  to every reachable material target under the pinned propagation/path policies. It then requires
+  the exact edge union to pass current R0.1 replay and requires the trusted ordered path set to equal
+  the structural set. Candidate structure never fabricates confirmed evidence and has no digest or
+  authority of its own. Empty/capacity-limited scope and any missing, extra, expired or altered path
+  input remain blocking release-only gaps while legacy analysis remains available.
+- A still-valid historical path artifact is an audit input, not frozen authority. Verification
+  samples the current UTC time internally, replays current roots/envelopes, compares every static
+  hop provenance field and returns a refreshed current artifact. Only evaluation-derived timestamps
+  and hashes may change during refresh; same-structure provenance substitution is rejected.
 - Release/outcome memory is append-only governed evidence. Historical similarity may rank a
   candidate or flag a prior incident, but cannot prove that the current change is safe.
