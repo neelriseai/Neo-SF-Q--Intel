@@ -557,7 +557,7 @@ class GraphProductionEvaluation(_Model):
 
 
 DEFAULT_GRAPH_PRODUCER_POLICY_SHA256 = (
-    "b3552af2fb1c49ecfc10ab1c996de2fdfa350181c9cdb782c1cb621e0aab3a21"
+    "a10136b49aee73d9c46522774fba189cc0f6e02a30cc655235434872000a061b"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -1409,6 +1409,7 @@ class LocalTreeGraphProducer:
                 maximum_nodes=self.policy.maximum_nodes - len(manifest),
                 maximum_edges=self.policy.maximum_edges,
                 maximum_work_units=self.policy.maximum_semantic_work_units,
+                maximum_path_bytes=self.policy.maximum_path_bytes,
             )
         except SalesforceGraphCapacityError:
             raise _ProductionRejected(

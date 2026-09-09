@@ -1,10 +1,9 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "operation-aware-seed-foundation-2026-09-10",
+  "reviewId": "nested-dx-discovery-2026-09-10",
   "status": "APPROVED",
   "reviewedPaths": [
     "Docs/02-source-ingestion-and-change-detection.md",
-    "Docs/07-governance-and-evaluation.md",
     "Docs/08-roadmap-24h.md",
     "Docs/10-graph-grounded-agent-reasoning.md",
     "config/capability-scope.json",
@@ -12,11 +11,13 @@
     "config/operation-seed-policy.json",
     "knowledge/application-graph.json",
     "knowledge/project-index.json",
-    "quality/reviews/2026-09-10-operation-aware-seed-foundation.md",
+    "quality/reviews/2026-09-10-nested-dx-discovery.md",
     "quality/reviews/current-scope-review.json",
+    "src/neo_sf_q_intel/graph_adapter.py",
     "src/neo_sf_q_intel/graph_production.py",
     "src/neo_sf_q_intel/operation_seed.py",
-    "tests/test_operation_seed.py"
+    "src/neo_sf_q_intel/salesforce_graph_adapter.py",
+    "tests/test_graph_production.py"
   ],
   "reviewers": [
     "r01_genericity_review",
@@ -24,39 +25,29 @@
   ],
   "findings": [
     {
-      "code": "R04D_OPERATION_SIDE_EVIDENCE",
+      "code": "R04C_NESTED_DESCRIPTOR_DISCOVERY",
       "severity": "P1",
-      "resolution": "ADD uses candidate evidence, DELETE uses base evidence plus exact tombstones, and MODIFY preserves independent base and candidate semantic versions under a pinned contract."
+      "resolution": "Each exact BASE/CANDIDATE tree independently supplies exactly one DX descriptor at arbitrary repository depth; no caller locator or working-directory heuristic can narrow selection."
     },
     {
-      "code": "R04D_EXACT_PARTITIONS",
+      "code": "R04C_DESCRIPTOR_RELATIVE_PACKAGES",
       "severity": "P1",
-      "resolution": "Every verified Git change, graph delta and tombstone is accounted through direct or indirect partitions; nonsemantic changes have an explicit no-seed outcome."
+      "resolution": "Declared packages resolve relative to the descriptor while every repository file remains in the disposition receipt and out-of-root lookalikes remain explicitly non-applicable."
     },
     {
-      "code": "R04D_CURRENT_REPLAY_AND_TIME",
+      "code": "R04C_PORTABLE_PATH_SAFETY",
       "severity": "P1",
-      "resolution": "Historical roots bind before current repository and graph replay; aware UTC, future, expiry, refresh and rollback cases fail closed."
+      "resolution": "Descriptor and package locators enforce canonical repository-relative paths, the pinned byte bound, portable aliases and reserved names, and case-independent duplicate and overlap refusal."
     },
     {
-      "code": "R04C_REFRESH_PROJECTION",
+      "code": "R04C_SIDE_INDEPENDENCE",
       "severity": "P1",
-      "resolution": "Residual graph freshness is temporal during current replay while model validation still proves the exact validity interval."
+      "resolution": "Descriptor relocation is evaluated independently per side; semantic identity remains stable while exact owner provenance and side receipts rotate."
     },
     {
-      "code": "R04D_BOUNDED_ASSOCIATIONS",
+      "code": "R04C_SINGLE_PROJECT_BOUNDARY",
       "severity": "P1",
-      "resolution": "A linear owner-to-delta index and pinned total reference limits prevent change-by-delta scans and combinatorial output expansion."
-    },
-    {
-      "code": "R04D_RELEASE_SCOPE_RETAINED",
-      "severity": "P1",
-      "resolution": "The slice claims only supported-family local operation mapping; trusted paths, source-family, upstream, build/test and global release gaps remain blocking."
-    },
-    {
-      "code": "R04D_PER_DELTA_DELIVERABLE",
-      "severity": "P2",
-      "resolution": "The receipt keeps exact aggregate direct and indirect partitions. A later obligation slice may add compact per-delta causal deliverables without strengthening this FOUNDATION claim."
+      "resolution": "The capability truthfully supports one DX descriptor at arbitrary depth and fails closed rather than selecting among multiple projects."
     }
   ],
   "statusDowngrades": []

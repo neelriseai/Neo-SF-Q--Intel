@@ -81,8 +81,11 @@ retaining a blocking graph-input-tree attestation gap.
 
 R0.4c adds a separately pinned product-graph producer. It replays the verified change set, reads
 base bytes by immutable Git object and candidate bytes through a bounded, no-follow handle under a
-final repository replay, and accounts for every manifest file. Package roots come from each side's
-exact `sfdx-project.json`; lookalike paths outside those roots are not Salesforce evidence. A
+final repository replay, and accounts for every manifest file. Each side independently requires
+exactly one portable, repository-relative `sfdx-project.json` at any depth; package roots resolve
+relative to that descriptor. Ambiguous descriptors, unsafe or overlapping roots and portable path
+aliases fail closed. Lookalike paths outside the resolved roots remain accounted but are not
+Salesforce evidence. A
 pinned Salesforce DX adapter deterministically emits supported semantic entities and relationships
 for metadata, Apex, LWC, security, automation and presentation source families from those same
 bytes. Unknown files under a package source root fail closed instead of disappearing from impact.

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "policyId": "operation-aware-semantic-seed-mapping",
   "policyVersion": "1.0.0",
-  "sha256": "3943267d34ae1f41a03e4b2bec7e8dce714d28538a67bd2149c7d2891064b1d7",
+  "sha256": "bf1e0611f6faa1ff62e06aa7847db79f7047da16c5f0621b1cd06fec756df332",
   "verifiedChangePolicy": {
     "contractId": "verified-local-git-change",
     "contractVersion": "1.0.0",
@@ -11,7 +11,7 @@
   "graphProducerPolicy": {
     "contractId": "verified-tree-graph-production",
     "contractVersion": "1.0.0",
-    "contractSha256": "b3552af2fb1c49ecfc10ab1c996de2fdfa350181c9cdb782c1cb621e0aab3a21"
+    "contractSha256": "a10136b49aee73d9c46522774fba189cc0f6e02a30cc655235434872000a061b"
   },
   "compiler": {
     "implementationId": "operation-aware-semantic-seed-compiler",

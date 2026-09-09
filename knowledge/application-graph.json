@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "db92a643517733ebad3a3f5cc2e5e0957625f1c5de62afa173613978b5782dc2",
+  "sourceSnapshot": "948a3555fe5d3cc994efcd8c18da5b8c4cd6ed72caf581c6ef3e0e31f5521dc0",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -966,6 +966,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-10-nested-dx-discovery.md",
+      "kind": "file",
+      "label": "2026-09-10-nested-dx-discovery.md",
+      "source": "quality/reviews/2026-09-10-nested-dx-discovery.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/2026-09-10-operation-aware-seed-foundation.md",
       "kind": "file",
       "label": "2026-09-10-operation-aware-seed-foundation.md",
@@ -1672,7 +1680,7 @@
       "kind": "capability",
       "label": "source.tree-graph-production",
       "status": "FOUNDATION",
-      "summary": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, derives package roots from each side's sfdx-project.json, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "summary": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, independently requires exactly one portable sfdx-project.json at any depth per side, resolves package roots relative to that descriptor, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Ambiguous descriptors, aliases, unsafe or overlapping roots and unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. This supports one DX descriptor, not automatic selection among multiple projects. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
       "authority": "policy"
     },
     {

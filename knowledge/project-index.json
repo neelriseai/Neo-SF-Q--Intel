@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "db92a643517733ebad3a3f5cc2e5e0957625f1c5de62afa173613978b5782dc2",
+  "sourceSnapshot": "948a3555fe5d3cc994efcd8c18da5b8c4cd6ed72caf581c6ef3e0e31f5521dc0",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -83,7 +83,7 @@
       "id": "source.tree-graph-production",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, derives package roots from each side's sfdx-project.json, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "genericity": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, independently requires exactly one portable sfdx-project.json at any depth per side, resolves package roots relative to that descriptor, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Ambiguous descriptors, aliases, unsafe or overlapping roots and unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. This supports one DX descriptor, not automatic selection among multiple projects. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
       "implementation": [
         "config/graph-producer-policy.json",
         "config/source-profiles/salesforce-dx-semantic-graph.json",
@@ -765,7 +765,7 @@
     {
       "path": "Docs/02-source-ingestion-and-change-detection.md",
       "category": "reference-documentation",
-      "sha256": "c7a710e447e6cb9573a66d9a56faffe000492f476e6b5659c67455704860e91a"
+      "sha256": "fdf800a5e87388b6bb572442bee835bc41dab86cd9285c434c29d2aa5787422d"
     },
     {
       "path": "Docs/03-data-memory-and-retrieval.md",
@@ -855,7 +855,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "a3d4e124dbf55a0bec6d7b7143901d5578956ca386f935ad1a3c5c2d64af3709"
+      "sha256": "d43d84e54e047e23cabeab0648d41741bdb3e38ff9e74fa2a27dbce0d3c876bb"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -885,7 +885,7 @@
     {
       "path": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "reference-documentation",
-      "sha256": "958927fe1b4a1ca66d7c8d9e0a3c936774bfde915d212f7aa9b7b83588ef149b"
+      "sha256": "bcad26dcfe344ac4a0368004748e3d3967218d759ff2336fc156b76429f9f669"
     },
     {
       "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
@@ -1020,7 +1020,7 @@
     {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "bc63c3f4bd04700b7dd5b0c76cbdc0878c45201f3a743a4b364a6a201243266f"
+      "sha256": "7c5d62bc4d827dbdb2e25fae3ad35d9a928d0b3632ff87cde9ac08c79e1ef7ae"
     },
     {
       "path": "config/change-seed-policy.json",
@@ -1055,7 +1055,7 @@
     {
       "path": "config/graph-producer-policy.json",
       "category": "policy",
-      "sha256": "6795b340f6ca9624c15784faf95740c1aea1ab6fa7bdf48072663ded06c64539"
+      "sha256": "864e6f1daea3fff93e6427157cc46cfbbd703f7b6628d7ca55976bb4de59a556"
     },
     {
       "path": "config/ontology/canonical-ontology.json",
@@ -1065,7 +1065,7 @@
     {
       "path": "config/operation-seed-policy.json",
       "category": "policy",
-      "sha256": "2d010b7f600c5e04654426c03f9b92f7e418df34e772a47d2ce08359122541cd"
+      "sha256": "49d90a8f06b20d5af7779898307d2ec1a3f8c28745f40aacf1eec3c21ed83329"
     },
     {
       "path": "config/outcome-memory-policy.json",
@@ -1293,6 +1293,11 @@
       "sha256": "2f5f2b289009ffdeed4f5ab2ccee048ac0cc6cb3598362295249aebc4186c480"
     },
     {
+      "path": "quality/reviews/2026-09-10-nested-dx-discovery.md",
+      "category": "project",
+      "sha256": "0a701f5550c3db0a2060975cb38faa7b27a42d827968519ee1a1b2c4074241f0"
+    },
+    {
       "path": "quality/reviews/2026-09-10-operation-aware-seed-foundation.md",
       "category": "project",
       "sha256": "3673cabe8de8d06c405da6cf1f60f69ec46da03ee5d9dc014d50d6d697368747"
@@ -1300,7 +1305,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "a4497395c5e41d3527b35eba2c7fc41bb7a61ae0714b696fa30db0e1e20fd9fa"
+      "sha256": "2b93c55feb154bfb0e9d791af7fffb507421c5593d38f9b6aeb7020d23e20565"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -1390,12 +1395,12 @@
     {
       "path": "src/neo_sf_q_intel/graph_adapter.py",
       "category": "python-runtime",
-      "sha256": "fbf11e607f1e31e4285c97017a13ba04c809e417a4d9f808963a031ae6fb615f"
+      "sha256": "85e7938635b984ca538a0ee67feb7326987741d6288e47d98fc3b99b02b88633"
     },
     {
       "path": "src/neo_sf_q_intel/graph_production.py",
       "category": "python-runtime",
-      "sha256": "00e5a4ec4999406382a7fc349f95151b79c4cb9469167e73499c7ac6ee272e45"
+      "sha256": "3b8adbf31982dca297de8066d5b96bfb4e09852e536376056798df51add9dfb8"
     },
     {
       "path": "src/neo_sf_q_intel/healing.py",
@@ -1420,7 +1425,7 @@
     {
       "path": "src/neo_sf_q_intel/operation_seed.py",
       "category": "python-runtime",
-      "sha256": "f9f165e8eb32f20f4f15e48ddf63d8ec6acb55a018bd774bf8f185e1e39b4f04"
+      "sha256": "b34ecd75f529b0cc6a6063d355301514ae496bc33c54a55bc35f95964678f192"
     },
     {
       "path": "src/neo_sf_q_intel/outcome_repository.py",
@@ -1490,7 +1495,7 @@
     {
       "path": "src/neo_sf_q_intel/salesforce_graph_adapter.py",
       "category": "python-runtime",
-      "sha256": "990cfdee8fbbf993ab45e3270af54ee320b6beacb20162ed460d530f5bbe7f79"
+      "sha256": "e466143dfc0a2c1d6667ab33fe6efa073c1cc8f13ec8f84ee4474a78865185e7"
     },
     {
       "path": "src/neo_sf_q_intel/salesforce_source.py",
@@ -1590,7 +1595,7 @@
     {
       "path": "tests/test_graph_production.py",
       "category": "test",
-      "sha256": "588a443ed5522af3c8a24185db9191d66a1809dbeba10f3ba8be684c78510a9f"
+      "sha256": "433b7625c674c3b8b881b43637cd638d1106d750c2a2a25e75a6036eed07b5d4"
     },
     {
       "path": "tests/test_mcp_server.py",

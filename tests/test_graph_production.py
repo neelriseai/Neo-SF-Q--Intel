@@ -110,6 +110,41 @@ def _repository(tmp_path: Path) -> Path:
     return repository
 
 
+def _nested_repository(tmp_path: Path) -> Path:
+    repository = tmp_path / "nested-repo"
+    repository.mkdir(parents=True)
+    _run(repository, "init", "--quiet")
+    _run(repository, "config", "user.email", "fixture@example.invalid")
+    _run(repository, "config", "user.name", "Fixture")
+    _run(repository, "config", "core.autocrlf", "false")
+    _write(
+        repository,
+        "workspace/crm/sfdx-project.json",
+        b'{"packageDirectories":[{"path":"force-app"}]}',
+    )
+    _write(
+        repository,
+        "workspace/crm/force-app/main/default/objects/Entity__c/"
+        "Entity__c.object-meta.xml",
+        _xml("CustomObject", "<label>Base label</label>"),
+    )
+    _write(
+        repository,
+        "force-app/main/default/objects/Lookalike__c/Lookalike__c.object-meta.xml",
+        _xml("CustomObject"),
+    )
+    _write(repository, "README.md", b"unrelated but accounted\n")
+    _run(repository, "add", "--all")
+    _run(repository, "commit", "--quiet", "-m", "base")
+    _write(
+        repository,
+        "workspace/crm/force-app/main/default/objects/Entity__c/"
+        "Entity__c.object-meta.xml",
+        _xml("CustomObject", "<label>Candidate label</label>"),
+    )
+    return repository
+
+
 def _policy():
     return load_graph_producer_policy(
         ROOT / "config" / "graph-producer-policy.json", implementation_root=ROOT
@@ -210,6 +245,72 @@ def test_all_files_accounted_and_binary_bytes_not_normalized(tmp_path: Path) -> 
     assert binary.normalized_text_sha256 is None
 
 
+def test_nested_descriptor_produces_both_exact_graph_sides_end_to_end(
+    tmp_path: Path,
+) -> None:
+    producer, inputs = _system(_nested_repository(tmp_path))
+    artifact = producer.capture(inputs).artifact
+    assert artifact is not None
+    for side, manifest in (
+        (artifact.base, inputs.candidate.base_files),
+        (artifact.candidate, inputs.candidate.candidate_files),
+    ):
+        assert tuple(item.path for item in side.dispositions) == tuple(
+            item.path for item in manifest
+        )
+        statuses = {item.path: item.semantic_status for item in side.dispositions}
+        assert statuses[
+            "workspace/crm/force-app/main/default/objects/Entity__c/"
+            "Entity__c.object-meta.xml"
+        ].value == "PARSED"
+        assert statuses[
+            "force-app/main/default/objects/Lookalike__c/"
+            "Lookalike__c.object-meta.xml"
+        ].value == "NOT_APPLICABLE"
+        assert "object:Entity__c" in {item.node_id for item in side.nodes}
+        assert "object:Lookalike__c" not in {item.node_id for item in side.nodes}
+
+
+def test_descriptor_relocation_is_resolved_independently_per_graph_side(
+    tmp_path: Path,
+) -> None:
+    repository = tmp_path / "relocated-repo"
+    repository.mkdir(parents=True)
+    _run(repository, "init", "--quiet")
+    _run(repository, "config", "user.email", "fixture@example.invalid")
+    _run(repository, "config", "user.name", "Fixture")
+    _run(repository, "config", "core.autocrlf", "false")
+    descriptor = b'{"packageDirectories":[{"path":"pkg"}]}'
+    source = _xml("CustomObject")
+    _write(repository, "sfdx-project.json", descriptor)
+    _write(
+        repository,
+        "pkg/main/default/objects/Entity__c/Entity__c.object-meta.xml",
+        source,
+    )
+    _run(repository, "add", "--all")
+    _run(repository, "commit", "--quiet", "-m", "base")
+    _write(repository, "workspace/crm/sfdx-project.json", descriptor)
+    _write(
+        repository,
+        "workspace/crm/pkg/main/default/objects/Entity__c/Entity__c.object-meta.xml",
+        source,
+    )
+    (repository / "sfdx-project.json").unlink()
+    (repository / "pkg" / "main" / "default" / "objects" / "Entity__c" /
+     "Entity__c.object-meta.xml").unlink()
+    producer, inputs = _system(repository)
+    artifact = producer.capture(inputs).artifact
+    assert artifact is not None
+    base = next(item for item in artifact.base.nodes if item.node_id == "object:Entity__c")
+    candidate = next(
+        item for item in artifact.candidate.nodes if item.node_id == "object:Entity__c"
+    )
+    assert base.semantic_sha256 == candidate.semantic_sha256
+    assert base.owners[0].path != candidate.owners[0].path
+    assert artifact.base.side_receipt_sha256 != artifact.candidate.side_receipt_sha256
+
+
 def test_adapter_uses_package_roots_and_ignores_lookalikes() -> None:
     graph = SalesforceSemanticGraphAdapter().extract(
         {
@@ -225,6 +326,65 @@ def test_adapter_uses_package_roots_and_ignores_lookalikes() -> None:
     )
     assert "object:Real__c" in {item.node_id for item in graph.nodes}
     assert "object:Fake__c" not in {item.node_id for item in graph.nodes}
+
+
+def test_adapter_resolves_single_nested_descriptor_without_narrowing_tree() -> None:
+    nested = (
+        "workspace/crm/force-app/main/default/objects/Real__c/"
+        "Real__c.object-meta.xml"
+    )
+    lookalike = "force-app/main/default/objects/Fake__c/Fake__c.object-meta.xml"
+    graph = SalesforceSemanticGraphAdapter().extract(
+        {
+            "workspace/crm/sfdx-project.json": (
+                b'{"packageDirectories":[{"path":"force-app"}]}'
+            ),
+            nested: _xml("CustomObject"),
+            lookalike: _xml("CustomObject"),
+            "README.md": b"complete repository accounting\n",
+        },
+        maximum_nodes=100,
+        maximum_edges=100,
+        maximum_work_units=100000,
+    )
+    assert "object:Real__c" in {item.node_id for item in graph.nodes}
+    assert "object:Fake__c" not in {item.node_id for item in graph.nodes}
+    dispositions = {item.path: item.status.value for item in graph.files}
+    assert set(dispositions) == {
+        "workspace/crm/sfdx-project.json",
+        nested,
+        lookalike,
+        "README.md",
+    }
+    assert dispositions[nested] == "PARSED"
+    assert dispositions[lookalike] == "NOT_APPLICABLE"
+    assert dispositions["README.md"] == "NOT_APPLICABLE"
+
+
+@pytest.mark.parametrize(
+    "files",
+    [
+        {
+            "sfdx-project.json": b'{"packageDirectories":[{"path":"pkg"}]}',
+            "nested/sfdx-project.json": b'{"packageDirectories":[{"path":"pkg"}]}',
+        },
+        {
+            "nested/sfdx-project.json": b'{"packageDirectories":[{"path":"pkg"}]}',
+            "nested/SFDX-PROJECT.JSON": b"{}",
+        },
+        {"../sfdx-project.json": b'{"packageDirectories":[{"path":"pkg"}]}'},
+    ],
+)
+def test_descriptor_ambiguity_and_unsafe_locator_fail_closed(
+    files: dict[str, bytes],
+) -> None:
+    with pytest.raises(SalesforceGraphAdapterError):
+        SalesforceSemanticGraphAdapter().extract(
+            files,
+            maximum_nodes=10,
+            maximum_edges=10,
+            maximum_work_units=10000,
+        )
 
 
 def test_package_rename_and_input_order_do_not_change_semantic_projection() -> None:
@@ -292,6 +452,12 @@ def test_package_rename_and_input_order_do_not_change_semantic_projection() -> N
         b'{"packageDirectories":[{"path":"../escape"}]}',
         b'{"packageDirectories":[{"path":"Pkg"},{"path":"pkg"}]}',
         b'{"packageDirectories":[{"path":"pkg"},{"path":"pkg/nested"}]}',
+        b'{"packageDirectories":[{"path":"A/b"},{"path":"a"}]}',
+        b'{"packageDirectories":[{"path":"CON"}]}',
+        b'{"packageDirectories":[{"path":"pkg. "}]}',
+        b'{"packageDirectories":[{"path":"pkg\\\\nested"}]}',
+        b'{"packageDirectories":[{"path":"/absolute"}]}',
+        b'{"packageDirectories":[{"path":"C:drive"}]}',
     ],
 )
 def test_invalid_package_roots_fail_closed(descriptor: bytes) -> None:
@@ -301,6 +467,23 @@ def test_invalid_package_roots_fail_closed(descriptor: bytes) -> None:
             maximum_nodes=10,
             maximum_edges=10,
             maximum_work_units=10000,
+        )
+
+
+def test_nested_descriptor_and_combined_package_root_obey_path_capacity() -> None:
+    descriptor = "nested-project-location-123/sfdx-project.json"
+    with pytest.raises(SalesforceGraphAdapterError):
+        SalesforceSemanticGraphAdapter().extract(
+            {
+                descriptor: (
+                    b'{"packageDirectories":[{"path":'
+                    b'"package-directory-name-longer-than-descriptor"}]}'
+                ),
+            },
+            maximum_nodes=10,
+            maximum_edges=10,
+            maximum_work_units=10000,
+            maximum_path_bytes=len(descriptor.encode()),
         )
 
 

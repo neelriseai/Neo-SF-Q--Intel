@@ -21,6 +21,9 @@ from neo_sf_q_intel.graph_adapter import (
 
 _METADATA_NAMESPACE = "http://soap.sforce.com/2006/04/metadata"
 _SALESFORCE_NAME = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
+_WINDOWS_DEVICE = re.compile(
+    r"^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$", re.IGNORECASE
+)
 
 
 class SalesforceGraphAdapterError(RuntimeError):
@@ -152,13 +155,55 @@ def _json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return value
 
 
-def _package_roots(files: Mapping[str, bytes]) -> tuple[str, ...]:
-    content = files.get("sfdx-project.json")
-    if content is None:
+def _safe_repository_locator(value: str, maximum_path_bytes: int) -> str:
+    if (
+        not value
+        or "\\" in value
+        or ":" in value
+        or any(ord(char) < 32 for char in value)
+        or len(value.encode("utf-8")) > maximum_path_bytes
+        or unicodedata.normalize("NFC", value) != value
+    ):
+        raise SalesforceGraphAdapterError("Unsafe Salesforce repository locator")
+    path = PurePosixPath(value)
+    if (
+        path.is_absolute()
+        or any(part in {"", ".", ".."} for part in path.parts)
+        or str(path) != value
+        or any(
+            part.endswith((".", " ")) or _WINDOWS_DEVICE.fullmatch(part)
+            for part in path.parts
+        )
+    ):
+        raise SalesforceGraphAdapterError("Unsafe Salesforce repository locator")
+    return path.as_posix()
+
+
+def _package_roots(
+    files: Mapping[str, bytes], maximum_path_bytes: int
+) -> tuple[str, ...]:
+    safe_paths = tuple(
+        sorted(_safe_repository_locator(path, maximum_path_bytes) for path in files)
+    )
+    descriptor_aliases = tuple(
+        path
+        for path in safe_paths
+        if PurePosixPath(path).name.casefold() == "sfdx-project.json"
+    )
+    descriptors = tuple(
+        path
+        for path in descriptor_aliases
+        if PurePosixPath(path).name == "sfdx-project.json"
+    )
+    if not descriptors:
         raise SalesforceGraphAdapterError("Missing sfdx-project.json")
+    if len(descriptors) != 1 or len(descriptor_aliases) != 1:
+        raise SalesforceGraphAdapterError("Salesforce project descriptor is ambiguous")
+    descriptor = descriptors[0]
+    content = files[descriptor]
     try:
         document = json.loads(
-            _utf8(content, "sfdx-project.json"), object_pairs_hook=_json_object
+            _utf8(content, descriptor), object_pairs_hook=_json_object
         )
     except (json.JSONDecodeError, TypeError) as exc:
         raise SalesforceGraphAdapterError("Malformed sfdx-project.json") from exc
@@ -168,25 +213,20 @@ def _package_roots(files: Mapping[str, bytes]) -> tuple[str, ...]:
     roots: list[str] = []
     for entry in directories:
         root = entry.get("path") if isinstance(entry, dict) else None
-        if (
-            not isinstance(root, str)
-            or not root
-            or root.startswith("/")
-            or "\\" in root
-            or ":" in root
-            or unicodedata.normalize("NFC", root) != root
-            or any(part in {"", ".", ".."} for part in PurePosixPath(root).parts)
-            or str(PurePosixPath(root)) != root
-        ):
+        if not isinstance(root, str):
             raise SalesforceGraphAdapterError("Unsafe Salesforce package directory")
-        roots.append(root)
+        _safe_repository_locator(root, maximum_path_bytes)
+        parent = PurePosixPath(descriptor).parent
+        resolved = PurePosixPath(root) if str(parent) == "." else parent / root
+        roots.append(_safe_repository_locator(str(resolved), maximum_path_bytes))
     aliases = [root.casefold() for root in roots]
     if len(aliases) != len(set(aliases)):
         raise SalesforceGraphAdapterError("Duplicate Salesforce package directory")
     ordered = tuple(sorted(roots))
     for index, root in enumerate(ordered):
         if any(
-            other.casefold().startswith(f"{root.casefold()}/")
+            root.casefold().startswith(f"{other.casefold()}/")
+            or other.casefold().startswith(f"{root.casefold()}/")
             for other in ordered[index + 1 :]
         ):
             raise SalesforceGraphAdapterError("Overlapping Salesforce package directory")
@@ -374,8 +414,14 @@ class SalesforceSemanticGraphAdapter:
         maximum_nodes: int,
         maximum_edges: int,
         maximum_work_units: int,
+        maximum_path_bytes: int = 1024,
     ) -> AdapterGraph:
-        if maximum_nodes < 1 or maximum_edges < 0 or maximum_work_units < 1:
+        if (
+            maximum_nodes < 1
+            or maximum_edges < 0
+            or maximum_work_units < 1
+            or maximum_path_bytes < 32
+        ):
             raise SalesforceGraphCapacityError("Semantic extraction limits are invalid")
         work_units = sum(len(content) for content in files.values()) + len(files)
         if work_units > maximum_work_units:
@@ -384,7 +430,7 @@ class SalesforceSemanticGraphAdapter:
             maximum_nodes, maximum_edges, maximum_work_units - work_units
         )
         parser_ids: dict[str, str] = {}
-        package_roots = _package_roots(files)
+        package_roots = _package_roots(files, maximum_path_bytes)
 
         def source_path(path: str) -> bool:
             return any(

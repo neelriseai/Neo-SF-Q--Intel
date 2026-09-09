@@ -387,7 +387,7 @@ class OperationSeedEvaluation(_Model):
 
 
 DEFAULT_OPERATION_SEED_POLICY_SHA256 = (
-    "3943267d34ae1f41a03e4b2bec7e8dce714d28538a67bd2149c7d2891064b1d7"
+    "bf1e0611f6faa1ff62e06aa7847db79f7047da16c5f0621b1cd06fec756df332"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")

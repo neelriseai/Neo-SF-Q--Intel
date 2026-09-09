@@ -61,4 +61,5 @@ class GraphSemanticAdapter(Protocol):
         maximum_nodes: int,
         maximum_edges: int,
         maximum_work_units: int,
+        maximum_path_bytes: int = 1024,
     ) -> AdapterGraph: ...
