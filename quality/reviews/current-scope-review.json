@@ -1,17 +1,24 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "change-seed-mapping-foundation-2026-09-09",
+  "reviewId": "semantic-graph-production-foundation-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
     "Docs/02-source-ingestion-and-change-detection.md",
+    "Docs/03-evidence-graph-and-memory.md",
     "Docs/07-governance-and-evaluation.md",
     "Docs/08-roadmap-24h.md",
     "Docs/10-graph-grounded-agent-reasoning.md",
     "config/capability-scope.json",
-    "config/change-seed-policy.json",
+    "config/graph-producer-policy.json",
     "config/quality-policy.json",
-    "src/neo_sf_q_intel/change_seed.py",
-    "tests/test_change_seed.py"
+    "config/source-profiles/salesforce-dx-semantic-graph.json",
+    "knowledge/application-graph.json",
+    "knowledge/project-index.json",
+    "quality/reviews/2026-09-09-semantic-graph-production-foundation.md",
+    "src/neo_sf_q_intel/graph_adapter.py",
+    "src/neo_sf_q_intel/graph_production.py",
+    "src/neo_sf_q_intel/salesforce_graph_adapter.py",
+    "tests/test_graph_production.py"
   ],
   "reviewers": [
     "r01_genericity_review",
@@ -19,39 +26,44 @@
   ],
   "findings": [
     {
-      "code": "R04B_CURRENT_AUTHORITY_REPLAY",
+      "code": "R04C_PRODUCT_GRAPH_NOT_DEVELOPER_INDEX",
       "severity": "P1",
-      "resolution": "The concrete pinned local-Git producer replays repository bytes, while current R0.2/R0.1 replay revalidates raw and normalized graph, ontology/profile, edge artifacts, policies and time. Caller mappings, seeds and path subsets are absent."
+      "resolution": "The file-only draft was rejected. R0.4c now materializes a separately pinned, typed Salesforce Change Evidence Graph from verified bytes; generated knowledge indexes remain developer-only discovery aids."
     },
     {
-      "code": "R04B_EXACT_CHANGE_PARTITION",
+      "code": "R04C_DESCRIPTOR_SCOPED_GENERIC_EXTRACTION",
       "severity": "P1",
-      "resolution": "Every complete bytewise non-delete change maps exactly once through an exact canonical locator to one unique source-artifact anchor. Unmapped, duplicate, ambiguous, aliased and unsafe locators block the aggregate."
+      "resolution": "Package roots are derived from each side's exact sfdx-project.json. Runtime code and the dedicated source profile contain no application object, field, route, alias or demo literals; unsupported package source families fail closed."
     },
     {
-      "code": "R04B_STABLE_PATH_REFRESH",
+      "code": "R04C_EXACT_BYTES_AND_PINNED_EXECUTION",
       "severity": "P1",
-      "resolution": "Stable ordered-topology path identities separate semantic scope from time-varying R0.1/R0.2 receipt hashes. Verification first binds historical audit roots, then recompiles and compares the stable current projection."
+      "resolution": "Bounded no-follow reads and final replay bind exact base/candidate bytes. Producer, adapter, adapter contract, normalizer, ontology and source profile are content-pinned and current runtime contracts are independently rehashed."
     },
     {
-      "code": "R04B_FINAL_TIME_AND_CAPACITY",
+      "code": "R04C_SEMANTIC_PROVENANCE_SEPARATION",
       "severity": "P1",
-      "resolution": "Final UTC is sampled after nested replay, nested chronology and expiry are checked against it, and graph/change/locator plus aggregate seed/path capacities fail closed without truncation."
+      "resolution": "File and owner receipts retain raw byte hashes while semantic element hashes exclude owner-byte changes. Formatting-only edits update evidence without fabricating semantic entity or relation changes."
     },
     {
-      "code": "R04B_ANALYSIS_RELEASE_ISOLATION",
+      "code": "R04C_SAFE_SEMANTIC_EVIDENCE",
       "severity": "P1",
-      "resolution": "Artifacts and evaluations are hard-typed ANALYSIS_ONLY and release-ineligible and retain graph-input, change-seed, build, deploy, risk, obligation, execution, conflict, approval, source, origin, signature and global interlock gaps."
+      "resolution": "Ambiguous lexical relations remain inferred, false permission entries emit no authorization edge, configuration values are digest-only, reserved attributes cannot override governed fields, and structural schema/identity ambiguity blocks output."
     },
     {
-      "code": "R04B_GRAPH_PRODUCER_AND_DELETE_PENDING",
+      "code": "R04C_ANALYSIS_RELEASE_ISOLATION",
+      "severity": "P1",
+      "resolution": "Artifacts remain ANALYSIS_ONLY and release-ineligible with incomplete source-family, upstream, seed, build, deployment, test, conflict, approval and global interlock gaps."
+    },
+    {
+      "code": "R04C_STREAMING_XML_HARDENING",
       "severity": "P2",
-      "resolution": "A same-tree graph-producer receipt, candidate/base graph linkage and deleted-artifact tombstones remain mandatory before mapping can become change-seed attestation. The capability remains FOUNDATION."
+      "resolution": "XML depth, element and output work are bounded after parse; streaming pre-parse enforcement remains a nonblocking peak-memory hardening item under the FOUNDATION acceptance boundary."
     },
     {
-      "code": "R04B_BREADTH_HARDENING",
+      "code": "R04C_OPERATION_AWARE_CONSUMPTION_PENDING",
       "severity": "P2",
-      "resolution": "Genuine rebuilt-graph permutations, broader multi-file diamond/cycle cases and direct capacity-boundary regressions remain nonblocking hardening because current authority and pinned upstream caps already fail closed."
+      "resolution": "R0.4d must consume both graph sides with operation-aware seed semantics before change-seed completeness can be claimed."
     }
   ],
   "statusDowngrades": []

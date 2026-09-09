@@ -75,9 +75,27 @@ The verified local-Git producer captures complete bytewise base/candidate manife
 change partition itself. The follow-on mapper replays that capture plus current graph/path trust,
 uses an exact repository locator to select a unique policy-defined source-artifact anchor, and
 derives declared entities and affected path identities. It never accepts caller-provided paths,
-seeds or mapping exemptions. Current graph snapshots are catalog digests, not Git candidate-tree
-receipts; therefore the mapper exposes local structural alignment while retaining a blocking graph
-input-tree attestation gap. Deletes require an independently captured base graph or tombstone.
+seeds or mapping exemptions. Current catalog graphs remain discovery artifacts, not Git
+candidate-tree receipts; therefore the R0.4b mapper exposes local structural alignment while
+retaining a blocking graph-input-tree attestation gap.
+
+R0.4c adds a separately pinned product-graph producer. It replays the verified change set, reads
+base bytes by immutable Git object and candidate bytes through a bounded, no-follow handle under a
+final repository replay, and accounts for every manifest file. Package roots come from each side's
+exact `sfdx-project.json`; lookalike paths outside those roots are not Salesforce evidence. A
+pinned Salesforce DX adapter deterministically emits supported semantic entities and relationships
+for metadata, Apex, LWC, security, automation and presentation source families from those same
+bytes. Unknown files under a package source root fail closed instead of disappearing from impact.
+Raw-byte provenance and semantic element digests are separate, so formatting-only edits change the
+file evidence without manufacturing a business-semantic change. Node and edge add/modify/delete
+deltas and tombstones are independently recomputed from complete materializations.
+
+This is the product Change Evidence Graph foundation, not `knowledge/project-index.json` or
+`knowledge/application-graph.json`. Those generated repository graphs remain developer discovery
+aids only. R0.4c attests exact file inventory and the supported semantic families; it does not claim
+complete Salesforce-family coverage, upstream org capture, build/test execution, or downstream
+change-seed completeness. `SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE`,
+`CHANGE_SEED_SCOPE_NOT_ATTESTED` and the global release interlock therefore remain blocking.
 
 ### Failure policy
 

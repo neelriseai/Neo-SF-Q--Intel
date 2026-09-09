@@ -13,6 +13,19 @@
 
 ## Part A — Solution design
 
+### Product graph versus developer navigation
+
+The governed Change Evidence Graph in this layer is a runtime product asset and reasoning
+substrate. It connects Salesforce semantics, business/control intent, changes, tests and outcomes
+with source-owned provenance and evidence state. Agents may reason only over a validated,
+snapshot-isolated projection of this graph.
+
+`knowledge/project-index.json` and `knowledge/application-graph.json` are different artifacts.
+They index this repository's files, imports, ownership and test links so developers can select a
+small reading set before changing code. They are regenerated discovery aids, not application facts,
+not durable agent memory, and never release or tool authority. A developer-index edge cannot enter
+the product graph unless a product ingestion boundary independently derives and validates it.
+
 ### Data planes
 
 - Business: Requirement, BusinessRule, AcceptanceCriterion, BusinessProcess, Control.

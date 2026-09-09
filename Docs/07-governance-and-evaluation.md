@@ -118,6 +118,18 @@ current graph snapshot use different capture semantics, so this slice deliberate
 `GRAPH_INPUT_TREE_NOT_ATTESTED` and `CHANGE_SEED_SCOPE_NOT_ATTESTED`; its output is useful local
 analysis evidence but cannot claim verified impact completeness or release authority.
 
+R0.4c adds a versioned product-graph authority boundary without promoting the developer discovery
+catalog. The producer replays R0.4a, reads the exact immutable base and bounded current candidate
+bytes, derives package roots from each captured `sfdx-project.json`, and passes the complete tree to
+an internally constructed, implementation-pinned Salesforce DX semantic adapter. The receipt binds
+file dispositions, typed semantic nodes and edges, exact byte owners, semantic hashes, both source
+trees, producer/adapter/adapter-contract/normalizer/policy/ontology/profile identities, time and
+capacity. Unsupported package source families, malformed schemas, unsafe paths, false permission
+grants, ambiguous declarations, mutation and tampering produce no artifact. Raw configuration
+values are digested rather than serialized. A successful receipt attests complete file accounting
+and supported-family semantic extraction only; incomplete Salesforce-family coverage, upstream org
+capture, downstream impact seeds, build/test execution and release authority remain explicit gaps.
+
 The required interlock field is a breaking governance-policy contract change, so the executable
 policy is version `2.0.0`. The interlock cannot be enabled by a configuration toggle in policy
 version 2.x. A future reviewed

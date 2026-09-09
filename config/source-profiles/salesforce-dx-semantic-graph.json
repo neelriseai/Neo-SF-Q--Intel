@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "salesforce-dx-semantic-graph",
+  "profileVersion": "1.0.0",
+  "sha256": "1544b379d56d635a21984e7c56175c11ca529aa5233302eece95d917bbee01a2",
+  "ontology": {
+    "ontologyId": "change-evidence-core",
+    "ontologyVersion": "1.0.0",
+    "ontologySha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+  },
+  "sourceSelector": {
+    "sourceType": "salesforce-dx-semantic-graph",
+    "contractSchema": {"minimumVersion": "1.0.0", "maximumExclusive": "2.0.0"},
+    "graphSchema": {"minimumVersion": "1.0.0", "maximumExclusive": "2.0.0"}
+  },
+  "nodeMappings": [
+    {"rawKind": "apex-class", "canonicalClass": "code"},
+    {"rawKind": "apex-test", "canonicalClass": "automated-test"},
+    {"rawKind": "apex-trigger", "canonicalClass": "code"},
+    {"rawKind": "approval-process", "canonicalClass": "business-process"},
+    {"rawKind": "component-test", "canonicalClass": "automated-test"},
+    {"rawKind": "custom-metadata-record", "canonicalClass": "configuration"},
+    {"rawKind": "custom-tab", "canonicalClass": "user-interface"},
+    {"rawKind": "field", "canonicalClass": "data-field"},
+    {"rawKind": "file", "canonicalClass": "source-artifact"},
+    {"rawKind": "flow", "canonicalClass": "automation"},
+    {"rawKind": "lightning-app", "canonicalClass": "user-interface"},
+    {"rawKind": "lightning-component", "canonicalClass": "user-interface"},
+    {"rawKind": "lightning-page", "canonicalClass": "user-interface"},
+    {"rawKind": "list-view", "canonicalClass": "user-interface"},
+    {"rawKind": "object", "canonicalClass": "data-entity"},
+    {"rawKind": "permission-set", "canonicalClass": "security-policy"},
+    {"rawKind": "presentation-configuration", "canonicalClass": "configuration"},
+    {"rawKind": "report-folder", "canonicalClass": "user-interface"},
+    {"rawKind": "saved-report", "canonicalClass": "user-interface"},
+    {"rawKind": "workflow-field-update", "canonicalClass": "automation"}
+  ],
+  "relationMappings": [
+    {"rawRelation": "calls", "canonicalRelation": "invokes", "legalEndpoints": [{"sourceClass": "automation", "targetClass": "code"}, {"sourceClass": "code", "targetClass": "code"}]},
+    {"rawRelation": "calls_internal_apex", "canonicalRelation": "invokes", "legalEndpoints": [{"sourceClass": "user-interface", "targetClass": "code"}]},
+    {"rawRelation": "class_access", "canonicalRelation": "authorizes", "legalEndpoints": [{"sourceClass": "security-policy", "targetClass": "code"}]},
+    {"rawRelation": "contains", "canonicalRelation": "contains", "legalEndpoints": [{"sourceClass": "user-interface", "targetClass": "user-interface"}]},
+    {"rawRelation": "defined_in", "canonicalRelation": "declared-in", "legalEndpoints": [{"sourceClass": "automated-test", "targetClass": "source-artifact"}, {"sourceClass": "automation", "targetClass": "source-artifact"}, {"sourceClass": "business-process", "targetClass": "source-artifact"}, {"sourceClass": "code", "targetClass": "source-artifact"}, {"sourceClass": "configuration", "targetClass": "source-artifact"}, {"sourceClass": "data-entity", "targetClass": "source-artifact"}, {"sourceClass": "data-field", "targetClass": "source-artifact"}, {"sourceClass": "security-policy", "targetClass": "source-artifact"}, {"sourceClass": "user-interface", "targetClass": "source-artifact"}]},
+    {"rawRelation": "field_grant", "canonicalRelation": "authorizes", "legalEndpoints": [{"sourceClass": "security-policy", "targetClass": "data-field"}]},
+    {"rawRelation": "has_field", "canonicalRelation": "contains", "legalEndpoints": [{"sourceClass": "data-entity", "targetClass": "data-field"}]},
+    {"rawRelation": "object_grant", "canonicalRelation": "authorizes", "legalEndpoints": [{"sourceClass": "security-policy", "targetClass": "data-entity"}]},
+    {"rawRelation": "reads", "canonicalRelation": "reads", "legalEndpoints": [{"sourceClass": "automation", "targetClass": "data-field"}, {"sourceClass": "code", "targetClass": "data-field"}]},
+    {"rawRelation": "references", "canonicalRelation": "references", "legalEndpoints": [{"sourceClass": "data-field", "targetClass": "data-entity"}]},
+    {"rawRelation": "tests", "canonicalRelation": "tests", "legalEndpoints": [{"sourceClass": "automated-test", "targetClass": "code"}, {"sourceClass": "automated-test", "targetClass": "user-interface"}]},
+    {"rawRelation": "triggers", "canonicalRelation": "triggers", "legalEndpoints": [{"sourceClass": "data-entity", "targetClass": "automation"}, {"sourceClass": "data-entity", "targetClass": "code"}]},
+    {"rawRelation": "writes", "canonicalRelation": "writes", "legalEndpoints": [{"sourceClass": "automation", "targetClass": "data-field"}]}
+  ]
+}

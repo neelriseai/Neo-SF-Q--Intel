@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "c89f56520e47cc308289de938544d9c8b96d868db0b3f97115420d97b745d52e",
+  "sourceSnapshot": "09f3ec6f070c2526618a7a8f69234c908bec98b4b06fe20b517cdcb7cee4f428",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -76,6 +76,39 @@
         ],
         "scenarioIndependence": [
           "tests/test_change_verification.py"
+        ]
+      }
+    },
+    {
+      "id": "source.tree-graph-production",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, derives package roots from each side's sfdx-project.json, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "implementation": [
+        "config/graph-producer-policy.json",
+        "config/source-profiles/salesforce-dx-semantic-graph.json",
+        "src/neo_sf_q_intel/graph_adapter.py",
+        "src/neo_sf_q_intel/graph_production.py",
+        "src/neo_sf_q_intel/salesforce_graph_adapter.py"
+      ],
+      "verification": [
+        "tests/test_graph_production.py"
+      ],
+      "verificationCases": {
+        "positive": [
+          "tests/test_graph_production.py"
+        ],
+        "negative": [
+          "tests/test_graph_production.py"
+        ],
+        "failure": [
+          "tests/test_graph_production.py"
+        ],
+        "degradation": [
+          "tests/test_graph_production.py"
+        ],
+        "scenarioIndependence": [
+          "tests/test_graph_production.py"
         ]
       }
     },
@@ -724,7 +757,7 @@
     {
       "path": "Docs/02-source-ingestion-and-change-detection.md",
       "category": "reference-documentation",
-      "sha256": "1f8994c47a6884c2f19d772351c9e1075d458e6463d1c2acb9c30ca92397b4c1"
+      "sha256": "ecef6c91d75d9befdda3697cdbc72ee89f4e04c3501104a2c7ff4ad12f5b9a3b"
     },
     {
       "path": "Docs/03-data-memory-and-retrieval.md",
@@ -739,7 +772,7 @@
     {
       "path": "Docs/03-evidence-graph-and-memory.md",
       "category": "reference-documentation",
-      "sha256": "26e5bb26fb6891c07fe0407ab05396c61c9bcb483af5e01c10d1ee9be5774ae2"
+      "sha256": "9371e686b91656cf1cd0431a4ce851b988454270f23a8210d35710b970f3a32b"
     },
     {
       "path": "Docs/04-agent-orchestration.md",
@@ -794,7 +827,7 @@
     {
       "path": "Docs/07-governance-and-evaluation.md",
       "category": "canonical-documentation",
-      "sha256": "fc9ea52b057eafa15768f1cab7312e5edc618235b5ea67a3fa2a70c2a2e4c30e"
+      "sha256": "52f93412fa0b342c5194d8fa2fa74552bf8b374e7e76eab852bce40a3ed98ab9"
     },
     {
       "path": "Docs/07-test-execution-and-rca.md",
@@ -814,7 +847,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "def6aeaae244361a871ec1bd7a94699229a69ad57142fb4b40940d4eadeaed92"
+      "sha256": "873f77f8b07add9c3ae15dd31987b63625ca862cbfb69710b30ec305ea23b797"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -844,7 +877,7 @@
     {
       "path": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "reference-documentation",
-      "sha256": "ac5ca1eb9a0a24f86dd8249910e749db1611e3071c4b4a4e2185b4bd1dd40dc9"
+      "sha256": "3b68331aba1ebac54129764c0b550eca23173f66b11dcacf7ba4bebfb9affb82"
     },
     {
       "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
@@ -979,7 +1012,7 @@
     {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "77b8eeb57bf1ccdc867cad4b97cff9da085ec3fbb00e8352cf7be75f4d370b3a"
+      "sha256": "8622ace4b3de476d66eb980614ae2e17c5b23e66a524a66961570b7029d659b9"
     },
     {
       "path": "config/change-seed-policy.json",
@@ -1012,6 +1045,11 @@
       "sha256": "45c9baeaa13038d6af8c5935355a951371a8e47270b0429a5068ac87610c554f"
     },
     {
+      "path": "config/graph-producer-policy.json",
+      "category": "policy",
+      "sha256": "d7bacb0a5f4a639e0a813c19c0fa694ddb2afdd5a81d9ed8850ebd12e7800b9c"
+    },
+    {
       "path": "config/ontology/canonical-ontology.json",
       "category": "policy",
       "sha256": "2f684b0507f84283a0393e84e272ce212380291b9574e54730f8130cba050955"
@@ -1029,7 +1067,7 @@
     {
       "path": "config/quality-policy.json",
       "category": "policy",
-      "sha256": "d87f405416a00fca5a088426721d8b5ed295d50ba257e41c3ca0c49ee4b4003f"
+      "sha256": "a0e071643e5bb65cd6178f87177db4bd2e9ac00740326bd4b9b177d6255f5b14"
     },
     {
       "path": "config/reasoning-policy.json",
@@ -1050,6 +1088,11 @@
       "path": "config/source-profiles/salesforce-application-graph.json",
       "category": "policy",
       "sha256": "e3cfffe57fe2a397b40de1a1ce99c1abf013a9e55e589705a17a4e5b0c25002a"
+    },
+    {
+      "path": "config/source-profiles/salesforce-dx-semantic-graph.json",
+      "category": "policy",
+      "sha256": "9a6325bda9ca3d8e24e5523b5629ac4139ab085d4705cdd911c21faa2aa492b7"
     },
     {
       "path": "config/specialist-policy.json",
@@ -1222,6 +1265,11 @@
       "sha256": "076c219e3eb262ff537ea575ee3b0018f4543a6d685e23d34b6e4d89fe94f124"
     },
     {
+      "path": "quality/reviews/2026-09-09-semantic-graph-production-foundation.md",
+      "category": "project",
+      "sha256": "d29c71825cbb7015b876ea75f989381b4b67cbcf7f6c81aad0b71e0ac4be387e"
+    },
+    {
       "path": "quality/reviews/2026-09-09-trusted-edge-envelope.md",
       "category": "project",
       "sha256": "eaaacecd6d461e7274d546bcf9fa8a5edd9da5fa0df226a83c631516f4900861"
@@ -1234,7 +1282,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "d9702144acce02f81e9af14648dadab86cab4511e6dd6ea9c173f6886746dd53"
+      "sha256": "64bbc2a2a9d2cc0c81647937185233e46ee1af24eb5783b199c379c575fdaa26"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -1322,6 +1370,16 @@
       "sha256": "3487718885c143330997cd207efc6e5b35db56d6f4da1ca12505e882fb3d9280"
     },
     {
+      "path": "src/neo_sf_q_intel/graph_adapter.py",
+      "category": "python-runtime",
+      "sha256": "fbf11e607f1e31e4285c97017a13ba04c809e417a4d9f808963a031ae6fb615f"
+    },
+    {
+      "path": "src/neo_sf_q_intel/graph_production.py",
+      "category": "python-runtime",
+      "sha256": "e533e09551c3c30e5f153b4b0c848d2652d0705134da62ae45f3a85309a231cf"
+    },
+    {
       "path": "src/neo_sf_q_intel/healing.py",
       "category": "python-runtime",
       "sha256": "b2c8a064498220fc75d3043fef2600ce433c8204e92a9bcdb0094468d2656042"
@@ -1405,6 +1463,11 @@
       "path": "src/neo_sf_q_intel/salesforce_cli.py",
       "category": "python-runtime",
       "sha256": "b25baa1971d4cbe79a5e927f0bf15df77d8cbb022fc1376186a4f745199d0c84"
+    },
+    {
+      "path": "src/neo_sf_q_intel/salesforce_graph_adapter.py",
+      "category": "python-runtime",
+      "sha256": "990cfdee8fbbf993ab45e3270af54ee320b6beacb20162ed460d530f5bbe7f79"
     },
     {
       "path": "src/neo_sf_q_intel/salesforce_source.py",
@@ -1500,6 +1563,11 @@
       "path": "tests/test_governance_policy.py",
       "category": "test",
       "sha256": "533181ec9321c192b494985727cdc3bd2cc135362d1e892bb5694a750d4217e8"
+    },
+    {
+      "path": "tests/test_graph_production.py",
+      "category": "test",
+      "sha256": "588a443ed5522af3c8a24185db9191d66a1809dbeba10f3ba8be684c78510a9f"
     },
     {
       "path": "tests/test_mcp_server.py",

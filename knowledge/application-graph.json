@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "c89f56520e47cc308289de938544d9c8b96d868db0b3f97115420d97b745d52e",
+  "sourceSnapshot": "09f3ec6f070c2526618a7a8f69234c908bec98b4b06fe20b517cdcb7cee4f428",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -582,6 +582,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/graph-producer-policy.json",
+      "kind": "file",
+      "label": "graph-producer-policy.json",
+      "source": "config/graph-producer-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/ontology/canonical-ontology.json",
       "kind": "file",
       "label": "canonical-ontology.json",
@@ -642,6 +650,14 @@
       "kind": "file",
       "label": "salesforce-application-graph.json",
       "source": "config/source-profiles/salesforce-application-graph.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:config/source-profiles/salesforce-dx-semantic-graph.json",
+      "kind": "file",
+      "label": "salesforce-dx-semantic-graph.json",
+      "source": "config/source-profiles/salesforce-dx-semantic-graph.json",
       "category": "policy",
       "authority": "authoritative-source"
     },
@@ -918,6 +934,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-09-semantic-graph-production-foundation.md",
+      "kind": "file",
+      "label": "2026-09-09-semantic-graph-production-foundation.md",
+      "source": "quality/reviews/2026-09-09-semantic-graph-production-foundation.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/2026-09-09-trusted-edge-envelope.md",
       "kind": "file",
       "label": "2026-09-09-trusted-edge-envelope.md",
@@ -1078,6 +1102,22 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/graph_adapter.py",
+      "kind": "file",
+      "label": "graph_adapter.py",
+      "source": "src/neo_sf_q_intel/graph_adapter.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/graph_production.py",
+      "kind": "file",
+      "label": "graph_production.py",
+      "source": "src/neo_sf_q_intel/graph_production.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/healing.py",
       "kind": "file",
       "label": "healing.py",
@@ -1210,6 +1250,14 @@
       "kind": "file",
       "label": "salesforce_cli.py",
       "source": "src/neo_sf_q_intel/salesforce_cli.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/salesforce_graph_adapter.py",
+      "kind": "file",
+      "label": "salesforce_graph_adapter.py",
+      "source": "src/neo_sf_q_intel/salesforce_graph_adapter.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -1362,6 +1410,14 @@
       "kind": "file",
       "label": "test_governance_policy.py",
       "source": "tests/test_governance_policy.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_graph_production.py",
+      "kind": "file",
+      "label": "test_graph_production.py",
+      "source": "tests/test_graph_production.py",
       "category": "test",
       "authority": "verification"
     },
@@ -1577,6 +1633,14 @@
       "label": "source.verified-change-set",
       "status": "FOUNDATION",
       "summary": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:source.tree-graph-production",
+      "kind": "capability",
+      "label": "source.tree-graph-production",
+      "status": "FOUNDATION",
+      "summary": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, derives package roots from each side's sfdx-project.json, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
       "authority": "policy"
     },
     {
@@ -2636,6 +2700,41 @@
       "to": "file:tests/test_salesforce_source.py"
     },
     {
+      "from": "capability:source.tree-graph-production",
+      "relation": "implemented_by",
+      "to": "file:config/graph-producer-policy.json"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "implemented_by",
+      "to": "file:config/source-profiles/salesforce-dx-semantic-graph.json"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/graph_adapter.py"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/graph_production.py"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/salesforce_graph_adapter.py"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "verified_by",
+      "to": "file:tests/test_graph_production.py"
+    },
+    {
       "from": "capability:source.verified-change-set",
       "relation": "implemented_by",
       "to": "file:config/verified-change-policy.json"
@@ -2926,6 +3025,31 @@
       "to": "file:src/neo_sf_q_intel/domain.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/change_verification.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/graph_adapter.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_graph_adapter.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/healing.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
@@ -3114,6 +3238,11 @@
       "from": "file:src/neo_sf_q_intel/retrieval.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/salesforce_graph_adapter.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/graph_adapter.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/salesforce_source.py",
@@ -3474,6 +3603,31 @@
       "from": "file:tests/test_governance_policy.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:tests/test_graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/change_verification.py"
+    },
+    {
+      "from": "file:tests/test_graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:tests/test_graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/graph_production.py"
+    },
+    {
+      "from": "file:tests/test_graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:tests/test_graph_production.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_graph_adapter.py"
     },
     {
       "from": "file:tests/test_mcp_server.py",

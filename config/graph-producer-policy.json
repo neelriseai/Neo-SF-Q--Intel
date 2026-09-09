@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "verified-tree-graph-production",
+  "policyVersion": "1.0.0",
+  "sha256": "6bfb85124f1a08ac52ee5727119ba165bec4747a1744f91c674caca2fc06f881",
+  "verifiedChangePolicy": {
+    "contractId": "verified-local-git-change",
+    "contractVersion": "1.0.0",
+    "contractSha256": "ef43e79fb8e2244d7187ae2a18b4d77ae7e7d17758f10fd6fe7ddb75df5a8d05"
+  },
+  "ontology": {
+    "contractId": "change-evidence-core",
+    "contractVersion": "1.0.0",
+    "contractSha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+  },
+  "sourceProfile": {
+    "contractId": "salesforce-dx-semantic-graph",
+    "contractVersion": "1.0.0",
+    "contractSha256": "1544b379d56d635a21984e7c56175c11ca529aa5233302eece95d917bbee01a2"
+  },
+  "producer": {
+    "implementationId": "verified-local-tree-graph-producer",
+    "implementationVersion": "1.0.0",
+    "implementationLocator": "src/neo_sf_q_intel/graph_production.py",
+    "implementationSha256": "57773114d7b149bd55f8fa989ea2d5790dea7690300f7825d2b4c9210bc504fc"
+  },
+  "adapter": {
+    "implementationId": "salesforce-dx-semantic-graph-adapter",
+    "implementationVersion": "1.0.0",
+    "implementationLocator": "src/neo_sf_q_intel/salesforce_graph_adapter.py",
+    "implementationSha256": "990cfdee8fbbf993ab45e3270af54ee320b6beacb20162ed460d530f5bbe7f79"
+  },
+  "adapterContract": {
+    "implementationId": "semantic-graph-adapter-contract",
+    "implementationVersion": "1.0.0",
+    "implementationLocator": "src/neo_sf_q_intel/graph_adapter.py",
+    "implementationSha256": "fbf11e607f1e31e4285c97017a13ba04c809e417a4d9f808963a031ae6fb615f"
+  },
+  "normalizer": {
+    "implementationId": "canonical-ontology-normalizer",
+    "implementationVersion": "1.0.0",
+    "implementationLocator": "src/neo_sf_q_intel/ontology.py",
+    "implementationSha256": "599e2912e058189b0a608f8698b77e0965b4d81afa3a5429b455671edf8ee48c"
+  },
+  "captureScope": "COMPLETE_BASE_AND_CANDIDATE_TREE",
+  "dispositionPolicy": "ALL_FILES_ACCOUNTED_WITH_SEMANTIC_CLASSIFICATION",
+  "inventoryParserId": "verified-file-inventory-parser",
+  "inventoryParserVersion": "1.0.0",
+  "maximumPathBytes": 1024,
+  "maximumFiles": 20000,
+  "maximumFileBytes": 33554432,
+  "maximumTotalBytes": 536870912,
+  "maximumNodes": 200000,
+  "maximumEdges": 400000,
+  "maximumSemanticWorkUnits": 1073741824,
+  "maximumReceiptBytes": 67108864,
+  "gitTimeoutSeconds": 20,
+  "maximumGitOutputBytes": 67108864,
+  "freshnessSeconds": 900
+}
