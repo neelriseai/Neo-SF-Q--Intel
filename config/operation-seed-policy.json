@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "operation-aware-semantic-seed-mapping",
+  "policyVersion": "1.0.0",
+  "sha256": "3943267d34ae1f41a03e4b2bec7e8dce714d28538a67bd2149c7d2891064b1d7",
+  "verifiedChangePolicy": {
+    "contractId": "verified-local-git-change",
+    "contractVersion": "1.0.0",
+    "contractSha256": "ef43e79fb8e2244d7187ae2a18b4d77ae7e7d17758f10fd6fe7ddb75df5a8d05"
+  },
+  "graphProducerPolicy": {
+    "contractId": "verified-tree-graph-production",
+    "contractVersion": "1.0.0",
+    "contractSha256": "b3552af2fb1c49ecfc10ab1c996de2fdfa350181c9cdb782c1cb621e0aab3a21"
+  },
+  "compiler": {
+    "implementationId": "operation-aware-semantic-seed-compiler",
+    "implementationVersion": "1.0.0",
+    "implementationLocator": "src/neo_sf_q_intel/operation_seed.py",
+    "implementationSha256": "a70102559165dfc6f4ca7ec74e14a153ca39c47b65cd1f8994f988384964052d"
+  },
+  "mappingScope": "SUPPORTED_FAMILY_OPERATION_SEEDS",
+  "addSide": "CANDIDATE",
+  "deleteSide": "BASE",
+  "modifySides": ["BASE", "CANDIDATE"],
+  "maximumChanges": 5000,
+  "maximumGraphDeltas": 400000,
+  "maximumTombstones": 200000,
+  "maximumSeeds": 400000,
+  "maximumBindings": 5000,
+  "maximumBindingSeedReferences": 1000000,
+  "maximumBindingDeltaReferences": 1000000,
+  "maximumBindingTombstoneReferences": 500000,
+  "maximumReceiptBytes": 67108864
+}

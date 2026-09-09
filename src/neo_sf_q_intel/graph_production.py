@@ -557,7 +557,7 @@ class GraphProductionEvaluation(_Model):
 
 
 DEFAULT_GRAPH_PRODUCER_POLICY_SHA256 = (
-    "6bfb85124f1a08ac52ee5727119ba165bec4747a1744f91c674caca2fc06f881"
+    "b3552af2fb1c49ecfc10ab1c996de2fdfa350181c9cdb782c1cb621e0aab3a21"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -925,7 +925,13 @@ def _make_delta(
 
 def _static_artifact(artifact: GraphProductionArtifact) -> dict[str, Any]:
     body = artifact.model_dump(mode="json")
-    for key in ("observed_at", "valid_until", "verified_change_manifest_sha256", "receipt_sha256"):
+    for key in (
+        "observed_at",
+        "valid_until",
+        "freshness_seconds",
+        "verified_change_manifest_sha256",
+        "receipt_sha256",
+    ):
         body.pop(key)
     return body
 

@@ -130,6 +130,16 @@ values are digested rather than serialized. A successful receipt attests complet
 and supported-family semantic extraction only; incomplete Salesforce-family coverage, upstream org
 capture, downstream impact seeds, build/test execution and release authority remain explicit gaps.
 
+R0.4d consumes that product graph through current replay and produces only side-qualified semantic
+seed evidence. Its contract prevents an identical entity ID in BASE and CANDIDATE from collapsing
+different semantics or provenance, rejects operation/disposition mismatches, requires DELETE
+tombstones, and accounts for all Git changes and graph deltas. Nonsemantic changes are recorded as
+an explicit successful structural disposition, not silently omitted. The receipt truthfully claims
+only `supported_family_operation_seed_scope_complete`; it retains
+`GRAPH_INPUT_TREE_NOT_ATTESTED`, `CHANGE_SEED_SCOPE_NOT_ATTESTED`, source-family, upstream,
+build/test and global release gaps until trusted side-specific path replay and later R0 slices are
+implemented.
+
 The required interlock field is a breaking governance-policy contract change, so the executable
 policy is version `2.0.0`. The interlock cannot be enabled by a configuration toggle in policy
 version 2.x. A future reviewed

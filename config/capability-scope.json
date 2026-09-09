@@ -49,15 +49,15 @@
       "id": "source.change-seed-mapping",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Re-verifies the complete local-Git change capture and current R0.2/R0.1 graph evidence, maps every supported changed repository locator to one unique policy-defined source-artifact anchor, binds declared entities and derives the complete stable affected-path projection without caller-supplied mappings, seeds or subsets. Deletes and missing graph-producer input-tree linkage remain explicit blocking gaps, so outputs are ANALYSIS_ONLY and cannot claim verified impact completeness or release authority.",
-      "implementation": ["config/change-seed-policy.json", "src/neo_sf_q_intel/change_seed.py"],
-      "verification": ["tests/test_change_seed.py"],
+      "genericity": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "implementation": ["config/change-seed-policy.json", "config/operation-seed-policy.json", "src/neo_sf_q_intel/change_seed.py", "src/neo_sf_q_intel/operation_seed.py"],
+      "verification": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
       "verificationCases": {
-        "positive": ["tests/test_change_seed.py"],
-        "negative": ["tests/test_change_seed.py"],
-        "failure": ["tests/test_change_seed.py"],
-        "degradation": ["tests/test_change_seed.py"],
-        "scenarioIndependence": ["tests/test_change_seed.py"]
+        "positive": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
+        "negative": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
+        "failure": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
+        "degradation": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
+        "scenarioIndependence": ["tests/test_change_seed.py", "tests/test_operation_seed.py"]
       }
     },
     {

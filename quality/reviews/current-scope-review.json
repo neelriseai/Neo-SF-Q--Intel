@@ -1,24 +1,22 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "semantic-graph-production-foundation-2026-09-09",
+  "reviewId": "operation-aware-seed-foundation-2026-09-10",
   "status": "APPROVED",
   "reviewedPaths": [
     "Docs/02-source-ingestion-and-change-detection.md",
-    "Docs/03-evidence-graph-and-memory.md",
     "Docs/07-governance-and-evaluation.md",
     "Docs/08-roadmap-24h.md",
     "Docs/10-graph-grounded-agent-reasoning.md",
     "config/capability-scope.json",
     "config/graph-producer-policy.json",
-    "config/quality-policy.json",
-    "config/source-profiles/salesforce-dx-semantic-graph.json",
+    "config/operation-seed-policy.json",
     "knowledge/application-graph.json",
     "knowledge/project-index.json",
-    "quality/reviews/2026-09-09-semantic-graph-production-foundation.md",
-    "src/neo_sf_q_intel/graph_adapter.py",
+    "quality/reviews/2026-09-10-operation-aware-seed-foundation.md",
+    "quality/reviews/current-scope-review.json",
     "src/neo_sf_q_intel/graph_production.py",
-    "src/neo_sf_q_intel/salesforce_graph_adapter.py",
-    "tests/test_graph_production.py"
+    "src/neo_sf_q_intel/operation_seed.py",
+    "tests/test_operation_seed.py"
   ],
   "reviewers": [
     "r01_genericity_review",
@@ -26,44 +24,39 @@
   ],
   "findings": [
     {
-      "code": "R04C_PRODUCT_GRAPH_NOT_DEVELOPER_INDEX",
+      "code": "R04D_OPERATION_SIDE_EVIDENCE",
       "severity": "P1",
-      "resolution": "The file-only draft was rejected. R0.4c now materializes a separately pinned, typed Salesforce Change Evidence Graph from verified bytes; generated knowledge indexes remain developer-only discovery aids."
+      "resolution": "ADD uses candidate evidence, DELETE uses base evidence plus exact tombstones, and MODIFY preserves independent base and candidate semantic versions under a pinned contract."
     },
     {
-      "code": "R04C_DESCRIPTOR_SCOPED_GENERIC_EXTRACTION",
+      "code": "R04D_EXACT_PARTITIONS",
       "severity": "P1",
-      "resolution": "Package roots are derived from each side's exact sfdx-project.json. Runtime code and the dedicated source profile contain no application object, field, route, alias or demo literals; unsupported package source families fail closed."
+      "resolution": "Every verified Git change, graph delta and tombstone is accounted through direct or indirect partitions; nonsemantic changes have an explicit no-seed outcome."
     },
     {
-      "code": "R04C_EXACT_BYTES_AND_PINNED_EXECUTION",
+      "code": "R04D_CURRENT_REPLAY_AND_TIME",
       "severity": "P1",
-      "resolution": "Bounded no-follow reads and final replay bind exact base/candidate bytes. Producer, adapter, adapter contract, normalizer, ontology and source profile are content-pinned and current runtime contracts are independently rehashed."
+      "resolution": "Historical roots bind before current repository and graph replay; aware UTC, future, expiry, refresh and rollback cases fail closed."
     },
     {
-      "code": "R04C_SEMANTIC_PROVENANCE_SEPARATION",
+      "code": "R04C_REFRESH_PROJECTION",
       "severity": "P1",
-      "resolution": "File and owner receipts retain raw byte hashes while semantic element hashes exclude owner-byte changes. Formatting-only edits update evidence without fabricating semantic entity or relation changes."
+      "resolution": "Residual graph freshness is temporal during current replay while model validation still proves the exact validity interval."
     },
     {
-      "code": "R04C_SAFE_SEMANTIC_EVIDENCE",
+      "code": "R04D_BOUNDED_ASSOCIATIONS",
       "severity": "P1",
-      "resolution": "Ambiguous lexical relations remain inferred, false permission entries emit no authorization edge, configuration values are digest-only, reserved attributes cannot override governed fields, and structural schema/identity ambiguity blocks output."
+      "resolution": "A linear owner-to-delta index and pinned total reference limits prevent change-by-delta scans and combinatorial output expansion."
     },
     {
-      "code": "R04C_ANALYSIS_RELEASE_ISOLATION",
+      "code": "R04D_RELEASE_SCOPE_RETAINED",
       "severity": "P1",
-      "resolution": "Artifacts remain ANALYSIS_ONLY and release-ineligible with incomplete source-family, upstream, seed, build, deployment, test, conflict, approval and global interlock gaps."
+      "resolution": "The slice claims only supported-family local operation mapping; trusted paths, source-family, upstream, build/test and global release gaps remain blocking."
     },
     {
-      "code": "R04C_STREAMING_XML_HARDENING",
+      "code": "R04D_PER_DELTA_DELIVERABLE",
       "severity": "P2",
-      "resolution": "XML depth, element and output work are bounded after parse; streaming pre-parse enforcement remains a nonblocking peak-memory hardening item under the FOUNDATION acceptance boundary."
-    },
-    {
-      "code": "R04C_OPERATION_AWARE_CONSUMPTION_PENDING",
-      "severity": "P2",
-      "resolution": "R0.4d must consume both graph sides with operation-aware seed semantics before change-seed completeness can be claimed."
+      "resolution": "The receipt keeps exact aggregate direct and indirect partitions. A later obligation slice may add compact per-delta causal deliverables without strengthening this FOUNDATION claim."
     }
   ],
   "statusDowngrades": []

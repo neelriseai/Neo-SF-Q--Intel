@@ -97,6 +97,17 @@ complete Salesforce-family coverage, upstream org capture, build/test execution,
 change-seed completeness. `SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE`,
 `CHANGE_SEED_SCOPE_NOT_ATTESTED` and the global release interlock therefore remain blocking.
 
+R0.4d adds a separately pinned operation-aware compiler over the replayed R0.4c artifact. ADD
+derives semantic seeds only from candidate evidence, DELETE derives them from base evidence and
+requires the exact absence tombstone, and MODIFY retains independent base and candidate versions
+even when they share one logical semantic ID. Source-artifact nodes remain provenance rather than
+semantic impact. Every verified Git change is bound to its exact file disposition and file-node
+delta; every semantic graph delta is classified as directly owned by changed files or as an
+indirect graph effect. A supported but nonsemantic file receives an explicit
+`NO_SEMANTIC_SEED` result rather than fabricated impact. This closes the supported-family local
+operation-mapping slice only. Trusted side-specific path replay and complete source-family,
+upstream, build, test and release evidence remain blocking.
+
 ### Failure policy
 
 - One malformed artifact is isolated and reported; policy decides whether snapshot activation is blocked.

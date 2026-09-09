@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "policyId": "verified-tree-graph-production",
   "policyVersion": "1.0.0",
-  "sha256": "6bfb85124f1a08ac52ee5727119ba165bec4747a1744f91c674caca2fc06f881",
+  "sha256": "b3552af2fb1c49ecfc10ab1c996de2fdfa350181c9cdb782c1cb621e0aab3a21",
   "verifiedChangePolicy": {
     "contractId": "verified-local-git-change",
     "contractVersion": "1.0.0",
@@ -22,7 +22,7 @@
     "implementationId": "verified-local-tree-graph-producer",
     "implementationVersion": "1.0.0",
     "implementationLocator": "src/neo_sf_q_intel/graph_production.py",
-    "implementationSha256": "57773114d7b149bd55f8fa989ea2d5790dea7690300f7825d2b4c9210bc504fc"
+    "implementationSha256": "d15dcd65c7d43a5ef33882281f2b3be3544eac8e7538a302c0b56cfa99b8705b"
   },
   "adapter": {
     "implementationId": "salesforce-dx-semantic-graph-adapter",
