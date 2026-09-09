@@ -52,12 +52,8 @@ class ContractPin(_Model):
 class ImplementationPin(_Model):
     implementation_id: str = Field(alias="implementationId", min_length=1, max_length=200)
     implementation_version: str = Field(alias="implementationVersion")
-    implementation_locator: str = Field(
-        alias="implementationLocator", min_length=1, max_length=500
-    )
-    implementation_sha256: str = Field(
-        alias="implementationSha256", pattern=r"^[a-f0-9]{64}$"
-    )
+    implementation_locator: str = Field(alias="implementationLocator", min_length=1, max_length=500)
+    implementation_sha256: str = Field(alias="implementationSha256", pattern=r"^[a-f0-9]{64}$")
 
 
 class OperationSeedPolicy(_Model):
@@ -68,25 +64,19 @@ class OperationSeedPolicy(_Model):
     verified_change_policy: ContractPin = Field(alias="verifiedChangePolicy")
     graph_producer_policy: ContractPin = Field(alias="graphProducerPolicy")
     compiler: ImplementationPin
-    mapping_scope: Literal["SUPPORTED_FAMILY_OPERATION_SEEDS"] = Field(
-        alias="mappingScope"
-    )
+    mapping_scope: Literal["SUPPORTED_FAMILY_OPERATION_SEEDS"] = Field(alias="mappingScope")
     add_side: Literal["CANDIDATE"] = Field(alias="addSide")
     delete_side: Literal["BASE"] = Field(alias="deleteSide")
-    modify_sides: tuple[Literal["BASE", "CANDIDATE"], Literal["BASE", "CANDIDATE"]] = (
-        Field(alias="modifySides")
+    modify_sides: tuple[Literal["BASE", "CANDIDATE"], Literal["BASE", "CANDIDATE"]] = Field(
+        alias="modifySides"
     )
     maximum_changes: int = Field(alias="maximumChanges", ge=1)
     maximum_graph_deltas: int = Field(alias="maximumGraphDeltas", ge=1)
     maximum_tombstones: int = Field(alias="maximumTombstones", ge=1)
     maximum_seeds: int = Field(alias="maximumSeeds", ge=1)
     maximum_bindings: int = Field(alias="maximumBindings", ge=1)
-    maximum_binding_seed_references: int = Field(
-        alias="maximumBindingSeedReferences", ge=1
-    )
-    maximum_binding_delta_references: int = Field(
-        alias="maximumBindingDeltaReferences", ge=1
-    )
+    maximum_binding_seed_references: int = Field(alias="maximumBindingSeedReferences", ge=1)
+    maximum_binding_delta_references: int = Field(alias="maximumBindingDeltaReferences", ge=1)
     maximum_binding_tombstone_references: int = Field(
         alias="maximumBindingTombstoneReferences", ge=1
     )
@@ -126,9 +116,7 @@ class OperationSeedGapCode(StrEnum):
     RELEASE_EVIDENCE_MODEL_INCOMPLETE = "RELEASE_EVIDENCE_MODEL_INCOMPLETE"
     REPOSITORY_ORIGIN_NOT_ATTESTED = "REPOSITORY_ORIGIN_NOT_ATTESTED"
     RISK_FACTORS_NOT_ATTESTED = "RISK_FACTORS_NOT_ATTESTED"
-    SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE = (
-        "SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE"
-    )
+    SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE = "SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE"
     TEST_EXECUTION_SCOPE_NOT_ATTESTED = "TEST_EXECUTION_SCOPE_NOT_ATTESTED"
     TEST_OBLIGATION_SCOPE_NOT_ATTESTED = "TEST_OBLIGATION_SCOPE_NOT_ATTESTED"
     UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED = "UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED"
@@ -272,9 +260,7 @@ class OperationSeedArtifact(_Model):
     schema_version: Literal["1.0.0"] = "1.0.0"
     authority_scope: Literal["ANALYSIS_ONLY"] = "ANALYSIS_ONLY"
     release_eligible: Literal[False] = False
-    mapping_scope: Literal["SUPPORTED_FAMILY_OPERATION_SEEDS"] = (
-        "SUPPORTED_FAMILY_OPERATION_SEEDS"
-    )
+    mapping_scope: Literal["SUPPORTED_FAMILY_OPERATION_SEEDS"] = "SUPPORTED_FAMILY_OPERATION_SEEDS"
     supported_family_operation_seed_scope_complete: Literal[True] = True
     graph_input_tree_attested: Literal[False] = False
     change_seed_scope_attested: Literal[False] = False
@@ -373,9 +359,7 @@ class OperationSeedEvaluation(_Model):
 
     @model_validator(mode="after")
     def validate_evaluation(self) -> OperationSeedEvaluation:
-        if self.supported_family_operation_seed_scope_complete is not (
-            self.artifact is not None
-        ):
+        if self.supported_family_operation_seed_scope_complete is not (self.artifact is not None):
             raise ValueError("Mapping completeness differs from artifact presence")
         keys = tuple((item.code.value, item.identity_sha256) for item in self.gaps)
         if keys != tuple(sorted(set(keys))):
@@ -387,7 +371,7 @@ class OperationSeedEvaluation(_Model):
 
 
 DEFAULT_OPERATION_SEED_POLICY_SHA256 = (
-    "bf1e0611f6faa1ff62e06aa7847db79f7047da16c5f0621b1cd06fec756df332"
+    "ce49d75ab5037088a6d51631a1c5a0220b1672ec06599bb82c3fe2a5934fa493"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -551,9 +535,7 @@ def _file_evidence(side: TreeSide, disposition: Any) -> SideFileEvidence:
         "content_sha256": disposition.content_sha256,
         "semantic_status": disposition.semantic_status.value,
     }
-    return SideFileEvidence.model_validate(
-        {**body, "evidence_sha256": stable_sha256(body)}
-    )
+    return SideFileEvidence.model_validate({**body, "evidence_sha256": stable_sha256(body)})
 
 
 def _semantic_seed(side: ProducedGraphSide, node: ProducedNode) -> SideQualifiedSemanticSeed:
@@ -570,9 +552,7 @@ def _semantic_seed(side: ProducedGraphSide, node: ProducedNode) -> SideQualified
         "side_receipt_sha256": side.side_receipt_sha256,
         "normalized_graph_sha256": side.normalized_graph_sha256,
     }
-    return SideQualifiedSemanticSeed.model_validate(
-        {**body, "seed_sha256": stable_sha256(body)}
-    )
+    return SideQualifiedSemanticSeed.model_validate({**body, "seed_sha256": stable_sha256(body)})
 
 
 def _delta_sides(delta: GraphDeltaEntry) -> tuple[TreeSide, ...]:
@@ -630,19 +610,15 @@ class OperationAwareSeedCompiler:
     ) -> OperationSeedEvaluation:
         try:
             now = _sample_now()
-            validated = OperationSeedArtifact.model_validate(
-                candidate.model_dump(mode="json")
-            )
+            validated = OperationSeedArtifact.model_validate(candidate.model_dump(mode="json"))
         except (AttributeError, OSError, TypeError, ValidationError, ValueError):
             validated = None
             now = None
         if validated is not None and (
-            validated.graph_production_receipt_sha256
-            != inputs.graph_candidate.receipt_sha256
+            validated.graph_production_receipt_sha256 != inputs.graph_candidate.receipt_sha256
             or validated.verified_change_manifest_sha256
             != inputs.graph_candidate.verified_change_manifest_sha256
-            or validated.base_side_receipt_sha256
-            != inputs.graph_candidate.base.side_receipt_sha256
+            or validated.base_side_receipt_sha256 != inputs.graph_candidate.base.side_receipt_sha256
             or validated.candidate_side_receipt_sha256
             != inputs.graph_candidate.candidate.side_receipt_sha256
             or validated.base_normalized_graph_sha256
@@ -685,16 +661,18 @@ class OperationAwareSeedCompiler:
             )
         return current
 
-    def _compile(
-        self, inputs: OperationSeedInputs, initial_now: datetime
-    ) -> OperationSeedArtifact:
+    def _compile(self, inputs: OperationSeedInputs, initial_now: datetime) -> OperationSeedArtifact:
         self._require_runtime_policy(inputs)
         if type(inputs.graph_producer) is not LocalTreeGraphProducer:
             raise _OperationRejected(OperationSeedGapCode.GRAPH_REPLAY_FAILED, "producer-type")
         replay = inputs.graph_producer.verify(inputs.graph_candidate, inputs.graph_inputs)
-        graph = replay.artifact
-        if graph is None or not replay.supported_semantic_graph_input_tree_attested:
+        if replay.artifact is None or not replay.supported_semantic_graph_input_tree_attested:
             raise _OperationRejected(OperationSeedGapCode.GRAPH_REPLAY_FAILED)
+        # The replay proves that the caller-bound historical graph artifact still
+        # has current static semantics. Compile against that exact historical
+        # artifact so the resulting receipt can be verified against its supplied
+        # graph root even when the producer refreshes evaluation timestamps.
+        graph = inputs.graph_candidate
         changes = inputs.graph_inputs.candidate.changes
         if len(changes) > self.policy.maximum_changes:
             raise _OperationRejected(OperationSeedGapCode.CAPACITY_EXCEEDED, "changes")
@@ -717,9 +695,7 @@ class OperationAwareSeedCompiler:
             side: {item.edge_id: item for item in materialized.edges}
             for side, materialized in sides.items()
         }
-        tombstones = {
-            (item.entity_type, item.entity_id): item for item in graph.tombstones
-        }
+        tombstones = {(item.entity_type, item.entity_id): item for item in graph.tombstones}
         source_artifact_ids = {
             side: {item.source_artifact_id for item in materialized.dispositions}
             for side, materialized in sides.items()
@@ -762,8 +738,7 @@ class OperationAwareSeedCompiler:
                     OperationSeedGapCode.OPERATION_BINDING_FAILED, change.path, "presence"
                 )
             file_evidence = tuple(
-                _file_evidence(side, dispositions[side][change.path])
-                for side in selected_sides
+                _file_evidence(side, dispositions[side][change.path]) for side in selected_sides
             )
             source_id = file_evidence[0].source_artifact_id
             file_delta = next(
@@ -840,18 +815,14 @@ class OperationAwareSeedCompiler:
                         source_artifact_ids,
                         seed_ids,
                     )
-            seeds = self._materialize_seeds(
-                seed_ids, sides, nodes, source_artifact_ids
-            )
+            seeds = self._materialize_seeds(seed_ids, sides, nodes, source_artifact_ids)
             total_seed_references += len(seeds)
             total_delta_references += len(related)
             total_tombstone_references += len(bound_tombstones)
             if (
                 total_seed_references > self.policy.maximum_binding_seed_references
-                or total_delta_references
-                > self.policy.maximum_binding_delta_references
-                or total_tombstone_references
-                > self.policy.maximum_binding_tombstone_references
+                or total_delta_references > self.policy.maximum_binding_delta_references
+                or total_tombstone_references > self.policy.maximum_binding_tombstone_references
             ):
                 raise _OperationRejected(
                     OperationSeedGapCode.CAPACITY_EXCEEDED, "binding-references"
@@ -898,9 +869,9 @@ class OperationAwareSeedCompiler:
         indirect_seeds = self._materialize_seeds(
             indirect_seed_ids, sides, nodes, source_artifact_ids
         )
-        all_seeds = {
-            item.seed_sha256 for binding in bindings for item in binding.seeds
-        } | {item.seed_sha256 for item in indirect_seeds}
+        all_seeds = {item.seed_sha256 for binding in bindings for item in binding.seeds} | {
+            item.seed_sha256 for item in indirect_seeds
+        }
         if len(bindings) > self.policy.maximum_bindings or len(all_seeds) > (
             self.policy.maximum_seeds
         ):
@@ -955,13 +926,9 @@ class OperationAwareSeedCompiler:
             "compiler_implementation_sha256": self.policy.compiler.implementation_sha256,
             "evaluated_at": final_now.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "valid_until": valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "change_identity_sha256s": [
-                item.change_identity_sha256 for item in bindings_tuple
-            ],
+            "change_identity_sha256s": [item.change_identity_sha256 for item in bindings_tuple],
             "graph_delta_sha256s": sorted(all_delta_sha256s),
-            "tombstone_sha256s": sorted(
-                item.tombstone_sha256 for item in graph.tombstones
-            ),
+            "tombstone_sha256s": sorted(item.tombstone_sha256 for item in graph.tombstones),
             "direct_graph_delta_sha256s": sorted(direct_deltas),
             "indirect_graph_delta_sha256s": sorted(indirect_delta_sha256s),
             "direct_tombstone_sha256s": sorted(direct_tombstone_sha256s),

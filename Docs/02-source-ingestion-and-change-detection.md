@@ -111,6 +111,17 @@ indirect graph effect. A supported but nonsemantic file receives an explicit
 operation-mapping slice only. Trusted side-specific path replay and complete source-family,
 upstream, build, test and release evidence remain blocking.
 
+The host-owned foundation pipeline composes R0.4a, R0.4c and R0.4d from the configured Git
+repository root with no caller-supplied paths, changed-file list, graph or operation seeds. Its own
+policy and implementation are independently pinned, each stage exposes exact input/output receipt
+roles and permanent gaps, and downstream stages are `NOT_RUN` after an upstream failure. The public
+projection is bounded and contains only typed measurements, receipt digests, policy identities and
+sanitized failure codes; full artifacts remain inside the runtime verification boundary. A current
+verification call replays the full host chain and rejects stale policy, source, time or artifact
+bindings. `EXECUTED` means only that all three local foundation stages executed successfully:
+evidence completeness remains `INCOMPLETE`, authority remains `ANALYSIS_ONLY`, release eligibility
+remains false and `RELEASE_EVIDENCE_MODEL_INCOMPLETE` cannot be removed.
+
 ### Failure policy
 
 - One malformed artifact is isolated and reported; policy decides whether snapshot activation is blocked.

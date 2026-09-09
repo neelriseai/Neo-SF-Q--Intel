@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "948a3555fe5d3cc994efcd8c18da5b8c4cd6ed72caf581c6ef3e0e31f5521dc0",
+  "sourceSnapshot": "f7d8078d677e835312d9ccce6df3be92c389e4618d9f12e8fc6ec6b9deb55ed3",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -566,6 +566,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/foundation-pipeline-policy.json",
+      "kind": "file",
+      "label": "foundation-pipeline-policy.json",
+      "source": "config/foundation-pipeline-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/fusion-policy.json",
       "kind": "file",
       "label": "fusion-policy.json",
@@ -966,6 +974,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-10-foundation-pipeline.md",
+      "kind": "file",
+      "label": "2026-09-10-foundation-pipeline.md",
+      "source": "quality/reviews/2026-09-10-foundation-pipeline.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/2026-09-10-nested-dx-discovery.md",
       "kind": "file",
       "label": "2026-09-10-nested-dx-discovery.md",
@@ -1098,6 +1114,14 @@
       "kind": "file",
       "label": "edge_extractors.py",
       "source": "src/neo_sf_q_intel/edge_extractors.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/foundation_pipeline.py",
+      "kind": "file",
+      "label": "foundation_pipeline.py",
+      "source": "src/neo_sf_q_intel/foundation_pipeline.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -1422,6 +1446,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_foundation_pipeline.py",
+      "kind": "file",
+      "label": "test_foundation_pipeline.py",
+      "source": "tests/test_foundation_pipeline.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_fusion.py",
       "kind": "file",
       "label": "test_fusion.py",
@@ -1672,7 +1704,7 @@
       "kind": "capability",
       "label": "source.verified-change-set",
       "status": "FOUNDATION",
-      "summary": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
+      "summary": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. A separately pinned host pipeline composes and current-verifies this stage without accepting caller scope, without exposing full artifacts, and without promoting partial results. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
       "authority": "policy"
     },
     {
@@ -1680,7 +1712,7 @@
       "kind": "capability",
       "label": "source.tree-graph-production",
       "status": "FOUNDATION",
-      "summary": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, independently requires exactly one portable sfdx-project.json at any depth per side, resolves package roots relative to that descriptor, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Ambiguous descriptors, aliases, unsafe or overlapping roots and unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. This supports one DX descriptor, not automatic selection among multiple projects. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "summary": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, independently requires exactly one portable sfdx-project.json at any depth per side, resolves package roots relative to that descriptor, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Ambiguous descriptors, aliases, unsafe or overlapping roots and unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. A separately pinned host pipeline enforces exact stage receipts, permanent gaps, sanitized failures and current replay before returning a bounded projection. Developer indexes are never evidence authority. This supports one DX descriptor, not automatic selection among multiple projects. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
       "authority": "policy"
     },
     {
@@ -1688,7 +1720,7 @@
       "kind": "capability",
       "label": "source.change-seed-mapping",
       "status": "FOUNDATION",
-      "summary": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "summary": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. A separately pinned zero-scope-argument host pipeline composes and current-verifies R0.4a/R0.4c/R0.4d, prevents downstream execution and artifact promotion after failure, and keeps execution status separate from invariant evidence incompleteness. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
       "authority": "policy"
     },
     {
@@ -2702,12 +2734,22 @@
     {
       "from": "capability:source.change-seed-mapping",
       "relation": "implemented_by",
+      "to": "file:config/foundation-pipeline-policy.json"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "implemented_by",
       "to": "file:config/operation-seed-policy.json"
     },
     {
       "from": "capability:source.change-seed-mapping",
       "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/change_seed.py"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/foundation_pipeline.py"
     },
     {
       "from": "capability:source.change-seed-mapping",
@@ -2723,6 +2765,11 @@
       "from": "capability:source.change-seed-mapping",
       "relation": "verified_by",
       "to": "file:tests/test_change_seed.py"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "verified_by",
+      "to": "file:tests/test_foundation_pipeline.py"
     },
     {
       "from": "capability:source.change-seed-mapping",
@@ -2757,12 +2804,22 @@
     {
       "from": "capability:source.tree-graph-production",
       "relation": "implemented_by",
+      "to": "file:config/foundation-pipeline-policy.json"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "implemented_by",
       "to": "file:config/graph-producer-policy.json"
     },
     {
       "from": "capability:source.tree-graph-production",
       "relation": "implemented_by",
       "to": "file:config/source-profiles/salesforce-dx-semantic-graph.json"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/foundation_pipeline.py"
     },
     {
       "from": "capability:source.tree-graph-production",
@@ -2787,7 +2844,17 @@
     {
       "from": "capability:source.tree-graph-production",
       "relation": "verified_by",
+      "to": "file:tests/test_foundation_pipeline.py"
+    },
+    {
+      "from": "capability:source.tree-graph-production",
+      "relation": "verified_by",
       "to": "file:tests/test_graph_production.py"
+    },
+    {
+      "from": "capability:source.verified-change-set",
+      "relation": "implemented_by",
+      "to": "file:config/foundation-pipeline-policy.json"
     },
     {
       "from": "capability:source.verified-change-set",
@@ -2801,6 +2868,11 @@
     },
     {
       "from": "capability:source.verified-change-set",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/foundation_pipeline.py"
+    },
+    {
+      "from": "capability:source.verified-change-set",
       "relation": "owned_by",
       "to": "owner:Change Analyst"
     },
@@ -2808,6 +2880,11 @@
       "from": "capability:source.verified-change-set",
       "relation": "verified_by",
       "to": "file:tests/test_change_verification.py"
+    },
+    {
+      "from": "capability:source.verified-change-set",
+      "relation": "verified_by",
+      "to": "file:tests/test_foundation_pipeline.py"
     },
     {
       "from": "capability:tools.mcp",
@@ -3053,6 +3130,31 @@
       "from": "file:src/neo_sf_q_intel/edge_envelope.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/safety.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/change_verification.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/graph_production.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/operation_seed.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/fusion.py",
@@ -3603,6 +3705,31 @@
       "from": "file:tests/test_edge_envelope.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:tests/test_foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/change_verification.py"
+    },
+    {
+      "from": "file:tests/test_foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:tests/test_foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/foundation_pipeline.py"
+    },
+    {
+      "from": "file:tests/test_foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/graph_production.py"
+    },
+    {
+      "from": "file:tests/test_foundation_pipeline.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/operation_seed.py"
     },
     {
       "from": "file:tests/test_fusion.py",

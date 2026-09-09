@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     outcome_sqlite_path: Path = Path(".runtime/outcome_memory.db")
     outcome_json_path: Path = Path(".runtime/outcome_memory")
     salesforce_app_root: Path | None = None
+    salesforce_repository_root: Path | None = None
     source_min_contract_version: str = "1.0.0"
     source_required_capabilities: str = ""
     source_graph_sha256: str | None = None
@@ -82,6 +83,27 @@ class Settings(BaseSettings):
         if root.is_absolute():
             return root.resolve()
         return ((repository_root or Path.cwd()) / root).resolve()
+
+    def resolved_salesforce_repository_root(self, repository_root: Path | None = None) -> Path:
+        root = self.salesforce_repository_root
+        if root is None:
+            raise ValueError(
+                "SALESFORCE_REPOSITORY_ROOT must identify the configured Git repository"
+            )
+        if root.is_absolute():
+            return root.resolve()
+        return ((repository_root or Path.cwd()) / root).resolve()
+
+    def resolved_salesforce_roots(self, repository_root: Path | None = None) -> tuple[Path, Path]:
+        git_root = self.resolved_salesforce_repository_root(repository_root)
+        app_root = self.resolved_salesforce_root(repository_root)
+        try:
+            app_root.relative_to(git_root)
+        except ValueError as exc:
+            raise ValueError(
+                "SALESFORCE_APP_ROOT must be within SALESFORCE_REPOSITORY_ROOT"
+            ) from exc
+        return git_root, app_root
 
     def resolved_sqlite_path(self, repository_root: Path | None = None) -> Path:
         if self.sqlite_path.is_absolute():

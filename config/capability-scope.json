@@ -19,45 +19,45 @@
       "id": "source.verified-change-set",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
-      "implementation": ["config/verified-change-policy.json", "src/neo_sf_q_intel/change_verification.py"],
-      "verification": ["tests/test_change_verification.py"],
+      "genericity": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. A separately pinned host pipeline composes and current-verifies this stage without accepting caller scope, without exposing full artifacts, and without promoting partial results. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
+      "implementation": ["config/verified-change-policy.json", "config/foundation-pipeline-policy.json", "src/neo_sf_q_intel/change_verification.py", "src/neo_sf_q_intel/foundation_pipeline.py"],
+      "verification": ["tests/test_change_verification.py", "tests/test_foundation_pipeline.py"],
       "verificationCases": {
-        "positive": ["tests/test_change_verification.py"],
-        "negative": ["tests/test_change_verification.py"],
-        "failure": ["tests/test_change_verification.py"],
-        "degradation": ["tests/test_change_verification.py"],
-        "scenarioIndependence": ["tests/test_change_verification.py"]
+        "positive": ["tests/test_change_verification.py", "tests/test_foundation_pipeline.py"],
+        "negative": ["tests/test_change_verification.py", "tests/test_foundation_pipeline.py"],
+        "failure": ["tests/test_change_verification.py", "tests/test_foundation_pipeline.py"],
+        "degradation": ["tests/test_change_verification.py", "tests/test_foundation_pipeline.py"],
+        "scenarioIndependence": ["tests/test_change_verification.py", "tests/test_foundation_pipeline.py"]
       }
     },
     {
       "id": "source.tree-graph-production",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, independently requires exactly one portable sfdx-project.json at any depth per side, resolves package roots relative to that descriptor, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Ambiguous descriptors, aliases, unsafe or overlapping roots and unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. This supports one DX descriptor, not automatic selection among multiple projects. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
-      "implementation": ["config/graph-producer-policy.json", "config/source-profiles/salesforce-dx-semantic-graph.json", "src/neo_sf_q_intel/graph_adapter.py", "src/neo_sf_q_intel/graph_production.py", "src/neo_sf_q_intel/salesforce_graph_adapter.py"],
-      "verification": ["tests/test_graph_production.py"],
+      "genericity": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, independently requires exactly one portable sfdx-project.json at any depth per side, resolves package roots relative to that descriptor, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Ambiguous descriptors, aliases, unsafe or overlapping roots and unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. A separately pinned host pipeline enforces exact stage receipts, permanent gaps, sanitized failures and current replay before returning a bounded projection. Developer indexes are never evidence authority. This supports one DX descriptor, not automatic selection among multiple projects. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "implementation": ["config/graph-producer-policy.json", "config/foundation-pipeline-policy.json", "config/source-profiles/salesforce-dx-semantic-graph.json", "src/neo_sf_q_intel/graph_adapter.py", "src/neo_sf_q_intel/graph_production.py", "src/neo_sf_q_intel/salesforce_graph_adapter.py", "src/neo_sf_q_intel/foundation_pipeline.py"],
+      "verification": ["tests/test_graph_production.py", "tests/test_foundation_pipeline.py"],
       "verificationCases": {
-        "positive": ["tests/test_graph_production.py"],
-        "negative": ["tests/test_graph_production.py"],
-        "failure": ["tests/test_graph_production.py"],
-        "degradation": ["tests/test_graph_production.py"],
-        "scenarioIndependence": ["tests/test_graph_production.py"]
+        "positive": ["tests/test_graph_production.py", "tests/test_foundation_pipeline.py"],
+        "negative": ["tests/test_graph_production.py", "tests/test_foundation_pipeline.py"],
+        "failure": ["tests/test_graph_production.py", "tests/test_foundation_pipeline.py"],
+        "degradation": ["tests/test_graph_production.py", "tests/test_foundation_pipeline.py"],
+        "scenarioIndependence": ["tests/test_graph_production.py", "tests/test_foundation_pipeline.py"]
       }
     },
     {
       "id": "source.change-seed-mapping",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
-      "implementation": ["config/change-seed-policy.json", "config/operation-seed-policy.json", "src/neo_sf_q_intel/change_seed.py", "src/neo_sf_q_intel/operation_seed.py"],
-      "verification": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
+      "genericity": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. A separately pinned zero-scope-argument host pipeline composes and current-verifies R0.4a/R0.4c/R0.4d, prevents downstream execution and artifact promotion after failure, and keeps execution status separate from invariant evidence incompleteness. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "implementation": ["config/change-seed-policy.json", "config/operation-seed-policy.json", "config/foundation-pipeline-policy.json", "src/neo_sf_q_intel/change_seed.py", "src/neo_sf_q_intel/operation_seed.py", "src/neo_sf_q_intel/foundation_pipeline.py"],
+      "verification": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
       "verificationCases": {
-        "positive": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
-        "negative": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
-        "failure": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
-        "degradation": ["tests/test_change_seed.py", "tests/test_operation_seed.py"],
-        "scenarioIndependence": ["tests/test_change_seed.py", "tests/test_operation_seed.py"]
+        "positive": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
+        "negative": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
+        "failure": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
+        "degradation": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"],
+        "scenarioIndependence": ["tests/test_change_seed.py", "tests/test_operation_seed.py", "tests/test_foundation_pipeline.py"]
       }
     },
     {

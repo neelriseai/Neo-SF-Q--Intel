@@ -76,8 +76,7 @@ def _repository(tmp_path: Path) -> Path:
         field,
         _xml(
             "CustomField",
-            "<fullName>Link__c</fullName><type>Lookup</type>"
-            "<referenceTo>Before__c</referenceTo>",
+            "<fullName>Link__c</fullName><type>Lookup</type><referenceTo>Before__c</referenceTo>",
         ),
     )
     deleted = "package/main/default/classes/RemovedWorker.cls"
@@ -99,16 +98,12 @@ def _repository(tmp_path: Path) -> Path:
         field,
         _xml(
             "CustomField",
-            "<fullName>Link__c</fullName><type>Lookup</type>"
-            "<referenceTo>After__c</referenceTo>",
+            "<fullName>Link__c</fullName><type>Lookup</type><referenceTo>After__c</referenceTo>",
         ),
     )
     (repository / deleted).unlink()
     (repository / "package/main/default/classes/RemovedWorker.cls-meta.xml").unlink()
-    (
-        repository
-        / "package/main/default/objects/After__c/After__c.object-meta.xml"
-    ).unlink()
+    (repository / "package/main/default/objects/After__c/After__c.object-meta.xml").unlink()
     _write(
         repository,
         "package/main/default/objects/Before__c/Before__c.object-meta.xml",
@@ -129,9 +124,7 @@ def _system(repository: Path):
     )
     change = change_producer.capture(repository).artifact
     assert change is not None
-    ontology = load_canonical_ontology(
-        ROOT / "config" / "ontology" / "canonical-ontology.json"
-    )
+    ontology = load_canonical_ontology(ROOT / "config" / "ontology" / "canonical-ontology.json")
     profile = load_source_graph_profile(
         ROOT / "config" / "source-profiles" / "salesforce-dx-semantic-graph.json",
         ontology,
@@ -179,9 +172,12 @@ def test_policy_is_self_hashed_and_implementation_pinned() -> None:
         ROOT / "config" / "operation-seed-policy.json", implementation_root=ROOT
     )
     assert policy.sha256 == DEFAULT_OPERATION_SEED_POLICY_SHA256
-    assert operation_seed._implementation_sha256(
-        (ROOT / policy.compiler.implementation_locator).read_bytes()
-    ) == policy.compiler.implementation_sha256
+    assert (
+        operation_seed._implementation_sha256(
+            (ROOT / policy.compiler.implementation_locator).read_bytes()
+        )
+        == policy.compiler.implementation_sha256
+    )
 
 
 def test_add_delete_modify_are_side_qualified_and_completely_partitioned(
@@ -193,23 +189,13 @@ def test_add_delete_modify_are_side_qualified_and_completely_partitioned(
     assert artifact is not None
     by_path = {item.change.path: item for item in artifact.bindings}
     nonsemantic_add = by_path["notes/context.json"]
-    semantic_add = by_path[
-        "package/main/default/objects/Before__c/Before__c.object-meta.xml"
-    ]
-    semantic_delete = by_path[
-        "package/main/default/objects/After__c/After__c.object-meta.xml"
-    ]
-    modify = by_path[
-        "package/main/default/objects/Entity__c/fields/Link__c.field-meta.xml"
-    ]
-    assert tuple(item.side.value for item in nonsemantic_add.file_evidence) == (
-        "CANDIDATE",
-    )
+    semantic_add = by_path["package/main/default/objects/Before__c/Before__c.object-meta.xml"]
+    semantic_delete = by_path["package/main/default/objects/After__c/After__c.object-meta.xml"]
+    modify = by_path["package/main/default/objects/Entity__c/fields/Link__c.field-meta.xml"]
+    assert tuple(item.side.value for item in nonsemantic_add.file_evidence) == ("CANDIDATE",)
     assert nonsemantic_add.seed_outcome is SemanticSeedOutcome.NO_SEMANTIC_SEED
     assert {item.side.value for item in semantic_add.seeds} == {"CANDIDATE"}
-    assert tuple(item.side.value for item in semantic_delete.file_evidence) == (
-        "BASE",
-    )
+    assert tuple(item.side.value for item in semantic_delete.file_evidence) == ("BASE",)
     assert {item.side.value for item in semantic_delete.seeds} == {"BASE"}
     assert semantic_delete.tombstone_sha256s
     assert {item.side.value for item in modify.seeds} == {
@@ -217,19 +203,14 @@ def test_add_delete_modify_are_side_qualified_and_completely_partitioned(
         "CANDIDATE",
     }
     assert modify.tombstone_sha256s
-    same_id = [
-        item
-        for item in modify.seeds
-        if item.node_id == "field:Entity__c.Link__c"
-    ]
+    same_id = [item for item in modify.seeds if item.node_id == "field:Entity__c.Link__c"]
     assert len(same_id) == 2
     assert {item.side.value for item in same_id} == {"BASE", "CANDIDATE"}
     assert set(artifact.graph_delta_sha256s) == {
         item.delta_sha256 for item in inputs.graph_candidate.delta
     }
     assert not (
-        set(artifact.direct_graph_delta_sha256s)
-        & set(artifact.indirect_graph_delta_sha256s)
+        set(artifact.direct_graph_delta_sha256s) & set(artifact.indirect_graph_delta_sha256s)
     )
     assert artifact.change_seed_scope_attested is False
     assert artifact.path_scope_attested is False
@@ -314,9 +295,7 @@ def test_total_delta_reference_capacity_rejects_before_binding_expansion(
     document["maximumBindingDeltaReferences"] = 1
     document["sha256"] = contract_sha256(document)
     constrained = OperationSeedPolicy.model_validate(document)
-    monkeypatch.setattr(
-        operation_seed, "DEFAULT_OPERATION_SEED_POLICY_SHA256", constrained.sha256
-    )
+    monkeypatch.setattr(operation_seed, "DEFAULT_OPERATION_SEED_POLICY_SHA256", constrained.sha256)
     rejected = OperationAwareSeedCompiler(constrained).compile(inputs)
     assert rejected.artifact is None
     assert OperationSeedGapCode.CAPACITY_EXCEEDED in _codes(rejected)
@@ -372,3 +351,25 @@ def test_time_authority_historical_root_and_later_refresh_fail_closed(
     rollback = compiler.verify(artifact, inputs)
     assert rollback.artifact is None
     assert OperationSeedGapCode.TIME_AUTHORITY_UNAVAILABLE in _codes(rollback)
+
+
+def test_compile_then_verify_survives_independent_graph_timestamp_refresh(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    compiler, inputs = _system(_repository(tmp_path))
+    monkeypatch.setattr(change_verification, "_utc_now", lambda: T0 + timedelta(minutes=3))
+    monkeypatch.setattr(graph_production, "_utc_now", lambda: T0 + timedelta(minutes=4))
+    monkeypatch.setattr(operation_seed, "_utc_now", lambda: T0 + timedelta(minutes=5))
+    compiled = compiler.compile(inputs)
+    assert compiled.artifact is not None
+    assert compiled.artifact.graph_production_receipt_sha256 == (
+        inputs.graph_candidate.receipt_sha256
+    )
+
+    monkeypatch.setattr(change_verification, "_utc_now", lambda: T0 + timedelta(minutes=6))
+    monkeypatch.setattr(graph_production, "_utc_now", lambda: T0 + timedelta(minutes=7))
+    monkeypatch.setattr(operation_seed, "_utc_now", lambda: T0 + timedelta(minutes=8))
+    verified = compiler.verify(compiled.artifact, inputs)
+
+    assert verified.artifact is not None
+    assert verified.artifact.evaluated_at == "2026-09-10T08:08:00Z"

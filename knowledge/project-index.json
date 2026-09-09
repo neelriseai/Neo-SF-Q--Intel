@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "948a3555fe5d3cc994efcd8c18da5b8c4cd6ed72caf581c6ef3e0e31f5521dc0",
+  "sourceSnapshot": "f7d8078d677e835312d9ccce6df3be92c389e4618d9f12e8fc6ec6b9deb55ed3",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -53,29 +53,37 @@
       "id": "source.verified-change-set",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
+      "genericity": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. A separately pinned host pipeline composes and current-verifies this stage without accepting caller scope, without exposing full artifacts, and without promoting partial results. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
       "implementation": [
         "config/verified-change-policy.json",
-        "src/neo_sf_q_intel/change_verification.py"
+        "config/foundation-pipeline-policy.json",
+        "src/neo_sf_q_intel/change_verification.py",
+        "src/neo_sf_q_intel/foundation_pipeline.py"
       ],
       "verification": [
-        "tests/test_change_verification.py"
+        "tests/test_change_verification.py",
+        "tests/test_foundation_pipeline.py"
       ],
       "verificationCases": {
         "positive": [
-          "tests/test_change_verification.py"
+          "tests/test_change_verification.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "negative": [
-          "tests/test_change_verification.py"
+          "tests/test_change_verification.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "failure": [
-          "tests/test_change_verification.py"
+          "tests/test_change_verification.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "degradation": [
-          "tests/test_change_verification.py"
+          "tests/test_change_verification.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "scenarioIndependence": [
-          "tests/test_change_verification.py"
+          "tests/test_change_verification.py",
+          "tests/test_foundation_pipeline.py"
         ]
       }
     },
@@ -83,32 +91,40 @@
       "id": "source.tree-graph-production",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, independently requires exactly one portable sfdx-project.json at any depth per side, resolves package roots relative to that descriptor, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Ambiguous descriptors, aliases, unsafe or overlapping roots and unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. Developer indexes are never evidence authority. This supports one DX descriptor, not automatic selection among multiple projects. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "genericity": "Replays exact verified local-Git base and candidate manifests, performs bounded no-follow candidate reads, independently requires exactly one portable sfdx-project.json at any depth per side, resolves package roots relative to that descriptor, accounts for every file, and deterministically emits provenance-bound file plus supported-family Salesforce semantic nodes and edges. Ambiguous descriptors, aliases, unsafe or overlapping roots and unsupported package source families fail closed. Byte provenance and semantic identity are separate; node/edge deltas and tombstones are independently recomputed without caller paths, adapters, exclusions, graphs or seeds. A separately pinned host pipeline enforces exact stage receipts, permanent gaps, sanitized failures and current replay before returning a bounded projection. Developer indexes are never evidence authority. This supports one DX descriptor, not automatic selection among multiple projects. Incomplete source-family and downstream seed coverage remain explicit blocking gaps, so outputs stay ANALYSIS_ONLY and release-ineligible.",
       "implementation": [
         "config/graph-producer-policy.json",
+        "config/foundation-pipeline-policy.json",
         "config/source-profiles/salesforce-dx-semantic-graph.json",
         "src/neo_sf_q_intel/graph_adapter.py",
         "src/neo_sf_q_intel/graph_production.py",
-        "src/neo_sf_q_intel/salesforce_graph_adapter.py"
+        "src/neo_sf_q_intel/salesforce_graph_adapter.py",
+        "src/neo_sf_q_intel/foundation_pipeline.py"
       ],
       "verification": [
-        "tests/test_graph_production.py"
+        "tests/test_graph_production.py",
+        "tests/test_foundation_pipeline.py"
       ],
       "verificationCases": {
         "positive": [
-          "tests/test_graph_production.py"
+          "tests/test_graph_production.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "negative": [
-          "tests/test_graph_production.py"
+          "tests/test_graph_production.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "failure": [
-          "tests/test_graph_production.py"
+          "tests/test_graph_production.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "degradation": [
-          "tests/test_graph_production.py"
+          "tests/test_graph_production.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "scenarioIndependence": [
-          "tests/test_graph_production.py"
+          "tests/test_graph_production.py",
+          "tests/test_foundation_pipeline.py"
         ]
       }
     },
@@ -116,37 +132,45 @@
       "id": "source.change-seed-mapping",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
-      "genericity": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
+      "genericity": "R0.4b preserves the earlier current-replayed path foundation. R0.4d separately replays the exact R0.4c product graph and R0.4a change set, accounts for every ADD, DELETE and MODIFY, preserves base/candidate semantic versions as side-qualified evidence, requires delete tombstones, accounts for nonsemantic files explicitly and partitions every graph delta without caller mappings, seeds or subsets. A separately pinned zero-scope-argument host pipeline composes and current-verifies R0.4a/R0.4c/R0.4d, prevents downstream execution and artifact promotion after failure, and keeps execution status separate from invariant evidence incompleteness. The supported-family operation mapping is complete, while trusted side-specific path replay, complete Salesforce-family coverage and release evidence remain explicit blocking gaps; outputs stay ANALYSIS_ONLY and release-ineligible.",
       "implementation": [
         "config/change-seed-policy.json",
         "config/operation-seed-policy.json",
+        "config/foundation-pipeline-policy.json",
         "src/neo_sf_q_intel/change_seed.py",
-        "src/neo_sf_q_intel/operation_seed.py"
+        "src/neo_sf_q_intel/operation_seed.py",
+        "src/neo_sf_q_intel/foundation_pipeline.py"
       ],
       "verification": [
         "tests/test_change_seed.py",
-        "tests/test_operation_seed.py"
+        "tests/test_operation_seed.py",
+        "tests/test_foundation_pipeline.py"
       ],
       "verificationCases": {
         "positive": [
           "tests/test_change_seed.py",
-          "tests/test_operation_seed.py"
+          "tests/test_operation_seed.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "negative": [
           "tests/test_change_seed.py",
-          "tests/test_operation_seed.py"
+          "tests/test_operation_seed.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "failure": [
           "tests/test_change_seed.py",
-          "tests/test_operation_seed.py"
+          "tests/test_operation_seed.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "degradation": [
           "tests/test_change_seed.py",
-          "tests/test_operation_seed.py"
+          "tests/test_operation_seed.py",
+          "tests/test_foundation_pipeline.py"
         ],
         "scenarioIndependence": [
           "tests/test_change_seed.py",
-          "tests/test_operation_seed.py"
+          "tests/test_operation_seed.py",
+          "tests/test_foundation_pipeline.py"
         ]
       }
     },
@@ -695,7 +719,7 @@
     {
       "path": ".env.example",
       "category": "project",
-      "sha256": "9d1dada16c271403ce03541d320ed774152cb9eda8bbfed39a332ce441320373"
+      "sha256": "6fa7bdf99b597527c0f6f4eb8a834e2afbd779b026a02d42399dcbb5172830a2"
     },
     {
       "path": ".gitattributes",
@@ -765,7 +789,7 @@
     {
       "path": "Docs/02-source-ingestion-and-change-detection.md",
       "category": "reference-documentation",
-      "sha256": "fdf800a5e87388b6bb572442bee835bc41dab86cd9285c434c29d2aa5787422d"
+      "sha256": "e1db16c28a5117d509f606a8caef62f419645a982768ce432efce7a2f49126ea"
     },
     {
       "path": "Docs/03-data-memory-and-retrieval.md",
@@ -855,7 +879,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "d43d84e54e047e23cabeab0648d41741bdb3e38ff9e74fa2a27dbce0d3c876bb"
+      "sha256": "bab7f91b86a5c722487df84e88789117bea064ce37e4995a211066ebeb7f3e8b"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -885,7 +909,7 @@
     {
       "path": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "reference-documentation",
-      "sha256": "bcad26dcfe344ac4a0368004748e3d3967218d759ff2336fc156b76429f9f669"
+      "sha256": "31ca6cc1a983daa227642981789e3b0aed5f606a38113bb83d6e3ac418786722"
     },
     {
       "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
@@ -1020,7 +1044,7 @@
     {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "7c5d62bc4d827dbdb2e25fae3ad35d9a928d0b3632ff87cde9ac08c79e1ef7ae"
+      "sha256": "b3cd763c4c4de6761dbadf6263a36fd74051cdc78c4798a97f1a853506d903a4"
     },
     {
       "path": "config/change-seed-policy.json",
@@ -1041,6 +1065,11 @@
       "path": "config/extractor-trust-registry.json",
       "category": "policy",
       "sha256": "e2b7d37d7fee6f0487014c5ffd30ec080c315b545d6e0bf11bb5366f7a435493"
+    },
+    {
+      "path": "config/foundation-pipeline-policy.json",
+      "category": "policy",
+      "sha256": "062578702a0d74c63770d4aeb9a9e97291bfc4eb51bb66b88ba2c60e4150fc30"
     },
     {
       "path": "config/fusion-policy.json",
@@ -1065,7 +1094,7 @@
     {
       "path": "config/operation-seed-policy.json",
       "category": "policy",
-      "sha256": "49d90a8f06b20d5af7779898307d2ec1a3f8c28745f40aacf1eec3c21ed83329"
+      "sha256": "27c9bd9aeda224eb21a2cd23d5a59ea5f354a95711f910beca210db0c4e8955d"
     },
     {
       "path": "config/outcome-memory-policy.json",
@@ -1293,6 +1322,11 @@
       "sha256": "2f5f2b289009ffdeed4f5ab2ccee048ac0cc6cb3598362295249aebc4186c480"
     },
     {
+      "path": "quality/reviews/2026-09-10-foundation-pipeline.md",
+      "category": "project",
+      "sha256": "0a3e25128026ccd062ee9b9d353447c6784b9e860e9d6a66b48921fd5f3e03ca"
+    },
+    {
       "path": "quality/reviews/2026-09-10-nested-dx-discovery.md",
       "category": "project",
       "sha256": "0a701f5550c3db0a2060975cb38faa7b27a42d827968519ee1a1b2c4074241f0"
@@ -1305,7 +1339,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "2b93c55feb154bfb0e9d791af7fffb507421c5593d38f9b6aeb7020d23e20565"
+      "sha256": "0a3cd7eccfaaf8f054dfaa335ae5ffe410ad223e026b430a71e1095161fa30b0"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -1355,7 +1389,7 @@
     {
       "path": "src/neo_sf_q_intel/config.py",
       "category": "python-runtime",
-      "sha256": "92a66cd37fa4786660008331f3775f245120bfa18efc639ef54e2b4f3efb9d9c"
+      "sha256": "6be97c8f783a0077c79608480994493a233fb6f8a5e1be060c0b0c3eff415911"
     },
     {
       "path": "src/neo_sf_q_intel/context_pack.py",
@@ -1376,6 +1410,11 @@
       "path": "src/neo_sf_q_intel/edge_extractors.py",
       "category": "python-runtime",
       "sha256": "02d5afa252049f8cc8b66f30be7ff995f2311bec9b36392503567fc7421e05b4"
+    },
+    {
+      "path": "src/neo_sf_q_intel/foundation_pipeline.py",
+      "category": "python-runtime",
+      "sha256": "3c2fd54fde55d8ed0f5a4a6d4234b0369beeb060c0cf2bcd42992e077b2d6f2f"
     },
     {
       "path": "src/neo_sf_q_intel/fusion.py",
@@ -1425,7 +1464,7 @@
     {
       "path": "src/neo_sf_q_intel/operation_seed.py",
       "category": "python-runtime",
-      "sha256": "b34ecd75f529b0cc6a6063d355301514ae496bc33c54a55bc35f95964678f192"
+      "sha256": "d746e0b49322d0e11ca4d7fbac60c103fe1b141d4fb81c046e0c0c9ef32450bf"
     },
     {
       "path": "src/neo_sf_q_intel/outcome_repository.py",
@@ -1565,7 +1604,7 @@
     {
       "path": "tests/test_config.py",
       "category": "test",
-      "sha256": "a94c72145e246274741d734fb5aac2c30f38bad06b38ba56e75a77728870aba7"
+      "sha256": "cee8f8dcaa3d0469cc058cdcae303c57a19110de1d56be5472b905a333f0226d"
     },
     {
       "path": "tests/test_context_pack.py",
@@ -1576,6 +1615,11 @@
       "path": "tests/test_edge_envelope.py",
       "category": "test",
       "sha256": "dce75ec50b9ee654f70e6bc928a999c763e0966ae736d1d3a99785d49947472a"
+    },
+    {
+      "path": "tests/test_foundation_pipeline.py",
+      "category": "test",
+      "sha256": "c320eeccdf51ba1ce8a47ae67d73fe29af3302c1392fa033dc3fcf2023d3b695"
     },
     {
       "path": "tests/test_fusion.py",
@@ -1610,7 +1654,7 @@
     {
       "path": "tests/test_operation_seed.py",
       "category": "test",
-      "sha256": "2445881e8bcc1a90c402a41cf3b870d739d0effaf8c714c4930e9ce3bf27c3f3"
+      "sha256": "d08fff24410c8b6c3354dc0b60c4982e0cd6ea3cf1b4903610b147e262cf7036"
     },
     {
       "path": "tests/test_outcome_repository.py",
