@@ -6,10 +6,15 @@ import re
 from collections import deque
 from enum import StrEnum
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
+from neo_sf_q_intel.edge_envelope import (
+    TrustedEdgeEnvelope,
+    TrustedEdgeReplayInput,
+    TrustedEdgeVerification,
+)
 from neo_sf_q_intel.ontology import (
     CanonicalOntology,
     Materiality,
@@ -254,6 +259,59 @@ class PathHopReceipt(PolicyModel):
     source_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
     extractor_id: str = Field(min_length=1)
     materiality: Materiality
+    provenance_scope: Literal[
+        "LEGACY_ANALYSIS_ONLY", "VERIFIED_EDGE_ENVELOPE"
+    ] = "LEGACY_ANALYSIS_ONLY"
+    source_artifact_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    extractor_version: str | None = None
+    extractor_implementation_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    trusted_edge_envelope_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    trusted_edge_policy_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    trusted_edge_registry_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    trusted_edge_verification_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    trusted_edge_evaluated_at: str | None = None
+    trusted_edge_valid_until: str | None = None
+    release_blocking_gap_codes: tuple[
+        Literal["UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED"], ...
+    ] = ()
+
+    @model_validator(mode="after")
+    def validate_provenance_scope(self) -> PathHopReceipt:
+        trusted_values = (
+            self.source_artifact_sha256,
+            self.extractor_version,
+            self.extractor_implementation_sha256,
+            self.trusted_edge_envelope_sha256,
+            self.trusted_edge_policy_sha256,
+            self.trusted_edge_registry_sha256,
+            self.trusted_edge_verification_sha256,
+            self.trusted_edge_evaluated_at,
+            self.trusted_edge_valid_until,
+        )
+        if self.provenance_scope == "VERIFIED_EDGE_ENVELOPE" and not all(trusted_values):
+            raise ValueError("Verified edge hops require the complete R0.1 envelope binding")
+        if self.provenance_scope == "VERIFIED_EDGE_ENVELOPE" and (
+            self.release_blocking_gap_codes
+            != ("UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED",)
+        ):
+            raise ValueError("Verified R0.1 hops must preserve the source-capture gap")
+        if self.provenance_scope == "LEGACY_ANALYSIS_ONLY" and any(trusted_values):
+            raise ValueError("Legacy analysis hops cannot carry partial trusted-edge fields")
+        if self.provenance_scope == "LEGACY_ANALYSIS_ONLY" and self.release_blocking_gap_codes:
+            raise ValueError("Legacy analysis hops cannot carry trusted-edge gap claims")
+        return self
 
 
 class PropagationPathReceipt(PolicyModel):
@@ -273,6 +331,8 @@ class PropagationPathReceipt(PolicyModel):
     policy_version: str = Field(min_length=1)
     policy_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     hops: tuple[PathHopReceipt, ...] = Field(min_length=1)
+    local_edge_envelope_complete: bool = False
+    authority_scope: Literal["ANALYSIS_ONLY"] = "ANALYSIS_ONLY"
     path_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
     @model_validator(mode="after")
@@ -302,6 +362,10 @@ class PropagationPathReceipt(PolicyModel):
             visited.append(hop.traversal_to_id)
         if len(visited) != len(set(visited)):
             raise ValueError("A path receipt must not contain a cycle")
+        if self.local_edge_envelope_complete != all(
+            hop.provenance_scope == "VERIFIED_EDGE_ENVELOPE" for hop in self.hops
+        ):
+            raise ValueError("Path edge-provenance completeness differs from its hops")
         body = self.model_dump(mode="json")
         declared = body.pop("path_sha256")
         if _stable_hash(body) != declared:
@@ -315,6 +379,7 @@ class PropagationGap(PolicyModel):
     edge_id: str | None = None
     detail: str | None = None
     blocking: bool
+    scope: Literal["ANALYSIS", "RELEASE_ONLY"] = "ANALYSIS"
 
 
 class PropagationResult(PolicyModel):
@@ -559,7 +624,11 @@ def load_analysis_risk_policy(
     return policy
 
 
-def _edge_is_receiptable(edge: NormalizedEdge, graph: NormalizedGraph) -> bool:
+def _edge_is_legacy_analysis_receiptable(
+    edge: NormalizedEdge, graph: NormalizedGraph
+) -> bool:
+    """Preserve pre-R0.1 analysis behavior without asserting release authority."""
+
     return bool(
         graph.source_snapshot
         and edge.source_snapshot == graph.source_snapshot
@@ -612,7 +681,60 @@ def _path_payload(
         "policy_version": policy.policy_version,
         "policy_sha256": policy.sha256,
         "hops": [item.model_dump(mode="json") for item in hops],
+        "local_edge_envelope_complete": all(
+            hop.provenance_scope == "VERIFIED_EDGE_ENVELOPE" for hop in hops
+        ),
+        "authority_scope": "ANALYSIS_ONLY",
     }
+
+
+def _trusted_envelopes_for_graph(
+    graph: NormalizedGraph,
+    replay_input: TrustedEdgeReplayInput | None,
+) -> tuple[
+    dict[str, tuple[TrustedEdgeEnvelope, TrustedEdgeVerification]],
+    TrustedEdgeVerification | None,
+]:
+    if replay_input is None:
+        return {}, None
+    replayed = replay_input.verify(graph)
+    identity = (
+        replayed.project_id,
+        replayed.source_snapshot,
+        replayed.source_graph_sha256,
+        replayed.normalized_graph_sha256,
+        replayed.ontology_id,
+        replayed.ontology_version,
+        replayed.ontology_sha256,
+        replayed.profile_id,
+        replayed.profile_version,
+        replayed.profile_sha256,
+    )
+    graph_identity = (
+        graph.project_id,
+        graph.source_snapshot,
+        graph.source_graph_sha256,
+        graph.graph_sha256,
+        graph.ontology_id,
+        graph.ontology_version,
+        graph.ontology_sha256,
+        graph.profile_id,
+        graph.profile_version,
+        graph.profile_sha256,
+    )
+    if identity != graph_identity:
+        raise PropagationEvaluationError(
+            "Trusted-edge verification receipt differs from the normalized graph"
+        )
+    if not replayed.coverage_complete:
+        return {}, replayed
+    return (
+        {
+            edge_id: (envelope, replayed)
+            for edge_id, envelope in replayed.accepted_by_edge_id.items()
+        },
+        replayed,
+    )
 
 
 def _stable_hash(body: dict[str, Any]) -> str:
@@ -677,7 +799,11 @@ def _node_is_receiptable(node: Any, graph: NormalizedGraph) -> bool:
 
 
 def traverse_propagation(
-    graph: NormalizedGraph, seed_ids: list[str] | tuple[str, ...], policy: PropagationPolicy
+    graph: NormalizedGraph,
+    seed_ids: list[str] | tuple[str, ...],
+    policy: PropagationPolicy,
+    *,
+    trusted_edge_replay: TrustedEdgeReplayInput | None = None,
 ) -> PropagationResult:
     """Enumerate deterministic simple paths under explicit directional relation rules."""
 
@@ -695,8 +821,29 @@ def traverse_propagation(
             "Project and trusted source-graph identities are required for path receipts"
         )
     nodes = _require_normalized_graph_integrity(graph, policy)
+    trusted_envelopes, trusted_verification = _trusted_envelopes_for_graph(
+        graph, trusted_edge_replay
+    )
     ordered_seeds = tuple(sorted(set(seed_ids)))
     gaps: list[PropagationGap] = []
+    if trusted_verification is not None:
+        gaps.append(
+            PropagationGap(
+                code="UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED",
+                detail=None,
+                blocking=True,
+                scope="RELEASE_ONLY",
+            )
+        )
+        for rejection in trusted_verification.rejections:
+            gaps.append(
+                PropagationGap(
+                    code=f"TRUSTED_EDGE_{rejection.code.value}",
+                    detail=rejection.edge_identity_sha256,
+                    blocking=True,
+                    scope="RELEASE_ONLY",
+                )
+            )
     valid_seeds: list[str] = []
     for seed_id in ordered_seeds:
         if seed_id not in nodes:
@@ -814,7 +961,7 @@ def traverse_propagation(
                             )
                         )
                         continue
-                    if not _edge_is_receiptable(edge, graph):
+                    if not _edge_is_legacy_analysis_receiptable(edge, graph):
                         gaps.append(
                             PropagationGap(
                                 code="EDGE_PROVENANCE_INCOMPLETE",
@@ -827,6 +974,37 @@ def traverse_propagation(
                         continue
                     if neighbor_id in visited:
                         continue
+                    trusted_pair = trusted_envelopes.get(edge.edge_id)
+                    trusted_fields: dict[str, Any] = {}
+                    if trusted_pair is not None:
+                        trusted_envelope, verification = trusted_pair
+                        trusted_fields = {
+                            "provenance_scope": "VERIFIED_EDGE_ENVELOPE",
+                            "source_artifact_sha256": (
+                                trusted_envelope.source_artifact_sha256
+                            ),
+                            "extractor_version": trusted_envelope.extractor_version,
+                            "extractor_implementation_sha256": (
+                                trusted_envelope.extractor_implementation_sha256
+                            ),
+                            "trusted_edge_envelope_sha256": (
+                                trusted_envelope.envelope_sha256
+                            ),
+                            "trusted_edge_policy_sha256": (
+                                trusted_envelope.trust_policy_sha256
+                            ),
+                            "trusted_edge_registry_sha256": (
+                                trusted_envelope.extractor_registry_sha256
+                            ),
+                            "trusted_edge_verification_sha256": (
+                                verification.verification_sha256
+                            ),
+                            "trusted_edge_evaluated_at": verification.evaluated_at,
+                            "trusted_edge_valid_until": trusted_envelope.valid_until,
+                            "release_blocking_gap_codes": (
+                                "UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED",
+                            ),
+                        }
                     hop = PathHopReceipt(
                         position=next_depth,
                         edge_id=edge.edge_id,
@@ -842,6 +1020,7 @@ def traverse_propagation(
                         source_hash=edge.source_hash,
                         extractor_id=edge.extractor_id,
                         materiality=edge.materiality,
+                        **trusted_fields,
                     )
                     hops = (*prior_hops, hop)
                     signature = (
@@ -889,12 +1068,20 @@ def traverse_propagation(
             item.target_id,
             item.seed_id,
             len(item.hops),
+            tuple((hop.edge_id, hop.direction.value) for hop in item.hops),
             item.path_sha256,
         )
     )
     gaps = sorted(
         set(gaps),
-        key=lambda item: (item.code, item.entity_id or "", item.edge_id or "", item.detail or ""),
+        key=lambda item: (
+            item.code,
+            item.scope,
+            item.blocking,
+            item.entity_id or "",
+            item.edge_id or "",
+            item.detail or "",
+        ),
     )
     body = {
         "project_id": graph.project_id,
@@ -983,7 +1170,9 @@ def evaluate_analysis_risk(
         pin.policy_sha256,
     ):
         raise PropagationEvaluationError("Risk policy and propagation result identities differ")
-    blocking_propagation_gaps = [gap for gap in propagation.gaps if gap.blocking]
+    blocking_propagation_gaps = [
+        gap for gap in propagation.gaps if gap.blocking and gap.scope == "ANALYSIS"
+    ]
     if blocking_propagation_gaps:
         risk_gaps = [
             RiskEvaluationGap(

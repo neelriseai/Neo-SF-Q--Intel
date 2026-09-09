@@ -84,6 +84,16 @@ the current in-process implementation and the future ChromaDB adapter interchang
 - Missing record-level state, source artifact, extractor, snapshot or hash remains `UNVERIFIED`.
   A whole-graph digest does not silently promote incomplete records, and raw
   `HUMAN_CONFIRMED` text cannot promote itself.
+- The R0.1 trusted-edge foundation preserves a separate release-only readiness channel. Missing or
+  invalid source-artifact hash, extractor version or extractor-implementation digest blocks release
+  evidence but does not remove a legacy edge from analysis. A current consumer must replay raw
+  source-graph bytes, normalized graph, ontology/profile, parser registry, policy, edge artifact and
+  validity window; a stored verification digest alone is never authority.
+- Accepted local envelopes bind legal direction and endpoint signature, canonical relation,
+  project/snapshot, raw and normalized graph roots, repository-relative artifact locator and digest,
+  pinned parser implementation and freshness. They remain `ANALYSIS_ONLY` because upstream source
+  capture is not yet attested; PostgreSQL persistence or a signature would not repair that missing
+  fact by itself.
 - An unmapped relation touching a material endpoint or an illegal signature is blocking. A truly
   supporting-to-supporting omission remains visible but nonblocking.
 - Graph expansion follows a reviewed propagation matrix keyed by canonical relation, changed

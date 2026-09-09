@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "trusted-edge-envelope",
+  "policyVersion": "1.0.0",
+  "sha256": "baf97c1ba7602cc7919e92e251948b659b343c88ef49e53f05cdca3a3e60f328",
+  "posture": "PROVENANCE_ONLY_ANALYSIS",
+  "extractorRegistry": {
+    "registryId": "canonical-edge-extractors",
+    "registryVersion": "1.0.0",
+    "registrySha256": "43da9da63df0f148091aa6356865bb17f167be8721ef0bc87fb9eb619f7529e6"
+  },
+  "acceptedEvidenceStates": ["CONFIRMED"],
+  "maximumFutureSkewSeconds": 300,
+  "maximumFreshnessSeconds": 2592000
+}

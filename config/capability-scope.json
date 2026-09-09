@@ -40,6 +40,21 @@
       "verification": ["tests/test_ontology.py", "tests/test_salesforce_source.py", "tests/test_reasoning_policy.py"]
     },
     {
+      "id": "knowledge.trusted-edge-envelope",
+      "owner": "Governance Review",
+      "status": "FOUNDATION",
+      "genericity": "Compiles and replays source-neutral canonical-edge artifact envelopes against externally pinned project/snapshot, raw and normalized graph, ontology/profile, parser registry/implementation, policy, evidence-state and freshness roots. Release-only gaps are isolated from analysis, all results remain ANALYSIS_ONLY with upstream capture unattested, and no receipt can authorize release.",
+      "implementation": ["src/neo_sf_q_intel/edge_envelope.py", "src/neo_sf_q_intel/edge_extractors.py", "src/neo_sf_q_intel/ontology.py", "src/neo_sf_q_intel/propagation.py", "src/neo_sf_q_intel/context_pack.py", "src/neo_sf_q_intel/safety.py", "config/extractor-trust-registry.json", "config/trusted-edge-policy.json"],
+      "verification": ["tests/test_edge_envelope.py", "tests/test_ontology.py", "tests/test_propagation.py", "tests/test_context_pack.py", "tests/test_safety.py"],
+      "verificationCases": {
+        "positive": ["tests/test_edge_envelope.py"],
+        "negative": ["tests/test_edge_envelope.py", "tests/test_safety.py"],
+        "failure": ["tests/test_edge_envelope.py"],
+        "degradation": ["tests/test_edge_envelope.py", "tests/test_context_pack.py"],
+        "scenarioIndependence": ["tests/test_edge_envelope.py"]
+      }
+    },
+    {
       "id": "knowledge.canonical-ontology",
       "owner": "Change Analyst",
       "status": "FOUNDATION",

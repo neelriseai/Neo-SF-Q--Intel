@@ -64,6 +64,14 @@ P0 safety interlock because the current evidence model does not yet bind complet
 full graph paths, verified candidate builds/per-impact obligations, scoped human approvals,
 authoritative conflicts and every release-relevant field into one immutable release input.
 
+R0.1 now supplies an isolated trusted-edge-envelope foundation. It replays current raw and
+normalized graph roots, ontology/profile, parser registry and actual implementation, policy,
+canonical edge artifact bytes, legal direction/signature, evidence state and freshness. Missing,
+expired, duplicated or tampered inputs create deterministic blocking `RELEASE_ONLY` gaps and cannot
+partially promote a path. These gaps do not suppress the legacy analysis/demo lane. The result still
+states `UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED`, `release_eligible=false` and `ANALYSIS_ONLY`; it is a
+necessary input-integrity step, not a reason to relax `RELEASE_EVIDENCE_MODEL_INCOMPLETE`.
+
 The required interlock field is a breaking governance-policy contract change, so the executable
 policy is version `2.0.0`. The interlock cannot be enabled by a configuration toggle in policy
 version 2.x. A future reviewed

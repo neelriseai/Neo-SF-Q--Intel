@@ -2,8 +2,10 @@ import pytest
 
 from neo_sf_q_intel.safety import (
     SensitiveTextError,
+    UnsafeLocatorError,
     contains_sensitive_text,
     require_no_sensitive_text,
+    require_safe_repository_locator,
 )
 
 FILE_SCHEME = "file:"
@@ -54,3 +56,31 @@ def test_nested_safety_rejection_never_echoes_sensitive_value() -> None:
         require_no_sensitive_text({"project": sensitive})
 
     assert sensitive not in str(captured.value)
+
+
+@pytest.mark.parametrize(
+    "locator",
+    (
+        "C:/private/item.json",
+        "//server/share/item.json",
+        "../item.json",
+        "safe/../item.json",
+        "safe/item.json:stream",
+        "safe/NUL.json",
+        "safe/com1",
+        "safe/trailing.",
+        "safe/trailing ",
+        "safe/control\x00.json",
+        "safe/control\x1f.json",
+    ),
+)
+def test_repository_locator_rejects_windows_escapes_without_echo(locator: str) -> None:
+    with pytest.raises(UnsafeLocatorError) as captured:
+        require_safe_repository_locator(locator)
+    assert locator not in str(captured.value)
+
+
+def test_repository_locator_returns_canonical_relative_posix_path() -> None:
+    assert require_safe_repository_locator("evidence/edges/item.json") == (
+        "evidence/edges/item.json"
+    )

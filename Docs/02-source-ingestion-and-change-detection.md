@@ -55,6 +55,20 @@ flowchart TB
 - Emit deterministic evidence locator and extractor version for every structural fact.
 - Semantic candidate links are separate proposals, never structural facts.
 
+### R0.1 edge-envelope boundary
+
+The current `canonical-edge-artifact-parser` is a deterministic parser for a bounded, already
+canonical JSON edge claim. It is pinned by registry identity, version, implementation locator and
+implementation SHA-256, and consumers replay its artifact bytes. This proves that a local claim was
+parsed consistently; it does **not** attest that Salesforce, Git or a test runner produced the
+underlying fact. The verification result therefore always carries
+`UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED`, remains analysis-only and cannot authorize release.
+
+Future source adapters must create the canonical artifact through a bounded, source-specific
+capture receipt that binds the authenticated read/query, permitted source, capture time, response
+digest, parser/normalizer version and project/snapshot. They must feed the same envelope verifier;
+they must not create a second trust path or rename the current parser to imply source attestation.
+
 ### Failure policy
 
 - One malformed artifact is isolated and reported; policy decides whether snapshot activation is blocked.

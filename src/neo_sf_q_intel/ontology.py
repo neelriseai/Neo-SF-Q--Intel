@@ -271,6 +271,13 @@ class NormalizedEdge(ContractModel):
     source_snapshot: str | None = None
     source_hash: str | None = None
     extractor_id: str | None = None
+    source_artifact_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    extractor_version: str | None = None
+    extractor_implementation_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
     attributes: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -288,6 +295,9 @@ class NormalizedGraph(ContractModel):
     edges: tuple[NormalizedEdge, ...]
     mapping_gaps: tuple[NormalizationGap, ...]
     trust_gaps: tuple[NormalizationGap, ...]
+    release_trust_gaps: tuple[NormalizationGap, ...] = Field(
+        default_factory=tuple, exclude_if=lambda value: not value
+    )
     graph_sha256: str
 
 
@@ -442,6 +452,9 @@ _EDGE_CORE_FIELDS = {
     "sourceSnapshot",
     "sourceHash",
     "extractorId",
+    "sourceArtifactSha256",
+    "extractorVersion",
+    "extractorImplementationSha256",
 }
 
 
@@ -543,6 +556,79 @@ def _trust_fields(
     )
 
 
+def _edge_release_provenance_fields(
+    item: dict[str, Any], entity_id: str, materiality: Materiality
+) -> tuple[dict[str, Any], list[NormalizationGap]]:
+    """Preserve explicit R0.1 fields without treating source assertions as authority."""
+
+    gaps: list[NormalizationGap] = []
+    values: dict[str, Any] = {}
+    for raw_field, normalized_field, missing_code in (
+        (
+            "sourceArtifactSha256",
+            "source_artifact_sha256",
+            "RELEASE_MISSING_SOURCE_ARTIFACT_HASH",
+        ),
+        (
+            "extractorVersion",
+            "extractor_version",
+            "RELEASE_MISSING_EXTRACTOR_VERSION",
+        ),
+        (
+            "extractorImplementationSha256",
+            "extractor_implementation_sha256",
+            "RELEASE_MISSING_EXTRACTOR_IMPLEMENTATION_HASH",
+        ),
+    ):
+        value = item.get(raw_field)
+        if not isinstance(value, str) or not value:
+            gaps.append(
+                NormalizationGap(
+                    code=missing_code,
+                    entity_id=entity_id,
+                    materiality=materiality,
+                    blocking=True,
+                )
+            )
+            values[normalized_field] = None
+        else:
+            values[normalized_field] = value
+    artifact_digest = values["source_artifact_sha256"]
+    implementation_digest = values["extractor_implementation_sha256"]
+    if artifact_digest is not None and not _SHA256.fullmatch(artifact_digest):
+        gaps.append(
+            NormalizationGap(
+                code="RELEASE_INVALID_SOURCE_ARTIFACT_HASH",
+                entity_id=entity_id,
+                materiality=materiality,
+                blocking=True,
+            )
+        )
+        values["source_artifact_sha256"] = None
+    if implementation_digest is not None and not _SHA256.fullmatch(implementation_digest):
+        gaps.append(
+            NormalizationGap(
+                code="RELEASE_INVALID_EXTRACTOR_IMPLEMENTATION_HASH",
+                entity_id=entity_id,
+                materiality=materiality,
+                blocking=True,
+            )
+        )
+        values["extractor_implementation_sha256"] = None
+    version = values["extractor_version"]
+    if version is not None and not _SEMVER.fullmatch(version):
+        gaps.append(
+            NormalizationGap(
+                code="RELEASE_INVALID_EXTRACTOR_VERSION",
+                entity_id=entity_id,
+                materiality=materiality,
+                blocking=True,
+            )
+        )
+        values["extractor_version"] = None
+    return values, gaps
+
+
 def normalize_source_graph(
     raw_graph: dict[str, Any],
     ontology: CanonicalOntology,
@@ -580,6 +666,7 @@ def normalize_source_graph(
     normalized_edges: list[NormalizedEdge] = []
     mapping_gaps: list[NormalizationGap] = []
     trust_gaps: list[NormalizationGap] = []
+    release_trust_gaps: list[NormalizationGap] = []
     normalized_by_source_id: dict[str, NormalizedNode] = {}
 
     for item in sorted(raw_nodes, key=lambda row: str(row["id"])):
@@ -671,6 +758,9 @@ def normalize_source_graph(
             )
             continue
         trust, edge_trust_gaps = _trust_fields(item, edge_id, relation.materiality)
+        release_provenance, release_provenance_gaps = _edge_release_provenance_fields(
+            item, edge_id, relation.materiality
+        )
         normalized_edges.append(
             NormalizedEdge(
                 edge_id=edge_id,
@@ -682,12 +772,17 @@ def normalize_source_graph(
                 source=str(item["source"]) if item.get("source") is not None else None,
                 attributes=_copy_attributes(item, _EDGE_CORE_FIELDS),
                 **trust,
+                **release_provenance,
             )
         )
         trust_gaps.extend(edge_trust_gaps)
+        release_trust_gaps.extend(release_provenance_gaps)
 
     mapping_gaps.sort(key=lambda gap: (gap.entity_id or "", gap.code, gap.raw_term or ""))
     trust_gaps.sort(key=lambda gap: (gap.entity_id or "", gap.code, gap.raw_term or ""))
+    release_trust_gaps.sort(
+        key=lambda gap: (gap.entity_id or "", gap.code, gap.raw_term or "")
+    )
     body = {
         "project_id": project_id,
         "source_graph_sha256": source_graph_sha256,
@@ -703,6 +798,10 @@ def normalize_source_graph(
         "mapping_gaps": [item.model_dump(mode="json") for item in mapping_gaps],
         "trust_gaps": [item.model_dump(mode="json") for item in trust_gaps],
     }
+    if release_trust_gaps:
+        body["release_trust_gaps"] = [
+            item.model_dump(mode="json") for item in release_trust_gaps
+        ]
     graph_sha256 = hashlib.sha256(
         json.dumps(body, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode()
     ).hexdigest()

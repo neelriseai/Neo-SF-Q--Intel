@@ -85,7 +85,7 @@ These slices are required before the platform can emit any current `GO`, `CONDIT
 
 | Priority | Capability slice | Acceptance result |
 |---:|---|---|
-| R0.1 | Explicit trusted edge envelope | Missing/unknown extractor, state, artifact hash, project or snapshot blocks release evidence; LLM output cannot claim confirmed authority |
+| R0.1 | Explicit trusted edge envelope — isolated foundation implemented | Canonical edge-artifact bytes are replayed through a pinned deterministic parser and bound to project/snapshot, raw and normalized graph, ontology/profile, extractor implementation, policy, evidence state and freshness. Missing, unknown, disabled, expired, duplicated or tampered inputs produce stable blocking release-only gaps while legacy analysis remains available. Upstream Salesforce/Git/source capture is still unattested, so every result remains `ANALYSIS_ONLY`, `release_eligible=false`, and cannot satisfy R0.2+ authority |
 | R0.2 | Complete graph-path replay | Every material release input cites every typed edge; tamper/removal/reversal/illegal signature makes release incomplete |
 | R0.3 | Immutable release-input binding | Canonical digest covers change/build, graph/evidence/paths, risk, obligations/execution, conflicts and all policies; mutation/policy/expiry fails closed |
 | R0.4 | Verified change and obligation matrix | Planned text alone cannot authorize release; each impact/control maps to exact-build mandatory test receipts |
@@ -99,6 +99,13 @@ paths. MCP remains a distribution adapter and does not move ahead of the intelli
 The current `RELEASE_EVIDENCE_MODEL_INCOMPLETE` interlock remains enabled throughout R0.1–R0.6 and
 cannot be removed by a policy toggle. Release-authorizing decisions resume only through a reviewed
 new governance/evidence schema with adversarial tests for every prerequisite.
+
+R0.1 deliberately proves local canonical-edge artifact provenance, not the origin of the underlying
+Salesforce, Git or test fact. Its built-in `canonical-edge-artifact-parser` is therefore not called a
+source extractor. A future upstream capture adapter must attest the source read and produce the
+artifact before any edge can become release evidence. R0.2 must consume only the complete,
+currently replayed envelope set for every edge in a material path; it cannot infer completeness from
+a self-hashed receipt or accept a partially verified subset.
 
 ## Post-demo vector milestone
 

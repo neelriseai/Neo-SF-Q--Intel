@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterator, Mapping
+from pathlib import PurePosixPath, PureWindowsPath
 from typing import Any
 
 _WINDOWS_ABSOLUTE = re.compile(r"(?i)(?<![a-z0-9])[a-z]:[\\/]")
@@ -31,10 +32,17 @@ _CREDENTIAL = re.compile(
     r"(?:authorization|private[_-]?key|connection[_-]?string|database[_-]?url|dsn)"
     r"\s*[:=]\s*[^\s,;]{8,}|(?:frontdoor\.jsp|sid=)[^\s]{8,})"
 )
+_WINDOWS_RESERVED_DEVICE = re.compile(
+    r"(?i)^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$"
+)
 
 
 class SensitiveTextError(ValueError):
     """Raised without echoing text that may contain a credential or local path."""
+
+
+class UnsafeLocatorError(ValueError):
+    """Raised without echoing a machine-specific or traversing locator."""
 
 
 def contains_sensitive_text(value: str) -> bool:
@@ -69,3 +77,45 @@ def require_no_sensitive_text(value: Any) -> None:
 
     if any(contains_sensitive_text(item) for item in iter_text_values(value)):
         raise SensitiveTextError("Value contains secret or machine-specific path text")
+
+
+def require_safe_repository_locator(locator: str) -> str:
+    """Validate and return a canonical repository-relative POSIX locator.
+
+    This is deliberately stricter than a general URI validator. Evidence artifacts must be
+    addressable from a configured repository root without embedding a workstation path, scheme,
+    traversal segment, empty segment, query or fragment.
+    """
+
+    if not isinstance(locator, str) or not locator.strip() or locator != locator.strip():
+        raise UnsafeLocatorError("Artifact locator must be a non-empty repository-relative path")
+    if contains_sensitive_text(locator):
+        raise UnsafeLocatorError("Artifact locator contains machine-specific path text")
+    if (
+        "\\" in locator
+        or ":" in locator
+        or "?" in locator
+        or "#" in locator
+        or any(ord(character) < 32 or ord(character) == 127 for character in locator)
+    ):
+        raise UnsafeLocatorError("Artifact locator must be a repository-relative POSIX path")
+    posix = PurePosixPath(locator)
+    windows = PureWindowsPath(locator)
+    if (
+        posix.is_absolute()
+        or windows.is_absolute()
+        or bool(windows.drive)
+        or any(part in {"", ".", ".."} for part in posix.parts)
+        or any(
+            part.endswith((".", " ")) or _WINDOWS_RESERVED_DEVICE.fullmatch(part)
+            for part in posix.parts
+        )
+        or locator.endswith("/")
+    ):
+        raise UnsafeLocatorError(
+            "Artifact locator must be repository-relative without traversal"
+        )
+    canonical = posix.as_posix()
+    if canonical != locator:
+        raise UnsafeLocatorError("Artifact locator is not in canonical POSIX form")
+    return canonical

@@ -9,6 +9,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
+from neo_sf_q_intel.edge_envelope import TrustedEdgeReplayInput
 from neo_sf_q_intel.ontology import (
     Materiality,
     NormalizedGraph,
@@ -1008,6 +1009,7 @@ def compile_graph_context_pack(
     expected_compiler_policy_sha256: str,
     unresolved_fragments: tuple[UnresolvedSourceFragment, ...] = (),
     semantic_candidates: tuple[SemanticCandidateReceipt, ...] = (),
+    trusted_edge_replay: TrustedEdgeReplayInput | None = None,
 ) -> GraphContextPack:
     """Compile deterministic analysis context without promoting caller-supplied text."""
 
@@ -1034,7 +1036,12 @@ def compile_graph_context_pack(
     nodes = _require_graph_integrity(graph)
     _require_propagation_integrity(graph, propagation)
     try:
-        replayed = traverse_propagation(graph, propagation.seed_ids, propagation_policy)
+        replayed = traverse_propagation(
+            graph,
+            propagation.seed_ids,
+            propagation_policy,
+            trusted_edge_replay=trusted_edge_replay,
+        )
     except PropagationEvaluationError as exc:
         raise ContextCompilationError("Propagation cannot be replayed against the graph") from exc
     if replayed != propagation:
@@ -1082,7 +1089,9 @@ def compile_graph_context_pack(
 
     selected_paths, omitted_paths, path_gaps = _select_paths(paths, compiler_policy)
     graph_gaps = _graph_context_gaps(graph)
-    if any(gap.blocking for gap in [*graph_gaps, *propagation.gaps]):
+    if any(gap.blocking for gap in graph_gaps) or any(
+        gap.blocking and gap.scope == "ANALYSIS" for gap in propagation.gaps
+    ):
         omitted_paths = paths
         selected_paths = []
         path_gaps = [
@@ -1098,6 +1107,20 @@ def compile_graph_context_pack(
     selected_candidates, omitted_candidates, candidate_gaps = _select_candidates(
         candidates, compiler_policy
     )
+    freshness_gaps = []
+    if not selected_paths or any(
+        not path.local_edge_envelope_complete for path in selected_paths
+    ):
+        freshness_gaps.append(
+            ContextGap(
+                code="EDGE_FRESHNESS_RECEIPTS_UNAVAILABLE",
+                detail=(
+                    "One or more selected analysis paths lack current R0.1 envelope "
+                    "evaluation and validity receipts."
+                ),
+                blocking=True,
+            )
+        )
     gaps = [
         *graph_gaps,
         *(
@@ -1105,18 +1128,14 @@ def compile_graph_context_pack(
                 code=f"PROPAGATION_{gap.code}",
                 item_id=gap.entity_id or gap.edge_id,
                 detail=gap.detail,
-                blocking=gap.blocking,
+                blocking=gap.blocking and gap.scope == "ANALYSIS",
             )
             for gap in propagation.gaps
         ),
         *path_gaps,
         *fragment_gaps,
         *candidate_gaps,
-        ContextGap(
-            code="EDGE_FRESHNESS_RECEIPTS_UNAVAILABLE",
-            detail="Propagation receipts do not yet bind evaluated-at and expiry semantics.",
-            blocking=True,
-        ),
+        *freshness_gaps,
         ContextGap(
             code="RISK_FACTOR_RECEIPTS_UNAVAILABLE",
             detail="Typed provenance-bound risk-factor observations are not yet available.",

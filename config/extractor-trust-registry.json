@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "registryId": "canonical-edge-extractors",
+  "registryVersion": "1.0.0",
+  "sha256": "43da9da63df0f148091aa6356865bb17f167be8721ef0bc87fb9eb619f7529e6",
+  "extractors": [
+    {
+      "extractorId": "canonical-edge-artifact-parser",
+      "extractorVersion": "1.0.0",
+      "implementationSha256": "02d5afa252049f8cc8b66f30be7ff995f2311bec9b36392503567fc7421e05b4",
+      "implementationLocator": "src/neo_sf_q_intel/edge_extractors.py",
+      "enabled": true
+    }
+  ]
+}

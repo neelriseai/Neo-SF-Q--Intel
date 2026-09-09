@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "642b0237182b0457b06f67ec12c3e935093b2794c1e15b567581a023338bbd3f",
+  "sourceSnapshot": "f2c5f9ee5915bdcea8c5fe00fabdc0fff870821906104360dc85427e9ffc268c",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -542,6 +542,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/extractor-trust-registry.json",
+      "kind": "file",
+      "label": "extractor-trust-registry.json",
+      "source": "config/extractor-trust-registry.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/fusion-policy.json",
       "kind": "file",
       "label": "fusion-policy.json",
@@ -618,6 +626,14 @@
       "kind": "file",
       "label": "specialist-policy.json",
       "source": "config/specialist-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:config/trusted-edge-policy.json",
+      "kind": "file",
+      "label": "trusted-edge-policy.json",
+      "source": "config/trusted-edge-policy.json",
       "category": "policy",
       "authority": "authoritative-source"
     },
@@ -846,6 +862,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-09-trusted-edge-envelope.md",
+      "kind": "file",
+      "label": "2026-09-09-trusted-edge-envelope.md",
+      "source": "quality/reviews/2026-09-09-trusted-edge-envelope.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/current-scope-review.json",
       "kind": "file",
       "label": "current-scope-review.json",
@@ -930,6 +954,22 @@
       "kind": "file",
       "label": "domain.py",
       "source": "src/neo_sf_q_intel/domain.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/edge_envelope.py",
+      "kind": "file",
+      "label": "edge_envelope.py",
+      "source": "src/neo_sf_q_intel/edge_envelope.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/edge_extractors.py",
+      "kind": "file",
+      "label": "edge_extractors.py",
+      "source": "src/neo_sf_q_intel/edge_extractors.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -1162,6 +1202,14 @@
       "kind": "file",
       "label": "test_context_pack.py",
       "source": "tests/test_context_pack.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_edge_envelope.py",
+      "kind": "file",
+      "label": "test_edge_envelope.py",
+      "source": "tests/test_edge_envelope.py",
       "category": "test",
       "authority": "verification"
     },
@@ -1401,6 +1449,14 @@
       "label": "knowledge.evidence-graph",
       "status": "FOUNDATION",
       "summary": "Treats project-, snapshot-, ontology- and profile-bound normalized evidence as the authority substrate; missing record envelopes remain unverified while durable graph ports and complete path replay remain planned.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:knowledge.trusted-edge-envelope",
+      "kind": "capability",
+      "label": "knowledge.trusted-edge-envelope",
+      "status": "FOUNDATION",
+      "summary": "Compiles and replays source-neutral canonical-edge artifact envelopes against externally pinned project/snapshot, raw and normalized graph, ontology/profile, parser registry/implementation, policy, evidence-state and freshness roots. Release-only gaps are isolated from analysis, all results remain ANALYSIS_ONLY with upstream capture unattested, and no receipt can authorize release.",
       "authority": "policy"
     },
     {
@@ -1800,6 +1856,76 @@
       "from": "capability:knowledge.evidence-graph",
       "relation": "verified_by",
       "to": "file:tests/test_salesforce_source.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "implemented_by",
+      "to": "file:config/extractor-trust-registry.json"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "implemented_by",
+      "to": "file:config/trusted-edge-policy.json"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/context_pack.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/edge_extractors.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/safety.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "owned_by",
+      "to": "owner:Governance Review"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "verified_by",
+      "to": "file:tests/test_context_pack.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "verified_by",
+      "to": "file:tests/test_edge_envelope.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "verified_by",
+      "to": "file:tests/test_ontology.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "verified_by",
+      "to": "file:tests/test_propagation.py"
+    },
+    {
+      "from": "capability:knowledge.trusted-edge-envelope",
+      "relation": "verified_by",
+      "to": "file:tests/test_safety.py"
     },
     {
       "from": "capability:memory.postgresql",
@@ -2449,6 +2575,11 @@
     {
       "from": "file:src/neo_sf_q_intel/context_pack.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/context_pack.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
@@ -2460,6 +2591,21 @@
       "from": "file:src/neo_sf_q_intel/context_pack.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/edge_envelope.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_extractors.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/edge_envelope.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/edge_envelope.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/safety.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/fusion.py",
@@ -2570,6 +2716,11 @@
       "from": "file:src/neo_sf_q_intel/preflight.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/propagation.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/propagation.py",
@@ -2843,6 +2994,21 @@
     },
     {
       "from": "file:tests/test_context_pack.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:tests/test_edge_envelope.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:tests/test_edge_envelope.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:tests/test_edge_envelope.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/propagation.py"
     },

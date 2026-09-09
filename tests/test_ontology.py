@@ -110,6 +110,9 @@ def _trusted_item(**values):
         "sourceSnapshot": "snapshot-1",
         "sourceHash": "a" * 64,
         "extractorId": "fixture-parser-v1",
+        "extractorVersion": "1.0.0",
+        "extractorImplementationSha256": "b" * 64,
+        "sourceArtifactSha256": "c" * 64,
         "source": "fixtures/source.json",
         **values,
     }
@@ -345,6 +348,19 @@ def test_normalization_never_invents_trust_or_provenance() -> None:
         "MISSING_SOURCE_SNAPSHOT",
         "MISSING_SOURCE_HASH",
         "MISSING_EXTRACTOR_ID",
+    }
+
+
+def test_edge_envelope_field_names_on_nodes_remain_source_attributes() -> None:
+    ontology, profile = _load_default_contracts()
+    node = _trusted_item(id="node", kind="apex-class", label="Node")
+
+    normalized = normalize_source_graph({"nodes": [node], "edges": []}, ontology, profile)
+
+    assert normalized.nodes[0].attributes == {
+        "extractorImplementationSha256": "b" * 64,
+        "extractorVersion": "1.0.0",
+        "sourceArtifactSha256": "c" * 64,
     }
 
 

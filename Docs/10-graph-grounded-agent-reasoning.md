@@ -104,6 +104,7 @@ outcomes cannot change runtime decisions until a reviewed policy/evaluation vers
 
 | Capability | Current truth | Next acceptance boundary |
 |---|---|---|
+| Trusted edge envelope | R0.1 deterministically compiles and replays immutable local canonical-edge envelopes against externally pinned project/snapshot, raw and normalized graph, ontology/profile, parser registry/implementation, policy, artifact bytes, evidence state and time. Release-only gaps are isolated from analysis, failed aggregate replay cannot partially promote paths, and all outputs retain the upstream-capture gap and `ANALYSIS_ONLY` scope | Add an attested source-capture producer and independently versioned historical normalizer replay; persist/anchor envelope inputs without making persistence itself authority; then let R0.2 require current complete envelope coverage for every material path edge |
 | Trusted evidence graph | Source JSON graph plus canonical ontology/source-profile normalization, stable normalized digest and explicit mapping/trust gaps exist; the real source currently lacks record envelopes | Add upstream record-level evidence envelopes, prove first-source trusted-behavior equivalence and add durable graph ports |
 | Directional propagation/risk | Separately pinned propagation/risk policies and deterministic path/risk evaluators pass inverse/cycle/diamond, bounded-enumeration, artifact-tamper, source/profile-binding, endpoint-trust and missing-factor tests, but are not yet consumed by assurance runs | Add grounded risk-factor receipts and freshness; then integrate identities, paths and risk gaps into the workflow and retire bidirectional traversal |
 | Graph context compiler | Isolated analysis-only foundation compiles replay-validated structural paths under pinned count/character/byte budgets, keeps unresolved fragments and semantic receipts candidate-only, and exposes omissions/foundation gaps | Add typed seed-rationale receipts, deterministic depth/work-unit accounting, provider-specific token/time budgets, governed fragment resolution/redaction, prior outcomes and semantic-index receipts; then integrate a trusted replay-validating workflow consumer |
@@ -116,8 +117,10 @@ outcomes cannot change runtime decisions until a reviewed policy/evaluation vers
 
 Before any release-authorizing decision is enabled, the current foundation must add:
 
-1. explicit edge envelopes: edge ID, legal canonical signature/direction, project/snapshot,
-   deterministic extractor or human-promotion identity, source artifact/hash and freshness;
+1. explicit edge envelopes: the R0.1 local-artifact foundation now binds edge ID, legal canonical
+   signature/direction, project/snapshot, deterministic parser implementation, artifact/hash and
+   freshness. Completion still requires attested upstream source capture and separately scoped
+   human-promotion receipts from R0.5;
 2. complete replayable path receipts from seed through every edge to each material output;
 3. separate canonical analysis-input and release-input digests, with the latter covering evidence,
    paths, risk, obligations, executions, conflicts and every policy/ontology/fusion identity;
