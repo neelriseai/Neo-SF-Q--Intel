@@ -16,6 +16,21 @@
       }
     },
     {
+      "id": "source.verified-change-set",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
+      "implementation": ["config/verified-change-policy.json", "src/neo_sf_q_intel/change_verification.py"],
+      "verification": ["tests/test_change_verification.py"],
+      "verificationCases": {
+        "positive": ["tests/test_change_verification.py"],
+        "negative": ["tests/test_change_verification.py"],
+        "failure": ["tests/test_change_verification.py"],
+        "degradation": ["tests/test_change_verification.py"],
+        "scenarioIndependence": ["tests/test_change_verification.py"]
+      }
+    },
+    {
       "id": "reasoning.graph-impact",
       "owner": "Change Analyst",
       "status": "FOUNDATION",

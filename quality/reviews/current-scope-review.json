@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "release-input-candidate-foundation-2026-09-09",
+  "reviewId": "verified-change-set-foundation-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
     "Docs/07-governance-and-evaluation.md",
@@ -8,9 +8,9 @@
     "Docs/10-graph-grounded-agent-reasoning.md",
     "config/capability-scope.json",
     "config/quality-policy.json",
-    "config/release-input-policy.json",
-    "src/neo_sf_q_intel/release_input.py",
-    "tests/test_release_input.py"
+    "config/verified-change-policy.json",
+    "src/neo_sf_q_intel/change_verification.py",
+    "tests/test_change_verification.py"
   ],
   "reviewers": [
     "r01_genericity_review",
@@ -18,39 +18,39 @@
   ],
   "findings": [
     {
-      "code": "R03_NO_DIGEST_ONLY_AUTHORITY",
+      "code": "R04A_COMPLETE_BYTEWISE_DELTA",
       "severity": "P1",
-      "resolution": "Complete v2 run partitions and full canonical candidate payloads are bound; runtime policy identities and current R0.2 plus risk behavior are replayed rather than trusted from caller-rehashed digests."
+      "resolution": "The producer enumerates complete base and tracked plus nonignored-untracked candidate manifests from actual bytes; change entries are independently re-derived from their full semantic union rather than caller paths or Git status."
     },
     {
-      "code": "R03_STABLE_PATH_RISK_BINDING",
+      "code": "R04A_STABLE_SOURCE_IDENTITY",
       "severity": "P1",
-      "resolution": "Historical and refreshed risk contributions map through stable seed, target and ordered-hop provenance identities; fake path hashes and swaps between valid paths fail closed."
+      "resolution": "Repository identity derives from project and actual base commit/tree; source snapshot derives from base and candidate-tree roots, while directory/origin authority remains a blocking unattested gap."
     },
     {
-      "code": "R03_POLICY_ROOT_INTEGRITY",
+      "code": "R04A_POLICY_PRODUCER_INTEGRITY",
       "severity": "P1",
-      "resolution": "The self-hashed binding policy pins real runtime governance, reasoning and evaluation identities and represents unavailable downstream producers as explicit missing roles instead of fabricated hashes."
+      "resolution": "A self-hashed externally pinned policy binds the current producer implementation; callers cannot inject a successful command runner, snapshot, clock or changed-path partition."
     },
     {
-      "code": "R03_TIME_AND_REPLAY",
+      "code": "R04A_TIME_RACE_AND_CAPACITY",
       "severity": "P1",
-      "resolution": "Private current UTC, positive bounded lifetimes, exact expiry/future checks and static-equal current replay govern candidate refresh."
+      "resolution": "Internal UTC, expiry/future checks, bounded Git streams and pre-read file/blob sizes govern capture; a second byte pass followed by final HEAD/tree/status checks rejects concurrent mutation."
     },
     {
-      "code": "R03_SAFE_GENERIC_INPUTS",
+      "code": "R04A_SAFE_GENERIC_INPUTS",
       "severity": "P1",
-      "resolution": "Canonical repository-relative locators, bounded identifiers/content, permutation invariance and renamed source-neutral topology tests prevent machine, scenario and path coupling."
+      "resolution": "Secret/auth paths are refused before content reads; relative-path, special-mode, sparse/index, Windows alias, Unicode, permutation, relocation, renamed topology, raw-byte and staging invariants are tested."
     },
     {
-      "code": "R03_ANALYSIS_RELEASE_ISOLATION",
+      "code": "R04A_ANALYSIS_RELEASE_ISOLATION",
       "severity": "P1",
-      "resolution": "Artifacts and evaluations are hard-typed ANALYSIS_ONLY and release-ineligible, retain exact permanent authority gaps, and cannot bypass RELEASE_EVIDENCE_MODEL_INCOMPLETE."
+      "resolution": "Artifacts and evaluations are hard-typed ANALYSIS_ONLY and release-ineligible and retain exact build, deploy, seed, risk, obligation, execution, conflict, approval, source, origin, signature and global interlock gaps."
     },
     {
-      "code": "R03_PRODUCER_COMPLETENESS_PENDING",
+      "code": "R04A_BUILD_OBLIGATION_EXECUTION_PENDING",
       "severity": "P2",
-      "resolution": "Verified change/build, attested risk factors, producer-derived obligations/executions, authoritative conflicts, scoped approvals, upstream capture and durable anchoring remain explicit roadmap work; this slice is candidate-composition FOUNDATION only."
+      "resolution": "Graph seed mapping, retained build inputs, trusted build output, complete per-impact/control obligations and exact-build executions remain explicit R0.4 work; this slice is VerifiedChangeSet FOUNDATION only."
     }
   ],
   "statusDowngrades": []

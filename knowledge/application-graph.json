@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "15c19b74e2b1460362098febae06ef6f2ccf3b4ddaf25abe511aebe63c2980c6",
+  "sourceSnapshot": "fc5ab33239bed45ab6b676e3dc50e5382fdf00bfb391887ccbf3326d2eeb2553",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -654,6 +654,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/verified-change-policy.json",
+      "kind": "file",
+      "label": "verified-change-policy.json",
+      "source": "config/verified-change-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:knowledge/README.md",
       "kind": "file",
       "label": "README.md",
@@ -902,6 +910,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-09-verified-change-set-foundation.md",
+      "kind": "file",
+      "label": "2026-09-09-verified-change-set-foundation.md",
+      "source": "quality/reviews/2026-09-09-verified-change-set-foundation.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/current-scope-review.json",
       "kind": "file",
       "label": "current-scope-review.json",
@@ -962,6 +978,14 @@
       "kind": "file",
       "label": "api.py",
       "source": "src/neo_sf_q_intel/api.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/change_verification.py",
+      "kind": "file",
+      "label": "change_verification.py",
+      "source": "src/neo_sf_q_intel/change_verification.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -1254,6 +1278,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_change_verification.py",
+      "kind": "file",
+      "label": "test_change_verification.py",
+      "source": "tests/test_change_verification.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_config.py",
       "kind": "file",
       "label": "test_config.py",
@@ -1505,6 +1537,14 @@
       "label": "source.contract-ingestion",
       "status": "IMPLEMENTED",
       "summary": "Version and required capabilities are configuration, not application constants.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:source.verified-change-set",
+      "kind": "capability",
+      "label": "source.verified-change-set",
+      "status": "FOUNDATION",
+      "summary": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
       "authority": "policy"
     },
     {
@@ -2536,6 +2576,26 @@
       "to": "file:tests/test_salesforce_source.py"
     },
     {
+      "from": "capability:source.verified-change-set",
+      "relation": "implemented_by",
+      "to": "file:config/verified-change-policy.json"
+    },
+    {
+      "from": "capability:source.verified-change-set",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/change_verification.py"
+    },
+    {
+      "from": "capability:source.verified-change-set",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:source.verified-change-set",
+      "relation": "verified_by",
+      "to": "file:tests/test_change_verification.py"
+    },
+    {
       "from": "capability:tools.mcp",
       "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/mcp_server.py"
@@ -2709,6 +2769,16 @@
       "from": "file:src/neo_sf_q_intel/api.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/change_verification.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/change_verification.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/context_pack.py",
@@ -3169,6 +3239,11 @@
       "from": "file:tests/test_api.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_change_verification.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/change_verification.py"
     },
     {
       "from": "file:tests/test_config.py",

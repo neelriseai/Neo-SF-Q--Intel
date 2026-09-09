@@ -97,6 +97,16 @@ obligations and exact-build executions, authoritative conflict scope, scoped hum
 upstream capture remain typed blocking gaps. The manifest and its evaluation therefore stay
 `ANALYSIS_ONLY`, `release_eligible=false`, and cannot be passed to release governance as authority.
 
+R0.4a adds the first producer-completeness boundary without weakening R0.3. A policy-pinned local-Git
+adapter captures the complete base tree and complete tracked plus nonignored-untracked candidate
+tree from actual bytes, derives additions, modifications and deletions rather than accepting caller
+`changed_paths`, and emits only canonical repository-relative identities. It refuses secret/auth
+locators before reading them and fails closed for sparse or ambiguous Git state, unsupported special
+file modes, capacity exhaustion and concurrent mutation. Rename inference is deliberately disabled;
+a rename is represented deterministically as delete plus add. The artifact remains `ANALYSIS_ONLY`:
+it is a verified change/input-tree receipt, not a trusted build, deploy, obligation or execution
+receipt. Those R0.4 boundaries and the upstream-capture/global interlock gaps remain mandatory.
+
 The required interlock field is a breaking governance-policy contract change, so the executable
 policy is version `2.0.0`. The interlock cannot be enabled by a configuration toggle in policy
 version 2.x. A future reviewed

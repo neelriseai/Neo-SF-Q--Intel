@@ -21,7 +21,8 @@
     "config/extractor-trust-registry.json",
     "config/trusted-edge-policy.json",
     "config/complete-path-replay-policy.json",
-    "config/release-input-policy.json"
+    "config/release-input-policy.json",
+    "config/verified-change-policy.json"
   ],
   "scanExemptPaths": [
     "config/quality-policy.json"
@@ -103,6 +104,7 @@
     "config/trusted-edge-policy.json",
     "config/complete-path-replay-policy.json",
     "config/release-input-policy.json",
+    "config/verified-change-policy.json",
     "quality/evals/hybrid-fusion-evaluation-v1.json",
     "config/specialist-policy.json",
     "quality/evals/graph-specialist-contract-v1.json",
@@ -136,6 +138,7 @@
     "src/neo_sf_q_intel/edge_extractors.py",
     "src/neo_sf_q_intel/path_replay.py",
     "src/neo_sf_q_intel/release_input.py",
+    "src/neo_sf_q_intel/change_verification.py",
     "apps/web/src/app/page.tsx",
     "apps/web/src/lib/types.ts",
     "apps/web/src/lib/run-view-model.ts"
@@ -156,6 +159,7 @@
   ],
   "requiredCapabilityIds": [
     "source.contract-ingestion",
+    "source.verified-change-set",
     "reasoning.graph-impact",
     "reasoning.directional-propagation",
     "knowledge.evidence-graph",
