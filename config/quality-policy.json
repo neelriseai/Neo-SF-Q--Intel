@@ -20,7 +20,8 @@
     "quality/evals/outcome-memory-contract-v1.json",
     "config/extractor-trust-registry.json",
     "config/trusted-edge-policy.json",
-    "config/complete-path-replay-policy.json"
+    "config/complete-path-replay-policy.json",
+    "config/release-input-policy.json"
   ],
   "scanExemptPaths": [
     "config/quality-policy.json"
@@ -101,6 +102,7 @@
     "config/extractor-trust-registry.json",
     "config/trusted-edge-policy.json",
     "config/complete-path-replay-policy.json",
+    "config/release-input-policy.json",
     "quality/evals/hybrid-fusion-evaluation-v1.json",
     "config/specialist-policy.json",
     "quality/evals/graph-specialist-contract-v1.json",
@@ -133,6 +135,7 @@
     "src/neo_sf_q_intel/edge_envelope.py",
     "src/neo_sf_q_intel/edge_extractors.py",
     "src/neo_sf_q_intel/path_replay.py",
+    "src/neo_sf_q_intel/release_input.py",
     "apps/web/src/app/page.tsx",
     "apps/web/src/lib/types.ts",
     "apps/web/src/lib/run-view-model.ts"

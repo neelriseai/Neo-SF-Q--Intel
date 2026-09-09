@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "immutable-release-input",
+  "policyVersion": "1.0.0",
+  "sha256": "0ad61225242088f8225aaf07b23cb7edb2d56deaf365af7ebca04c9ba746c60b",
+  "pathReplayPolicy": {
+    "policyId": "complete-material-path-replay",
+    "policyVersion": "1.0.0",
+    "policySha256": "0c86193a76dd48dcdd04597e65ec202ba6cae61fc93537eee209df8bfdbc19aa"
+  },
+  "analysisRiskPolicy": {
+    "policyId": "path-bound-analysis-risk",
+    "policyVersion": "1.0.0",
+    "policySha256": "57ab48f6c9016e20d599aee4ff9070e34b7583b566251ded78019d895c683e6a"
+  },
+  "pinnedProducerPolicies": [
+    {"role": "governance", "policyId": "governance-policy", "policyVersion": "2.0.0", "policySha256": "288f848e26687b72ba776e2f99ce02eef2e11c32c282d3e32301aeca1614aae8"},
+    {"role": "reasoning", "policyId": "reasoning-policy", "policyVersion": "2.0.0", "policySha256": "c7b7e91c9a47bb813806289a359e8eb613a088f7ec663f91b0f322ad8966a5ee"},
+    {"role": "reasoning-evaluation", "policyId": "retrieval-boundaries-v1", "policyVersion": "1.0.0", "policySha256": "52a11a0e0f1d065e141dc5c7d37f3a2c85926b066b6864ed512a6624d0c05c11"}
+  ],
+  "plannedMissingProducerRoles": ["conflict", "execution", "human-confirmation", "obligation"],
+  "requiredPolicyRoles": [
+    "analysis-risk",
+    "canonical-ontology",
+    "extractor-registry",
+    "governance",
+    "path-replay",
+    "propagation",
+    "reasoning",
+    "reasoning-evaluation",
+    "source-profile",
+    "trusted-edge"
+  ],
+  "maximumArtifactBytes": 16777216,
+  "maximumReceiptsPerPartition": 10000,
+  "maximumFutureSkewSeconds": 300,
+  "maximumReceiptAgeSeconds": 2592000,
+  "maximumBindingFreshnessSeconds": 86400,
+  "maximumManifestBytes": 33554432
+}

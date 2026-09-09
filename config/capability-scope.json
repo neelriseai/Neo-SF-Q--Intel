@@ -198,9 +198,16 @@
       "id": "governance.release-input-integrity",
       "owner": "Governance Review",
       "status": "FOUNDATION",
-      "genericity": "Currently provides a versioned policy-validated non-bypassable INCOMPLETE interlock and revalidates persisted decisions on service/API reads without rewriting audit history; full authority requires explicit edge/path provenance, immutable release-input binding, verified builds/obligations, scoped human approvals and deterministic conflicts.",
-      "implementation": ["config/governance-policy.json", "src/neo_sf_q_intel/governance_policy.py", "src/neo_sf_q_intel/governance.py", "src/neo_sf_q_intel/service.py"],
-      "verification": ["tests/test_governance_policy.py", "tests/test_governance.py", "tests/test_api.py", "tests/test_service_fallback.py"]
+      "genericity": "A pinned R0.3 candidate-composition foundation binds the complete v2 run/request candidate surface, candidate change/build bytes, current-replayed R0.2/R0.1 path roots, deterministically replayed risk per stable structural path, advisory downstream payloads and current runtime policy identities into a canonical expiring manifest. It remains ANALYSIS_ONLY and release-ineligible because producer-derived change/build, risk factors, obligation/execution, conflict, approval and upstream capture completeness are not yet available; the non-bypassable INCOMPLETE interlock and historical-decision revalidation remain unchanged.",
+      "implementation": ["config/governance-policy.json", "config/release-input-policy.json", "src/neo_sf_q_intel/governance_policy.py", "src/neo_sf_q_intel/governance.py", "src/neo_sf_q_intel/release_input.py", "src/neo_sf_q_intel/service.py"],
+      "verification": ["tests/test_governance_policy.py", "tests/test_governance.py", "tests/test_release_input.py", "tests/test_api.py", "tests/test_service_fallback.py"],
+      "verificationCases": {
+        "positive": ["tests/test_release_input.py"],
+        "negative": ["tests/test_release_input.py"],
+        "failure": ["tests/test_release_input.py"],
+        "degradation": ["tests/test_release_input.py"],
+        "scenarioIndependence": ["tests/test_release_input.py"]
+      }
     },
     {
       "id": "governance.measurement-contract",

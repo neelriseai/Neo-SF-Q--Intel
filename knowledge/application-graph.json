@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "888810367d5b7ff264fd2b5d01cd0f38736fd133423932a058b30b9212360abb",
+  "sourceSnapshot": "15c19b74e2b1460362098febae06ef6f2ccf3b4ddaf25abe511aebe63c2980c6",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -622,6 +622,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/release-input-policy.json",
+      "kind": "file",
+      "label": "release-input-policy.json",
+      "source": "config/release-input-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/source-profiles/salesforce-application-graph.json",
       "kind": "file",
       "label": "salesforce-application-graph.json",
@@ -870,6 +878,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-09-release-input-candidate-foundation.md",
+      "kind": "file",
+      "label": "2026-09-09-release-input-candidate-foundation.md",
+      "source": "quality/reviews/2026-09-09-release-input-candidate-foundation.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/2026-09-09-retrospective-capability-audit.md",
       "kind": "file",
       "label": "2026-09-09-retrospective-capability-audit.md",
@@ -1110,6 +1126,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/release_input.py",
+      "kind": "file",
+      "label": "release_input.py",
+      "source": "src/neo_sf_q_intel/release_input.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/repository.py",
       "kind": "file",
       "label": "repository.py",
@@ -1338,6 +1362,14 @@
       "kind": "file",
       "label": "test_reasoning_workflow.py",
       "source": "tests/test_reasoning_workflow.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_release_input.py",
+      "kind": "file",
+      "label": "test_release_input.py",
+      "source": "tests/test_release_input.py",
       "category": "test",
       "authority": "verification"
     },
@@ -1624,7 +1656,7 @@
       "kind": "capability",
       "label": "governance.release-input-integrity",
       "status": "FOUNDATION",
-      "summary": "Currently provides a versioned policy-validated non-bypassable INCOMPLETE interlock and revalidates persisted decisions on service/API reads without rewriting audit history; full authority requires explicit edge/path provenance, immutable release-input binding, verified builds/obligations, scoped human approvals and deterministic conflicts.",
+      "summary": "A pinned R0.3 candidate-composition foundation binds the complete v2 run/request candidate surface, candidate change/build bytes, current-replayed R0.2/R0.1 path roots, deterministically replayed risk per stable structural path, advisory downstream payloads and current runtime policy identities into a canonical expiring manifest. It remains ANALYSIS_ONLY and release-ineligible because producer-derived change/build, risk factors, obligation/execution, conflict, approval and upstream capture completeness are not yet available; the non-bypassable INCOMPLETE interlock and historical-decision revalidation remain unchanged.",
       "authority": "policy"
     },
     {
@@ -1801,12 +1833,22 @@
     {
       "from": "capability:governance.release-input-integrity",
       "relation": "implemented_by",
+      "to": "file:config/release-input-policy.json"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/governance.py"
     },
     {
       "from": "capability:governance.release-input-integrity",
       "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/release_input.py"
     },
     {
       "from": "capability:governance.release-input-integrity",
@@ -1832,6 +1874,11 @@
       "from": "capability:governance.release-input-integrity",
       "relation": "verified_by",
       "to": "file:tests/test_governance_policy.py"
+    },
+    {
+      "from": "capability:governance.release-input-integrity",
+      "relation": "verified_by",
+      "to": "file:tests/test_release_input.py"
     },
     {
       "from": "capability:governance.release-input-integrity",
@@ -2859,6 +2906,41 @@
       "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/path_replay.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/repository.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
@@ -3372,6 +3454,46 @@
       "from": "file:tests/test_reasoning_workflow.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/specialist.py"
+    },
+    {
+      "from": "file:tests/test_release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:tests/test_release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:tests/test_release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance.py"
+    },
+    {
+      "from": "file:tests/test_release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:tests/test_release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/path_replay.py"
+    },
+    {
+      "from": "file:tests/test_release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "file:tests/test_release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:tests/test_release_input.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/release_input.py"
     },
     {
       "from": "file:tests/test_repository.py",

@@ -83,6 +83,20 @@ blocking `RELEASE_ONLY` gaps. `CHANGE_SEED_SCOPE_NOT_ATTESTED` and
 `UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED` remain, so “coverage complete” means local envelope/path
 coverage only and cannot enable a release decision.
 
+R0.3 now supplies an isolated candidate-composition foundation without relaxing that boundary. A
+separately self-hashed and externally pinned policy compiles the complete current v2 request and
+analysis partitions, exact candidate change/build bytes, current-replayed R0.2 path artifact and
+R0.1 identities, deterministic current-policy risk associated with stable structural path
+identities, advisory obligation/execution/conflict/human payloads, and the active runtime policy
+roots into one canonical expiring manifest. The compiler derives run partitions from the whole run,
+samples current UTC internally, validates safe repository-relative locators and rejects omission,
+duplication, cross-root reuse, policy rotation, expiry, nested rehashing, fabricated path identities
+and swaps of valid path identities between different risk contributions. Candidate composition is
+not producer completeness: verified change/build capture, attested risk factors, per-impact
+obligations and exact-build executions, authoritative conflict scope, scoped human approvals and
+upstream capture remain typed blocking gaps. The manifest and its evaluation therefore stay
+`ANALYSIS_ONLY`, `release_eligible=false`, and cannot be passed to release governance as authority.
+
 The required interlock field is a breaking governance-policy contract change, so the executable
 policy is version `2.0.0`. The interlock cannot be enabled by a configuration toggle in policy
 version 2.x. A future reviewed

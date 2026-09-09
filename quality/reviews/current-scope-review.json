@@ -1,21 +1,16 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "complete-path-replay-foundation-2026-09-09",
+  "reviewId": "release-input-candidate-foundation-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
-    "Docs/03-data-memory-and-retrieval.md",
     "Docs/07-governance-and-evaluation.md",
     "Docs/08-roadmap-24h.md",
     "Docs/10-graph-grounded-agent-reasoning.md",
     "config/capability-scope.json",
-    "config/complete-path-replay-policy.json",
     "config/quality-policy.json",
-    "src/neo_sf_q_intel/path_replay.py",
-    "src/neo_sf_q_intel/propagation.py",
-    "tests/__init__.py",
-    "tests/support/__init__.py",
-    "tests/support/path_replay_fixture.py",
-    "tests/test_path_replay.py"
+    "config/release-input-policy.json",
+    "src/neo_sf_q_intel/release_input.py",
+    "tests/test_release_input.py"
   ],
   "reviewers": [
     "r01_genericity_review",
@@ -23,39 +18,39 @@
   ],
   "findings": [
     {
-      "code": "R02_NON_NARROWABLE_SCOPE",
+      "code": "R03_NO_DIGEST_ONLY_AUTHORITY",
       "severity": "P1",
-      "resolution": "The replay policy derives all graph nodes as candidate seeds and all reachable material-target paths; callers cannot submit a smaller path, target or edge scope or make empty scope appear complete."
+      "resolution": "Complete v2 run partitions and full canonical candidate payloads are bound; runtime policy identities and current R0.2 plus risk behavior are replayed rather than trusted from caller-rehashed digests."
     },
     {
-      "code": "R02_CURRENT_EDGE_REPLAY",
+      "code": "R03_STABLE_PATH_RISK_BINDING",
       "severity": "P1",
-      "resolution": "Every edge in the exact structural path union must pass current R0.1 replay under independently pinned propagation, path, trusted-edge and extractor-registry policy identities."
+      "resolution": "Historical and refreshed risk contributions map through stable seed, target and ordered-hop provenance identities; fake path hashes and swaps between valid paths fail closed."
     },
     {
-      "code": "R02_TRUSTED_TIME_REFRESH",
+      "code": "R03_POLICY_ROOT_INTEGRITY",
       "severity": "P1",
-      "resolution": "Evaluation time is sampled privately from current UTC; stale historical artifacts fail and still-valid historical artifacts are refreshed only after current replay and static provenance equality."
+      "resolution": "The self-hashed binding policy pins real runtime governance, reasoning and evaluation identities and represents unavailable downstream producers as explicit missing roles instead of fabricated hashes."
     },
     {
-      "code": "R02_STATIC_PROVENANCE_INTEGRITY",
+      "code": "R03_TIME_AND_REPLAY",
       "severity": "P1",
-      "resolution": "Historical refresh compares every non-time-derived root, scope and hop field, preventing tamper from being hidden by a new evaluation timestamp."
+      "resolution": "Private current UTC, positive bounded lifetimes, exact expiry/future checks and static-equal current replay govern candidate refresh."
     },
     {
-      "code": "R02_ANALYSIS_RELEASE_ISOLATION",
+      "code": "R03_SAFE_GENERIC_INPUTS",
       "severity": "P1",
-      "resolution": "All complete-path results remain ANALYSIS_ONLY and release_eligible=false; failures create typed RELEASE_ONLY gaps and do not remove or weaken legacy analysis."
+      "resolution": "Canonical repository-relative locators, bounded identifiers/content, permutation invariance and renamed source-neutral topology tests prevent machine, scenario and path coupling."
     },
     {
-      "code": "R02_METAMORPHIC_COMPLETENESS",
+      "code": "R03_ANALYSIS_RELEASE_ISOLATION",
       "severity": "P1",
-      "resolution": "Direct rename, diamond, cycle and input-permutation tests prove deterministic unique simple paths without scenario-specific identifiers."
+      "resolution": "Artifacts and evaluations are hard-typed ANALYSIS_ONLY and release-ineligible, retain exact permanent authority gaps, and cannot bypass RELEASE_EVIDENCE_MODEL_INCOMPLETE."
     },
     {
-      "code": "R02_FOUNDATION_GAPS",
+      "code": "R03_PRODUCER_COMPLETENESS_PENDING",
       "severity": "P2",
-      "resolution": "Changed-seed attestation, upstream source capture, durable anchoring and R0.3-R0.5 release inputs remain explicit blockers and prevent promotion beyond FOUNDATION."
+      "resolution": "Verified change/build, attested risk factors, producer-derived obligations/executions, authoritative conflicts, scoped approvals, upstream capture and durable anchoring remain explicit roadmap work; this slice is candidate-composition FOUNDATION only."
     }
   ],
   "statusDowngrades": []
