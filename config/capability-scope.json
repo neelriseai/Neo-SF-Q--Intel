@@ -73,10 +73,17 @@
     {
       "id": "reasoning.graph-grounded-agent",
       "owner": "Orchestrator",
-      "status": "NEXT",
-      "genericity": "Will constrain provider-backed specialist proposals to the exact context-pack endpoints and evidence IDs while keeping inferred semantics outside deterministic release authority.",
-      "implementation": [],
-      "verification": []
+      "status": "FOUNDATION",
+      "genericity": "Provides an isolated, provider-neutral proposal/verifier boundary that directly replays its A3/A4 inputs, derives relation legality from the pinned ontology, binds citations to ordered endpoints, preserves conflicts through abstention and emits only analysis-only candidate/inferred output. Completion requires a real structured-output provider adapter with hard cancellation, workflow consumption and an adjudicated quality corpus.",
+      "implementation": ["src/neo_sf_q_intel/specialist.py", "config/specialist-policy.json", "quality/evals/graph-specialist-contract-v1.json"],
+      "verification": ["tests/test_specialist.py"],
+      "verificationCases": {
+        "positive": ["tests/test_specialist.py"],
+        "negative": ["tests/test_specialist.py"],
+        "failure": ["tests/test_specialist.py"],
+        "degradation": ["tests/test_specialist.py"],
+        "scenarioIndependence": ["tests/test_specialist.py"]
+      }
     },
     {
       "id": "reasoning.semantic-retrieval",

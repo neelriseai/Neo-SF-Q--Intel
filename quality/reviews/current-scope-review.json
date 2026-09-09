@@ -1,68 +1,66 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "hybrid-candidate-fusion-foundation-2026-09-09",
+  "reviewId": "graph-specialist-proposal-foundation-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
     "config/capability-scope.json",
     "config/quality-policy.json",
-    "config/fusion-policy.json",
-    "quality/evals/hybrid-fusion-evaluation-v1.json",
-    "src/neo_sf_q_intel/fusion.py",
-    "tests/test_fusion.py",
-    "Docs/03-data-memory-and-retrieval.md",
+    "config/specialist-policy.json",
+    "quality/evals/graph-specialist-contract-v1.json",
+    "src/neo_sf_q_intel/specialist.py",
+    "tests/test_specialist.py",
     "Docs/08-roadmap-24h.md",
-    "Docs/10-graph-grounded-agent-reasoning.md",
-    "Docs/16-deferred-operator-actions.md"
+    "Docs/10-graph-grounded-agent-reasoning.md"
   ],
   "reviewers": [
-    "genericity_reviewer",
-    "governance_precision_auditor"
+    "a5_genericity_review",
+    "a5_governance_review"
   ],
   "findings": [
     {
-      "code": "CANDIDATE_AUTHORITY_SEPARATION",
+      "code": "DIRECT_UPSTREAM_REPLAY",
       "severity": "P0",
-      "resolution": "Fusion inputs and outputs are literal CANDIDATE and ANALYSIS_ONLY types with mayAuthorize=false, authorityEligible=false and maySatisfyReleaseEvidence=false. Confirmed source-node provenance never confirms semantic relevance."
+      "resolution": "All specialist consumer paths retain typed original A3/A4 replay inputs and directly rerun their deterministic validators. Caller callbacks and importable seal objects were removed."
     },
     {
-      "code": "UPSTREAM_CONTEXT_GAP_PROPAGATION",
+      "code": "SPECIALIST_SECRET_AND_SESSION_SAFETY",
       "severity": "P0",
-      "resolution": "A3 blocking gaps create UPSTREAM_CONTEXT_INCOMPLETE and keep overall analysis incomplete; A4 reports its narrower fusion completeness separately and cannot launder an incomplete context pack."
+      "resolution": "Identifiers, prompts and captured output reject common API, GitHub, Slack, AWS, PEM, JWT, credential-URL, frontdoor and Salesforce session-token patterns. Only stable allowlisted provider and gap codes persist; raw exceptions do not."
     },
     {
-      "code": "INDEPENDENT_FUSION_TRUST_ROOTS",
+      "code": "PROPOSAL_ONLY_AUTHORITY_BOUNDARY",
       "severity": "P0",
-      "resolution": "Request, query, graph, ontology, profile, context, channel, policy and evaluation identities are validated against independent roots. Trusted replay recompiles and rejects paired content/digest mutation."
+      "resolution": "Documents, child proposals and artifacts are strict ANALYSIS_ONLY, CANDIDATE and INFERRED types with all authority and release-evidence flags false. No EvidenceRef, approval, tool execution or release-decision field is accepted."
     },
     {
-      "code": "CHANNEL_FRESHNESS_WITHOUT_RESULTS",
+      "code": "IMMUTABLE_SPECIALIST_ROOTS",
       "severity": "P1",
-      "resolution": "Every channel root is strictly reconstructed and checked against the fixed evaluation time, even when the channel returns zero candidates. Future, expired and forged roots fail closed."
+      "resolution": "Repository policy, evaluation, prompt schema and ontology paths/digests are internally pinned and non-overridable at the public consumer boundary. Provider profiles and captured outcomes have full independent digests."
     },
     {
-      "code": "PROTECTED_DETERMINISTIC_ADMISSION",
+      "code": "ORDERED_FACT_BOUND_CITATIONS",
       "severity": "P1",
-      "resolution": "Exact and confirmed-graph bundles are admitted ahead of proposal-only bundles using only protected-channel contributions and canonical ties. Semantic corroboration or flooding cannot change protected admission under a tight cap."
+      "resolution": "Relation proposals are checked against the pinned ontology endpoint signature and the cited path's ordered source, target and canonical relation. Candidate propositions bind candidate, entity, evidence and assertion digest."
     },
     {
-      "code": "EVIDENCE_BINDING_DUPLICATES_AND_CONFLICTS",
+      "code": "UNRESOLVED_CONFLICT_ABSTENTION",
       "severity": "P1",
-      "resolution": "Evidence identifiers map to allowed context endpoints; logical claims are deduplicated before channel ranking; conflicting values remain an atomic set and any protected/conflict omission creates a blocking gap."
+      "resolution": "Any unresolved fusion conflict forces document-level abstention, zero accepted proposals, a sanitized conclusion and a blocking UNRESOLVED_FUSION_CONFLICT gap; narrative winner selection cannot survive."
     },
     {
-      "code": "A4_REAL_CHANNEL_ADAPTERS",
+      "code": "PROVIDER_RECEIPT_AND_BUDGET_INTEGRITY",
       "severity": "P1",
-      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.hybrid-candidate-fusion. Acceptance: exact, lexical, graph and in-process semantic adapters emit the governed receipt contract and a service consumer verifies A3 transitively before fusion."
+      "resolution": "The injected port owns the provider profile; host-measured timing replaces provider claims, token and response budgets are enforced, failure classifications are consistent and a full captured-outcome digest prevents paired receipt substitution."
     },
     {
-      "code": "A4_ADJUDICATED_RETRIEVAL_QUALITY",
+      "code": "A5_REAL_PROVIDER_AND_WORKFLOW",
       "severity": "P1",
-      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.hybrid-candidate-fusion. Acceptance: at least twenty human-adjudicated, versioned cross-channel cases implement explicit populations, formulas and thresholds before any ranked-quality claim or weight promotion."
+      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.graph-grounded-agent and orchestration.multi-agent. Acceptance: a trusted OpenAI/Azure adapter uses strict structured output, disabled tools and adapter-level hard cancellation, then A6 consumes replay-validated proposals without mutating deterministic facts or release authority."
     },
     {
-      "code": "A4_CANONICAL_ASSERTION_DIGEST",
-      "severity": "P2",
-      "resolution": "Deferred to the producer adapter boundary. Acceptance: a versioned assertion schema supplies a canonical assertion digest with case, Unicode and structured-value metamorphic tests; fusion must not apply business-specific normalization heuristics."
+      "code": "A5_ADJUDICATED_QUALITY",
+      "severity": "P1",
+      "resolution": "Retained as a truthful FOUNDATION boundary. Owner: reasoning.graph-grounded-agent. Acceptance: at least twenty human-adjudicated, versioned specialist cases define inclusion, TP/FP/FN, conflict treatment and explicit thresholds. The current manifest remains NOT_RUN/0 and quality is 0/20."
     }
   ],
   "statusDowngrades": []

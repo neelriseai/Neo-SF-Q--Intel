@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "7f5f4abee6f30d2c61717e876a30c0c59dd5b4c1cf9bcc419fa5cc97e395c0d3",
+  "sourceSnapshot": "93360caca0d5116e0346fb542f01243d311a1f4779dc2c41cf98c26600f609d4",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -590,6 +590,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/specialist-policy.json",
+      "kind": "file",
+      "label": "specialist-policy.json",
+      "source": "config/specialist-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:knowledge/README.md",
       "kind": "file",
       "label": "README.md",
@@ -694,6 +702,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/evals/graph-specialist-contract-v1.json",
+      "kind": "file",
+      "label": "graph-specialist-contract-v1.json",
+      "source": "quality/evals/graph-specialist-contract-v1.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/evals/hybrid-fusion-evaluation-v1.json",
       "kind": "file",
       "label": "hybrid-fusion-evaluation-v1.json",
@@ -730,6 +746,14 @@
       "kind": "file",
       "label": "2026-09-09-graph-grounded-reasoning-design.md",
       "source": "quality/reviews/2026-09-09-graph-grounded-reasoning-design.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-graph-specialist-proposal.md",
+      "kind": "file",
+      "label": "2026-09-09-graph-specialist-proposal.md",
+      "source": "quality/reviews/2026-09-09-graph-specialist-proposal.md",
       "category": "project",
       "authority": "supporting"
     },
@@ -982,6 +1006,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/specialist.py",
+      "kind": "file",
+      "label": "specialist.py",
+      "source": "src/neo_sf_q_intel/specialist.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/workflow.py",
       "kind": "file",
       "label": "workflow.py",
@@ -1158,6 +1190,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_specialist.py",
+      "kind": "file",
+      "label": "test_specialist.py",
+      "source": "tests/test_specialist.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_vector_storage_policy.py",
       "kind": "file",
       "label": "test_vector_storage_policy.py",
@@ -1263,8 +1303,8 @@
       "id": "capability:reasoning.graph-grounded-agent",
       "kind": "capability",
       "label": "reasoning.graph-grounded-agent",
-      "status": "NEXT",
-      "summary": "Will constrain provider-backed specialist proposals to the exact context-pack endpoints and evidence IDs while keeping inferred semantics outside deterministic release authority.",
+      "status": "FOUNDATION",
+      "summary": "Provides an isolated, provider-neutral proposal/verifier boundary that directly replays its A3/A4 inputs, derives relation legality from the pinned ontology, binds citations to ordered endpoints, preserves conflicts through abstention and emits only analysis-only candidate/inferred output. Completion requires a real structured-output provider adapter with hard cancellation, workflow consumption and an adjudicated quality corpus.",
       "authority": "policy"
     },
     {
@@ -1812,8 +1852,28 @@
     },
     {
       "from": "capability:reasoning.graph-grounded-agent",
+      "relation": "implemented_by",
+      "to": "file:config/specialist-policy.json"
+    },
+    {
+      "from": "capability:reasoning.graph-grounded-agent",
+      "relation": "implemented_by",
+      "to": "file:quality/evals/graph-specialist-contract-v1.json"
+    },
+    {
+      "from": "capability:reasoning.graph-grounded-agent",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
+    },
+    {
+      "from": "capability:reasoning.graph-grounded-agent",
       "relation": "owned_by",
       "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:reasoning.graph-grounded-agent",
+      "relation": "verified_by",
+      "to": "file:tests/test_specialist.py"
     },
     {
       "from": "capability:reasoning.graph-impact",
@@ -2286,6 +2346,31 @@
       "to": "file:src/neo_sf_q_intel/workflow.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_pack.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/fusion.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/policy.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/workflow.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/analysis.py"
@@ -2594,6 +2679,26 @@
       "from": "file:tests/test_service_fallback.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/fusion.py"
+    },
+    {
+      "from": "file:tests/test_specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:tests/test_specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:tests/test_specialist.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "file:tests/test_workflow.py",
