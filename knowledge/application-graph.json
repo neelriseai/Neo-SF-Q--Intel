@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "f98625e7cd87b6239fba9716a02c9aa8e6a0ea19cceee94eee8c1fa03971fa23",
+  "sourceSnapshot": "642b0237182b0457b06f67ec12c3e935093b2794c1e15b567581a023338bbd3f",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -494,6 +494,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:apps/web/src/lib/run-view-model.ts",
+      "kind": "file",
+      "label": "run-view-model.ts",
+      "source": "apps/web/src/lib/run-view-model.ts",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:apps/web/src/lib/types.ts",
       "kind": "file",
       "label": "types.ts",
@@ -762,6 +770,14 @@
       "kind": "file",
       "label": "2026-09-09-canonical-ontology-propagation.md",
       "source": "quality/reviews/2026-09-09-canonical-ontology-propagation.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-09-dashboard-evidence-view.md",
+      "kind": "file",
+      "label": "2026-09-09-dashboard-evidence-view.md",
+      "source": "quality/reviews/2026-09-09-dashboard-evidence-view.md",
       "category": "project",
       "authority": "supporting"
     },
@@ -1449,6 +1465,14 @@
       "label": "observability.agent-trace",
       "status": "FOUNDATION",
       "summary": "Emits bounded typed stage events and deliverables using capability, evidence, artifact, policy and gap identifiers without persisting prompts, secrets or hidden reasoning.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:ui.assurance-dashboard",
+      "kind": "capability",
+      "label": "ui.assurance-dashboard",
+      "status": "FOUNDATION",
+      "summary": "Projects the typed assurance-run contract without scenario literals or client-side governance rules. It separates source-confirmed, human-recorded, inferred, contradictory and unresolved evidence; selected validations from execution receipts; proposals from applied actions; recorded activity from live dependency availability; and current decisions from audit-only history. Ordered path receipts, A6 advisory payloads, persistence health, runtime response validation and automated accessibility auditing remain planned.",
       "authority": "policy"
     },
     {
@@ -2273,6 +2297,36 @@
       "to": "file:tests/test_salesforce_cli.py"
     },
     {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "implemented_by",
+      "to": "file:apps/web/src/app/page.tsx"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "implemented_by",
+      "to": "file:apps/web/src/app/styles.css"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "implemented_by",
+      "to": "file:apps/web/src/lib/run-view-model.ts"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "implemented_by",
+      "to": "file:apps/web/src/lib/types.ts"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "owned_by",
+      "to": "owner:Orchestrator"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "verified_by",
+      "to": "file:packages/browser/tests/dashboard.spec.ts"
+    },
+    {
       "from": "file:Docs/README.md",
       "relation": "references",
       "to": "file:Docs/00-product-scope.md"
@@ -2341,6 +2395,16 @@
       "from": "file:apps/web/src/app/layout.tsx",
       "relation": "imports",
       "to": "file:apps/web/src/app/styles.css"
+    },
+    {
+      "from": "file:apps/web/src/lib/run-view-model.ts",
+      "relation": "imports",
+      "to": "file:apps/web/src/lib/types.ts"
+    },
+    {
+      "from": "file:packages/browser/tests/dashboard.spec.ts",
+      "relation": "imports",
+      "to": "file:apps/web/src/lib/types.ts"
     },
     {
       "from": "file:packages/browser/tests/locator-healer.spec.ts",

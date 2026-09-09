@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "f98625e7cd87b6239fba9716a02c9aa8e6a0ea19cceee94eee8c1fa03971fa23",
+  "sourceSnapshot": "642b0237182b0457b06f67ec12c3e935093b2794c1e15b567581a023338bbd3f",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -248,6 +248,38 @@
       "verification": [
         "tests/test_workflow.py"
       ]
+    },
+    {
+      "id": "ui.assurance-dashboard",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Projects the typed assurance-run contract without scenario literals or client-side governance rules. It separates source-confirmed, human-recorded, inferred, contradictory and unresolved evidence; selected validations from execution receipts; proposals from applied actions; recorded activity from live dependency availability; and current decisions from audit-only history. Ordered path receipts, A6 advisory payloads, persistence health, runtime response validation and automated accessibility auditing remain planned.",
+      "implementation": [
+        "apps/web/src/app/page.tsx",
+        "apps/web/src/app/styles.css",
+        "apps/web/src/lib/types.ts",
+        "apps/web/src/lib/run-view-model.ts"
+      ],
+      "verification": [
+        "packages/browser/tests/dashboard.spec.ts"
+      ],
+      "verificationCases": {
+        "positive": [
+          "packages/browser/tests/dashboard.spec.ts"
+        ],
+        "negative": [
+          "packages/browser/tests/dashboard.spec.ts"
+        ],
+        "failure": [
+          "packages/browser/tests/dashboard.spec.ts"
+        ],
+        "degradation": [
+          "packages/browser/tests/dashboard.spec.ts"
+        ],
+        "scenarioIndependence": [
+          "packages/browser/tests/dashboard.spec.ts"
+        ]
+      }
     },
     {
       "id": "quality.test-selection",
@@ -627,7 +659,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "2cef67647c4284cb9dc1c4d96d062a950e82bf1d51d111090b3c3f62944f3f65"
+      "sha256": "2f2879e6043d41194c35eabb72312a6f7bcef28a828f228778d9f1eabc0fff3a"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -637,7 +669,7 @@
     {
       "path": "Docs/09-demo-scenarios.md",
       "category": "canonical-documentation",
-      "sha256": "c7aa5e42c9633cac68fb999e304e3c409c15404b3a7aec0845f14befe277667e"
+      "sha256": "c50cb59f06a16d2c8b11f57d16c74dbe1eb24034fc6d6c861522a23cb862a7ac"
     },
     {
       "path": "Docs/09-tool-mcp-and-agent-security.md",
@@ -667,7 +699,7 @@
     {
       "path": "Docs/11-api-ui-and-mcp-experience.md",
       "category": "reference-documentation",
-      "sha256": "ac5e07b901f8f91bba09431d2d03b281f0266f67869942b32eebc1af497b3ed4"
+      "sha256": "af51b9a75dbeafdeee35696224e7a9d37f0af35bf0bfdd9fcaf9fd2dced0d11b"
     },
     {
       "path": "Docs/12-security-governance-and-audit.md",
@@ -762,17 +794,22 @@
     {
       "path": "apps/web/src/app/page.tsx",
       "category": "web-runtime",
-      "sha256": "411208bbb8afb31783f185ec350125dac7cddfb35ee450dc6a6e631d5f5a2770"
+      "sha256": "277935b7ff05c9117742cf1af03061eaaea9f7496550b1fa3f49d510ed869658"
     },
     {
       "path": "apps/web/src/app/styles.css",
       "category": "web-runtime",
-      "sha256": "1f23a26d2f0fdf97be424ca53cf800376c7e0b83958af73c49eb2b14472ab140"
+      "sha256": "d4c55b481e8272d2f3d726c4b432451115d3d186e2c99e7cf0ebd678a5836986"
+    },
+    {
+      "path": "apps/web/src/lib/run-view-model.ts",
+      "category": "web-runtime",
+      "sha256": "3cd2a987ac6f59ff40c2917785cb7dd1a89b49c2bd14c9af562f784e137dd513"
     },
     {
       "path": "apps/web/src/lib/types.ts",
       "category": "web-runtime",
-      "sha256": "9ac414c656d366b7b5e566d74aaf40d478996745b1eb4eb97aebce481afc48aa"
+      "sha256": "09f65d14f59b37851a16011e619b65d0e19cdaf3546bc961e1fff7b0d6dd59a0"
     },
     {
       "path": "apps/web/tsconfig.json",
@@ -787,7 +824,7 @@
     {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "66faf5d50735d9e662562bc530805f2731f174d7d951e75155044f6e623d48d2"
+      "sha256": "66dbe5fc3900bed2827172d93d7fdde90d06c5ea24fb9f9a832b3d6c4bae7c61"
     },
     {
       "path": "config/context-compiler-policy.json",
@@ -822,7 +859,7 @@
     {
       "path": "config/quality-policy.json",
       "category": "policy",
-      "sha256": "8e4a6af928d0f8077c6e54e2b8d66cdf1d9c9cfb238d2dc097f464566b2736cb"
+      "sha256": "cea29fb934a712f65debaf8a9413c2749d900f9fd56f7be92816b3e90f0227ad"
     },
     {
       "path": "config/reasoning-policy.json",
@@ -897,7 +934,7 @@
     {
       "path": "packages/browser/tests/dashboard.spec.ts",
       "category": "test",
-      "sha256": "4692c830046a52889cc9d72fe404be8104c0680c44900c0a6a0a528b7e80c204"
+      "sha256": "96adf696a36ae0fda920f04615b84ebe7790d73e034c3b9b3152cee4f1b7b128"
     },
     {
       "path": "packages/browser/tests/locator-healer.spec.ts",
@@ -938,6 +975,11 @@
       "path": "quality/reviews/2026-09-09-canonical-ontology-propagation.md",
       "category": "project",
       "sha256": "623a64507008d1277ca7bb5447a8f00ec06c25d8f51b83a33b7cd5b40a5e25d4"
+    },
+    {
+      "path": "quality/reviews/2026-09-09-dashboard-evidence-view.md",
+      "category": "project",
+      "sha256": "f3338a7628e374292c7010f76d576addeb85479f9408589e3e364608322c6356"
     },
     {
       "path": "quality/reviews/2026-09-09-graph-context-pack.md",
@@ -982,7 +1024,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "6255f5321795a0a32ed0e2c1aa6aa45ea5dd71eeafae38ff00aba827579b7008"
+      "sha256": "4bdd185dbfcba6d59ca6b08c249f0cba53e2b7a6eaa3b6f49572d03b482b1898"
     },
     {
       "path": "scripts/catalog/build_project_index.py",

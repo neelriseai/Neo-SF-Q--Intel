@@ -25,9 +25,13 @@ assurance workflow; the demo must not simulate that evidence meanwhile.
 
 ## Viewer narrative
 
-The current dashboard should make four implemented ideas visually obvious: typed specialist stages
-cooperate through shared state; graph retrieval cites evidence; test obligations remain distinct from
-execution proof; and governance can return `INCOMPLETE` when proof is missing. It must not imply that
-standalone semantic search influenced a run, that a browser action occurred, or that live Salesforce
-evidence was collected. Those become viewer claims only after their full vertical slices pass.
-ChromaDB is the sole persistent vector backend in the roadmap.
+The current dashboard makes the implemented boundary visually explicit: it renders only specialist
+activities recorded on the run; source-confirmed, human-recorded, inferred, contradictory and
+unresolved evidence remain separate; selected validations remain distinct from execution receipts;
+healing stays a strategy proposal unless a browser receipt exists; guardrails and violations remain
+distinct from the current effective decision; and historical decisions are audit-only. A completed
+run without an effective decision fails closed in the view. The run API currently exposes evidence
+citations, not replayable ordered path receipts, and does not yet expose A6 advisory payloads or live
+dependency availability. The dashboard therefore labels those boundaries instead of simulating
+them. It also makes no persistence-durability claim until `/health` is integrated. ChromaDB is the
+sole persistent vector backend in the roadmap.

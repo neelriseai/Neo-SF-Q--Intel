@@ -1,63 +1,50 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "reasoning-workflow-and-outcome-memory-foundations-2026-09-09",
+  "reviewId": "dashboard-evidence-view-foundation-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
+    "apps/web/src/app/page.tsx",
+    "apps/web/src/app/styles.css",
+    "apps/web/src/lib/run-view-model.ts",
+    "apps/web/src/lib/types.ts",
     "config/capability-scope.json",
-    "config/outcome-memory-policy.json",
     "config/quality-policy.json",
-    "config/reasoning-workflow-policy.json",
-    "migrations/003_outcome_memory.sql",
-    "quality/evals/outcome-memory-contract-v1.json",
-    "src/neo_sf_q_intel/api.py",
-    "src/neo_sf_q_intel/config.py",
-    "src/neo_sf_q_intel/governance.py",
-    "src/neo_sf_q_intel/outcome_repository.py",
-    "src/neo_sf_q_intel/outcomes.py",
-    "src/neo_sf_q_intel/reasoning_workflow.py",
-    "src/neo_sf_q_intel/safety.py",
-    "src/neo_sf_q_intel/service.py",
-    "src/neo_sf_q_intel/specialist.py"
+    "packages/browser/tests/dashboard.spec.ts"
   ],
   "reviewers": [
-    "a7_full_genericity_review",
-    "a7_governance_review"
+    "a8_genericity_review",
+    "a8_governance_review"
   ],
   "findings": [
     {
-      "code": "A6_NON_AUTHORIZING_REPLAY_CONSUMER",
+      "code": "A8_TYPED_VIEW_BOUNDARY",
       "severity": "P1",
-      "resolution": "The separate advisory consumer replays module-pinned A3/A4/A5 inputs, complete request and graph roots, current governance and run immutability; specialist failures cannot mutate facts or release authority."
+      "resolution": "The pure view model consumes only typed run fields; it does not synthesize path order, authority, live dependency availability, execution, applied healing or conflict semantics from narrative text."
     },
     {
-      "code": "A7_CANONICAL_APPEND_AND_READ_REPLAY",
+      "code": "A8_EVIDENCE_INTEGRITY",
       "severity": "P1",
-      "resolution": "Every outcome append and service read replays the authoritative stored run, module-pinned contracts, exact evidence and bounded persisted incident history before exposing a non-authorizing candidate."
+      "resolution": "Evidence states remain distinct, sensitive source and attribute fields are not rendered, and missing or duplicate citations are withheld from impact linkage and surfaced as integrity signals."
     },
     {
-      "code": "A7_TYPED_TARGET_AND_IDENTITY_INTEGRITY",
+      "code": "A8_FAIL_CLOSED_DECISION",
       "severity": "P1",
-      "resolution": "Incident and correction targets use typed keys and run-derived artifact hashes; duplicate evidence, tests, target keys, outcome IDs and ambiguous bare identifiers fail closed."
+      "resolution": "A terminal completed run without an effective decision renders INCOMPLETE; current API decisions remain distinct from recorded audit-only history."
     },
     {
-      "code": "A7_SECRET_PATH_AND_PROJECT_ISOLATION",
+      "code": "A8_STALE_RESULT_ISOLATION",
       "severity": "P1",
-      "resolution": "A shared recursive safety boundary rejects credential, machine-path and file-URI variants without echoing them, while JSON and service reads enforce exact project scope and preserve safe HTTPS/API routes."
+      "resolution": "Input changes, new submissions and failed follow-ups clear the previous run so evidence cannot appear bound to a different request."
     },
     {
-      "code": "A7_APPEND_ONLY_DURABILITY",
+      "code": "A8_ACCESSIBLE_GENERIC_SURFACE",
       "severity": "P1",
-      "resolution": "PostgreSQL and SQLite reject mutation, PostgreSQL also rejects truncation, SQLite releases handles, and all adapters require exact stored predecessor chains before child effects."
+      "resolution": "Generic empty inputs, arbitrary renamed fixtures, stable keyboard-operable tab panels, mobile coverage and escaped dynamic text prevent demo coupling and unsafe presentation."
     },
     {
-      "code": "A7_DETERMINISTIC_FALLBACK_HEALTH",
-      "severity": "P1",
-      "resolution": "Only classified initialization unavailability falls back through PostgreSQL, SQLite, JSON and process cache. Health reports run/outcome modes and conservative durability; schema, replay, corruption, conflict and ambiguous-write errors do not fall through."
-    },
-    {
-      "code": "A7_FOUNDATION_GAPS",
-      "severity": "P1",
-      "resolution": "The capability remains FOUNDATION. Live PostgreSQL verification, public HTTP/MCP access, signed anchoring, historical-policy replay, remaining outcome kinds, A3/A6 linkage and an adjudicated corpus are explicitly retained in canonical docs and the review ledger."
+      "code": "A8_FOUNDATION_GAPS",
+      "severity": "P2",
+      "resolution": "Ordered path receipts, A6 advisory payloads, /health durability display, runtime response validation, zero-sample fixtures and automated axe/contrast auditing remain explicit follow-up work."
     }
   ],
   "statusDowngrades": []

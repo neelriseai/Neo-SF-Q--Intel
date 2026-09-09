@@ -63,6 +63,21 @@ contracts/openapi/
 5. Automation patch/validation views and approval controls.
 6. MCP tools/resources mapped to application services.
 
+### Current dashboard foundation
+
+The implemented dashboard is a read-only typed projection of the assurance-run API. It provides a
+responsive command center, keyboard-operable stable tab panels, evidence-state lanes, citation
+integrity warnings, recorded specialist activity, validation/execution separation, non-applied
+healing proposals, measured controls, guardrails, violations and current-versus-recorded decision
+separation. It never turns a recorded activity into a live dependency-health claim and fails closed
+when a terminal run lacks an effective decision.
+
+The API does not yet expose ordered path receipts, A6 advisory payloads or a release-authority
+receipt, so the view labels them as not exposed rather than synthesizing them. `/health` persistence
+and degradation display, runtime client schema validation, zero-sample presentation fixtures and an
+automated accessibility/contrast audit remain follow-up work; the capability therefore remains
+`FOUNDATION`.
+
 ### Engineering rules
 
 - UI and MCP never import domain or orchestration internals.

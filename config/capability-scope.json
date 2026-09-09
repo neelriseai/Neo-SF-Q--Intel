@@ -118,6 +118,21 @@
       "verification": ["tests/test_workflow.py"]
     },
     {
+      "id": "ui.assurance-dashboard",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Projects the typed assurance-run contract without scenario literals or client-side governance rules. It separates source-confirmed, human-recorded, inferred, contradictory and unresolved evidence; selected validations from execution receipts; proposals from applied actions; recorded activity from live dependency availability; and current decisions from audit-only history. Ordered path receipts, A6 advisory payloads, persistence health, runtime response validation and automated accessibility auditing remain planned.",
+      "implementation": ["apps/web/src/app/page.tsx", "apps/web/src/app/styles.css", "apps/web/src/lib/types.ts", "apps/web/src/lib/run-view-model.ts"],
+      "verification": ["packages/browser/tests/dashboard.spec.ts"],
+      "verificationCases": {
+        "positive": ["packages/browser/tests/dashboard.spec.ts"],
+        "negative": ["packages/browser/tests/dashboard.spec.ts"],
+        "failure": ["packages/browser/tests/dashboard.spec.ts"],
+        "degradation": ["packages/browser/tests/dashboard.spec.ts"],
+        "scenarioIndependence": ["packages/browser/tests/dashboard.spec.ts"]
+      }
+    },
+    {
       "id": "quality.test-selection",
       "owner": "Test Intelligence",
       "status": "FOUNDATION",
