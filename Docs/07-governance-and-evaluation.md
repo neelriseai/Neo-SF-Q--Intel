@@ -107,6 +107,17 @@ a rename is represented deterministically as delete plus add. The artifact remai
 it is a verified change/input-tree receipt, not a trusted build, deploy, obligation or execution
 receipt. Those R0.4 boundaries and the upstream-capture/global interlock gaps remain mandatory.
 
+R0.4b adds a separate local change-to-graph mapping foundation. It first replays the current
+`VerifiedChangeSet` from repository bytes and the complete R0.2/R0.1 graph path evidence, then maps
+every non-deleted changed repository locator to one unique policy-defined `source-artifact` anchor.
+Declared entities and the complete stable affected-path projection are derived from canonical graph
+relations; callers cannot supply seeds, mappings, ignored paths or path subsets. Unsafe, aliased,
+unmapped, ambiguous, zero-path, stale, cross-project, capacity-limited or tampered inputs fail
+closed. Deletes remain blocked until a base-graph/tombstone receipt exists. The Git input-tree and
+current graph snapshot use different capture semantics, so this slice deliberately retains
+`GRAPH_INPUT_TREE_NOT_ATTESTED` and `CHANGE_SEED_SCOPE_NOT_ATTESTED`; its output is useful local
+analysis evidence but cannot claim verified impact completeness or release authority.
+
 The required interlock field is a breaking governance-policy contract change, so the executable
 policy is version `2.0.0`. The interlock cannot be enabled by a configuration toggle in policy
 version 2.x. A future reviewed

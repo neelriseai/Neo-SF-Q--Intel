@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "fc5ab33239bed45ab6b676e3dc50e5382fdf00bfb391887ccbf3326d2eeb2553",
+  "sourceSnapshot": "c89f56520e47cc308289de938544d9c8b96d868db0b3f97115420d97b745d52e",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -76,6 +76,36 @@
         ],
         "scenarioIndependence": [
           "tests/test_change_verification.py"
+        ]
+      }
+    },
+    {
+      "id": "source.change-seed-mapping",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Re-verifies the complete local-Git change capture and current R0.2/R0.1 graph evidence, maps every supported changed repository locator to one unique policy-defined source-artifact anchor, binds declared entities and derives the complete stable affected-path projection without caller-supplied mappings, seeds or subsets. Deletes and missing graph-producer input-tree linkage remain explicit blocking gaps, so outputs are ANALYSIS_ONLY and cannot claim verified impact completeness or release authority.",
+      "implementation": [
+        "config/change-seed-policy.json",
+        "src/neo_sf_q_intel/change_seed.py"
+      ],
+      "verification": [
+        "tests/test_change_seed.py"
+      ],
+      "verificationCases": {
+        "positive": [
+          "tests/test_change_seed.py"
+        ],
+        "negative": [
+          "tests/test_change_seed.py"
+        ],
+        "failure": [
+          "tests/test_change_seed.py"
+        ],
+        "degradation": [
+          "tests/test_change_seed.py"
+        ],
+        "scenarioIndependence": [
+          "tests/test_change_seed.py"
         ]
       }
     },
@@ -694,7 +724,7 @@
     {
       "path": "Docs/02-source-ingestion-and-change-detection.md",
       "category": "reference-documentation",
-      "sha256": "0a16a10a8bbf592f5f65b0f856a3d9c08ba48c6b7d0a3a8ec5a2082196785807"
+      "sha256": "1f8994c47a6884c2f19d772351c9e1075d458e6463d1c2acb9c30ca92397b4c1"
     },
     {
       "path": "Docs/03-data-memory-and-retrieval.md",
@@ -764,7 +794,7 @@
     {
       "path": "Docs/07-governance-and-evaluation.md",
       "category": "canonical-documentation",
-      "sha256": "cd99db796100d9d10f2048e906c55ce5668608696d8ab03a062c3d17ef046df3"
+      "sha256": "fc9ea52b057eafa15768f1cab7312e5edc618235b5ea67a3fa2a70c2a2e4c30e"
     },
     {
       "path": "Docs/07-test-execution-and-rca.md",
@@ -784,7 +814,7 @@
     {
       "path": "Docs/08-roadmap-24h.md",
       "category": "canonical-documentation",
-      "sha256": "90b0191bd05ce0963d8edaff49fa9b85cbf118ec932da8cf62c63a44ec091ed5"
+      "sha256": "def6aeaae244361a871ec1bd7a94699229a69ad57142fb4b40940d4eadeaed92"
     },
     {
       "path": "Docs/09-agent-llm-and-orchestration.md",
@@ -814,7 +844,7 @@
     {
       "path": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "reference-documentation",
-      "sha256": "b043994fca61851c892bea34b23f245f1efb024cbbe7938f05536f62a7776a4b"
+      "sha256": "ac5ca1eb9a0a24f86dd8249910e749db1611e3071c4b4a4e2185b4bd1dd40dc9"
     },
     {
       "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
@@ -949,7 +979,12 @@
     {
       "path": "config/capability-scope.json",
       "category": "policy",
-      "sha256": "c597a16608b27e1fc57f465a2cc232a69478f8b5a6eb7e12b39f151fc2bd2585"
+      "sha256": "77b8eeb57bf1ccdc867cad4b97cff9da085ec3fbb00e8352cf7be75f4d370b3a"
+    },
+    {
+      "path": "config/change-seed-policy.json",
+      "category": "policy",
+      "sha256": "2d68b9fea4d5e1f11853af2880f96ee4a25dcf5d18028be9e5bdeefa41a75e32"
     },
     {
       "path": "config/complete-path-replay-policy.json",
@@ -994,7 +1029,7 @@
     {
       "path": "config/quality-policy.json",
       "category": "policy",
-      "sha256": "540d4c5b9c951c0a763c5cb8c04ad13c91dbae282b5dc1e6b31eb024624fc798"
+      "sha256": "d87f405416a00fca5a088426721d8b5ed295d50ba257e41c3ca0c49ee4b4003f"
     },
     {
       "path": "config/reasoning-policy.json",
@@ -1127,6 +1162,11 @@
       "sha256": "623a64507008d1277ca7bb5447a8f00ec06c25d8f51b83a33b7cd5b40a5e25d4"
     },
     {
+      "path": "quality/reviews/2026-09-09-change-seed-mapping-foundation.md",
+      "category": "project",
+      "sha256": "4542fa76c945b6be2537bbb971d0a927ac67928c647c18acebfa84bbad9537e7"
+    },
+    {
       "path": "quality/reviews/2026-09-09-complete-path-replay.md",
       "category": "project",
       "sha256": "c84223b07e2f4c9d3f728016a0f83528226e4d1102d8e716eb2424341a7c753f"
@@ -1194,7 +1234,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "b0432b7184076ece45ea9c0701a66837c112c7eccecddc4b673f4631f95b3e14"
+      "sha256": "d9702144acce02f81e9af14648dadab86cab4511e6dd6ea9c173f6886746dd53"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -1230,6 +1270,11 @@
       "path": "src/neo_sf_q_intel/api.py",
       "category": "python-runtime",
       "sha256": "4a5354b7a0e0cb23551382cc88623efdd05ac88fc8f96b712da658c9202e8c1f"
+    },
+    {
+      "path": "src/neo_sf_q_intel/change_seed.py",
+      "category": "python-runtime",
+      "sha256": "5ad799ea588b45175e158ed5b734d3f1276d37a1589710eb8d59dfbf6a9f35c8"
     },
     {
       "path": "src/neo_sf_q_intel/change_verification.py",
@@ -1415,6 +1460,11 @@
       "path": "tests/test_api.py",
       "category": "test",
       "sha256": "770bdad40778b5e11cca6e73a8c0bd69764a66bf0b3d0d957f2d7df0affd6be7"
+    },
+    {
+      "path": "tests/test_change_seed.py",
+      "category": "test",
+      "sha256": "c9b627b55231a0afd553d7d14e82b599b1551ce0363615e5a42523a30d988fba"
     },
     {
       "path": "tests/test_change_verification.py",

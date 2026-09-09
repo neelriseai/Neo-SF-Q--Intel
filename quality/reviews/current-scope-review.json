@@ -1,16 +1,17 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "verified-change-set-foundation-2026-09-09",
+  "reviewId": "change-seed-mapping-foundation-2026-09-09",
   "status": "APPROVED",
   "reviewedPaths": [
+    "Docs/02-source-ingestion-and-change-detection.md",
     "Docs/07-governance-and-evaluation.md",
     "Docs/08-roadmap-24h.md",
     "Docs/10-graph-grounded-agent-reasoning.md",
     "config/capability-scope.json",
+    "config/change-seed-policy.json",
     "config/quality-policy.json",
-    "config/verified-change-policy.json",
-    "src/neo_sf_q_intel/change_verification.py",
-    "tests/test_change_verification.py"
+    "src/neo_sf_q_intel/change_seed.py",
+    "tests/test_change_seed.py"
   ],
   "reviewers": [
     "r01_genericity_review",
@@ -18,39 +19,39 @@
   ],
   "findings": [
     {
-      "code": "R04A_COMPLETE_BYTEWISE_DELTA",
+      "code": "R04B_CURRENT_AUTHORITY_REPLAY",
       "severity": "P1",
-      "resolution": "The producer enumerates complete base and tracked plus nonignored-untracked candidate manifests from actual bytes; change entries are independently re-derived from their full semantic union rather than caller paths or Git status."
+      "resolution": "The concrete pinned local-Git producer replays repository bytes, while current R0.2/R0.1 replay revalidates raw and normalized graph, ontology/profile, edge artifacts, policies and time. Caller mappings, seeds and path subsets are absent."
     },
     {
-      "code": "R04A_STABLE_SOURCE_IDENTITY",
+      "code": "R04B_EXACT_CHANGE_PARTITION",
       "severity": "P1",
-      "resolution": "Repository identity derives from project and actual base commit/tree; source snapshot derives from base and candidate-tree roots, while directory/origin authority remains a blocking unattested gap."
+      "resolution": "Every complete bytewise non-delete change maps exactly once through an exact canonical locator to one unique source-artifact anchor. Unmapped, duplicate, ambiguous, aliased and unsafe locators block the aggregate."
     },
     {
-      "code": "R04A_POLICY_PRODUCER_INTEGRITY",
+      "code": "R04B_STABLE_PATH_REFRESH",
       "severity": "P1",
-      "resolution": "A self-hashed externally pinned policy binds the current producer implementation; callers cannot inject a successful command runner, snapshot, clock or changed-path partition."
+      "resolution": "Stable ordered-topology path identities separate semantic scope from time-varying R0.1/R0.2 receipt hashes. Verification first binds historical audit roots, then recompiles and compares the stable current projection."
     },
     {
-      "code": "R04A_TIME_RACE_AND_CAPACITY",
+      "code": "R04B_FINAL_TIME_AND_CAPACITY",
       "severity": "P1",
-      "resolution": "Internal UTC, expiry/future checks, bounded Git streams and pre-read file/blob sizes govern capture; a second byte pass followed by final HEAD/tree/status checks rejects concurrent mutation."
+      "resolution": "Final UTC is sampled after nested replay, nested chronology and expiry are checked against it, and graph/change/locator plus aggregate seed/path capacities fail closed without truncation."
     },
     {
-      "code": "R04A_SAFE_GENERIC_INPUTS",
+      "code": "R04B_ANALYSIS_RELEASE_ISOLATION",
       "severity": "P1",
-      "resolution": "Secret/auth paths are refused before content reads; relative-path, special-mode, sparse/index, Windows alias, Unicode, permutation, relocation, renamed topology, raw-byte and staging invariants are tested."
+      "resolution": "Artifacts and evaluations are hard-typed ANALYSIS_ONLY and release-ineligible and retain graph-input, change-seed, build, deploy, risk, obligation, execution, conflict, approval, source, origin, signature and global interlock gaps."
     },
     {
-      "code": "R04A_ANALYSIS_RELEASE_ISOLATION",
-      "severity": "P1",
-      "resolution": "Artifacts and evaluations are hard-typed ANALYSIS_ONLY and release-ineligible and retain exact build, deploy, seed, risk, obligation, execution, conflict, approval, source, origin, signature and global interlock gaps."
-    },
-    {
-      "code": "R04A_BUILD_OBLIGATION_EXECUTION_PENDING",
+      "code": "R04B_GRAPH_PRODUCER_AND_DELETE_PENDING",
       "severity": "P2",
-      "resolution": "Graph seed mapping, retained build inputs, trusted build output, complete per-impact/control obligations and exact-build executions remain explicit R0.4 work; this slice is VerifiedChangeSet FOUNDATION only."
+      "resolution": "A same-tree graph-producer receipt, candidate/base graph linkage and deleted-artifact tombstones remain mandatory before mapping can become change-seed attestation. The capability remains FOUNDATION."
+    },
+    {
+      "code": "R04B_BREADTH_HARDENING",
+      "severity": "P2",
+      "resolution": "Genuine rebuilt-graph permutations, broader multi-file diamond/cycle cases and direct capacity-boundary regressions remain nonblocking hardening because current authority and pinned upstream caps already fail closed."
     }
   ],
   "statusDowngrades": []

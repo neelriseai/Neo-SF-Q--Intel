@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "fc5ab33239bed45ab6b676e3dc50e5382fdf00bfb391887ccbf3326d2eeb2553",
+  "sourceSnapshot": "c89f56520e47cc308289de938544d9c8b96d868db0b3f97115420d97b745d52e",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -534,6 +534,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:config/change-seed-policy.json",
+      "kind": "file",
+      "label": "change-seed-policy.json",
+      "source": "config/change-seed-policy.json",
+      "category": "policy",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:config/complete-path-replay-policy.json",
       "kind": "file",
       "label": "complete-path-replay-policy.json",
@@ -814,6 +822,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/2026-09-09-change-seed-mapping-foundation.md",
+      "kind": "file",
+      "label": "2026-09-09-change-seed-mapping-foundation.md",
+      "source": "quality/reviews/2026-09-09-change-seed-mapping-foundation.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/2026-09-09-complete-path-replay.md",
       "kind": "file",
       "label": "2026-09-09-complete-path-replay.md",
@@ -978,6 +994,14 @@
       "kind": "file",
       "label": "api.py",
       "source": "src/neo_sf_q_intel/api.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/change_seed.py",
+      "kind": "file",
+      "label": "change_seed.py",
+      "source": "src/neo_sf_q_intel/change_seed.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -1278,6 +1302,14 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_change_seed.py",
+      "kind": "file",
+      "label": "test_change_seed.py",
+      "source": "tests/test_change_seed.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_change_verification.py",
       "kind": "file",
       "label": "test_change_verification.py",
@@ -1545,6 +1577,14 @@
       "label": "source.verified-change-set",
       "status": "FOUNDATION",
       "summary": "Captures a complete local-Git base and candidate input tree from actual repository bytes under a pinned policy and producer implementation. The caller cannot supply changed paths or narrow the tracked plus nonignored-untracked scope; unsafe, secret, sparse, special-mode, ambiguous or concurrently changing inputs fail closed. This R0.4a artifact remains ANALYSIS_ONLY and is not a verified build or deployment receipt.",
+      "authority": "policy"
+    },
+    {
+      "id": "capability:source.change-seed-mapping",
+      "kind": "capability",
+      "label": "source.change-seed-mapping",
+      "status": "FOUNDATION",
+      "summary": "Re-verifies the complete local-Git change capture and current R0.2/R0.1 graph evidence, maps every supported changed repository locator to one unique policy-defined source-artifact anchor, binds declared entities and derives the complete stable affected-path projection without caller-supplied mappings, seeds or subsets. Deletes and missing graph-producer input-tree linkage remain explicit blocking gaps, so outputs are ANALYSIS_ONLY and cannot claim verified impact completeness or release authority.",
       "authority": "policy"
     },
     {
@@ -2551,6 +2591,26 @@
       "to": "owner:Orchestrator"
     },
     {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "implemented_by",
+      "to": "file:config/change-seed-policy.json"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "implemented_by",
+      "to": "file:src/neo_sf_q_intel/change_seed.py"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "owned_by",
+      "to": "owner:Change Analyst"
+    },
+    {
+      "from": "capability:source.change-seed-mapping",
+      "relation": "verified_by",
+      "to": "file:tests/test_change_seed.py"
+    },
+    {
       "from": "capability:source.contract-ingestion",
       "relation": "implemented_by",
       "to": "file:src/neo_sf_q_intel/config.py"
@@ -2769,6 +2829,31 @@
       "from": "file:src/neo_sf_q_intel/api.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/change_verification.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/path_replay.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/change_verification.py",
@@ -3239,6 +3324,36 @@
       "from": "file:tests/test_api.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/change_seed.py"
+    },
+    {
+      "from": "file:tests/test_change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/change_verification.py"
+    },
+    {
+      "from": "file:tests/test_change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
+    },
+    {
+      "from": "file:tests/test_change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/ontology.py"
+    },
+    {
+      "from": "file:tests/test_change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/path_replay.py"
+    },
+    {
+      "from": "file:tests/test_change_seed.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
     },
     {
       "from": "file:tests/test_change_verification.py",

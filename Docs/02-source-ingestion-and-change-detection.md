@@ -69,6 +69,16 @@ capture receipt that binds the authenticated read/query, permitted source, captu
 digest, parser/normalizer version and project/snapshot. They must feed the same envelope verifier;
 they must not create a second trust path or rename the current parser to imply source attestation.
 
+### R0.4 local Git and graph-seed boundary
+
+The verified local-Git producer captures complete bytewise base/candidate manifests and derives the
+change partition itself. The follow-on mapper replays that capture plus current graph/path trust,
+uses an exact repository locator to select a unique policy-defined source-artifact anchor, and
+derives declared entities and affected path identities. It never accepts caller-provided paths,
+seeds or mapping exemptions. Current graph snapshots are catalog digests, not Git candidate-tree
+receipts; therefore the mapper exposes local structural alignment while retaining a blocking graph
+input-tree attestation gap. Deletes require an independently captured base graph or tombstone.
+
 ### Failure policy
 
 - One malformed artifact is isolated and reported; policy decides whether snapshot activation is blocked.

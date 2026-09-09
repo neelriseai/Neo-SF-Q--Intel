@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0.0",
+  "policyId": "canonical-change-seed-mapping",
+  "policyVersion": "1.0.0",
+  "sha256": "03eb5e8cb294c5464e72ebcaaf82ae76651122b05ff45e773161880989eb0b8f",
+  "verifiedChangePolicy": {
+    "contractId": "verified-local-git-change",
+    "contractVersion": "1.0.0",
+    "contractSha256": "ef43e79fb8e2244d7187ae2a18b4d77ae7e7d17758f10fd6fe7ddb75df5a8d05"
+  },
+  "ontology": {
+    "contractId": "change-evidence-core",
+    "contractVersion": "1.0.0",
+    "contractSha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+  },
+  "sourceProfile": {
+    "contractId": "salesforce-application-graph",
+    "contractVersion": "1.0.0",
+    "contractSha256": "4cf073120c223126be161243bb394d57b808346a8011b25730b52a8917648e10"
+  },
+  "propagationPolicy": {
+    "contractId": "canonical-propagation",
+    "contractVersion": "1.0.0",
+    "contractSha256": "66c83e8cb13b68cbffb363a582f0a3b5927f4ec04bddc3dcab5b560b02c2cdf5"
+  },
+  "pathReplayPolicy": {
+    "contractId": "complete-material-path-replay",
+    "contractVersion": "1.0.0",
+    "contractSha256": "0c86193a76dd48dcdd04597e65ec202ba6cae61fc93537eee209df8bfdbc19aa"
+  },
+  "trustedEdgePolicy": {
+    "contractId": "trusted-edge-envelope",
+    "contractVersion": "1.0.0",
+    "contractSha256": "baf97c1ba7602cc7919e92e251948b659b343c88ef49e53f05cdca3a3e60f328"
+  },
+  "extractorRegistry": {
+    "contractId": "canonical-edge-extractors",
+    "contractVersion": "1.0.0",
+    "contractSha256": "43da9da63df0f148091aa6356865bb17f167be8721ef0bc87fb9eb619f7529e6"
+  },
+  "mapper": {
+    "mapperId": "canonical-repository-locator-mapper",
+    "mapperVersion": "1.0.0",
+    "implementationLocator": "src/neo_sf_q_intel/change_seed.py",
+    "implementationSha256": "5ff554044ce6bc35c4fd306e810b171f3edb02bdca8d665b5a95829eee20482a"
+  },
+  "artifactAnchorClass": "source-artifact",
+  "locatorAttribute": "path",
+  "declarationRelationClass": "declared-in",
+  "declarationDirection": "TARGET_TO_SOURCE",
+  "includeArtifactAnchor": true,
+  "graphInputBinding": "REQUIRES_PRODUCER_RECEIPT",
+  "maximumChanges": 5000,
+  "maximumGraphNodes": 100000,
+  "maximumLocatorBytes": 4096,
+  "maximumSeedBindings": 100000,
+  "maximumAffectedPaths": 100000
+}

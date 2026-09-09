@@ -31,6 +31,21 @@
       }
     },
     {
+      "id": "source.change-seed-mapping",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Re-verifies the complete local-Git change capture and current R0.2/R0.1 graph evidence, maps every supported changed repository locator to one unique policy-defined source-artifact anchor, binds declared entities and derives the complete stable affected-path projection without caller-supplied mappings, seeds or subsets. Deletes and missing graph-producer input-tree linkage remain explicit blocking gaps, so outputs are ANALYSIS_ONLY and cannot claim verified impact completeness or release authority.",
+      "implementation": ["config/change-seed-policy.json", "src/neo_sf_q_intel/change_seed.py"],
+      "verification": ["tests/test_change_seed.py"],
+      "verificationCases": {
+        "positive": ["tests/test_change_seed.py"],
+        "negative": ["tests/test_change_seed.py"],
+        "failure": ["tests/test_change_seed.py"],
+        "degradation": ["tests/test_change_seed.py"],
+        "scenarioIndependence": ["tests/test_change_seed.py"]
+      }
+    },
+    {
       "id": "reasoning.graph-impact",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
