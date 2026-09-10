@@ -1,54 +1,55 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "foundation-api-capture-2026-09-10",
+  "reviewId": "foundation-dashboard-projection-2026-09-10",
   "status": "APPROVED",
   "reviewedPaths": [
-    "Docs/02-source-ingestion-and-change-detection.md",
+    ".env.example",
     "Docs/08-roadmap-24h.md",
     "Docs/10-graph-grounded-agent-reasoning.md",
     "Docs/11-api-ui-and-mcp-experience.md",
+    "apps/web/src/app/page.tsx",
+    "apps/web/src/app/styles.css",
+    "apps/web/src/components/foundation-evidence-panel.tsx",
+    "apps/web/src/lib/foundation-client.ts",
+    "apps/web/src/lib/foundation-contract.ts",
+    "apps/web/src/lib/foundation-view-model.ts",
     "config/capability-scope.json",
-    "config/foundation-pipeline-policy.json",
     "knowledge/application-graph.json",
     "knowledge/project-index.json",
-    "quality/reviews/2026-09-10-foundation-api-capture.md",
-    "quality/reviews/current-scope-review.json",
-    "src/neo_sf_q_intel/api.py",
-    "src/neo_sf_q_intel/foundation_pipeline.py",
-    "src/neo_sf_q_intel/service.py",
-    "tests/test_api.py",
-    "tests/test_foundation_pipeline.py",
-    "tests/test_service_foundation.py"
+    "packages/browser/tests/dashboard.spec.ts",
+    "quality/reviews/2026-09-10-foundation-dashboard-projection.md",
+    "quality/reviews/current-scope-review.json"
   ],
   "reviewers": [
     "r01_genericity_review",
-    "r01_governance_review"
+    "r01_governance_review",
+    "r01_edge_builder"
   ],
   "findings": [
     {
-      "code": "R04_API_ZERO_SCOPE_BOUNDARY",
+      "code": "FOUNDATION_UI_RUNTIME_CONTRACT",
       "severity": "P1",
-      "resolution": "The POST rejects nonempty bodies without buffering, all query parameters and normalized custom scope-bearing headers before the zero-argument service is invoked."
+      "resolution": "The browser bounds every response and accepts no stage data until exact authority, stage, capability, permanent-gap, receipt-lineage, timestamp and canonical-digest contracts replay successfully."
     },
     {
-      "code": "R04_API_CURRENT_VERIFICATION",
+      "code": "FOUNDATION_UI_RELEASE_INTERLOCK",
       "severity": "P1",
-      "resolution": "Every successful fresh capture is current-verified in a worker thread; expected abstentions remain typed and no first capture is exposed after verification failure."
+      "resolution": "The panel permanently displays analysis-only, evidence-incomplete and release-ineligible status and explicitly excludes live-org, deploy, build, test, approval and release claims."
     },
     {
-      "code": "R04_API_PROJECT_BINDING",
+      "code": "FOUNDATION_UI_STATE_ISOLATION",
       "severity": "P1",
-      "resolution": "The loaded source project and configured Git/app roots own composition; the unique candidate DX root must equal the configured nested app root."
+      "resolution": "Foundation capture owns separate request and view state; it cannot mutate AssuranceRun, and refresh, malformed, network, timeout, supersession or expiry paths remove older evidence."
     },
     {
-      "code": "R04_API_ARTIFACT_AND_PERSISTENCE_BOUNDARY",
+      "code": "FOUNDATION_UI_GENERIC_HOST_BUDGET",
       "severity": "P1",
-      "resolution": "Only bounded CandidateFoundationEvidence is returned; full artifacts are request-local, no GET/list/cache exists and no AssuranceRun or outcome is written or changed."
+      "resolution": "The capture timeout is validated host configuration with a five-minute default and a 30-second to 15-minute range, avoiding a demo-scale repository assumption."
     },
     {
-      "code": "R04_API_HEALTH_TRUTHFULNESS",
+      "code": "FOUNDATION_UI_ACCESSIBLE_PRESENTATION",
       "severity": "P2",
-      "resolution": "Health reports configured state with sanitized missing/invalid categories rather than claiming runtime availability; generic unavailability is non-retryable."
+      "resolution": "Stage state is text as well as color; natural keyboard activation, ready-state announcements, arbitrary identifiers, wrapping and a 390-pixel viewport are verified."
     }
   ],
   "statusDowngrades": []

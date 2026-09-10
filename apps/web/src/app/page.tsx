@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, useMemo, useState } from "react";
+import { FoundationEvidencePanel } from "@/components/foundation-evidence-panel";
 import { buildRunViewModel, metricValue, type EvidenceLane } from "@/lib/run-view-model";
 import type { AssuranceRun } from "@/lib/types";
 
@@ -150,6 +151,8 @@ export default function Dashboard() {
         </aside>
       </section>
 
+      <FoundationEvidencePanel apiBase={apiBase} />
+
       <section className="shell metrics" aria-label="Run summary">
         <article className="metric panel"><span>Impact findings</span><strong>{run ? run.impacts.length : "—"}</strong><small>{run ? `${view.highRiskCount} marked high risk` : "Not evaluated"}</small></article>
         <article className="metric panel"><span>Selected validations</span><strong>{run ? run.selected_tests.length : "—"}</strong><small>{run ? `${run.test_results.length} execution receipt${run.test_results.length === 1 ? "" : "s"} reported` : "Not evaluated"}</small></article>
@@ -158,13 +161,13 @@ export default function Dashboard() {
       </section>
 
       <section className="shell workflow panel" aria-labelledby="workflow-heading">
-        <div className="sectionHeading"><div><span className="sectionNumber">03</span><h2 id="workflow-heading">Specialist activity</h2></div><p>Only stages recorded on this run are shown.</p></div>
+        <div className="sectionHeading"><div><span className="sectionNumber">04</span><h2 id="workflow-heading">Specialist activity</h2></div><p>Only stages recorded on this run are shown.</p></div>
         {run?.activities.length ? <ol className="activityList">{run.activities.map((activity) => <li key={activity.activity_id}><span className={`activityDot ${activity.status.toLowerCase()}`} aria-hidden="true" /><div><strong>{activity.agent}</strong><p>{activity.summary}</p><small>{words(activity.stage)} · {activity.duration_ms} ms · {activity.capability_ids.join(", ")}</small></div><span className={`statusTag ${activity.status.toLowerCase()}`}>{activity.status}</span></li>)}</ol> : <div className="emptyState"><span aria-hidden="true">○</span><p>No specialist activity is attached to this run.</p></div>}
       </section>
 
       <section className="shell resultPanel panel" aria-labelledby="result-heading">
         <div className="resultHeader">
-          <div className="sectionHeading compact"><div><span className="sectionNumber">04</span><h2 id="result-heading">Assurance evidence</h2></div></div>
+          <div className="sectionHeading compact"><div><span className="sectionNumber">05</span><h2 id="result-heading">Assurance evidence</h2></div></div>
           <div className="tabs" role="tablist" aria-label="Assurance result views">
             {tabs.map((tab) => <button key={tab} type="button" role="tab" aria-selected={activeTab === tab} aria-controls={`panel-${tab}`} id={`tab-${tab}`} tabIndex={activeTab === tab ? 0 : -1} className={activeTab === tab ? "selected" : ""} onClick={() => setActiveTab(tab)} onKeyDown={(event) => moveTab(event, tab)}>{tab}</button>)}
           </div>

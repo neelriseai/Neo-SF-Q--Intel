@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "ddcc1ccf856c6899bcaacfe81c3ce7c714bde5a7d19b1937723e47d5e80d9922",
+  "sourceSnapshot": "50ff1c6745c1cd0145296a311b386a1d204ae82528a6c02945e376681f4d7df0",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -494,6 +494,38 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:apps/web/src/components/foundation-evidence-panel.tsx",
+      "kind": "file",
+      "label": "foundation-evidence-panel.tsx",
+      "source": "apps/web/src/components/foundation-evidence-panel.tsx",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:apps/web/src/lib/foundation-client.ts",
+      "kind": "file",
+      "label": "foundation-client.ts",
+      "source": "apps/web/src/lib/foundation-client.ts",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:apps/web/src/lib/foundation-contract.ts",
+      "kind": "file",
+      "label": "foundation-contract.ts",
+      "source": "apps/web/src/lib/foundation-contract.ts",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:apps/web/src/lib/foundation-view-model.ts",
+      "kind": "file",
+      "label": "foundation-view-model.ts",
+      "source": "apps/web/src/lib/foundation-view-model.ts",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:apps/web/src/lib/run-view-model.ts",
       "kind": "file",
       "label": "run-view-model.ts",
@@ -978,6 +1010,14 @@
       "kind": "file",
       "label": "2026-09-10-foundation-api-capture.md",
       "source": "quality/reviews/2026-09-10-foundation-api-capture.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/2026-09-10-foundation-dashboard-projection.md",
+      "kind": "file",
+      "label": "2026-09-10-foundation-dashboard-projection.md",
+      "source": "quality/reviews/2026-09-10-foundation-dashboard-projection.md",
       "category": "project",
       "authority": "supporting"
     },
@@ -1848,7 +1888,7 @@
       "kind": "capability",
       "label": "ui.assurance-dashboard",
       "status": "FOUNDATION",
-      "summary": "Projects the typed assurance-run contract without scenario literals or client-side governance rules. It separates source-confirmed, human-recorded, inferred, contradictory and unresolved evidence; selected validations from execution receipts; proposals from applied actions; recorded activity from live dependency availability; and current decisions from audit-only history. Ordered path receipts, A6 advisory payloads, persistence health, runtime response validation and automated accessibility auditing remain planned.",
+      "summary": "Projects the typed assurance-run contract and a separately owned local-candidate foundation contract without scenario literals or client-side governance decisions. The foundation client sends no caller scope, bounds and runtime-decodes every response, replays canonical contract digests, rejects impossible stage chains, clears stale evidence and preserves analysis-only, incomplete and release-ineligible interlocks. The run view separately distinguishes source-confirmed, human-recorded, inferred, contradictory and unresolved evidence; selected validations from execution receipts; proposals from applied actions; recorded activity from live dependency availability; and current decisions from audit-only history. Ordered path receipts, A6 advisory payloads, persistence health, runtime validation of the legacy assurance-run response and automated accessibility auditing remain planned.",
       "authority": "policy"
     },
     {
@@ -2960,6 +3000,26 @@
     {
       "from": "capability:ui.assurance-dashboard",
       "relation": "implemented_by",
+      "to": "file:apps/web/src/components/foundation-evidence-panel.tsx"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "implemented_by",
+      "to": "file:apps/web/src/lib/foundation-client.ts"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "implemented_by",
+      "to": "file:apps/web/src/lib/foundation-contract.ts"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "implemented_by",
+      "to": "file:apps/web/src/lib/foundation-view-model.ts"
+    },
+    {
+      "from": "capability:ui.assurance-dashboard",
+      "relation": "implemented_by",
       "to": "file:apps/web/src/lib/run-view-model.ts"
     },
     {
@@ -3048,9 +3108,29 @@
       "to": "file:apps/web/src/app/styles.css"
     },
     {
+      "from": "file:apps/web/src/lib/foundation-client.ts",
+      "relation": "imports",
+      "to": "file:apps/web/src/lib/foundation-contract.ts"
+    },
+    {
+      "from": "file:apps/web/src/lib/foundation-view-model.ts",
+      "relation": "imports",
+      "to": "file:apps/web/src/lib/foundation-contract.ts"
+    },
+    {
       "from": "file:apps/web/src/lib/run-view-model.ts",
       "relation": "imports",
       "to": "file:apps/web/src/lib/types.ts"
+    },
+    {
+      "from": "file:packages/browser/tests/dashboard.spec.ts",
+      "relation": "imports",
+      "to": "file:apps/web/src/lib/foundation-client.ts"
+    },
+    {
+      "from": "file:packages/browser/tests/dashboard.spec.ts",
+      "relation": "imports",
+      "to": "file:apps/web/src/lib/foundation-contract.ts"
     },
     {
       "from": "file:packages/browser/tests/dashboard.spec.ts",

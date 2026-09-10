@@ -72,11 +72,11 @@ healing proposals, measured controls, guardrails, violations and current-versus-
 separation. It never turns a recorded activity into a live dependency-health claim and fails closed
 when a terminal run lacks an effective decision.
 
-The API does not yet expose ordered path receipts, A6 advisory payloads or a release-authority
-receipt, so the view labels them as not exposed rather than synthesizing them. `/health` persistence
-and degradation display, runtime client schema validation, zero-sample presentation fixtures and an
-automated accessibility/contrast audit remain follow-up work; the capability therefore remains
-`FOUNDATION`.
+The assurance-run API does not yet expose ordered path receipts, A6 advisory payloads or a
+release-authority receipt, so the run view labels them as not exposed rather than synthesizing
+them. `/health` persistence and degradation display, runtime validation of the legacy assurance-run
+response, zero-sample presentation fixtures and an automated accessibility/contrast audit remain
+follow-up work; the capability therefore remains `FOUNDATION`.
 
 The API separately exposes `POST /api/v1/foundation/candidate-evidence` for a fresh host-owned local
 Git candidate capture. It accepts an empty request only: any body, query parameter or scope-bearing
@@ -85,7 +85,16 @@ only the bounded `CandidateFoundationEvidence`; the full verified-change, graph 
 artifacts remain request-local. Missing configuration or current-verification races return a fixed,
 typed, `ANALYSIS_ONLY`/`INCOMPLETE`/release-false problem without exception or path text. There is no
 GET, list or persistence route. The endpoint does not extend `AssuranceRun` and cannot affect a
-release decision. A separately runtime-decoded dashboard panel remains the next UI slice.
+release decision.
+
+The dashboard now owns this projection in a separate panel and client state. A fresh, bodyless POST
+is bounded before JSON parsing and the response is accepted only after exact schema, authority,
+stage order/state/capability, permanent-gap, receipt-lineage, canonical timestamp and canonical
+digest replay. A rejected, unavailable, superseded, timed-out or expired capture removes all prior
+stage evidence. Valid abstention remains distinct from transport failure. The view renders all
+reported measurements, receipts and blocking gaps while stating that local foundation execution is
+not evidence of a live org, deployment, build, tests, approval, impact completeness or release
+readiness.
 
 ### Engineering rules
 

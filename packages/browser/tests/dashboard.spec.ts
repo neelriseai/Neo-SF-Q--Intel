@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import { decodeCandidateFoundationEvidence, type CandidateFoundationEvidence } from "../../../apps/web/src/lib/foundation-contract.js";
+import { captureCandidateFoundation, resolveFoundationCaptureTimeout } from "../../../apps/web/src/lib/foundation-client.js";
 import type { AssuranceRun } from "../../../apps/web/src/lib/types.js";
 
 const sha = (character: string) => character.repeat(64);
@@ -63,6 +65,158 @@ async function mockRun(page: Page, run: MockRun) {
 async function submit(page: Page) {
   await page.getByLabel("Requirement or observed change").fill("Assess an arbitrary renamed component");
   await page.getByRole("button", { name: "Analyze change" }).click();
+}
+
+const changeFoundationGaps = [
+  "CANDIDATE_BUILD_NOT_VERIFIED",
+  "CHANGE_SEED_SCOPE_NOT_ATTESTED",
+  "CONFLICT_SCOPE_NOT_ATTESTED",
+  "DEPLOYMENT_NOT_ATTESTED",
+  "GIT_COMMIT_SIGNATURE_NOT_ATTESTED",
+  "HUMAN_APPROVAL_SCOPE_NOT_ATTESTED",
+  "RELEASE_EVIDENCE_MODEL_INCOMPLETE",
+  "REPOSITORY_ORIGIN_NOT_ATTESTED",
+  "RISK_FACTORS_NOT_ATTESTED",
+  "TEST_EXECUTION_SCOPE_NOT_ATTESTED",
+  "TEST_OBLIGATION_SCOPE_NOT_ATTESTED",
+  "UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED",
+];
+const graphFoundationGaps = [...changeFoundationGaps, "SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE"].sort();
+const seedFoundationGaps = [...graphFoundationGaps, "GRAPH_INPUT_TREE_NOT_ATTESTED"].sort();
+
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  const item = value as Record<string, unknown>;
+  return `{${Object.keys(item).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(item[key])}`).join(",")}}`;
+}
+
+async function stableDigest(value: unknown): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonicalJson(value)));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function rehashFoundationDocument(document: Record<string, unknown>): Promise<Record<string, unknown>> {
+  for (const stage of document.stages as Array<Record<string, unknown>>) {
+    const body = { ...stage };
+    delete body.evidence_sha256;
+    stage.evidence_sha256 = await stableDigest(body);
+  }
+  const body = { ...document };
+  delete body.chain_sha256;
+  document.chain_sha256 = await stableDigest(body);
+  return document;
+}
+
+async function baseFoundation(projectId = "project-renamed-alpha"): Promise<CandidateFoundationEvidence> {
+  const common = {
+    schema_version: "1.0.0" as const,
+    authority_scope: "ANALYSIS_ONLY" as const,
+    release_eligible: false as const,
+    local_foundation_stage_complete: true,
+    state: "EXECUTED" as const,
+    policy_id: "foundation-stage-policy",
+    policy_version: "1.0.0",
+    policy_sha256: sha("a"),
+    evaluated_at: "2026-09-10T08:00:00Z",
+    valid_until: "2099-09-10T08:00:00Z",
+  };
+  const stages: CandidateFoundationEvidence["stages"] = [
+    {
+      ...common,
+      stage: "VERIFIED_CHANGE_CAPTURE",
+      sequence: 1,
+      capability_id: "source.verified-change-set",
+      input_receipts: [],
+      output_receipt: { role: "verified-change", sha256: sha("1") },
+      gap_codes: changeFoundationGaps,
+      measurements: [{ name: "changed_file_count", value: 0 }],
+      evidence_sha256: sha("4"),
+    },
+    {
+      ...common,
+      stage: "TREE_GRAPH_PRODUCTION",
+      sequence: 2,
+      capability_id: "source.tree-graph-production",
+      input_receipts: [{ role: "verified-change", sha256: sha("1") }],
+      output_receipt: { role: "graph-production", sha256: sha("2") },
+      gap_codes: graphFoundationGaps,
+      measurements: [],
+      evidence_sha256: sha("5"),
+    },
+    {
+      ...common,
+      stage: "OPERATION_SEED_MAPPING",
+      sequence: 3,
+      capability_id: "source.change-seed-mapping",
+      input_receipts: [
+        { role: "graph-production", sha256: sha("2") },
+        { role: "verified-change", sha256: sha("1") },
+      ],
+      output_receipt: { role: "operation-seeds", sha256: sha("3") },
+      gap_codes: seedFoundationGaps,
+      measurements: [{ name: "operation_seed_count", value: 2 }],
+      evidence_sha256: sha("6"),
+    },
+  ];
+  const evidence: CandidateFoundationEvidence = {
+    schema_version: "1.0.0",
+    authority_scope: "ANALYSIS_ONLY",
+    release_eligible: false,
+    project_id: projectId,
+    stages,
+    outcome: "EXECUTED",
+    foundation_execution_complete: true,
+    evidence_completeness: "INCOMPLETE",
+    non_authoritative_projection: true,
+    pipeline_policy_id: "candidate-foundation-pipeline",
+    pipeline_policy_version: "1.0.0",
+    pipeline_policy_sha256: sha("7"),
+    pipeline_implementation_sha256: sha("8"),
+    blocking_gap_codes: seedFoundationGaps,
+    chain_sha256: sha("9"),
+  };
+  return await rehashFoundationDocument(evidence as unknown as Record<string, unknown>) as unknown as CandidateFoundationEvidence;
+}
+
+async function abstainedFoundation(): Promise<CandidateFoundationEvidence> {
+  const evidence = await baseFoundation("arbitrary-project-beta");
+  evidence.stages[1] = {
+    ...evidence.stages[1],
+    state: "FAILED",
+    local_foundation_stage_complete: false,
+    output_receipt: null,
+    evaluated_at: "unavailable",
+    valid_until: null,
+    gap_codes: [...graphFoundationGaps, "GRAPH_CAPTURE_FAILED"].sort(),
+    measurements: [],
+  };
+  evidence.stages[2] = {
+    ...evidence.stages[2],
+    state: "NOT_RUN",
+    local_foundation_stage_complete: false,
+    input_receipts: [],
+    output_receipt: null,
+    evaluated_at: "unavailable",
+    valid_until: null,
+    gap_codes: ["UPSTREAM_STAGE_INCOMPLETE"],
+    measurements: [],
+  };
+  evidence.outcome = "ABSTAINED";
+  evidence.foundation_execution_complete = false;
+  evidence.blocking_gap_codes = [...new Set([
+    ...changeFoundationGaps,
+    ...graphFoundationGaps,
+    "GRAPH_CAPTURE_FAILED",
+    "UPSTREAM_STAGE_INCOMPLETE",
+  ])].sort();
+  return await rehashFoundationDocument(evidence as unknown as Record<string, unknown>) as unknown as CandidateFoundationEvidence;
+}
+
+async function mockFoundation(page: Page, evidence: CandidateFoundationEvidence) {
+  await page.route("**/api/v1/foundation/candidate-evidence", async (route) => {
+    await route.fulfill({ contentType: "application/json", body: JSON.stringify(evidence) });
+  });
 }
 
 test("dashboard opens as a clean, truthful assurance workspace", async ({ page }) => {
@@ -220,4 +374,319 @@ test("tabs support keyboard navigation and the dashboard remains usable on mobil
   await expect(page.getByRole("tab", { name: "tests" })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByRole("heading", { name: "Start an analysis" })).toBeVisible();
   await expect(page.getByLabel("Requirement or observed change")).toBeVisible();
+});
+
+test("foundation capture sends an unscoped empty POST and renders only local capture evidence", async ({ page }) => {
+  const evidence = await baseFoundation();
+  let captures = 0;
+  await page.route("**/api/v1/foundation/candidate-evidence", async (route) => {
+    captures += 1;
+    const request = route.request();
+    expect(request.method()).toBe("POST");
+    expect(new URL(request.url()).search).toBe("");
+    expect(request.postData()).toBeNull();
+    const headers = request.headers();
+    expect(headers["content-type"]).toBeUndefined();
+    expect(headers["x-repository-root"]).toBeUndefined();
+    expect(headers["x-change-paths"]).toBeUndefined();
+    await route.fulfill({ contentType: "application/json", body: JSON.stringify(evidence) });
+  });
+  await page.goto("/");
+  await expect(page.getByTestId("foundation-interlock")).toContainText("Analysis only");
+  await expect(page.getByTestId("foundation-interlock")).toContainText("Evidence incomplete");
+  await expect(page.getByTestId("foundation-interlock")).toContainText("Release ineligible");
+  await page.getByRole("button", { name: "Capture candidate" }).click();
+
+  const panel = page.getByTestId("foundation-evidence");
+  await expect(panel).toContainText("project-renamed-alpha");
+  await expect(panel.getByText("EXECUTED", { exact: true })).toHaveCount(4);
+  await expect(panel).toContainText("0");
+  await expect(panel).toContainText("Not reported");
+  await expect(panel).toContainText("Input · graph-production");
+  await expect(panel).toContainText("Output · operation-seeds");
+  await expect(panel).toContainText("RELEASE_EVIDENCE_MODEL_INCOMPLETE");
+  await expect(panel).toContainText("does not evidence a live Salesforce org, deployment, build, test execution, approval, or release readiness");
+  await expect(page.getByLabel("Release posture")).toContainText("AWAITING RUN");
+  expect(captures).toBe(1);
+});
+
+test("valid abstention preserves failed and not-run stages without becoming a transport error", async ({ page }) => {
+  await mockFoundation(page, await abstainedFoundation());
+  await page.goto("/");
+  await page.getByRole("button", { name: "Capture candidate" }).click();
+
+  const panel = page.getByTestId("foundation-evidence");
+  await expect(panel).toContainText("ABSTAINED");
+  await expect(panel.getByText("FAILED", { exact: true })).toBeVisible();
+  await expect(panel.getByText("NOT RUN", { exact: true })).toBeVisible();
+  await expect(panel).toContainText("GRAPH_CAPTURE_FAILED");
+  await expect(panel).toContainText("UPSTREAM_STAGE_INCOMPLETE");
+  await expect(page.getByText("Foundation capture is unavailable.")).toHaveCount(0);
+  await expect(page.getByTestId("foundation-interlock")).toContainText("Release ineligible");
+});
+
+test("malformed authority response is rejected as a whole and never leaves stale evidence", async ({ page }) => {
+  let requestCount = 0;
+  const first = await baseFoundation("first-valid-project");
+  const second = { ...await baseFoundation("must-not-render"), release_eligible: true, private_path: "must-not-render-path" };
+  await page.route("**/api/v1/foundation/candidate-evidence", async (route) => {
+    requestCount += 1;
+    const payload = requestCount === 1
+      ? first
+      : second;
+    await route.fulfill({ contentType: "application/json", body: JSON.stringify(payload) });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Capture candidate" }).click();
+  await expect(page.getByText("first-valid-project", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Capture again" }).click();
+  await expect(page.getByText("first-valid-project", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Foundation response failed runtime validation.")).toBeVisible();
+  await expect(page.getByText("must-not-render", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("must-not-render-path", { exact: true })).toHaveCount(0);
+});
+
+test("typed unavailability clears prior receipts and cannot disturb an assurance run", async ({ page }) => {
+  const run = baseRun();
+  run.evidence = [{ evidence_id: "run-evidence-stays", kind: "fact", label: "Independent run evidence", source: "hidden", state: "CONFIRMED", attributes: {} }];
+  await mockRun(page, run);
+  let requestCount = 0;
+  const temporary = await baseFoundation("temporary-foundation");
+  await page.route("**/api/v1/foundation/candidate-evidence", async (route) => {
+    requestCount += 1;
+    if (requestCount === 1) {
+      await route.fulfill({ contentType: "application/json", body: JSON.stringify(temporary) });
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    await route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({
+        type: "FOUNDATION_CAPTURE_PROBLEM",
+        code: "FOUNDATION_PIPELINE_UNAVAILABLE",
+        authority_scope: "ANALYSIS_ONLY",
+        evidence_completeness: "INCOMPLETE",
+        release_eligible: false,
+        retryable: false,
+      }),
+    });
+  });
+  await page.goto("/");
+  await submit(page);
+  await expect(page.getByText("Independent run evidence", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Capture candidate" }).click();
+  await expect(page.getByText("temporary-foundation", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Capture again" }).click();
+  await expect(page.getByText("temporary-foundation", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Foundation capture is unavailable.")).toBeVisible();
+  await expect(page.getByText("Independent run evidence", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Release posture")).toContainText("INCOMPLETE");
+});
+
+test("foundation capture remains keyboard-operable and contained on a mobile viewport", async ({ page }) => {
+  await mockFoundation(page, await baseFoundation("mobile-project-gamma"));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const button = page.getByRole("button", { name: "Capture candidate" });
+  await page.locator("body").click({ position: { x: 1, y: 1 } });
+  for (let index = 0; index < 4; index += 1) await page.keyboard.press("Tab");
+  await expect(button).toBeFocused();
+  await page.keyboard.press("Space");
+  await expect(page.getByText("mobile-project-gamma", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Three local foundation stages executed");
+  await expect(page.locator(".foundationStage")).toHaveCount(3);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("foundation decoder fails closed across authority, ordering, lineage, and bounded-shape mutations", async () => {
+  type Document = Record<string, unknown>;
+  type StageDocument = Record<string, unknown>;
+  const stages = (document: Document) => document.stages as StageDocument[];
+  const mutations: Array<[string, (document: Document) => void, boolean?]> = [
+    ["release authority", (document) => { document.release_eligible = true; }],
+    ["unknown field", (document) => { document.private_path = "must-not-be-accepted"; }],
+    ["missing global interlock", (document) => {
+      for (const stage of stages(document)) {
+        stage.gap_codes = (stage.gap_codes as string[]).filter((gap) => gap !== "RELEASE_EVIDENCE_MODEL_INCOMPLETE");
+      }
+      document.blocking_gap_codes = (document.blocking_gap_codes as string[]).filter((gap) => gap !== "RELEASE_EVIDENCE_MODEL_INCOMPLETE");
+    }],
+    ["gap union mismatch", (document) => { document.blocking_gap_codes = ["RELEASE_EVIDENCE_MODEL_INCOMPLETE"]; }],
+    ["stage order", (document) => { [stages(document)[0], stages(document)[1]] = [stages(document)[1], stages(document)[0]]; }],
+    ["outcome mismatch", (document) => { document.outcome = "ABSTAINED"; }],
+    ["stage authority", (document) => { stages(document)[1].authority_scope = "RELEASE"; }],
+    ["capability substitution", (document) => { stages(document)[1].capability_id = "source.arbitrary-well-formed"; }],
+    ["required gap omission", (document) => {
+      for (const stage of stages(document)) {
+        stage.gap_codes = (stage.gap_codes as string[]).filter((gap) => gap !== "DEPLOYMENT_NOT_ATTESTED");
+      }
+      document.blocking_gap_codes = (document.blocking_gap_codes as string[]).filter((gap) => gap !== "DEPLOYMENT_NOT_ATTESTED");
+    }],
+    ["upstream failure followed by execution", (document) => {
+      const first = stages(document)[0];
+      first.state = "FAILED";
+      first.local_foundation_stage_complete = false;
+      first.output_receipt = null;
+      first.valid_until = null;
+      first.measurements = [];
+      document.outcome = "ABSTAINED";
+      document.foundation_execution_complete = false;
+    }],
+    ["first stage skipped", (document) => {
+      const first = stages(document)[0];
+      first.state = "NOT_RUN";
+      first.local_foundation_stage_complete = false;
+      first.input_receipts = [];
+      first.output_receipt = null;
+      first.evaluated_at = "unavailable";
+      first.valid_until = null;
+      first.gap_codes = ["UPSTREAM_STAGE_INCOMPLETE"];
+      first.measurements = [];
+      for (const later of stages(document).slice(1)) {
+        later.state = "NOT_RUN";
+        later.local_foundation_stage_complete = false;
+        later.input_receipts = [];
+        later.output_receipt = null;
+        later.evaluated_at = "unavailable";
+        later.valid_until = null;
+        later.gap_codes = ["UPSTREAM_STAGE_INCOMPLETE"];
+        later.measurements = [];
+      }
+      document.outcome = "ABSTAINED";
+      document.foundation_execution_complete = false;
+      document.blocking_gap_codes = ["UPSTREAM_STAGE_INCOMPLETE"];
+    }],
+    ["downstream stage skipped after successful upstream", (document) => {
+      for (const later of stages(document).slice(1)) {
+        later.state = "NOT_RUN";
+        later.local_foundation_stage_complete = false;
+        later.input_receipts = [];
+        later.output_receipt = null;
+        later.evaluated_at = "unavailable";
+        later.valid_until = null;
+        later.gap_codes = ["UPSTREAM_STAGE_INCOMPLETE"];
+        later.measurements = [];
+      }
+      document.outcome = "ABSTAINED";
+      document.foundation_execution_complete = false;
+      document.blocking_gap_codes = [...new Set(stages(document).flatMap((stage) => stage.gap_codes as string[]))].sort();
+    }],
+    ["receipt role", (document) => {
+      (stages(document)[1].input_receipts as StageDocument[])[0].role = "arbitrary-input";
+    }],
+    ["receipt lineage", (document) => {
+      (stages(document)[2].input_receipts as StageDocument[])[1].sha256 = sha("0");
+    }],
+    ["duplicate measurement", (document) => {
+      const existing = stages(document)[0].measurements as StageDocument[];
+      stages(document)[0].measurements = [...existing, { ...existing[0] }];
+    }],
+    ["invalid timestamp", (document) => { stages(document)[0].evaluated_at = "not-a-time"; }],
+    ["impossible timestamp", (document) => { stages(document)[0].evaluated_at = "2026-02-30T08:00:00Z"; }],
+    ["not-run measurement", (document) => {
+      const third = stages(document)[2];
+      third.state = "NOT_RUN";
+      third.local_foundation_stage_complete = false;
+      third.input_receipts = [];
+      third.output_receipt = null;
+      third.evaluated_at = "unavailable";
+      third.valid_until = null;
+      third.gap_codes = ["UPSTREAM_STAGE_INCOMPLETE"];
+      third.measurements = [{ name: "fabricated_count", value: 1 }];
+      document.outcome = "ABSTAINED";
+      document.foundation_execution_complete = false;
+      document.blocking_gap_codes = [...new Set(stages(document).flatMap((stage) => stage.gap_codes as string[]))].sort();
+    }],
+    ["path-like gap", (document) => {
+      stages(document)[0].gap_codes = [...stages(document)[0].gap_codes as string[], "C:/private/path"].sort();
+      document.blocking_gap_codes = [...new Set(stages(document).flatMap((stage) => stage.gap_codes as string[]))].sort();
+    }],
+    ["invalid digest", (document) => { document.chain_sha256 = "not-a-digest"; }, false],
+  ];
+
+  await expect(decodeCandidateFoundationEvidence(await baseFoundation())).resolves.toMatchObject({
+    authority_scope: "ANALYSIS_ONLY",
+    evidence_completeness: "INCOMPLETE",
+    release_eligible: false,
+  });
+  for (const [, mutate, shouldRehash = true] of mutations) {
+    const document = structuredClone(await baseFoundation()) as unknown as Document;
+    mutate(document);
+    if (shouldRehash) await rehashFoundationDocument(document);
+    await expect(decodeCandidateFoundationEvidence(document)).rejects.toThrow("FOUNDATION_RESPONSE_INVALID");
+  }
+});
+
+test("oversized valid JSON is rejected before it can replace prior foundation evidence", async ({ page }) => {
+  let requestCount = 0;
+  const evidence = await baseFoundation("bounded-response-project");
+  await page.route("**/api/v1/foundation/candidate-evidence", async (route) => {
+    requestCount += 1;
+    await route.fulfill({
+      contentType: "application/json",
+      body: requestCount === 1 ? JSON.stringify(evidence) : `${JSON.stringify(evidence)}${" ".repeat(33_000)}`,
+    });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Capture candidate" }).click();
+  await expect(page.getByText("bounded-response-project", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Capture again" }).click();
+  await expect(page.getByText("bounded-response-project", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Foundation response failed runtime validation.")).toBeVisible();
+});
+
+test("a bounded client timeout becomes sanitized unavailability", async () => {
+  expect(resolveFoundationCaptureTimeout(undefined)).toBe(300_000);
+  expect(resolveFoundationCaptureTimeout("120000")).toBe(120_000);
+  expect(resolveFoundationCaptureTimeout("7999")).toBe(300_000);
+  expect(resolveFoundationCaptureTimeout("not-a-number")).toBe(300_000);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => await new Promise<Response>((_resolve, reject) => {
+    init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+  });
+  try {
+    await expect(captureCandidateFoundation("http://unused.invalid", new AbortController().signal, 10))
+      .rejects.toMatchObject({ code: "FOUNDATION_CAPTURE_UNAVAILABLE" });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("network failure clears a prior projection without exposing transport detail", async ({ page }) => {
+  let requestCount = 0;
+  const evidence = await baseFoundation("network-stale-project");
+  await page.route("**/api/v1/foundation/candidate-evidence", async (route) => {
+    requestCount += 1;
+    if (requestCount === 1) {
+      await route.fulfill({ contentType: "application/json", body: JSON.stringify(evidence) });
+      return;
+    }
+    await route.abort("failed");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Capture candidate" }).click();
+  await expect(page.getByText("network-stale-project", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Capture again" }).click();
+  await expect(page.getByText("network-stale-project", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Foundation capture is unavailable.")).toBeVisible();
+});
+
+test("client-clock expiry only downgrades the projection and requires recapture", async ({ page }) => {
+  const evidence = await baseFoundation("expiring-project");
+  const validUntilMillis = Math.ceil((Date.now() + 1_500) / 1_000) * 1_000;
+  const evaluatedMillis = validUntilMillis - 60_000;
+  for (const stage of evidence.stages) {
+    stage.evaluated_at = new Date(evaluatedMillis).toISOString().replace(".000Z", "Z");
+    stage.valid_until = new Date(validUntilMillis).toISOString().replace(".000Z", "Z");
+  }
+  await rehashFoundationDocument(evidence as unknown as Record<string, unknown>);
+  await mockFoundation(page, evidence);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Capture candidate" }).click();
+  await expect(page.getByText("expiring-project", { exact: true })).toBeVisible();
+  await expect(page.getByText("Captured evidence has expired. Capture again before using it for analysis.")).toBeVisible({ timeout: 4_000 });
+  await expect(page.getByText("expiring-project", { exact: true })).toHaveCount(0);
 });

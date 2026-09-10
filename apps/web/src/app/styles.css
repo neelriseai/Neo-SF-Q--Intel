@@ -64,6 +64,53 @@ textarea:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px 
 .primaryButton:disabled { opacity: .52; cursor: not-allowed; }
 .formMessage { min-height: 24px; }
 .error { color: var(--red); font-size: .8rem; margin: 10px 0 0; }
+.foundationPanel { margin-top: 18px; padding: 28px; overflow: hidden; }
+.foundationHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.foundationHeader .sectionHeading { flex: 1; margin-bottom: 18px; }
+.foundationButton { flex: 0 0 auto; border: 1px solid var(--teal); padding: 10px 15px; color: var(--teal-dark); background: #fff; border-radius: 10px 3px; font-weight: 760; cursor: pointer; }
+.foundationButton:hover { color: #fff; background: var(--teal); }
+.foundationButton:disabled { opacity: .55; cursor: wait; }
+.foundationInterlock { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; color: #fff; background: rgba(255,255,255,.13); border-radius: 10px 3px; }
+.foundationInterlock span { padding: 11px 14px; background: var(--ink); text-align: center; text-transform: uppercase; letter-spacing: .09em; font-size: .72rem; font-weight: 800; }
+.foundationInterlock span:last-child { color: #ffd18b; }
+.foundationStatus { min-height: 42px; display: flex; align-items: center; }
+.foundationStatus p { color: var(--muted); font-size: .8rem; margin: 12px 0 0; }
+.foundationStatus .error { color: var(--red); }
+.foundationSummary { display: grid; grid-template-columns: 1.35fr 1fr 1fr .8fr; gap: 10px; margin-top: 14px; }
+.foundationSummary > div { min-width: 0; padding: 14px; background: #f6f8f5; border: 1px solid var(--line); border-radius: 10px 3px; }
+.foundationSummary span, .foundationMeasurements > span, .foundationReceipts > span { display: block; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: .67rem; }
+.foundationSummary strong { display: block; margin-top: 6px; overflow-wrap: anywhere; font-size: .86rem; }
+.foundationBoundary { padding: 12px 14px; color: var(--amber); background: var(--amber-soft); border-left: 4px solid var(--amber); border-radius: 4px; font-size: .8rem; line-height: 1.5; }
+.foundationStages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.foundationStage { min-width: 0; padding: 16px; background: #fafbf9; border: 1px solid var(--line); border-top: 4px solid var(--muted); border-radius: 12px 4px; }
+.foundationStage.executed { border-top-color: var(--teal); }
+.foundationStage.failed { border-top-color: var(--red); }
+.foundationStage header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.foundationStage header > div span, .foundationStage header > div strong { display: block; }
+.foundationStage header > div span { color: var(--muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .09em; }
+.foundationStage header > div strong { margin-top: 4px; font-size: .9rem; text-transform: capitalize; }
+.capabilityId { display: block; min-height: 38px; margin-top: 13px; color: var(--teal-dark); }
+.foundationTiming { display: grid; gap: 4px; padding: 10px 0; border-block: 1px solid var(--line); color: var(--muted); font-size: .72rem; }
+.foundationMeasurements { margin-top: 12px; }
+.foundationMeasurements dl { margin: 7px 0 0; }
+.foundationMeasurements dl div { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px dotted var(--line); }
+.foundationMeasurements dt { color: var(--ink-soft); font-size: .73rem; }
+.foundationMeasurements dd { margin: 0; font-size: .75rem; font-weight: 800; }
+.foundationMeasurements p, .foundationReceipts p { color: var(--muted); font-size: .73rem; margin: 7px 0; }
+.foundationReceipts { margin-top: 12px; }
+.foundationReceipts > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin-top: 7px; }
+.foundationReceipts small { min-width: 0; color: var(--muted); overflow-wrap: anywhere; font-size: .69rem; }
+.foundationReceipts code { white-space: nowrap; }
+.foundationGaps { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.foundationGaps summary { color: var(--red); font-size: .75rem; font-weight: 750; cursor: pointer; }
+.foundationGaps ul { max-height: 180px; overflow: auto; margin: 8px 0 0; padding-left: 20px; }
+.foundationGaps li { margin: 5px 0; overflow-wrap: anywhere; }
+.foundationGapRegister { display: grid; grid-template-columns: minmax(220px, .7fr) 2fr; gap: 24px; padding: 18px; margin-top: 16px; background: #fcf0ef; border-left: 4px solid var(--red); border-radius: 6px; }
+.foundationGapRegister h3 { font-family: Georgia, serif; font-weight: 500; margin: 0; }
+.foundationGapRegister p { color: var(--muted); font-size: .76rem; line-height: 1.45; }
+.foundationGapRegister ul { columns: 2; column-gap: 28px; margin: 0; padding-left: 18px; }
+.foundationGapRegister li { break-inside: avoid; margin: 5px 0; overflow-wrap: anywhere; }
+.foundationChain { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 16px; padding-top: 13px; font-size: .7rem; }
 .truthPanel { background: rgba(18, 32, 30, .96); color: #fff; }
 .truthPanel .sectionNumber { color: var(--lime); }
 .truthRow { padding: 14px 0; border-top: 1px solid rgba(255,255,255,.11); }
@@ -172,6 +219,7 @@ code { font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; ove
 
 @media (max-width: 1050px) {
   .metrics { grid-template-columns: 1fr 1fr; }
+  .foundationSummary { grid-template-columns: 1fr 1fr; }
   .evidenceLanes { grid-template-columns: repeat(3, 1fr); }
   .impactGrid { grid-template-columns: 1fr 1fr; }
 }
@@ -179,6 +227,8 @@ code { font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; ove
   .command, .workspace, .governanceGrid { grid-template-columns: 1fr; }
   .command { gap: 24px; }
   .activityList { grid-template-columns: 1fr; }
+  .foundationStages { grid-template-columns: 1fr; }
+  .foundationGapRegister { grid-template-columns: 1fr; }
   .evidenceLanes { grid-template-columns: 1fr 1fr; }
   .resultHeader { align-items: flex-start; flex-direction: column; }
 }
@@ -187,7 +237,11 @@ code { font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; ove
   .navMeta { display: none; }
   .command { padding-top: 36px; }
   h1 { font-size: 2.55rem; }
-  .composer, .truthPanel, .workflow, .resultPanel { padding: 19px; }
+  .composer, .truthPanel, .foundationPanel, .workflow, .resultPanel { padding: 19px; }
+  .foundationHeader { flex-direction: column; }
+  .foundationButton { width: 100%; }
+  .foundationInterlock, .foundationSummary { grid-template-columns: 1fr; }
+  .foundationGapRegister ul { columns: 1; }
   .formRow, .metrics, .evidenceLanes, .impactGrid { grid-template-columns: 1fr; }
   .sectionHeading { flex-direction: column; }
   .resultHeader { margin-bottom: 18px; }
