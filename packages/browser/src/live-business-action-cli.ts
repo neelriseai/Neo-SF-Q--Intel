@@ -162,9 +162,11 @@ function businessActionRequest(environment: Environment): BusinessActionRequest 
   ) {
     throw new BrowserCoordinatorError("BUSINESS_ACTION_REQUEST_INVALID");
   }
+  const persistence = parsePersistence(environment.NEO_BROWSER_BUSINESS_PERSISTENCE_JSON);
   return {
     startPath,
     businessAction: {
+      objectApiName: persistence.objectApiName,
       fields,
       submit: {
         tag: environment.NEO_BROWSER_BUSINESS_SUBMIT_TAG === "button" ? "button" : "lightning-button",
@@ -173,7 +175,7 @@ function businessActionRequest(environment: Environment): BusinessActionRequest 
       },
       successText,
     },
-    persistence: parsePersistence(environment.NEO_BROWSER_BUSINESS_PERSISTENCE_JSON),
+    persistence,
   };
 }
 

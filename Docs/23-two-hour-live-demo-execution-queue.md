@@ -291,3 +291,22 @@ Boundary: this is now a runnable acceptance mechanism for fill/edit/save/evaluat
 verification. It is still not a signed Salesforce campaign gate receipt and remains
 `releaseEligible=false` until the live receipt producer/ledger issues and validates the corresponding
 campaign receipt.
+
+## Continuation: general self-healing loop for business actions
+
+Selected item: extend browser business actions beyond fixed locators into a bounded
+observe → choose alternate locator → execute → evaluate loop.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Observe | DONE | 1 | Business actions still begin with a sanitized DOM capture and exact object/field/action intent; raw field values are represented only by digests |
+| Choose alternate locator | DONE | 1 | Field fills and submit actions now fall back to the existing metadata-aware locator healer when the direct `data-field-api` or host-tag action locator fails |
+| Execute | DONE | 1 | The worker fills the healed field/action locator only when the candidate is unique, visible, enabled, metadata/action scoped and non-readonly |
+| Evaluate | DONE | 1 | The worker requires configured success status text and the live CLI still performs the post-action Salesforce persistence assertion before returning `PASSED` |
+| Heal evidence | DONE | 1 | Receipts include healed/abstained counts and strategy names, without exposing raw selectors, form values, session URLs, record IDs or org payloads |
+| Live execution | NOT_RUN | 0 | No new live Salesforce mutation was dispatched in this pass |
+| Test it | DONE | 1 | Browser lint, live build and 23 focused Playwright worker/coordinator tests passed, including stable-action submit healing |
+
+Boundary: this is a generalized self-healing execution loop for browser business actions, not a
+signed live-campaign receipt producer. Ambiguous or unsafe candidates still abstain rather than
+forcing an action.

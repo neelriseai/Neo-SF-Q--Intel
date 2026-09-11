@@ -292,6 +292,7 @@ test("business-action projection binds values by digest without leaking form inp
   const request = {
     startPath: "/lightning/n/Strategic_Deal_Workbench",
     businessAction: {
+      objectApiName: "Opportunity",
       fields: [{ fieldApiName: "Name", value: fieldValue }],
       submit: {
         tag: "lightning-button" as const,

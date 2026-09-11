@@ -365,6 +365,11 @@
       "code": "BUSINESS_ACTION_BROWSER_ACCEPTANCE",
       "severity": "P1",
       "resolution": "The browser worker now has an explicit BUSINESS_ACTION mode for configured field fill, submit and success-status readback, gated by a live profile mutation opt-in. The live business-action CLI requires a trusted business-action profile, bounded field/action inputs and a post-action Salesforce CLI persistence assertion; projections expose only digests, counts and match booleans. Live mutation was not dispatched in this pass. Browser lint, live build and 27 focused Playwright tests passed."
+    },
+    {
+      "code": "BUSINESS_ACTION_SELF_HEALING_LOOP",
+      "severity": "P1",
+      "resolution": "Business-action execution now has a bounded observe, alternate-locator selection, execute and evaluate loop. Field actions carry object identity, direct field/action locators fall back to the metadata-aware locator healer, and receipts report healed/abstained counts plus strategy names without leaking raw values or selectors. Ambiguous candidates abstain. Browser lint, live build and 23 focused Playwright worker/coordinator tests passed."
     }
   ],
   "statusDowngrades": []

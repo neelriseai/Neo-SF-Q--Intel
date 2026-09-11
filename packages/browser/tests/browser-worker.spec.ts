@@ -171,6 +171,7 @@ test("executes an explicitly authorized business action and verifies success rea
     handoff: session,
     mode: "BUSINESS_ACTION",
     businessAction: {
+      objectApiName: "Opportunity",
       fields: [
         { fieldApiName: "Name", value: "SYN-Widget Renewal" },
         { fieldApiName: "Amount", value: "50000" },
@@ -190,6 +191,9 @@ test("executes an explicitly authorized business action and verifies success rea
     fieldCount: 2,
     submitted: true,
     successTextMatched: true,
+    healedFieldCount: 0,
+    abstainedFieldCount: 0,
+    strategies: ["direct-data-field-api", "direct-data-field-api"],
   });
   expect(JSON.stringify(receipt)).not.toContain("SYN-Widget Renewal");
   expect(JSON.stringify(receipt)).not.toContain("50000");
@@ -209,6 +213,7 @@ test("blocks business action when the live profile does not explicitly authorize
     handoff: session,
     mode: "BUSINESS_ACTION",
     businessAction: {
+      objectApiName: "Opportunity",
       fields: [{ fieldApiName: "Name", value: "SYN-Unauthorized" }],
       submit: { tag: "button", attribute: "data-action", expectedValue: "save-evaluate-live" },
       successText: "Saved successfully. The policy results are shown below.",
@@ -218,6 +223,44 @@ test("blocks business action when the live profile does not explicitly authorize
   expect(receipt.status).toBe("BLOCKED");
   expect(receipt.error?.code).toBe("MODE_NOT_AUTHORIZED");
   expect(JSON.stringify(receipt)).not.toContain("SYN-Unauthorized");
+  expectNoLeak(receipt, canary);
+});
+
+test("self-heals business submit locators through stable action identity before evaluation", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+  const worker = makeWorker(`
+    <form data-object-api="Opportunity"
+      onsubmit="event.preventDefault(); document.querySelector('[role=status]').textContent='Saved successfully. The policy results are shown below.'">
+      <section data-field-api="Name"><label>Opportunity Name<input /></label></section>
+      <button data-action="save-evaluate-live">Save and Evaluate</button>
+      <p role="status"></p>
+    </form>
+  `);
+  const session = await handoff(worker, canary, {
+    permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"],
+  });
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "BUSINESS_ACTION",
+    businessAction: {
+      objectApiName: "Opportunity",
+      fields: [{ fieldApiName: "Name", value: "SYN-Healed Renewal" }],
+      submit: { tag: "lightning-button", attribute: "data-action", expectedValue: "save-evaluate-live" },
+      successText: "Saved successfully. The policy results are shown below.",
+    },
+  });
+
+  expect(receipt.status).toBe("PASSED");
+  expect(receipt.businessAction).toMatchObject({
+    fieldCount: 1,
+    submitted: true,
+    successTextMatched: true,
+    healedFieldCount: 1,
+    abstainedFieldCount: 0,
+    strategies: ["direct-data-field-api", "stable-action-identity"],
+  });
+  expect(JSON.stringify(receipt)).not.toContain("SYN-Healed Renewal");
   expectNoLeak(receipt, canary);
 });
 

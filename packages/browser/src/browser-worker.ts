@@ -1,5 +1,6 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+import { discoverLocatorCandidate } from "./locator-healer.js";
 
 export type WorkerMode = "READ_ONLY_DOM_CAPTURE" | "CANDIDATE_READBACK" | "BUSINESS_ACTION";
 export type WorkerStatus = "PASSED" | "FAILED" | "BLOCKED";
@@ -40,6 +41,7 @@ export interface CandidateIntent {
 }
 
 export interface BusinessActionIntent {
+  objectApiName: string;
   fields: readonly {
     fieldApiName: string;
     value: string;
@@ -101,6 +103,9 @@ export interface BrowserWorkerReceipt {
     fieldCount: number;
     submitted: boolean;
     successTextMatched: boolean;
+    healedFieldCount?: number;
+    abstainedFieldCount?: number;
+    strategies?: readonly string[];
   };
   cleanup: {
     contextClosed: boolean;
@@ -347,6 +352,7 @@ export class BrowserWorker {
           : undefined,
         businessAction: request.businessAction
           ? {
+              objectApiName: request.businessAction.objectApiName,
               fields: request.businessAction.fields.map((field) => ({
                 fieldApiName: field.fieldApiName,
                 valueDigest: digest(field.value),
@@ -640,43 +646,85 @@ export class BrowserWorker {
     if (request.mode === "BUSINESS_ACTION") {
       const action = request.businessAction!;
       const lifecycle: CandidateLifecycleState[] = ["CAPTURED"];
+      let healedFieldCount = 0;
+      let abstainedFieldCount = 0;
+      const strategies: string[] = [];
       for (const field of action.fields) {
         const wrapper = page.locator(`[data-field-api="${cssString(field.fieldApiName)}"]`);
         const wrapperCount = await wrapper.count();
-        if (wrapperCount !== 1) {
+        let filled = false;
+        if (wrapperCount === 1) {
+          const control = wrapper.locator(
+            'input:not([type="hidden"]),textarea,select,[role="textbox"],[role="spinbutton"],[role="combobox"]',
+          ).first();
+          try {
+            await control.fill(field.value, { timeout: this.#operationTimeoutMs });
+            strategies.push("direct-data-field-api");
+            filled = true;
+          } catch {
+            filled = false;
+          }
+        }
+        if (!filled) {
+          const healed = await discoverLocatorCandidate(page, {
+            objectApiName: action.objectApiName,
+            fieldApiName: field.fieldApiName,
+          });
+          if (healed.status === "CANDIDATE_DISCOVERED" && healed.locator) {
+            try {
+              await healed.locator.fill(field.value, { timeout: this.#operationTimeoutMs });
+              healedFieldCount += 1;
+              strategies.push(healed.strategy ?? "metadata-healer");
+              filled = true;
+            } catch {
+              filled = false;
+            }
+          } else {
+            abstainedFieldCount += 1;
+          }
+        }
+        if (!filled) {
           return {
             ...base,
-            status: "BLOCKED",
+            status: abstainedFieldCount > 0 ? "BLOCKED" : "FAILED",
             lifecycle: [
               ...lifecycle,
               wrapperCount === 0 ? "CANDIDATE_NOT_FOUND" : "CANDIDATE_AMBIGUOUS",
             ],
-            candidateCount: wrapperCount,
-            error: {
-              class: "POLICY_BLOCKED",
-              code: wrapperCount === 0 ? "BUSINESS_FIELD_NOT_FOUND" : "BUSINESS_FIELD_AMBIGUOUS",
+            candidateCount: Math.max(wrapperCount, abstainedFieldCount),
+            businessAction: {
+              fieldCount: action.fields.length,
+              submitted: false,
+              successTextMatched: false,
+              healedFieldCount,
+              abstainedFieldCount,
+              strategies,
             },
-          };
-        }
-        const control = wrapper.locator(
-          'input:not([type="hidden"]),textarea,select,[role="textbox"],[role="spinbutton"],[role="combobox"]',
-        ).first();
-        try {
-          await control.fill(field.value, { timeout: this.#operationTimeoutMs });
-        } catch {
-          return {
-            ...base,
-            status: "FAILED",
-            lifecycle,
-            candidateCount: 1,
-            error: { class: "CAPTURE_FAILED", code: "BUSINESS_FIELD_FILL_FAILED" },
+            error: {
+              class: abstainedFieldCount > 0 ? "POLICY_BLOCKED" : "CAPTURE_FAILED",
+              code: abstainedFieldCount > 0
+                ? "BUSINESS_FIELD_HEALING_ABSTAINED"
+                : "BUSINESS_FIELD_FILL_FAILED",
+            },
           };
         }
       }
       const submit = page.locator(
         `${action.submit.tag}[${action.submit.attribute}="${cssString(action.submit.expectedValue)}"]`,
       );
-      const submitCount = await submit.count();
+      let submitCount = await submit.count();
+      let submitLocator = submit;
+      if (submitCount !== 1) {
+        const healedSubmit = await discoverLocatorCandidate(page, {
+          action: action.submit.expectedValue,
+        });
+        if (healedSubmit.status === "CANDIDATE_DISCOVERED" && healedSubmit.locator) {
+          submitLocator = healedSubmit.locator;
+          submitCount = 1;
+          healedFieldCount += 1;
+          strategies.push(healedSubmit.strategy ?? "action-healer");
+        }
+      }
       if (submitCount !== 1) {
         return {
           ...base,
@@ -686,6 +734,14 @@ export class BrowserWorker {
             submitCount === 0 ? "CANDIDATE_NOT_FOUND" : "CANDIDATE_AMBIGUOUS",
           ],
           candidateCount: submitCount,
+          businessAction: {
+            fieldCount: action.fields.length,
+            submitted: false,
+            successTextMatched: false,
+            healedFieldCount,
+            abstainedFieldCount: abstainedFieldCount + 1,
+            strategies,
+          },
           error: {
             class: "POLICY_BLOCKED",
             code: submitCount === 0 ? "BUSINESS_SUBMIT_NOT_FOUND" : "BUSINESS_SUBMIT_AMBIGUOUS",
@@ -694,7 +750,7 @@ export class BrowserWorker {
       }
       lifecycle.push("CANDIDATE_DISCOVERED");
       try {
-        await submit.click({ timeout: this.#operationTimeoutMs });
+        await submitLocator.click({ timeout: this.#operationTimeoutMs });
         await page.getByRole("status").filter({ hasText: action.successText }).first().waitFor({
           state: "visible",
           timeout: this.#operationTimeoutMs,
@@ -710,6 +766,9 @@ export class BrowserWorker {
             fieldCount: action.fields.length,
             submitted: lifecycle.includes("CANDIDATE_DISCOVERED"),
             successTextMatched: false,
+            healedFieldCount,
+            abstainedFieldCount,
+            strategies,
           },
           error: { class: "CAPTURE_FAILED", code: "BUSINESS_ACTION_ASSERTION_FAILED" },
         };
@@ -723,6 +782,9 @@ export class BrowserWorker {
           fieldCount: action.fields.length,
           submitted: true,
           successTextMatched: true,
+          healedFieldCount,
+          abstainedFieldCount,
+          strategies,
         },
       };
     }
@@ -877,6 +939,7 @@ function hasValidCandidateLocator(candidate: CandidateIntent): boolean {
 function hasValidBusinessAction(action: BusinessActionIntent): boolean {
   return (
     Array.isArray(action.fields) &&
+    /^[A-Za-z][A-Za-z0-9_]{0,79}$/.test(action.objectApiName) &&
     action.fields.length >= 1 &&
     action.fields.length <= 8 &&
     action.fields.every(

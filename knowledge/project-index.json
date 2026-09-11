@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "1b89adfb03895b22cc1aae6b9fb2cef8cdf075f60a8286e5931f2f3f34dc3175",
+  "sourceSnapshot": "c82830f7b84b684e4de3ceadac2e9145f543e00487e7b5b4c3f54369d518313e",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1571,7 +1571,7 @@
     {
       "path": "Docs/23-two-hour-live-demo-execution-queue.md",
       "category": "reference-documentation",
-      "sha256": "ef736a823b33c2616a6866fb99132b46d4f979562be3f33046ac55424b9e3c10"
+      "sha256": "bda7378c58abf1324949862b91512d9e556fc7e4100007e7cec2645629115bcb"
     },
     {
       "path": "Docs/README.md",
@@ -1886,7 +1886,7 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "06da94be8135e3b5c197af01b71d5665601f75b4be12eb1435c70abc8098a32d"
+      "sha256": "8e1e2b4c5caa95f32d88172913bac4826ebda4ae8ebabb08a62c32b62e06390a"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
@@ -1896,7 +1896,7 @@
     {
       "path": "packages/browser/src/live-business-action-cli.ts",
       "category": "browser-runtime",
-      "sha256": "20a4c2d14c46392c539c71c89f4ebb25edb9fb50cbba4beadef204b53a4db06d"
+      "sha256": "5d8eeac85142a256edadb8a148e3247ac51dd7df682869eb2dab824fe6557b30"
     },
     {
       "path": "packages/browser/src/live-candidate-readback-cli.ts",
@@ -1936,7 +1936,7 @@
     {
       "path": "packages/browser/tests/browser-worker.spec.ts",
       "category": "test",
-      "sha256": "08e4d134017390b0c1d5df108ac3343df28652f132b5790991fd591f05c6d6cd"
+      "sha256": "3e2d07bf5568f44494a44761ef71ac4e50f3a0af13e8d1ea65536b1deb821894"
     },
     {
       "path": "packages/browser/tests/candidate-client.spec.ts",
@@ -1971,7 +1971,7 @@
     {
       "path": "packages/browser/tests/salesforce-browser-coordinator.spec.ts",
       "category": "test",
-      "sha256": "47fd2f6288681fbce4e3fdfdde6e4aba67a0d64246a5ddfcc67195b7cd5669f4"
+      "sha256": "2e5d616d7f6ee585011e49849db7b528a6e689011c0353949770f540bb55be1f"
     },
     {
       "path": "packages/browser/tests/salesforce-cli-session.spec.ts",
@@ -2131,7 +2131,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "d38d31bf0fe1e7bc0ff64cf0a37c8c398a3d11cde977161d9c06cb520af1b9a8"
+      "sha256": "e1fb7ed1e2af53d122260914bc1b666e10598f4c4e0da07a5e69d3faeb59c26f"
     },
     {
       "path": "scripts/catalog/build_project_index.py",

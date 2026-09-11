@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "1b89adfb03895b22cc1aae6b9fb2cef8cdf075f60a8286e5931f2f3f34dc3175",
+  "sourceSnapshot": "c82830f7b84b684e4de3ceadac2e9145f543e00487e7b5b4c3f54369d518313e",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -4589,6 +4589,11 @@
       "from": "file:packages/browser/src/browser-recovery.ts",
       "relation": "imports",
       "to": "file:packages/browser/src/browser-worker.ts"
+    },
+    {
+      "from": "file:packages/browser/src/browser-worker.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/locator-healer.ts"
     },
     {
       "from": "file:packages/browser/src/healing-probe.ts",
