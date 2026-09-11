@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -5,14 +6,24 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from neo_sf_q_intel.api import create_app
-from neo_sf_q_intel.candidate_assurance import CandidateAssuranceBundle
+from neo_sf_q_intel.candidate_assurance import (
+    CandidateAssuranceBundle,
+    build_candidate_assurance_view,
+)
 from neo_sf_q_intel.config import Settings
 from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest, DecisionCode
 from neo_sf_q_intel.edge_envelope import stable_sha256
 from neo_sf_q_intel.foundation_pipeline import CandidateFoundationPipeline
 from neo_sf_q_intel.repository import InMemoryRunRepository
 from neo_sf_q_intel.service import AssuranceService
+from neo_sf_q_intel.specialist import (
+    ProviderCallOutcome,
+    ProviderCallStatus,
+    ProviderFinishReason,
+    ProviderProfile,
+)
 from tests.test_foundation_pipeline import NS, ROOT, _git, _pipeline, _repository, _write
+from tests.test_specialist import _profile
 from tests.test_workflow import source
 
 
@@ -32,6 +43,52 @@ def _service_for_repository(
         ),
         repository,
     )
+
+
+class _RecordingSpecialistProvider:
+    def __init__(self, profile: ProviderProfile | None = None) -> None:
+        self._profile = profile or _profile()
+        self.prompts: list[str] = []
+
+    @property
+    def profile(self) -> ProviderProfile:
+        return self._profile
+
+    def __call__(
+        self,
+        prompt: str,
+        *,
+        timeout_milliseconds: int,
+        maximum_output_tokens: int,
+    ) -> ProviderCallOutcome:
+        self.prompts.append(prompt)
+        return ProviderCallOutcome(
+            status=ProviderCallStatus.SUCCESS,
+            raw_response=json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "posture": "ANALYSIS_ONLY",
+                    "candidate_state": "CANDIDATE",
+                    "relationship_state": "INFERRED",
+                    "may_authorize": False,
+                    "may_satisfy_release_evidence": False,
+                    "authority_eligible": False,
+                    "conclusion": "No source-bound proposal from the test provider.",
+                    "proposals": [],
+                    "assumptions": [],
+                    "gaps": ["test provider abstained"],
+                    "abstained": True,
+                },
+                separators=(",", ":"),
+            ),
+            provider_profile_sha256=self._profile.profile_sha256,
+            invoked_at="2026-01-01T00:00:00.000Z",
+            completed_at="2026-01-01T00:00:00.001Z",
+            finish_reason=ProviderFinishReason.STOP,
+            input_tokens=10,
+            output_tokens=8,
+            duration_milliseconds=1,
+        )
 
 
 def _lwc_repository(tmp_path: Path, names: tuple[str, str]) -> Path:
@@ -113,6 +170,36 @@ def test_host_owned_candidate_runs_both_modify_sides_and_persists(tmp_path: Path
     assert set(repository.runs) == {item.run.run_id for item in bundle.analyses}
     assert bundle.release_eligible is False
     assert CandidateAssuranceBundle.model_validate(bundle.model_dump(mode="json")) == bundle
+
+
+def test_candidate_endpoint_invokes_and_persists_specialist_capture(tmp_path: Path) -> None:
+    repository_root = _repository(tmp_path)
+    repository = InMemoryRunRepository()
+    provider = _RecordingSpecialistProvider()
+    service = AssuranceService(
+        source(),
+        repository,
+        foundation_pipeline=_pipeline(repository_root),
+        specialist_provider=provider,
+    )
+
+    bundle = service.analyze_current_candidate()
+    view = build_candidate_assurance_view(bundle)
+
+    assert len(provider.prompts) == sum(len(item.specialist_captures) for item in bundle.analyses)
+    assert len(provider.prompts) == 6
+    assert all(item.specialist_captures for item in bundle.analyses)
+    for analysis in bundle.analyses:
+        capture = analysis.specialist_captures[0]
+        assert capture.provider_raw_response is not None
+        assert capture.workflow_result.run_id == analysis.run.run_id
+        assert capture.workflow_result.may_authorize is False
+        assert capture.workflow_result.may_satisfy_release_evidence is False
+        assert capture.artifact.may_authorize is False
+        assert capture.expected_provider_profile_sha256 == provider.profile.profile_sha256
+        assert capture.capture_sha256
+    assert all(item.specialist_capture_count == 3 for item in view.analyses)
+    assert all(len(item.specialist_artifact_sha256s) == 3 for item in view.analyses)
 
 
 @pytest.mark.parametrize("component_name", ["panel", "accountSummary"])

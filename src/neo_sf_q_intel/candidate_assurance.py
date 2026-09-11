@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -27,7 +27,15 @@ from neo_sf_q_intel.graph_production import (
 )
 from neo_sf_q_intel.ontology import CanonicalOntology, SourceGraphProfile
 from neo_sf_q_intel.operation_seed import OperationSeedArtifact
+from neo_sf_q_intel.reasoning_workflow import ReasoningWorkflowResult
 from neo_sf_q_intel.salesforce_source import SalesforceSourceSnapshot, canonical_project_id
+from neo_sf_q_intel.specialist import (
+    PromptEnvelope,
+    ProviderCallOutcome,
+    ProviderProfile,
+    SpecialistProposalArtifact,
+    provider_capture_sha256,
+)
 
 Sha256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 
@@ -61,6 +69,45 @@ class CandidateOperationBinding(_Model):
         return self
 
 
+class CandidateSpecialistCapture(_Model):
+    """Private replay material for one provider-backed advisory stage.
+
+    ``ProviderCallOutcome.raw_response`` is intentionally excluded by that public model,
+    so the candidate bundle stores a bounded replay copy here instead of relying on
+    ordinary ``model_dump`` output.  Public candidate views expose only hashes/statuses.
+    """
+
+    workflow_result: ReasoningWorkflowResult
+    artifact: SpecialistProposalArtifact
+    prompt: PromptEnvelope
+    provider_profile: ProviderProfile
+    provider_outcome: dict[str, Any]
+    provider_raw_response: str | None = Field(default=None, max_length=262_144)
+    expected_provider_profile_sha256: Sha256
+    expected_provider_capture_sha256: Sha256
+    capture_sha256: Sha256
+
+    @model_validator(mode="after")
+    def validate_capture(self) -> CandidateSpecialistCapture:
+        replay_outcome = ProviderCallOutcome.model_validate(self.provider_outcome)
+        if replay_outcome.raw_response != self.provider_raw_response:
+            raise ValueError("Provider raw response differs from private replay field")
+        if self.expected_provider_profile_sha256 != self.provider_profile.profile_sha256:
+            raise ValueError("Provider profile root differs from expected replay root")
+        if self.expected_provider_capture_sha256 != provider_capture_sha256(replay_outcome):
+            raise ValueError("Provider capture root differs from replay outcome")
+        if (
+            self.artifact.provider_receipt.provider_profile_sha256
+            != self.provider_profile.profile_sha256
+        ):
+            raise ValueError("Artifact receipt differs from provider profile")
+        body = self.model_dump(mode="json")
+        declared = body.pop("capture_sha256")
+        if declared != stable_sha256(body):
+            raise ValueError("Candidate specialist capture digest is invalid")
+        return self
+
+
 class CandidateSideAssurance(_Model):
     side: TreeSide
     operation_scope: tuple[Literal["ADD", "MODIFY", "DELETE"], ...] = Field(min_length=1)
@@ -74,6 +121,7 @@ class CandidateSideAssurance(_Model):
     producer_raw_graph_sha256: Sha256
     analysis_normalized_graph_sha256: Sha256
     run: AssuranceRun
+    specialist_captures: tuple[CandidateSpecialistCapture, ...] = Field(default=(), max_length=8)
 
     @model_validator(mode="after")
     def validate_binding(self) -> CandidateSideAssurance:
@@ -118,6 +166,21 @@ class CandidateSideAssurance(_Model):
         if self.graph_side_receipt_sha256 != self.operation_seed_side_receipt_sha256:
             raise ValueError("Operation seeds are not bound to the exact graph side")
         request = self.run.request
+        for capture in self.specialist_captures:
+            if (
+                capture.workflow_result.run_id != self.run.run_id
+                or capture.workflow_result.trace_id != self.run.trace_id
+                or capture.workflow_result.project_id != request.project_id
+                or capture.workflow_result.source_snapshot != self.run.source_snapshot
+                or capture.workflow_result.source_graph_sha256 != self.run.source_graph_sha256
+                or capture.workflow_result.normalized_graph_sha256
+                != self.run.normalized_graph_sha256
+                or capture.artifact.project_id != request.project_id
+                or capture.artifact.source_snapshot != self.run.source_snapshot
+                or capture.artifact.source_graph_sha256 != self.run.source_graph_sha256
+                or capture.artifact.normalized_graph_sha256 != self.run.normalized_graph_sha256
+            ):
+                raise ValueError("Specialist capture is not bound to its side run")
         if (
             request.change_intent is not ChangeIntent.VERIFIED_CHANGE
             or tuple(request.changed_paths) != self.changed_paths
@@ -289,6 +352,9 @@ class CandidateSideAssuranceView(_Model):
     source_graph_sha256: Sha256
     normalized_graph_sha256: Sha256
     graph_side_receipt_sha256: Sha256
+    specialist_capture_count: int = Field(default=0, ge=0, le=8)
+    specialist_artifact_sha256s: tuple[Sha256, ...] = Field(default=(), max_length=8)
+    reasoning_workflow_result_sha256s: tuple[Sha256, ...] = Field(default=(), max_length=8)
 
     @model_validator(mode="after")
     def validate_side_view(self) -> CandidateSideAssuranceView:
@@ -621,6 +687,14 @@ def build_candidate_assurance_view(
                 "source_graph_sha256": item.run.source_graph_sha256,
                 "normalized_graph_sha256": item.run.normalized_graph_sha256,
                 "graph_side_receipt_sha256": item.graph_side_receipt_sha256,
+                "specialist_capture_count": len(item.specialist_captures),
+                "specialist_artifact_sha256s": [
+                    capture.artifact.artifact_sha256 for capture in item.specialist_captures
+                ],
+                "reasoning_workflow_result_sha256s": [
+                    capture.workflow_result.result_sha256
+                    for capture in item.specialist_captures
+                ],
             }
             for item in validated.analyses
         ],

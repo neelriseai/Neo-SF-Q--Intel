@@ -15,8 +15,10 @@ machine-local authority described below.
 No commit or push was performed at this checkpoint. Local Git is the product source boundary; a
 remote repository is optional and its absence must not block analysis. Secret-bearing `.env` and
 `.runtime` content remains ignored and must never be committed, copied into reports or printed.
-The machine-readable scope review is intentionally `IN_PROGRESS`, not `APPROVED`, while the open
-P1 findings and interrupted host/browser integrations remain.
+At this checkpoint, the machine-readable scope review was intentionally `IN_PROGRESS`, not
+`APPROVED`, while the open P1 findings and interrupted host/browser integrations remained. Later
+protected commits may approve a narrower reviewed slice without altering this historical stop-state
+boundary.
 
 ## Executive status
 
@@ -214,3 +216,14 @@ TypeScript live build coverage. A remaining review P1 is open: the TypeScript pr
 needs an explicit navigation identity or digest so direct probe callers cannot mix semantic
 obligations across navigation objects. Do not promote applied healing or live browser dispatch from
 the probe foundation until that boundary and production call wiring are complete.
+
+After the provider proof, the public host-owned candidate-analysis path was also wired to invoke the
+configured advisory specialist stages for each verified BASE/CANDIDATE side when LLM dispatch is
+enabled. Candidate bundles persist private replay capture material, including exact provider
+response bytes, while bounded public views expose only counts/statuses and advisory artifact or
+workflow SHA-256 roots. Azure OpenAI specialist configuration now rejects placeholder, malformed and
+pre-structured-output API versions before client construction.
+
+This post-checkpoint addendum still does not change the stop state: live Salesforce acceptance is
+zero accepted gates, no metadata candidate was dispatched, no headless live browser acceptance was
+run, and no release authority is claimed.

@@ -31,6 +31,9 @@ class ProviderConfigurationBlockedError(RuntimeError):
     code = PROVIDER_CREDENTIAL_SOURCE_CONFLICT
 
 
+AZURE_STRICT_SCHEMA_API_VERSION_UNSUPPORTED = "AZURE_STRICT_SCHEMA_API_VERSION_UNSUPPORTED"
+
+
 class ModelProvider(Protocol):
     async def reason_json(
         self, *, instructions: str, payload: dict[str, Any]
@@ -83,6 +86,7 @@ class OpenAISpecialistProvider:
             raise ProviderConfigurationBlockedError(PROVIDER_CREDENTIAL_SOURCE_CONFLICT)
         self.settings = settings
         if settings.ai_provider is AIProvider.AZURE_OPENAI:
+            _require_azure_strict_schema_api_version(settings.azure_openai_api_version)
             self.client = client or AzureOpenAI(
                 api_key=settings.azure_openai_api_key.get_secret_value(),  # type: ignore[union-attr]
                 azure_endpoint=settings.azure_openai_endpoint,
@@ -248,6 +252,23 @@ def _canonical_json(value: Any) -> bytes:
 
 def _stable_hash(value: Any) -> str:
     return hashlib.sha256(_canonical_json(value)).hexdigest()
+
+
+def _require_azure_strict_schema_api_version(api_version: str | None) -> None:
+    if not api_version:
+        raise ProviderConfigurationBlockedError(AZURE_STRICT_SCHEMA_API_VERSION_UNSUPPORTED)
+    lowered = api_version.casefold()
+    if lowered in {"v1", "preview"}:
+        return
+    if len(lowered) >= 10:
+        date_part = lowered[:10]
+        try:
+            parsed = datetime.fromisoformat(date_part)
+        except ValueError:
+            parsed = None
+        if parsed is not None and parsed.date() >= datetime(2024, 8, 1).date():
+            return
+    raise ProviderConfigurationBlockedError(AZURE_STRICT_SCHEMA_API_VERSION_UNSUPPORTED)
 
 
 def _format_timestamp(value: datetime) -> str:

@@ -4,6 +4,7 @@ import sqlite3
 from collections.abc import Callable, Iterable
 from contextlib import suppress
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any, Literal, Protocol
 from uuid import UUID
@@ -17,12 +18,18 @@ from neo_sf_q_intel.candidate_assurance import (
     CandidateAssuranceBundle,
     CandidateAssuranceView,
     CandidateSideAssurance,
+    CandidateSpecialistCapture,
     build_candidate_assurance_bundle,
     build_candidate_assurance_view,
     candidate_side_requests,
     source_from_verified_graph_side,
 )
 from neo_sf_q_intel.config import Settings
+from neo_sf_q_intel.context_pack import (
+    DEFAULT_CONTEXT_COMPILER_POLICY_SHA256,
+    compile_graph_context_pack,
+    load_context_compiler_policy,
+)
 from neo_sf_q_intel.domain import (
     AnalysisGap,
     AssuranceRun,
@@ -68,7 +75,23 @@ from neo_sf_q_intel.outcomes import (
 )
 from neo_sf_q_intel.policy import ReasoningPolicy
 from neo_sf_q_intel.postgres_schema import scoped_connection_string
-from neo_sf_q_intel.providers import ModelProvider, create_model_provider
+from neo_sf_q_intel.propagation import (
+    DEFAULT_PROPAGATION_POLICY_SHA256,
+    load_propagation_policy,
+    traverse_propagation,
+)
+from neo_sf_q_intel.providers import (
+    ModelProvider,
+    create_model_provider,
+    create_specialist_provider,
+)
+from neo_sf_q_intel.reasoning_workflow import (
+    SpecialistReplayBundle,
+    SpecialistStageInput,
+    canonical_change_request_sha256,
+    integrate_reasoning_workflow,
+    load_reasoning_workflow_policy,
+)
 from neo_sf_q_intel.repository import (
     InMemoryRunRepository,
     PostgresRunRepository,
@@ -79,6 +102,16 @@ from neo_sf_q_intel.retrieval import EvidenceRetriever
 from neo_sf_q_intel.safety import require_no_sensitive_text
 from neo_sf_q_intel.salesforce_source import SalesforceSourceSnapshot, load_salesforce_source
 from neo_sf_q_intel.semantic import SemanticEvidenceIndex, SemanticHit
+from neo_sf_q_intel.specialist import (
+    GraphContextReplayInputs,
+    ProviderPort,
+    SpecialistIdentity,
+    SpecialistRequest,
+    execute_specialist_capture,
+    load_specialist_evaluation_contract,
+    load_specialist_policy,
+    replay_verify_analysis_context,
+)
 from neo_sf_q_intel.workflow import AssuranceWorkflow
 
 
@@ -93,6 +126,9 @@ class FoundationPipelineUnavailable(RuntimeError):
 
 FOUNDATION_PIPELINE_NOT_CONFIGURED = "FOUNDATION_PIPELINE_NOT_CONFIGURED"
 FOUNDATION_PIPELINE_CONFIGURATION_INVALID = "FOUNDATION_PIPELINE_CONFIGURATION_INVALID"
+_REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+_CONTEXT_COMPILER_POLICY_PATH = _REPOSITORY_ROOT / "config" / "context-compiler-policy.json"
+_PROPAGATION_POLICY_PATH = _REPOSITORY_ROOT / "config" / "propagation-policy.json"
 
 
 class _LiveBaselineRunner(Protocol):
@@ -140,12 +176,17 @@ class _VerifiedCandidateAuthority:
     operation_seed_sha256: str
 
 
+def _utc_timestamp() -> str:
+    return datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
 class AssuranceService:
     def __init__(
         self,
         source: SalesforceSourceSnapshot,
         repository: RunRepository | None = None,
         model_provider: ModelProvider | None = None,
+        specialist_provider: ProviderPort | None = None,
         checkpointer: Any | None = None,
         checkpoint_context: Any | None = None,
         reasoning_policy: ReasoningPolicy | None = None,
@@ -193,6 +234,7 @@ class AssuranceService:
         self._reasoning_policy = active_reasoning_policy
         self._checkpointer = checkpointer
         self._model_provider = model_provider
+        self._specialist_provider = specialist_provider
         retriever = EvidenceRetriever(source, active_reasoning_policy)
         self._source_project_id = retriever.project_id
         self._source_snapshot = retriever.source_snapshot
@@ -468,6 +510,149 @@ class AssuranceService:
         except Exception:
             raise FoundationPipelineUnavailable from None
 
+    def _candidate_specialist_captures(
+        self,
+        run: AssuranceRun,
+        source: SalesforceSourceSnapshot,
+    ) -> tuple[CandidateSpecialistCapture, ...]:
+        """Run configured advisory specialists for one verified candidate side."""
+
+        if self._specialist_provider is None:
+            return ()
+        propagation_policy = load_propagation_policy(
+            _PROPAGATION_POLICY_PATH,
+            self._foundation_pipeline.ontology if self._foundation_pipeline else source.ontology,
+            expected_sha256=DEFAULT_PROPAGATION_POLICY_SHA256,
+        )
+        compiler_policy = load_context_compiler_policy(
+            _CONTEXT_COMPILER_POLICY_PATH,
+            expected_sha256=DEFAULT_CONTEXT_COMPILER_POLICY_SHA256,
+        )
+        request_sha256 = canonical_change_request_sha256(run.request)
+        propagation = traverse_propagation(
+            source.normalized_graph,
+            tuple(run.request.verified_seed_ids),
+            propagation_policy,
+        )
+        pack = compile_graph_context_pack(
+            source.normalized_graph,
+            propagation,
+            propagation_policy,
+            self._reasoning_policy,
+            compiler_policy,
+            request_sha256=request_sha256,
+            reasoning_policy_locator="config/reasoning-policy.json",
+            expected_reasoning_policy_sha256=self._reasoning_policy.policy_sha256,
+            expected_retrieval_eval_set_sha256=self._reasoning_policy.retrieval_eval_set_sha256,
+            expected_propagation_policy_sha256=propagation_policy.sha256,
+            expected_compiler_policy_sha256=compiler_policy.sha256,
+        )
+        context = replay_verify_analysis_context(
+            pack,
+            GraphContextReplayInputs(
+                graph=source.normalized_graph,
+                propagation=propagation,
+                propagation_policy=propagation_policy,
+                reasoning_policy=self._reasoning_policy,
+                compiler_policy=compiler_policy,
+                ontology=source.ontology,
+                request_sha256=request_sha256,
+                reasoning_policy_locator="config/reasoning-policy.json",
+                expected_ontology_sha256=source.ontology.sha256,
+                expected_reasoning_policy_sha256=self._reasoning_policy.policy_sha256,
+                expected_retrieval_eval_set_sha256=(
+                    self._reasoning_policy.retrieval_eval_set_sha256
+                ),
+                expected_propagation_policy_sha256=propagation_policy.sha256,
+                expected_compiler_policy_sha256=compiler_policy.sha256,
+            ),
+        )
+        workflow_policy = load_reasoning_workflow_policy()
+        specialist_policy = load_specialist_policy()
+        evaluation = load_specialist_evaluation_contract()
+        captures: list[CandidateSpecialistCapture] = []
+        stages: list[SpecialistStageInput] = []
+        for spec in workflow_policy.specialist_profiles:
+            if run.request.change_intent.value not in spec.eligible_change_intents:
+                continue
+            request_body = {
+                "request_id": f"{run.run_id}:{spec.stage_id}",
+                "context_request_sha256": request_sha256,
+                "identity": {
+                    "specialist_id": spec.specialist_id,
+                    "specialist_version": spec.specialist_version,
+                    "capability_id": spec.capability_id,
+                },
+                "task": (
+                    "Assess replay-verified Salesforce candidate-change impacts from the "
+                    "provided graph context. Produce only source-bound advisory proposals."
+                ),
+                "question": (
+                    "Which impacted components, tests, automation targets, or governance "
+                    "risks need deterministic review before this candidate can proceed?"
+                ),
+            }
+            specialist_request = SpecialistRequest(
+                request_id=request_body["request_id"],
+                context_request_sha256=request_body["context_request_sha256"],
+                request_sha256=stable_sha256(request_body),
+                identity=SpecialistIdentity(**request_body["identity"]),
+                task=request_body["task"],
+                question=request_body["question"],
+            )
+            capture = execute_specialist_capture(
+                context,
+                specialist_request,
+                specialist_policy,
+                evaluation,
+                self._specialist_provider,
+                expected_provider_profile_sha256=(
+                    self._specialist_provider.profile.profile_sha256
+                ),
+            )
+            replay_bundle = SpecialistReplayBundle(
+                target_run_id=run.run_id,
+                target_trace_id=run.trace_id,
+                artifact=capture.artifact,
+                context=context,
+                request=specialist_request,
+                profile=capture.profile,
+                policy=specialist_policy,
+                evaluation=evaluation,
+                prompt=capture.prompt,
+                outcome=capture.outcome,
+                expected_provider_profile_sha256=capture.expected_provider_profile_sha256,
+                expected_provider_capture_sha256=capture.expected_provider_capture_sha256,
+            )
+            stages.append(SpecialistStageInput(spec=spec, replay_bundle=replay_bundle))
+            result = integrate_reasoning_workflow(
+                run,
+                tuple(stages),
+                workflow_policy,
+                expected_workflow_policy_sha256=workflow_policy.policy_sha256,
+                evaluated_at=_utc_timestamp(),
+                live_evaluated_at=_utc_timestamp,
+            )
+            capture_body = {
+                "workflow_result": result.model_dump(mode="json"),
+                "artifact": capture.artifact.model_dump(mode="json"),
+                "prompt": capture.prompt.model_dump(mode="json"),
+                "provider_profile": capture.profile.model_dump(mode="json"),
+                "provider_outcome": {
+                    **capture.outcome.model_dump(mode="json"),
+                    "raw_response": capture.outcome.raw_response,
+                },
+                "provider_raw_response": capture.outcome.raw_response,
+                "expected_provider_profile_sha256": capture.expected_provider_profile_sha256,
+                "expected_provider_capture_sha256": capture.expected_provider_capture_sha256,
+            }
+            captures.append(
+                CandidateSpecialistCapture.model_validate(
+                    {**capture_body, "capture_sha256": stable_sha256(capture_body)}
+                )
+            )
+        return tuple(captures)
+
     def analyze_current_candidate(self) -> CandidateAssuranceBundle:
         """Replay and analyze host-owned Git state; accepts no caller-selected scope."""
 
@@ -527,6 +712,7 @@ class AssuranceService:
                         operation_seed_sha256=seeds.artifact_sha256,
                     ),
                 )
+                specialist_captures = self._candidate_specialist_captures(run, source)
                 analyses.append(
                     CandidateSideAssurance(
                         side=side,
@@ -545,6 +731,7 @@ class AssuranceService:
                         producer_raw_graph_sha256=graph_side.raw_graph_sha256,
                         analysis_normalized_graph_sha256=(source.normalized_graph.graph_sha256),
                         run=run,
+                        specialist_captures=specialist_captures,
                     )
                 )
             bundle = build_candidate_assurance_bundle(verified, tuple(analyses))
@@ -814,6 +1001,9 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
             repository,
             model_provider=(
                 None if settings.provider_calls_blocked else create_model_provider(settings)
+            ),
+            specialist_provider=(
+                None if settings.provider_calls_blocked else create_specialist_provider(settings)
             ),
             checkpointer=checkpointer,
             checkpoint_context=checkpoint_context,

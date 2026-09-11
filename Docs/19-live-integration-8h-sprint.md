@@ -166,8 +166,10 @@ weaken signatures, freshness windows, ordering or replay.
 ## Feasibility verdict
 
 - **Completed prerequisite:** isolated real OpenAI specialist invocation through the strict
-  provider-neutral contract, including typed verification and sanitized capture roots. This remains
-  advisory-only and does not satisfy live Salesforce gates.
+  provider-neutral contract, plus public candidate-path wiring that invokes configured advisory
+  specialist stages against replay-verified graph context and persists private replay captures.
+  Public API/UI projections expose only safe counts/statuses and SHA-256 roots. This remains
+  advisory-only and does not satisfy live Salesforce, browser, deployment, restore or residue gates.
 - **Feasible in eight hours:** a live baseline assurance vertical, real candidate impact/test
   reasoning, product-owned scoped live reads, selected live tests when independently authorized,
   PostgreSQL-backed evidence, one reversible browser recovery, a real dashboard journey and final

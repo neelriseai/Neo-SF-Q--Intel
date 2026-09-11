@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "498dd489939df45337e40c2c84d6db6dd2ca81569b83327079f47c30fb9cf8ca",
+  "sourceSnapshot": "cd7623225a7fe2f92e1e0f733bd1abdda4e04cd052b47e9411c3a97f2b36904b",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -4788,7 +4788,17 @@
     {
       "from": "file:src/neo_sf_q_intel/candidate_assurance.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/reasoning_workflow.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/candidate_assurance.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/candidate_assurance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/candidate_live_targets.py",
@@ -5848,6 +5858,11 @@
     {
       "from": "file:src/neo_sf_q_intel/service.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_pack.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
     },
     {
@@ -5908,7 +5923,17 @@
     {
       "from": "file:src/neo_sf_q_intel/service.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/propagation.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/providers.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/reasoning_workflow.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/service.py",
@@ -5934,6 +5959,11 @@
       "from": "file:src/neo_sf_q_intel/service.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/semantic.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/service.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/service.py",
@@ -6149,6 +6179,11 @@
       "from": "file:tests/test_candidate_assurance.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_candidate_assurance.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "file:tests/test_candidate_live_targets.py",

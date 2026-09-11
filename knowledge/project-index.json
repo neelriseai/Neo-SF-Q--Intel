@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "498dd489939df45337e40c2c84d6db6dd2ca81569b83327079f47c30fb9cf8ca",
+  "sourceSnapshot": "cd7623225a7fe2f92e1e0f733bd1abdda4e04cd052b47e9411c3a97f2b36904b",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1401,7 +1401,7 @@
     {
       "path": "Docs/04-agent-orchestration.md",
       "category": "canonical-documentation",
-      "sha256": "91957174ab4f5ceaa79b778b89d0fbf5d0f86866c9d373445b4ec29c0eeac17f"
+      "sha256": "f1ace67609f54895dfffc33dacb149be6be6d7a2dbfb0f96b6a001fc4a6df6f9"
     },
     {
       "path": "Docs/04-guardrails-and-policy-enforcement.md",
@@ -1501,7 +1501,7 @@
     {
       "path": "Docs/10-graph-grounded-agent-reasoning.md",
       "category": "canonical-documentation",
-      "sha256": "685b65c4a38f972929be53067db20c76fc97cbbc25e3109d25b052178e0f6818"
+      "sha256": "4ae33989723f74d9489a51c5a33913c87ae107fe5160c528e13b1cf7fa4badab"
     },
     {
       "path": "Docs/11-ai-governance-red-teaming-and-continuous-improvement.md",
@@ -1551,7 +1551,7 @@
     {
       "path": "Docs/19-live-integration-8h-sprint.md",
       "category": "reference-documentation",
-      "sha256": "86c7023c2807de6721eab6aa89a6b172e80e78e610b2c9dce58977322477b94f"
+      "sha256": "6216dce2035c414209e67f5dba2778d1cc7de35da082481a0060e777bdb2e911"
     },
     {
       "path": "Docs/20-source-operation-declarations.md",
@@ -1561,17 +1561,17 @@
     {
       "path": "Docs/21-development-stop-checkpoint-2026-09-11.md",
       "category": "reference-documentation",
-      "sha256": "ec26a01e94e96eeb0071429f33c58bd5d603a6d458e4b6c098b1d453c5200cea"
+      "sha256": "644838758391bfb918e055c86ae796543eaa32ed7d7205967fa74f6c5067d41a"
     },
     {
       "path": "Docs/22-frozen-three-hour-agentic-live-vertical.md",
       "category": "reference-documentation",
-      "sha256": "c5ded7bba3c9707e1b741c45f25f8bbaf530bc0284a9e10e64a8866081b41149"
+      "sha256": "39ae9ddd4f3cef15377ef9aecb0b889a3f50ff168ea5df942029410a75c18a04"
     },
     {
       "path": "Docs/README.md",
       "category": "canonical-documentation",
-      "sha256": "a51d6c1ed2df4a58ce0c064c2a60d1af95d6cf7f8e6c29cdf1670fde9b145a67"
+      "sha256": "66f8fe0a05de98b1cea47a3ec3f10cdb203553224d1a076ad8f46698d0601cbc"
     },
     {
       "path": "Docs/deep-research-report.md",
@@ -2106,7 +2106,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "aae8f6c5c2d2cba6b9decfe69263b44677e72813453a449433af1e04a17d8b74"
+      "sha256": "c4e56c39bd2bcf18d666281e2759fd4776d1e077679904ef260fd916f812b2fd"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -2156,7 +2156,7 @@
     {
       "path": "src/neo_sf_q_intel/candidate_assurance.py",
       "category": "python-runtime",
-      "sha256": "6f92544cc1f725844333aadc4d3d5b35b10f8236a683472bbea9ef5874bea49a"
+      "sha256": "ca6e52536a557e1cdc9f1db930f8c386cb6a92801250287a13669b2c8bf25e1c"
     },
     {
       "path": "src/neo_sf_q_intel/candidate_live_targets.py",
@@ -2381,7 +2381,7 @@
     {
       "path": "src/neo_sf_q_intel/providers.py",
       "category": "python-runtime",
-      "sha256": "beebe199fad937b32565f6a53ba824a3a3f79667b2f564f5a7f194c6cde6bde8"
+      "sha256": "db85ac1e147ef547daaef21d7c106880ddb525b449c2681148e755369febea98"
     },
     {
       "path": "src/neo_sf_q_intel/reasoning_workflow.py",
@@ -2431,7 +2431,7 @@
     {
       "path": "src/neo_sf_q_intel/service.py",
       "category": "python-runtime",
-      "sha256": "5a68b6f8e78a0abf5007c3b8e641fc541747e0f57aba7a4ca651f1f4db801f5e"
+      "sha256": "17bd425581ec2061ec6dcb90ab6f5f2cd416f853d3aaa3940953dbb64cb9a04c"
     },
     {
       "path": "src/neo_sf_q_intel/specialist.py",
@@ -2496,7 +2496,7 @@
     {
       "path": "tests/test_candidate_assurance.py",
       "category": "test",
-      "sha256": "a65b9811a067c8a2c9fa22a456482a8b0bbbc32aaa00dd0c92bfdbea0f78363d"
+      "sha256": "491be56f3674414157a94d9e86ce22f230a48cb63bec05df3f622a5f09adbc5f"
     },
     {
       "path": "tests/test_candidate_live_targets.py",
@@ -2531,7 +2531,7 @@
     {
       "path": "tests/test_config.py",
       "category": "test",
-      "sha256": "4cdffdbe71c290eeb0bcd6a963c27f51a28d5cd4296069084ee46fe1fe0a5b9b"
+      "sha256": "ae783f61db0f922b816ff08425ca6df693b3017959659f348429326fb08696cf"
     },
     {
       "path": "tests/test_context_pack.py",

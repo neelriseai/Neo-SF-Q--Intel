@@ -53,10 +53,25 @@ The response was replayed through the deterministic specialist verifier and prod
 - degraded advisory status because context freshness, risk-factor and fusion evidence remain
   incomplete.
 
-This satisfies the isolated real-provider invocation proof for the specialist contract. It does
-not satisfy live Salesforce acceptance, browser dispatch acceptance, deployment/check-only,
-restore, PostgreSQL campaign replay or release eligibility. Those gates remain `NOT_RUN` or
-`INCOMPLETE` until current receipts exist for the same live campaign.
+This satisfies the first isolated real-provider invocation proof for the specialist contract.
+Subsequent implementation also wired the public host-owned candidate-analysis path to invoke the
+configured specialist stages for each verified BASE/CANDIDATE side when LLM dispatch is enabled.
+The persisted candidate bundle now retains private replay capture material, including the exact
+provider response bytes needed for deterministic verifier replay, while the public projection
+exposes only bounded counts, statuses and SHA-256 roots for advisory artifacts/workflow results.
+Azure OpenAI strict-schema dispatch now fails closed before client construction when the configured
+API version is a placeholder, malformed or older than the structured-output boundary.
+
+These proofs do not satisfy live Salesforce acceptance, browser dispatch acceptance,
+deployment/check-only, restore, PostgreSQL campaign replay or release eligibility. Those gates
+remain `NOT_RUN` or `INCOMPLETE` until current receipts exist for the same live campaign.
+
+A fixture-backed public-path smoke with the real OpenAI provider reached all six configured
+candidate specialist calls (two verified sides times three stages). Each provider call returned
+`STOP`, but deterministic verification classified the advisory artifacts as `INVALID_RESPONSE`.
+That is an accepted fail-closed behavior for malformed or unsupported model output, and proves
+dispatch plus guardrail enforcement, but it does not yet prove an accepted public-path advisory
+proposal. Prompt/contract refinement for accepted public-path proposals remains open.
 
 ## Fixed implementation sequence
 
@@ -64,8 +79,8 @@ restore, PostgreSQL campaign replay or release eligibility. Those gates remain `
    inventory P1. Review or discard interrupted host-factory code.
 2. Complete one non-thin real-provider specialist from graph context compilation through typed
    proposal validation, sanitized trace output and deterministic outage/malformed-response
-   degradation. The isolated provider proof is complete; service wiring and durable persistence of
-   the replay bundle remain open.
+   degradation. The isolated provider proof and candidate-path service wiring are complete; durable
+   restart replay, hard cancellation and PostgreSQL campaign acceptance remain open.
 3. Complete the source-bound TypeScript dispatcher and signed browser observation bridge.
 4. Regenerate current host-owned enrollment, phase-policy, target and recovery proposals; execute
    read-only classification and preflight. No stale `.runtime` artifact grants authority.

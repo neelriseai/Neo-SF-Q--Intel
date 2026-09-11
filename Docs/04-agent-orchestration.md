@@ -23,21 +23,23 @@ around this initial graph and remain scheduled work for the 24-hour implementati
 
 | Stage | Current behavior | Target boundary not yet claimed |
 |---|---|---|
-| Change Analyst | Deterministic lexical/path seed matching over a pinned, normalized analysis graph; isolated provider-backed specialist invocation is now proven through the replay verifier | Product-consumed provider proposals fused into the public service/API result with durable invocation receipts |
+| Change Analyst | Deterministic lexical/path seed matching over a pinned, normalized analysis graph; the host-owned candidate path now invokes configured provider-backed advisory specialists and persists private replay captures | Durable restart replay, hard cancellation, retry-safe checkpoint/CAS integration and quality-corpus evidence |
 | Test Intelligence | Projects selections already made by deterministic analysis into a typed stage result; it does not independently select tests today | Independent evidence-bound obligation planning, trusted execution results and provider explanations |
 | UI Healing | Converts eligible impacts into approval-gated metadata/accessibility strategy proposals | Current-DOM capture, candidate ranking, apply and before/after browser evidence |
 | Governance Review | Revalidates evidence, exact metrics, guardrails and deterministic decision truth | Durable tool/model audit and human approval workflow |
 
-These nodes are deterministic specialist stages, not yet independent model-backed agents. The
-current activity event is useful diagnostic structure but does not yet contain the complete
-replayable measurement and exact-policy receipt required by `AGENTS.md`; durable outbox capture is
-also pending. Events must never contain raw prompts, credentials, session URLs or chain-of-thought.
+These nodes remain governed advisory stages, not release-authorizing model agents. The current
+activity event is useful diagnostic structure but does not yet contain the complete replayable
+measurement and exact-policy receipt required by `AGENTS.md`; durable outbox capture is also
+pending. Events must never contain raw prompts, credentials, session URLs or chain-of-thought.
 
-The multi-agent roadmap capability becomes complete only when provider-backed specialist ports are
-wired into the public service, consume bounded context packs, return schema-validated proposals,
-degrade deterministically when a provider is unavailable, and have independent negative/failure
-tests plus durable invocation receipts. Tool use and state transitions continue to pass through the
-orchestrator.
+The verified candidate path now wires provider-backed specialist ports into the public service when
+LLM dispatch is enabled. Each configured stage consumes replay-verified context packs, returns a
+schema-validated advisory artifact or deterministic degradation, and stores private replay capture
+material; the public view exposes hashes/counts only. The capability remains `FOUNDATION` pending
+durable restart replay, hard cancellation, retry-safe checkpoint/CAS integration, service outbox
+guarantees and adjudicated quality evidence. Tool use and state transitions continue to pass
+through the orchestrator.
 
 ## Isolated advisory consumer foundation
 
@@ -58,12 +60,13 @@ decision. Provider failures are isolated; exact duplicate advisory facts merge t
 provenance, while distinct multi-target facts remain distinct. A4/A5 explicit conflict sets still
 force abstention, and A6 does not invent conflict semantics from model prose.
 
-This is deliberately an isolated `FOUNDATION`, not durable workflow completion. The production
-composition now has a real OpenAI/Azure structured-output adapter and capture-returning specialist
-execution path, but still needs service/API wiring, an independent durable invocation/capture
-registry, host-owned consumption-time receipts, idempotent CAS/checkpoint resume, an event outbox
-and persisted advisory results. Until those exist the dashboard must not imply that configured
-profiles are accepted live agents or that advisory results affected the deterministic assurance run.
+This remains `FOUNDATION`, not durable workflow completion. The production composition now has a
+real OpenAI/Azure structured-output adapter, capture-returning specialist execution and
+candidate-path service wiring with private replay captures. It still needs independent durable
+restart replay, hard cancellation, host-owned consumption-time receipts, idempotent
+CAS/checkpoint resume, an event outbox and quality-corpus evidence. Until those exist the dashboard
+must not imply that configured profiles are accepted live agents or that advisory results affected
+the deterministic assurance run.
 
 ## Graph-grounded specialist contract
 
@@ -83,4 +86,7 @@ and release decisions remain ordinary application logic.
 - Local development: `AI_PROVIDER=openai`.
 - Org runtime: `AI_PROVIDER=azure_openai`.
 
-Both providers implement the same JSON reasoning and embedding interfaces. Provider-specific deployment names, endpoints and keys stay in environment configuration.
+Both providers implement the same JSON reasoning and embedding interfaces. Provider-specific
+deployment names, endpoints and keys stay in environment configuration. Azure OpenAI specialist
+dispatch fails closed before client construction when the configured API version is a placeholder,
+malformed or older than the structured-output boundary.

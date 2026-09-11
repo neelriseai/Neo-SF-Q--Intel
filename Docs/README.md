@@ -36,8 +36,11 @@ the state at interruption. The subsequently authorized execution scope is frozen
 document grants live authority by itself.
 
 Post-resume evidence proves one real OpenAI specialist invocation through the strict provider
-contract and deterministic verifier. It does not prove live Salesforce acceptance,
-deployed-candidate browser testing, restore, residue reconciliation or release eligibility.
+contract and deterministic verifier. The host-owned candidate-analysis path now invokes configured
+advisory specialist stages when LLM dispatch is enabled, persists private replay captures and
+exposes only safe hashes/counts in public views. This status is `FOUNDATION`; live Salesforce
+acceptance, deployed-candidate browser testing, restore, residue reconciliation and release
+eligibility remain `NOT_RUN` or `INCOMPLETE`.
 
 ## Authority and exclusions
 

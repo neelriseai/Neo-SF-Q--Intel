@@ -13,6 +13,7 @@ from neo_sf_q_intel.config import (
 )
 from neo_sf_q_intel.ontology import load_canonical_ontology, load_source_graph_profile
 from neo_sf_q_intel.providers import (
+    AZURE_STRICT_SCHEMA_API_VERSION_UNSUPPORTED,
     OpenAISpecialistProvider,
     ProviderConfigurationBlockedError,
     create_model_provider,
@@ -218,6 +219,48 @@ def test_specialist_provider_uses_strict_schema_without_exposing_secret() -> Non
     assert client.responses.kwargs["text"]["format"]["type"] == "json_schema"
     assert client.responses.kwargs["text"]["format"]["strict"] is True
     assert client.responses.kwargs["text"]["format"]["schema"]["additionalProperties"] is False
+
+
+@pytest.mark.parametrize(
+    "api_version",
+    ["your-supported-api-version", "2024-07-01-preview", "not-a-date"],
+)
+def test_azure_specialist_provider_blocks_unsupported_strict_schema_versions(
+    api_version: str,
+) -> None:
+    settings = Settings(
+        ai_provider="azure_openai",
+        azure_openai_api_key="secret",
+        azure_openai_endpoint="https://example.openai.azure.com",
+        azure_openai_api_version=api_version,
+        azure_openai_chat_deployment="chat",
+        azure_openai_embedding_deployment="embedding",
+    )
+
+    with pytest.raises(
+        ProviderConfigurationBlockedError,
+        match=f"^{AZURE_STRICT_SCHEMA_API_VERSION_UNSUPPORTED}$",
+    ):
+        OpenAISpecialistProvider(settings, client=_FakeClient(_FakeResponse(body={})))
+
+
+@pytest.mark.parametrize("api_version", ["2024-08-01-preview", "2025-04-01-preview", "v1"])
+def test_azure_specialist_provider_accepts_supported_strict_schema_versions(
+    api_version: str,
+) -> None:
+    settings = Settings(
+        ai_provider="azure_openai",
+        azure_openai_api_key="secret",
+        azure_openai_endpoint="https://example.openai.azure.com",
+        azure_openai_api_version=api_version,
+        azure_openai_chat_deployment="chat",
+        azure_openai_embedding_deployment="embedding",
+    )
+
+    provider = OpenAISpecialistProvider(settings, client=_FakeClient(_FakeResponse(body={})))
+
+    assert provider.profile.provider_kind == "azure_openai"
+    assert provider.profile.api_version == api_version
 
 
 def test_specialist_provider_sanitizes_timeout_and_protocol_failures() -> None:
