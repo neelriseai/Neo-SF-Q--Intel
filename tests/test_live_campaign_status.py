@@ -79,11 +79,47 @@ def test_empty_campaign_is_explicitly_incomplete_without_validator_claim(tmp_pat
     assert status.requirements_satisfied is False
     assert status.release_eligible is False
     assert status.accepted_completion_numerator == 0
+    assert status.locally_valid_gate_count == 0
+    assert status.not_current_gate_count == 15
     assert status.receipt_count == 0
     assert len(status.acceptance_profile_sha256) == 64
     assert status.ledger_mode == "SQLITE"
     assert status.ledger_degradation_code == "POSTGRES_NOT_CONFIGURED"
+    assert status.required_gate_ids == tuple(item.gate_id for item in status.gates)
+    assert status.missing_required_gate_ids == status.required_gate_ids
+    assert status.live_baseline_gate_ids == (
+        "SF-L01",
+        "SF-L02",
+        "SF-L03",
+        "SF-L04",
+        "SF-L05",
+        "SF-L06",
+        "SF-L07",
+        "SF-L08",
+        "SF-L09",
+        "SF-C01",
+    )
+    assert status.candidate_gate_ids == (
+        "SF-C01",
+        "SF-C02",
+        "SF-C03",
+        "SF-C04",
+        "SF-C05",
+        "SF-C06",
+    )
     assert {item.state for item in status.gates} == {GateReplayState.NOT_CURRENT}
+    assert {
+        (item.gate_id, item.kind, item.receipt_type, item.accepted_evidence_phases)
+        for item in status.gates
+    } >= {
+        ("SF-L03", "MCP_STANDARD_REST_ASSERTIONS", "MCP_LIVE_REST_RECEIPT", ("LIVE_BASELINE",)),
+        (
+            "SF-C06",
+            "RESTORE_AND_RESIDUE_RECONCILIATION",
+            "RESTORE_RECONCILIATION_RECEIPT",
+            ("RESTORED_BASELINE",),
+        ),
+    }
     assert status.gap_codes == ("CAMPAIGN_RECEIPTS_NOT_FOUND",)
 
 
@@ -98,7 +134,10 @@ def test_durable_replay_reports_local_gate_validity_without_acceptance_overclaim
     assert status.release_eligible is False
     assert status.accepted_completion_numerator == 0
     assert status.completion_denominator == 15
+    assert status.locally_valid_gate_count == 15
+    assert status.not_current_gate_count == 0
     assert len(status.locally_valid_gate_ids) == 15
+    assert status.missing_required_gate_ids == ()
     assert {item.state for item in status.gates} == {GateReplayState.LOCALLY_VALID}
     assert "DURABLE_LEDGER_REQUIRED" in status.gap_codes
 
@@ -201,6 +240,9 @@ def test_api_exposes_only_sanitized_current_replay_projection(tmp_path: Path) ->
     assert response.status_code == 200
     body = response.json()
     assert body["accepted_completion_numerator"] == 0
+    assert body["locally_valid_gate_count"] == 15
+    assert body["not_current_gate_count"] == 0
+    assert body["missing_required_gate_ids"] == []
     assert body["release_eligible"] is False
     assert len(body["acceptance_profile_sha256"]) == 64
     assert body["receipt_count"] > 0

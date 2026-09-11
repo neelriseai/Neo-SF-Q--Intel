@@ -110,6 +110,11 @@ Current 2026-09-11 recheck receipts for this slice:
   read back live through headless Playwright as one matching `save-evaluate-live` host action marker,
   then restored and reconciled to the archived preimage SHA-256. This is deployed-candidate readback
   evidence for the marker only, not complete full-campaign acceptance.
+- The live campaign status endpoint now shows the complete 15-gate matrix with gate kind, receipt
+  type, accepted evidence phase, locally valid count and missing gate IDs. Use it to explain which
+  API, metadata, browser, test, candidate-deploy and restore gates are still missing. Do not present
+  locally replay-valid gates as accepted completion; `releaseEligible=false` remains the boundary
+  until every required signed receipt validates from the durable ledger.
 
 ## Operator runbook — live locator-healing demo (NOT_READY)
 

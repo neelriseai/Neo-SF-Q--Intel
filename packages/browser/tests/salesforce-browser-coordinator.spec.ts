@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import type {
   BrowserWorkerReceipt,
+  CandidateLifecycleState,
   EphemeralSessionHandoff,
   TrustedEnrollmentHandle,
 } from "../src/browser-worker.js";
@@ -223,14 +224,18 @@ test("candidate readback projection carries retry context without raw path or ma
     ...receipt(canary),
     status: "BLOCKED" as const,
     mode: "CANDIDATE_READBACK" as const,
-    lifecycle: ["CAPTURED", "CANDIDATE_NOT_FOUND"] as const,
+    lifecycle: ["CAPTURED", "CANDIDATE_NOT_FOUND"] satisfies CandidateLifecycleState[],
     candidateCount: 0,
     error: { class: "POLICY_BLOCKED" as const, code: "CANDIDATE_NOT_FOUND" },
   };
   const second = {
     ...receipt(canary),
     mode: "CANDIDATE_READBACK" as const,
-    lifecycle: ["CAPTURED", "CANDIDATE_DISCOVERED", "READBACK_VERIFIED"] as const,
+    lifecycle: [
+      "CAPTURED",
+      "CANDIDATE_DISCOVERED",
+      "READBACK_VERIFIED",
+    ] satisfies CandidateLifecycleState[],
     readbackMatched: true,
   };
 

@@ -868,17 +868,18 @@ def test_artifact_byte_limit_counts_digest_envelope() -> None:
     context = _context()
     profile = _profile()
     _, policy, _ = _contracts()
-    body = _relation_document(context.pack, conclusion="c" * 4096)
-    body["proposals"][0]["basis"] = "a" * 4096
-    second_path = context.pack.confirmed_structure_paths[1]
-    second = dict(body["proposals"][0])
-    second.update(
-        proposal_id="proposal-002",
-        target_entity_id=second_path.target_id,
-        evidence_ids=[second_path.path_sha256],
-        basis="b" * 4096,
+    valid_large_text = "x" * policy.limits.maximum_text_characters
+    unique_large_items = [
+        f"{index:02d}-" + ("x" * (policy.limits.maximum_text_characters - 3))
+        for index in range(16)
+    ]
+    body = _relation_document(
+        context.pack,
+        conclusion=valid_large_text,
+        assumptions=unique_large_items,
+        gaps=[],
     )
-    body["proposals"].append(second)
+    body["proposals"][0]["basis"] = valid_large_text
     outcome = _outcome(profile, body)
     with pytest.raises(SpecialistVerificationError, match="maximumOutputBytes"):
         _run(context=context, profile=profile, policy=policy, outcome=outcome)

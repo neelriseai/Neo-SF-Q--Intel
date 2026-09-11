@@ -113,6 +113,7 @@
     "src/neo_sf_q_intel/specialist.py",
     "src/neo_sf_q_intel/subprocess_environment.py",
     "tests/test_candidate_assurance.py",
+    "tests/test_live_campaign_status.py",
     "packages/browser/tests/browser-worker.spec.ts",
     "packages/browser/tests/live-profile-cli.spec.ts",
     "packages/browser/tests/salesforce-browser-coordinator.spec.ts"
@@ -348,6 +349,16 @@
       "code": "LIVE_BROWSER_STEP_CONTEXT_RETRY",
       "severity": "P1",
       "resolution": "The blueprint review found the useful near-term addition was not a new architecture but a small runtime execution/evaluation envelope. The live candidate readback CLI now emits sanitized step context, selected strategy, expected postcondition and per-attempt receipts, caps retries at three, retries only bounded readback failures after browser/context cleanup, and avoids raw paths, selectors, marker values, sessions or org payloads. Focused browser build and 23 Playwright tests passed."
+    },
+    {
+      "code": "FULL_LIVE_CAMPAIGN_GATE_MATRIX",
+      "severity": "P1",
+      "resolution": "The live campaign status projection now exposes the complete required gate matrix with each gate's kind, receipt type, accepted evidence phase, required-for-completion flag, locally valid count and missing required gate IDs. Completion and release fields remain false/zero unless the signed durable campaign validates all required gates, so scoped LWC deploy/readback/restore evidence cannot be misrepresented as full live Salesforce acceptance. Focused status/API tests passed 10/10."
+    },
+    {
+      "code": "BROWSER_TYPESCRIPT_PUSH_GATE",
+      "severity": "P1",
+      "resolution": "Protected push surfaced browser TypeScript regressions after the Python suite passed. Browser recovery now narrows recovery action roles to non-null Playwright roles before getByRole use, and the coordinator test fixtures type candidate lifecycle arrays explicitly. Browser lint and live browser build pass without changing browser authority, mutation, or acceptance behavior."
     }
   ],
   "statusDowngrades": []

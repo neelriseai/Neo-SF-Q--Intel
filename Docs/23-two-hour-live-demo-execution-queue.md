@@ -255,3 +255,21 @@ envelope to the live candidate readback CLI.
 
 Deferred from this blueprint-inspired slice: broad LangGraph rewrite, vector example retrieval,
 vision/bounding boxes, full layout/FLS extraction and forced JavaScript-click fallback.
+
+## Continuation: full live Salesforce campaign acceptance status
+
+Selected item: full live Salesforce campaign acceptance across API, metadata, browser, tests,
+candidate deployment, reconciliation and release policy.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Full gate-set visibility | DONE | 1 | `GET /api/v1/live-campaigns/{campaign_id}/status` now exposes all required gate IDs with kind, receipt type, accepted evidence phases, required-for-completion flag, locally valid count and missing required gate IDs |
+| Truthful acceptance boundary | DONE | 1 | `accepted_completion_numerator`, `requirements_satisfied` and `release_eligible` remain false/zero unless the product-owned validator can accept the complete signed campaign; local replay-valid gates are reported separately and cannot become release authority |
+| API/metadata/browser/test/reconciliation coverage | PARTIAL | 1 | The acceptance profile enumerates those gates (`SF-L03` REST, `SF-L04` custom REST, `SF-L05` metadata, `SF-L06`-`SF-L09` browser/recovery, `SF-L08` tests, `SF-C01`-`SF-C06` candidate/check/deploy/assert/restore). The status API can now show which are missing, but no new signed receipts were minted in this pass |
+| Test it | DONE | 1 | `tests/test_live_campaign_status.py` passed 10/10, including empty-campaign missing-gate projection, full local replay-valid projection and API serialization/no-secret checks |
+| Commit boundary | READY | 0 | This is a status/readiness enhancement and documentation update. It does not deploy, mutate Salesforce, restore metadata, or satisfy the full signed campaign |
+
+Current result: the system can now present the full 15-gate campaign matrix truthfully. The scoped
+LWC deploy/readback/restore evidence remains useful demo evidence, but full live Salesforce
+campaign acceptance still requires trusted current receipts for every required gate and successful
+validator replay over the durable ledger.

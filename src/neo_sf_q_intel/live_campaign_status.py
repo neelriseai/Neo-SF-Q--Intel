@@ -61,6 +61,10 @@ class _Model(BaseModel):
 
 class LiveGateReplayStatus(_Model):
     gate_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$")
+    kind: str = Field(pattern=r"^[A-Z][A-Z0-9_]{0,127}$")
+    receipt_type: str = Field(pattern=r"^[A-Z][A-Z0-9_]{0,127}$")
+    accepted_evidence_phases: tuple[str, ...] = Field(min_length=1, max_length=4)
+    required_for_completion: bool
     state: GateReplayState
 
 
@@ -75,11 +79,17 @@ class LiveCampaignStatus(_Model):
     release_eligible: Literal[False] = False
     accepted_completion_numerator: Literal[0] = 0
     completion_denominator: Literal[15] = 15
+    locally_valid_gate_count: int = Field(ge=0, le=15)
+    not_current_gate_count: int = Field(ge=0, le=15)
     receipt_count: int = Field(ge=0, le=256)
     acceptance_profile_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     ledger_mode: Literal["POSTGRESQL", "SQLITE"]
     ledger_degradation_code: str | None = Field(default=None, pattern=r"^[A-Z][A-Z0-9_]{0,127}$")
+    required_gate_ids: tuple[str, ...] = Field(min_length=15, max_length=15)
     locally_valid_gate_ids: tuple[str, ...] = Field(max_length=15)
+    missing_required_gate_ids: tuple[str, ...] = Field(max_length=15)
+    live_baseline_gate_ids: tuple[str, ...] = Field(max_length=15)
+    candidate_gate_ids: tuple[str, ...] = Field(max_length=6)
     gates: tuple[LiveGateReplayStatus, ...] = Field(min_length=15, max_length=15)
     quarantined: bool
     stored_quarantine_reasons: tuple[str, ...] = Field(max_length=256)
@@ -189,7 +199,13 @@ class LiveCampaignStatusReader:
             acceptance_profile_sha256=self._pinned_profile.profile_sha256,
             ledger_mode=self._selection.mode,
             ledger_degradation_code=self._selection.degradation_code,
+            locally_valid_gate_count=0,
+            not_current_gate_count=len(self._pinned_profile.profile.requiredGateIds),
+            required_gate_ids=tuple(self._pinned_profile.profile.requiredGateIds),
             locally_valid_gate_ids=(),
+            missing_required_gate_ids=tuple(self._pinned_profile.profile.requiredGateIds),
+            live_baseline_gate_ids=self._phase_gate_ids("LIVE_BASELINE"),
+            candidate_gate_ids=self._candidate_gate_ids(),
             gates=self._gate_statuses(()),
             quarantined=stored_quarantine,
             stored_quarantine_reasons=tuple(dict.fromkeys(quarantine_reasons)),
@@ -210,6 +226,9 @@ class LiveCampaignStatusReader:
         gap_codes = [item.code.value for item in validation.gaps]
         if stored_quarantine:
             gap_codes.append("CAMPAIGN_QUARANTINED")
+        locally_valid = tuple(validation.locally_valid_gate_ids)
+        required = tuple(self._pinned_profile.profile.requiredGateIds)
+        missing = tuple(gate_id for gate_id in required if gate_id not in set(locally_valid))
         return LiveCampaignStatus(
             campaign_id=campaign_id,
             replay_state=(
@@ -222,8 +241,14 @@ class LiveCampaignStatusReader:
             acceptance_profile_sha256=self._pinned_profile.profile_sha256,
             ledger_mode=self._selection.mode,
             ledger_degradation_code=self._selection.degradation_code,
-            locally_valid_gate_ids=validation.locally_valid_gate_ids,
-            gates=self._gate_statuses(validation.locally_valid_gate_ids),
+            locally_valid_gate_count=len(locally_valid),
+            not_current_gate_count=len(missing),
+            required_gate_ids=required,
+            locally_valid_gate_ids=locally_valid,
+            missing_required_gate_ids=missing,
+            live_baseline_gate_ids=self._phase_gate_ids("LIVE_BASELINE"),
+            candidate_gate_ids=self._candidate_gate_ids(),
+            gates=self._gate_statuses(locally_valid),
             quarantined=quarantined,
             stored_quarantine_reasons=reasons,
             gap_codes=tuple(dict.fromkeys(gap_codes)),
@@ -235,6 +260,14 @@ class LiveCampaignStatusReader:
         return tuple(
             LiveGateReplayStatus(
                 gate_id=gate_id,
+                kind=self._pinned_profile.profile.gates_by_id[gate_id].kind,
+                receipt_type=self._pinned_profile.profile.gates_by_id[gate_id].receiptType,
+                accepted_evidence_phases=tuple(
+                    self._pinned_profile.profile.gates_by_id[gate_id].acceptedEvidencePhases
+                ),
+                required_for_completion=self._pinned_profile.profile.gates_by_id[
+                    gate_id
+                ].requiredForCompletion,
                 state=(
                     GateReplayState.LOCALLY_VALID
                     if gate_id in valid
@@ -242,6 +275,21 @@ class LiveCampaignStatusReader:
                 ),
             )
             for gate_id in self._pinned_profile.profile.requiredGateIds
+        )
+
+    def _phase_gate_ids(self, phase: str) -> tuple[str, ...]:
+        return tuple(
+            gate_id
+            for gate_id in self._pinned_profile.profile.requiredGateIds
+            if phase in self._pinned_profile.profile.gates_by_id[gate_id].acceptedEvidencePhases
+        )
+
+    def _candidate_gate_ids(self) -> tuple[str, ...]:
+        candidate_ids = {item.gateId for item in self._pinned_profile.profile.candidateGates}
+        return tuple(
+            gate_id
+            for gate_id in self._pinned_profile.profile.requiredGateIds
+            if gate_id in candidate_ids
         )
 
 

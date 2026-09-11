@@ -9,7 +9,7 @@ import { join } from "node:path";
 import type { Page } from "playwright";
 import type { BrowserWorkerReceipt, CandidateIntent } from "./browser-worker.js";
 
-type CandidateRole = CandidateIntent["role"];
+type CandidateRole = NonNullable<CandidateIntent["role"]>;
 type StateAttribute = NonNullable<CandidateIntent["readback"]>["attribute"];
 
 export interface BrowserRecoveryScope {
