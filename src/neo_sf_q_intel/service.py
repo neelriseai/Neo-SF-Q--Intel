@@ -1,24 +1,53 @@
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from contextlib import suppress
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, Literal, Protocol
 from uuid import UUID
 
 from langgraph.checkpoint.postgres import PostgresSaver
 from psycopg import OperationalError
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from neo_sf_q_intel.analysis import ChangeIntelligenceService
+from neo_sf_q_intel.candidate_assurance import (
+    CandidateAssuranceBundle,
+    CandidateAssuranceView,
+    CandidateSideAssurance,
+    build_candidate_assurance_bundle,
+    build_candidate_assurance_view,
+    candidate_side_requests,
+    source_from_verified_graph_side,
+)
 from neo_sf_q_intel.config import Settings
-from neo_sf_q_intel.domain import AssuranceRun, ChangeRequest, DecisionCode, ReleaseDecision
+from neo_sf_q_intel.domain import (
+    AnalysisGap,
+    AssuranceRun,
+    ChangeRequest,
+    DecisionCode,
+    ReleaseDecision,
+)
+from neo_sf_q_intel.edge_envelope import stable_sha256
 from neo_sf_q_intel.foundation_pipeline import (
     CandidateFoundationEvidence,
     CandidateFoundationPipeline,
 )
 from neo_sf_q_intel.governance import decide
 from neo_sf_q_intel.governance_policy import GovernancePolicy
+from neo_sf_q_intel.graph_production import TreeSide
+from neo_sf_q_intel.live_baseline import (
+    LiveBaselineResult,
+    create_live_baseline_service,
+)
+from neo_sf_q_intel.live_campaign_status import (
+    LiveCampaignStatus,
+    LiveCampaignStatusError,
+    LiveCampaignStatusReader,
+    create_live_campaign_status_reader,
+)
 from neo_sf_q_intel.outcome_repository import (
     InMemoryOutcomeRepository,
     JsonOutcomeRepository,
@@ -38,6 +67,7 @@ from neo_sf_q_intel.outcomes import (
     load_outcome_policy,
 )
 from neo_sf_q_intel.policy import ReasoningPolicy
+from neo_sf_q_intel.postgres_schema import scoped_connection_string
 from neo_sf_q_intel.providers import ModelProvider, create_model_provider
 from neo_sf_q_intel.repository import (
     InMemoryRunRepository,
@@ -65,6 +95,51 @@ FOUNDATION_PIPELINE_NOT_CONFIGURED = "FOUNDATION_PIPELINE_NOT_CONFIGURED"
 FOUNDATION_PIPELINE_CONFIGURATION_INVALID = "FOUNDATION_PIPELINE_CONFIGURATION_INVALID"
 
 
+class _LiveBaselineRunner(Protocol):
+    def run(self) -> LiveBaselineResult: ...
+
+
+class LiveBaselineReadView(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    plan_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    result_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    artifact_set_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    observation_count: int = Field(ge=1, le=256)
+    receipt_count: int = Field(ge=1, le=256)
+    item_count: int = Field(ge=0)
+    byte_count: int = Field(ge=0)
+    invocation_count: int = Field(ge=1, le=1000)
+
+
+class LiveBaselineView(BaseModel):
+    """Bounded application projection; raw routes, values, IDs and receipts never cross it."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    campaign_id: str | None = Field(default=None, pattern=r"^baseline:[a-f0-9]{32}$")
+    state: Literal["BLOCKED", "IN_PROGRESS", "COMPLETED"]
+    gap_codes: tuple[Annotated[str, Field(pattern=r"^[A-Z][A-Z0-9_]{0,127}$")], ...] = Field(
+        max_length=32
+    )
+    ledger_mode: Literal["POSTGRESQL", "SQLITE", "UNAVAILABLE"]
+    assertion_store_mode: Literal["POSTGRESQL", "SQLITE", "UNAVAILABLE"]
+    read: LiveBaselineReadView | None = None
+    release_eligible: Literal[False] = False
+
+    @model_validator(mode="after")
+    def validate_view(self) -> LiveBaselineView:
+        if (self.state == "COMPLETED") != (self.read is not None):
+            raise ValueError("Only completed live baselines expose a read summary")
+        return self
+
+
+@dataclass(frozen=True, slots=True)
+class _VerifiedCandidateAuthority:
+    manifest_sha256: str
+    operation_seed_sha256: str
+
+
 class AssuranceService:
     def __init__(
         self,
@@ -82,6 +157,10 @@ class AssuranceService:
         gap_codes: Iterable[str] = (),
         foundation_pipeline: CandidateFoundationPipeline | None = None,
         foundation_configuration_code: str | None = None,
+        live_campaign_status_reader: LiveCampaignStatusReader | None = None,
+        live_baseline_service_factory: (
+            Callable[[Callable[[], CandidateAssuranceBundle]], _LiveBaselineRunner] | None
+        ) = None,
     ) -> None:
         self.source = source
         self.repository = repository or InMemoryRunRepository()
@@ -104,12 +183,16 @@ class AssuranceService:
             configured_gaps.append("OUTCOME_PROCESS_CACHE_NON_DURABLE")
         self.gap_codes = tuple(dict.fromkeys(configured_gaps))
         self._foundation_pipeline = foundation_pipeline
+        self._live_campaign_status_reader = live_campaign_status_reader
         self.foundation_configuration_code = (
             None
             if foundation_pipeline is not None
             else foundation_configuration_code or FOUNDATION_PIPELINE_NOT_CONFIGURED
         )
         active_reasoning_policy = reasoning_policy or ReasoningPolicy.load()
+        self._reasoning_policy = active_reasoning_policy
+        self._checkpointer = checkpointer
+        self._model_provider = model_provider
         retriever = EvidenceRetriever(source, active_reasoning_policy)
         self._source_project_id = retriever.project_id
         self._source_snapshot = retriever.source_snapshot
@@ -123,26 +206,67 @@ class AssuranceService:
             SemanticEvidenceIndex(source, model_provider) if model_provider else None
         )
         self._checkpoint_context = checkpoint_context
+        self._live_baseline_service = (
+            live_baseline_service_factory(self.analyze_current_candidate)
+            if live_baseline_service_factory is not None
+            else None
+        )
 
     def analyze(self, request: ChangeRequest) -> AssuranceRun:
+        if request.change_intent.value == "VERIFIED_CHANGE":
+            raise ValueError("VERIFIED_CHANGE_REQUIRES_HOST_CAPTURE")
+        result = self._analyze_source(request, self.source)
+        self.repository.save(result)
+        return result
+
+    def _analyze_source(
+        self,
+        request: ChangeRequest,
+        source: SalesforceSourceSnapshot,
+        upstream_gaps: tuple[AnalysisGap, ...] = (),
+        *,
+        verified_authority: _VerifiedCandidateAuthority | None = None,
+    ) -> AssuranceRun:
+        if request.change_intent.value == "VERIFIED_CHANGE":
+            if verified_authority is None or (
+                request.verified_change_manifest_sha256,
+                request.verified_operation_seed_sha256,
+            ) != (
+                verified_authority.manifest_sha256,
+                verified_authority.operation_seed_sha256,
+            ):
+                raise ValueError("VERIFIED_CHANGE_REQUIRES_HOST_CAPTURE")
+        elif verified_authority is not None:
+            raise ValueError("HOST_CAPTURE_AUTHORITY_REQUIRES_VERIFIED_CHANGE")
+        retriever = EvidenceRetriever(source, self._reasoning_policy)
         if request.project_id is None:
-            request = request.model_copy(update={"project_id": self._source_project_id})
-        elif request.project_id != self._source_project_id:
+            request = request.model_copy(update={"project_id": retriever.project_id})
+        elif request.project_id != retriever.project_id:
             raise ValueError(
                 f"Request project {request.project_id!r} does not match loaded source "
-                f"{self._source_project_id!r}"
+                f"{retriever.project_id!r}"
             )
-        policy = self.workflow.analysis.policy
-        ontology_identity = self._ontology_identity
-        result = self.workflow.run(
+        analysis = ChangeIntelligenceService(
+            retriever,
+            self._reasoning_policy,
+            upstream_gaps=upstream_gaps,
+        )
+        workflow = (
+            self.workflow
+            if source is self.source and not upstream_gaps
+            else AssuranceWorkflow(analysis, checkpointer=self._checkpointer)
+        )
+        policy = analysis.policy
+        ontology_identity = retriever.ontology_identity
+        return workflow.run(
             AssuranceRun(
                 request=request,
                 reasoning_policy_version=policy.schema_version,
                 reasoning_policy_sha256=policy.policy_sha256,
                 reasoning_eval_set_id=policy.retrieval_eval_set_id,
                 reasoning_eval_set_sha256=policy.retrieval_eval_set_sha256,
-                source_snapshot=self._source_snapshot,
-                source_graph_sha256=self._source_graph_sha256,
+                source_snapshot=retriever.source_snapshot,
+                source_graph_sha256=retriever.source_graph_sha256,
                 ontology_id=ontology_identity["ontologyId"],
                 ontology_version=ontology_identity["ontologyVersion"],
                 ontology_sha256=ontology_identity["ontologySha256"],
@@ -152,8 +276,6 @@ class AssuranceService:
                 normalized_graph_sha256=ontology_identity["normalizedGraphSha256"],
             )
         )
-        self.repository.save(result)
-        return result
 
     def get(self, run_id: UUID) -> AssuranceRun | None:
         run = self.repository.get(run_id)
@@ -346,6 +468,164 @@ class AssuranceService:
         except Exception:
             raise FoundationPipelineUnavailable from None
 
+    def analyze_current_candidate(self) -> CandidateAssuranceBundle:
+        """Replay and analyze host-owned Git state; accepts no caller-selected scope."""
+
+        if self._foundation_pipeline is None:
+            raise FoundationPipelineUnavailable
+        try:
+            captured = self._foundation_pipeline.capture_current()
+            if not captured.evidence.foundation_execution_complete:
+                raise FoundationPipelineUnavailable
+            verified = self._foundation_pipeline.verify_current(captured)
+            graph = verified.produced_graph
+            seeds = verified.operation_seeds
+            if graph is None or seeds is None:
+                raise FoundationPipelineUnavailable
+            upstream_gaps = tuple(
+                AnalysisGap(
+                    code=code,
+                    message=(
+                        "The replayed candidate foundation records this release-blocking gap."
+                    ),
+                    blocking=True,
+                )
+                for code in verified.evidence.blocking_gap_codes
+            ) + (
+                AnalysisGap(
+                    code="CHECKPOINT_NOT_ATOMIC_WITH_CANDIDATE_BUNDLE",
+                    message=(
+                        "Workflow checkpoints are outside the atomic component-run and "
+                        "candidate-bundle persistence transaction."
+                    ),
+                    blocking=True,
+                ),
+            )
+            analyses: list[CandidateSideAssurance] = []
+            for (
+                side,
+                graph_side,
+                operations,
+                request,
+                operation_bindings,
+                indirect_ids,
+                indirect_receipts,
+            ) in candidate_side_requests(verified):
+                source = source_from_verified_graph_side(
+                    repository_root=self._foundation_pipeline.repository_root,
+                    graph=graph,
+                    side=graph_side,
+                    ontology=self._foundation_pipeline.ontology,
+                    source_profile=self._foundation_pipeline.source_profile,
+                )
+                run = self._analyze_source(
+                    request,
+                    source,
+                    upstream_gaps,
+                    verified_authority=_VerifiedCandidateAuthority(
+                        manifest_sha256=verified.verified_change.manifest_sha256,
+                        operation_seed_sha256=seeds.artifact_sha256,
+                    ),
+                )
+                analyses.append(
+                    CandidateSideAssurance(
+                        side=side,
+                        operation_scope=operations,
+                        changed_paths=tuple(request.changed_paths),
+                        verified_seed_ids=tuple(request.verified_seed_ids),
+                        operation_bindings=operation_bindings,
+                        indirect_seed_ids=indirect_ids,
+                        indirect_seed_sha256s=indirect_receipts,
+                        graph_side_receipt_sha256=graph_side.side_receipt_sha256,
+                        operation_seed_side_receipt_sha256=(
+                            seeds.base_side_receipt_sha256
+                            if side is TreeSide.BASE
+                            else seeds.candidate_side_receipt_sha256
+                        ),
+                        producer_raw_graph_sha256=graph_side.raw_graph_sha256,
+                        analysis_normalized_graph_sha256=(source.normalized_graph.graph_sha256),
+                        run=run,
+                    )
+                )
+            bundle = build_candidate_assurance_bundle(verified, tuple(analyses))
+            self.repository.save_candidate_bundle(bundle)
+            return bundle
+        except FoundationPipelineUnavailable:
+            raise
+        except Exception:
+            raise FoundationPipelineUnavailable from None
+
+    def analyze_current_candidate_view(self) -> CandidateAssuranceView:
+        """Persist the full candidate bundle and return only its bounded client view."""
+
+        return build_candidate_assurance_view(self.analyze_current_candidate())
+
+    @property
+    def live_receipt_ledger_mode(self) -> str:
+        if self._live_campaign_status_reader is None:
+            return "UNAVAILABLE"
+        return self._live_campaign_status_reader.ledger_mode
+
+    @property
+    def live_receipt_ledger_degradation_code(self) -> str | None:
+        if self._live_campaign_status_reader is None:
+            return "LIVE_RECEIPT_LEDGER_NOT_CONFIGURED"
+        return self._live_campaign_status_reader.ledger_degradation_code
+
+    def get_live_campaign_status(self, campaign_id: str) -> LiveCampaignStatus:
+        """Replay one exact campaign without accepting evidence or authority from callers."""
+
+        if self._live_campaign_status_reader is None:
+            raise LiveCampaignStatusError
+        return self._live_campaign_status_reader.get(campaign_id)
+
+    def run_live_baseline(self) -> LiveBaselineView:
+        """Run the fixed host baseline without accepting caller execution scope."""
+
+        if self._live_baseline_service is None:
+            return LiveBaselineView(
+                state="BLOCKED",
+                gap_codes=("LIVE_BASELINE_SERVICE_UNAVAILABLE",),
+                ledger_mode="UNAVAILABLE",
+                assertion_store_mode="UNAVAILABLE",
+            )
+        try:
+            observed = self._live_baseline_service.run()
+            if not isinstance(observed, LiveBaselineResult):
+                raise TypeError
+            result = LiveBaselineResult.model_validate(observed.model_dump(mode="python"))
+            read = result.read_result
+            summary = None
+            if read is not None:
+                observations = read.observations
+                summary = LiveBaselineReadView(
+                    plan_sha256=read.plan_sha256,
+                    result_sha256=read.result_sha256,
+                    artifact_set_sha256=stable_sha256(
+                        sorted(item.artifact_sha256 for item in observations)
+                    ),
+                    observation_count=len(observations),
+                    receipt_count=len(read.stored_receipt_ids),
+                    item_count=sum(item.item_count for item in observations),
+                    byte_count=sum(item.byte_count for item in observations),
+                    invocation_count=sum(item.invocation_count for item in observations),
+                )
+            return LiveBaselineView(
+                campaign_id=result.campaign_id,
+                state=result.state,
+                gap_codes=tuple(dict.fromkeys((*result.gap_codes, *result.degradation_codes))),
+                ledger_mode=result.ledger_mode,
+                assertion_store_mode=result.assertion_store_mode,
+                read=summary,
+            )
+        except Exception:
+            return LiveBaselineView(
+                state="BLOCKED",
+                gap_codes=("LIVE_BASELINE_SERVICE_UNAVAILABLE",),
+                ledger_mode="UNAVAILABLE",
+                assertion_store_mode="UNAVAILABLE",
+            )
+
     def close(self) -> None:
         if self._checkpoint_context is not None:
             self._checkpoint_context.__exit__(None, None, None)
@@ -413,7 +693,9 @@ def _select_outcome_repository(
     gap_codes: list[str] = []
     if settings.database_url:
         try:
-            postgres = PostgresOutcomeRepository(settings.database_url.get_secret_value())
+            postgres = PostgresOutcomeRepository(
+                settings.database_url.get_secret_value(), schema=settings.postgres_schema
+            )
             postgres.setup()
             return postgres, degradation_codes, gap_codes
         except (OperationalError, OSError, TimeoutError, ConnectionError):
@@ -444,7 +726,6 @@ def _select_outcome_repository(
 def create_service(settings: Settings, repository_root: Path) -> AssuranceService:
     source = load_salesforce_source(
         settings.resolved_salesforce_root(repository_root),
-        expected_graph_sha256=settings.require_graph_sha256(),
         minimum_contract_version=settings.source_min_contract_version,
         required_capabilities=settings.required_capabilities,
         ontology_path=settings.resolved_canonical_ontology_path(repository_root),
@@ -472,14 +753,21 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
     checkpoint_context = None
     checkpointer = None
     persistence_warning = None
-    degradation_codes: list[str] = []
+    degradation_codes: list[str] = list(settings.provider_configuration_codes)
     gap_codes: list[str] = []
+    live_campaign_status_reader = create_live_campaign_status_reader(settings, repository_root)
+    if live_campaign_status_reader.ledger_degradation_code:
+        degradation_codes.append(live_campaign_status_reader.ledger_degradation_code)
+    if live_campaign_status_reader.ledger_mode == "UNAVAILABLE":
+        gap_codes.append("LIVE_RECEIPT_LEDGER_UNAVAILABLE")
     if settings.database_url:
         database_url = settings.database_url.get_secret_value()
         try:
-            postgres = PostgresRunRepository(database_url)
+            postgres = PostgresRunRepository(database_url, schema=settings.postgres_schema)
             postgres.setup()
-            checkpoint_context = PostgresSaver.from_conn_string(database_url)
+            checkpoint_context = PostgresSaver.from_conn_string(
+                scoped_connection_string(database_url, settings.postgres_schema)
+            )
             checkpointer = checkpoint_context.__enter__()
             checkpointer.setup()
             repository = postgres
@@ -513,10 +801,20 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
         )
         degradation_codes.extend(outcome_degradations)
         gap_codes.extend(outcome_gaps)
+        source_profile = source.source_profile
+        if source_profile is None:
+            raise RuntimeError("SOURCE_PROFILE_UNAVAILABLE")
+        candidate_source_profile = (
+            foundation_pipeline.source_profile
+            if isinstance(foundation_pipeline, CandidateFoundationPipeline)
+            else source_profile
+        )
         return AssuranceService(
             source,
             repository,
-            model_provider=create_model_provider(settings),
+            model_provider=(
+                None if settings.provider_calls_blocked else create_model_provider(settings)
+            ),
             checkpointer=checkpointer,
             checkpoint_context=checkpoint_context,
             persistence_mode=AssuranceService._repository_mode(repository),
@@ -527,6 +825,15 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
             gap_codes=gap_codes,
             foundation_pipeline=foundation_pipeline,
             foundation_configuration_code=foundation_configuration_code,
+            live_campaign_status_reader=live_campaign_status_reader,
+            live_baseline_service_factory=lambda candidate_provider: (
+                create_live_baseline_service(
+                    settings,
+                    repository_root,
+                    candidate_provider=candidate_provider,
+                    source_profile=candidate_source_profile,
+                )
+            ),
         )
     except Exception as exc:
         if checkpoint_context is not None:

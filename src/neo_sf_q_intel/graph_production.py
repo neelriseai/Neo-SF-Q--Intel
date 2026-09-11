@@ -20,6 +20,7 @@ from neo_sf_q_intel.change_verification import (
     GitFileEntry,
     LocalGitChangeProducer,
     VerifiedChangeSet,
+    read_git_blobs_batch,
 )
 from neo_sf_q_intel.edge_envelope import stable_sha256
 from neo_sf_q_intel.graph_adapter import (
@@ -67,12 +68,8 @@ class ContractPin(_Model):
 class ImplementationPin(_Model):
     implementation_id: str = Field(alias="implementationId", min_length=1, max_length=200)
     implementation_version: str = Field(alias="implementationVersion")
-    implementation_locator: str = Field(
-        alias="implementationLocator", min_length=1, max_length=500
-    )
-    implementation_sha256: str = Field(
-        alias="implementationSha256", pattern=r"^[a-f0-9]{64}$"
-    )
+    implementation_locator: str = Field(alias="implementationLocator", min_length=1, max_length=500)
+    implementation_sha256: str = Field(alias="implementationSha256", pattern=r"^[a-f0-9]{64}$")
 
 
 class GraphProducerPolicy(_Model):
@@ -87,17 +84,11 @@ class GraphProducerPolicy(_Model):
     adapter: ImplementationPin
     adapter_contract: ImplementationPin = Field(alias="adapterContract")
     normalizer: ImplementationPin
-    capture_scope: Literal["COMPLETE_BASE_AND_CANDIDATE_TREE"] = Field(
-        alias="captureScope"
-    )
-    disposition_policy: Literal[
-        "ALL_FILES_ACCOUNTED_WITH_SEMANTIC_CLASSIFICATION"
-    ] = Field(
+    capture_scope: Literal["COMPLETE_BASE_AND_CANDIDATE_TREE"] = Field(alias="captureScope")
+    disposition_policy: Literal["ALL_FILES_ACCOUNTED_WITH_SEMANTIC_CLASSIFICATION"] = Field(
         alias="dispositionPolicy"
     )
-    inventory_parser_id: str = Field(
-        alias="inventoryParserId", min_length=1, max_length=200
-    )
+    inventory_parser_id: str = Field(alias="inventoryParserId", min_length=1, max_length=200)
     inventory_parser_version: str = Field(alias="inventoryParserVersion")
     maximum_path_bytes: int = Field(alias="maximumPathBytes", ge=32, le=32768)
     maximum_files: int = Field(alias="maximumFiles", ge=1)
@@ -105,9 +96,7 @@ class GraphProducerPolicy(_Model):
     maximum_total_bytes: int = Field(alias="maximumTotalBytes", ge=1)
     maximum_nodes: int = Field(alias="maximumNodes", ge=1)
     maximum_edges: int = Field(alias="maximumEdges", ge=0)
-    maximum_semantic_work_units: int = Field(
-        alias="maximumSemanticWorkUnits", ge=1
-    )
+    maximum_semantic_work_units: int = Field(alias="maximumSemanticWorkUnits", ge=1)
     maximum_receipt_bytes: int = Field(alias="maximumReceiptBytes", ge=1024)
     git_timeout_seconds: int = Field(alias="gitTimeoutSeconds", ge=1, le=120)
     maximum_git_output_bytes: int = Field(alias="maximumGitOutputBytes", ge=1024)
@@ -130,9 +119,7 @@ class GraphProducerPolicy(_Model):
             _require_semver(value)
         _require_safe_locator(self.producer.implementation_locator, self.maximum_path_bytes)
         _require_safe_locator(self.adapter.implementation_locator, self.maximum_path_bytes)
-        _require_safe_locator(
-            self.adapter_contract.implementation_locator, self.maximum_path_bytes
-        )
+        _require_safe_locator(self.adapter_contract.implementation_locator, self.maximum_path_bytes)
         _require_safe_locator(self.normalizer.implementation_locator, self.maximum_path_bytes)
         if self.maximum_git_output_bytes < self.maximum_file_bytes:
             raise ValueError("Git output capacity must cover one maximum-sized blob")
@@ -155,9 +142,7 @@ class FileDisposition(_Model):
     size_bytes: int = Field(ge=0)
     content_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     content_kind: Literal["TEXT_UTF8", "BINARY"]
-    normalized_text_sha256: str | None = Field(
-        default=None, pattern=r"^[a-f0-9]{64}$"
-    )
+    normalized_text_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     inventory_parser_id: str = Field(min_length=1, max_length=200)
     inventory_parser_version: str
     semantic_status: SemanticFileStatus
@@ -409,9 +394,7 @@ class GraphProductionArtifact(_Model):
     schema_version: Literal["1.0.0"] = "1.0.0"
     authority_scope: Literal["ANALYSIS_ONLY"] = "ANALYSIS_ONLY"
     release_eligible: Literal[False] = False
-    graph_scope: Literal["SALESFORCE_CHANGE_EVIDENCE_GRAPH"] = (
-        "SALESFORCE_CHANGE_EVIDENCE_GRAPH"
-    )
+    graph_scope: Literal["SALESFORCE_CHANGE_EVIDENCE_GRAPH"] = "SALESFORCE_CHANGE_EVIDENCE_GRAPH"
     file_inventory_input_tree_attested: Literal[True] = True
     supported_semantic_graph_input_tree_attested: Literal[True] = True
     semantic_source_family_coverage: Literal["SUPPORTED_FAMILIES"] = "SUPPORTED_FAMILIES"
@@ -458,9 +441,7 @@ class GraphProductionArtifact(_Model):
         )
         if delta_keys != tuple(sorted(set(delta_keys))):
             raise ValueError("Graph delta must be sorted and unique")
-        tombstone_ids = tuple(
-            (item.entity_type, item.entity_id) for item in self.tombstones
-        )
+        tombstone_ids = tuple((item.entity_type, item.entity_id) for item in self.tombstones)
         if tombstone_ids != tuple(sorted(set(tombstone_ids))):
             raise ValueError("Tombstones must be sorted and unique")
         deleted = tuple(
@@ -489,9 +470,7 @@ class GraphProductionGapCode(StrEnum):
     RELEASE_EVIDENCE_MODEL_INCOMPLETE = "RELEASE_EVIDENCE_MODEL_INCOMPLETE"
     REPOSITORY_ORIGIN_NOT_ATTESTED = "REPOSITORY_ORIGIN_NOT_ATTESTED"
     RISK_FACTORS_NOT_ATTESTED = "RISK_FACTORS_NOT_ATTESTED"
-    SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE = (
-        "SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE"
-    )
+    SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE = "SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE"
     TEST_EXECUTION_SCOPE_NOT_ATTESTED = "TEST_EXECUTION_SCOPE_NOT_ATTESTED"
     TEST_OBLIGATION_SCOPE_NOT_ATTESTED = "TEST_OBLIGATION_SCOPE_NOT_ATTESTED"
     UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED = "UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED"
@@ -557,7 +536,7 @@ class GraphProductionEvaluation(_Model):
 
 
 DEFAULT_GRAPH_PRODUCER_POLICY_SHA256 = (
-    "a10136b49aee73d9c46522774fba189cc0f6e02a30cc655235434872000a061b"
+    "d3d5f6a7efc7a636b477c83b6609b08427dcc24b762d63b2b6cf3dab3e2bc290"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -574,6 +553,7 @@ _RESERVED_RAW_ATTRIBUTE_KEYS = frozenset(
         "source",
         "sourceSnapshot",
         "sourceHash",
+        "validUntil",
         "extractorId",
         "owners",
         "sourceArtifactSha256",
@@ -810,9 +790,7 @@ def _raw_graph(
         return {
             "source": owners[0].path,
             "extractorId": (
-                parser_ids[0]
-                if len(parser_ids) == 1
-                else policy.adapter.implementation_id
+                parser_ids[0] if len(parser_ids) == 1 else policy.adapter.implementation_id
             ),
             "owners": owner_body,
             "ownerReceiptSha256": stable_sha256(owner_body),
@@ -845,6 +823,34 @@ def _raw_graph(
                 **provenance(item.owners),
             }
             for item in edges
+        ],
+    }
+
+
+def materialize_source_attested_reasoning_graph(
+    raw_graph: dict[str, Any],
+    *,
+    source_graph_sha256: str,
+) -> dict[str, Any]:
+    """Overlay the immutable content root used as per-record source authority."""
+
+    if not re.fullmatch(r"[a-f0-9]{64}", source_graph_sha256):
+        raise ValueError("Reasoning graph source digest is invalid")
+    return {
+        **raw_graph,
+        "nodes": [
+            {
+                **item,
+                "sourceHash": source_graph_sha256,
+            }
+            for item in raw_graph["nodes"]
+        ],
+        "edges": [
+            {
+                **item,
+                "sourceHash": source_graph_sha256,
+            }
+            for item in raw_graph["edges"]
         ],
     }
 
@@ -889,11 +895,7 @@ def _make_delta(
             "base_owner_paths": old_owners,
             "candidate_owner_paths": new_owners,
         }
-        deltas.append(
-            GraphDeltaEntry.model_validate(
-                {**body, "delta_sha256": stable_sha256(body)}
-            )
-        )
+        deltas.append(GraphDeltaEntry.model_validate({**body, "delta_sha256": stable_sha256(body)}))
         if operation == "DELETE":
             absence = stable_sha256(
                 {
@@ -943,6 +945,7 @@ class GraphProductionInputs:
     repository_hint: Path
     ontology: CanonicalOntology
     profile: SourceGraphProfile
+    reuse_request_scoped_capture: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -1020,15 +1023,25 @@ class LocalTreeGraphProducer:
             )
         return current
 
-    def _capture(
-        self, inputs: GraphProductionInputs, now: datetime
-    ) -> GraphProductionArtifact:
+    def verify_bound(
+        self,
+        candidate: GraphProductionArtifact,
+        inputs: GraphProductionInputs,
+    ) -> GraphProductionEvaluation:
+        """Replay the full graph producer; caller labels cannot substitute for provenance."""
+
+        return self.verify(candidate, inputs)
+
+    def _capture(self, inputs: GraphProductionInputs, now: datetime) -> GraphProductionArtifact:
         self._require_runtime_policy(inputs)
         if type(inputs.change_producer) is not LocalGitChangeProducer:
             raise _ProductionRejected(GraphProductionGapCode.CHANGE_REPLAY_FAILED, "producer-type")
-        initial_replay = inputs.change_producer.verify(
-            inputs.candidate, inputs.repository_hint
+        change_verifier = (
+            inputs.change_producer.verify_bound
+            if inputs.reuse_request_scoped_capture
+            else inputs.change_producer.verify
         )
+        initial_replay = change_verifier(inputs.candidate, inputs.repository_hint)
         if initial_replay.artifact is None or not initial_replay.change_capture_complete:
             raise _ProductionRejected(GraphProductionGapCode.CHANGE_REPLAY_FAILED)
         root = self._repository_root(inputs)
@@ -1048,7 +1061,7 @@ class LocalTreeGraphProducer:
             inputs.candidate.candidate_input_tree_sha256,
             inputs,
         )
-        final_replay = inputs.change_producer.verify(inputs.candidate, inputs.repository_hint)
+        final_replay = change_verifier(inputs.candidate, inputs.repository_hint)
         if final_replay.artifact is None or not final_replay.change_capture_complete:
             raise _ProductionRejected(GraphProductionGapCode.CONCURRENT_MUTATION)
         try:
@@ -1138,9 +1151,7 @@ class LocalTreeGraphProducer:
             ) from None
         if digest != self.policy.producer.implementation_sha256:
             raise _ProductionRejected(GraphProductionGapCode.PRODUCER_IMPLEMENTATION_MISMATCH)
-        adapter_loaded = Path(
-            inspect.getsourcefile(SalesforceSemanticGraphAdapter) or ""
-        ).resolve()
+        adapter_loaded = Path(inspect.getsourcefile(SalesforceSemanticGraphAdapter) or "").resolve()
         expected_adapter = (
             loaded.parents[2] / self.policy.adapter.implementation_locator
         ).resolve()
@@ -1178,9 +1189,7 @@ class LocalTreeGraphProducer:
                     GraphProductionGapCode.ADAPTER_IMPLEMENTATION_MISMATCH
                 ) from None
             if dependency != expected or dependency_digest != pin.implementation_sha256:
-                raise _ProductionRejected(
-                    GraphProductionGapCode.ADAPTER_IMPLEMENTATION_MISMATCH
-                )
+                raise _ProductionRejected(GraphProductionGapCode.ADAPTER_IMPLEMENTATION_MISMATCH)
         change_policy = inputs.change_producer.policy
         change_pin = self.policy.verified_change_policy
         if (
@@ -1192,9 +1201,7 @@ class LocalTreeGraphProducer:
         ontology_pin = self.policy.ontology
         if (
             type(inputs.ontology) is not CanonicalOntology
-            or contract_sha256(
-                inputs.ontology.model_dump(mode="json", by_alias=True)
-            )
+            or contract_sha256(inputs.ontology.model_dump(mode="json", by_alias=True))
             != inputs.ontology.sha256
             or (
                 inputs.ontology.ontology_id,
@@ -1214,8 +1221,7 @@ class LocalTreeGraphProducer:
             or contract_sha256(inputs.profile.model_dump(mode="json", by_alias=True))
             != inputs.profile.sha256
             or inputs.profile.ontology.ontology_id != inputs.ontology.ontology_id
-            or inputs.profile.ontology.ontology_version
-            != inputs.ontology.ontology_version
+            or inputs.profile.ontology.ontology_version != inputs.ontology.ontology_version
             or inputs.profile.ontology.ontology_sha256 != inputs.ontology.sha256
             or (
                 inputs.profile.profile_id,
@@ -1292,10 +1298,27 @@ class LocalTreeGraphProducer:
             objects[path] = object_id
         if tuple(sorted(objects)) != tuple(item.path for item in candidate.base_files):
             raise _ProductionRejected(GraphProductionGapCode.TREE_MANIFEST_MISMATCH, "base")
+        try:
+            blobs = read_git_blobs_batch(
+                root,
+                tuple(objects[item.path] for item in candidate.base_files),
+                timeout_seconds=self.policy.git_timeout_seconds,
+                maximum_file_bytes=self.policy.maximum_file_bytes,
+                maximum_total_bytes=self.policy.maximum_total_bytes,
+                maximum_stderr_bytes=self.policy.maximum_git_output_bytes,
+            )
+        except subprocess.TimeoutExpired:
+            raise _ProductionRejected(GraphProductionGapCode.GIT_TIMEOUT) from None
+        except OverflowError:
+            raise _ProductionRejected(
+                GraphProductionGapCode.CAPACITY_EXCEEDED, "tree-bytes"
+            ) from None
+        except (OSError, RuntimeError, TypeError, ValueError):
+            raise _ProductionRejected(GraphProductionGapCode.GIT_COMMAND_FAILED, "batch") from None
         contents: dict[str, bytes] = {}
         total = 0
         for item in candidate.base_files:
-            content = self._git(root, "cat-file", "blob", objects[item.path])
+            content = blobs[objects[item.path]]
             total += len(content)
             self._check_content(item, content, total)
             contents[item.path] = content
@@ -1385,10 +1408,7 @@ class LocalTreeGraphProducer:
             or hashlib.sha256(content).hexdigest() != item.content_sha256
         ):
             raise _ProductionRejected(GraphProductionGapCode.TREE_BYTES_MISMATCH, item.path)
-        if (
-            len(content) > self.policy.maximum_file_bytes
-            or total > self.policy.maximum_total_bytes
-        ):
+        if len(content) > self.policy.maximum_file_bytes or total > self.policy.maximum_total_bytes:
             raise _ProductionRejected(GraphProductionGapCode.CAPACITY_EXCEEDED, "tree-bytes")
 
     def _produce_side(
@@ -1428,41 +1448,26 @@ class LocalTreeGraphProducer:
 
         manifest_by_path = {item.path: item for item in manifest}
         semantic_by_path = {item.path: item for item in extracted.files}
-        if (
-            tuple(item.path for item in extracted.files) != tuple(sorted(manifest_by_path))
-            or len(semantic_by_path) != len(extracted.files)
-        ):
+        if tuple(item.path for item in extracted.files) != tuple(sorted(manifest_by_path)) or len(
+            semantic_by_path
+        ) != len(extracted.files):
             raise _ProductionRejected(GraphProductionGapCode.SEMANTIC_OUTPUT_INVALID, "files")
-        if any(
-            item.status is SemanticFileStatus.UNSUPPORTED for item in extracted.files
-        ):
+        if any(item.status is SemanticFileStatus.UNSUPPORTED for item in extracted.files):
             raise _ProductionRejected(GraphProductionGapCode.UNSUPPORTED_SOURCE_FAMILY)
 
         adapter_nodes = {item.node_id: item for item in extracted.nodes}
         adapter_edges = {item.edge_id: item for item in extracted.edges}
-        if len(adapter_nodes) != len(extracted.nodes) or len(adapter_edges) != len(
-            extracted.edges
-        ):
+        if len(adapter_nodes) != len(extracted.nodes) or len(adapter_edges) != len(extracted.edges):
             raise _ProductionRejected(GraphProductionGapCode.OUTPUT_COLLISION)
         for path, result in semantic_by_path.items():
             expected_nodes = tuple(
-                sorted(
-                    item.node_id
-                    for item in extracted.nodes
-                    if path in item.owner_paths
-                )
+                sorted(item.node_id for item in extracted.nodes if path in item.owner_paths)
             )
             expected_edges = tuple(
-                sorted(
-                    item.edge_id
-                    for item in extracted.edges
-                    if path in item.owner_paths
-                )
+                sorted(item.edge_id for item in extracted.edges if path in item.owner_paths)
             )
             if result.node_ids != expected_nodes or result.edge_ids != expected_edges:
-                raise _ProductionRejected(
-                    GraphProductionGapCode.SEMANTIC_OUTPUT_INVALID, path
-                )
+                raise _ProductionRejected(GraphProductionGapCode.SEMANTIC_OUTPUT_INVALID, path)
 
         semantic_tree = stable_sha256(
             [
@@ -1582,11 +1587,7 @@ class LocalTreeGraphProducer:
                         {
                             **node_body,
                             "semantic_sha256": stable_sha256(
-                                {
-                                    key: value
-                                    for key, value in node_body.items()
-                                    if key != "owners"
-                                }
+                                {key: value for key, value in node_body.items() if key != "owners"}
                             ),
                             "element_sha256": stable_sha256(
                                 {
@@ -1637,11 +1638,7 @@ class LocalTreeGraphProducer:
                         {
                             **edge_body,
                             "semantic_sha256": stable_sha256(
-                                {
-                                    key: value
-                                    for key, value in edge_body.items()
-                                    if key != "owners"
-                                }
+                                {key: value for key, value in edge_body.items() if key != "owners"}
                             ),
                             "element_sha256": stable_sha256(
                                 {
@@ -1680,9 +1677,13 @@ class LocalTreeGraphProducer:
             raise _ProductionRejected(GraphProductionGapCode.CAPACITY_EXCEEDED, "graph")
         raw_graph = _raw_graph(nodes_tuple, edges_tuple, snapshot, self.policy)
         raw_sha = stable_sha256(raw_graph)
+        reasoning_graph = materialize_source_attested_reasoning_graph(
+            raw_graph,
+            source_graph_sha256=raw_sha,
+        )
         try:
             normalized: NormalizedGraph = normalize_source_graph(
-                raw_graph,
+                reasoning_graph,
                 inputs.ontology,
                 inputs.profile,
                 project_id=inputs.candidate.project_id,

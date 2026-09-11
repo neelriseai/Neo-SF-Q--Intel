@@ -17,7 +17,11 @@ GENERATED = {
     "knowledge/project-index.json",
     "knowledge/application-graph.json",
 }
-EXCLUDED_SUFFIXES = {".png", ".txt", ".tsbuildinfo", ".winmd", ".zip"}
+EXCLUDED_SUFFIXES = {".png", ".tsbuildinfo", ".winmd", ".zip"}
+EXCLUDED_PATHS = {
+    "Docs/Divine Framework.txt",
+    "Docs/old solution discussion.txt",
+}
 READ_ORDER = [
     "AGENTS.md",
     "Docs/README.md",
@@ -31,7 +35,10 @@ READ_ORDER = [
     "Docs/07-governance-and-evaluation.md",
     "Docs/08-roadmap-24h.md",
     "Docs/09-demo-scenarios.md",
+    "Docs/10-graph-grounded-agent-reasoning.md",
     "Docs/15-development-assurance-process.md",
+    "Docs/16-deferred-operator-actions.md",
+    "Docs/18-live-salesforce-demo-execution-contract.md",
     "config/capability-scope.json",
 ]
 MARKDOWN_LINK = re.compile(r"\[[^]]+\]\(([^)#]+)(?:#[^)]+)?\)")
@@ -40,7 +47,7 @@ TS_IMPORT = re.compile(r"(?:from\s+|import\s*)[\"']([^\"']+)[\"']")
 
 def _repo_files() -> list[str]:
     completed = subprocess.run(
-        ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
         cwd=ROOT,
         check=True,
         capture_output=True,
@@ -49,14 +56,18 @@ def _repo_files() -> list[str]:
     )
     return sorted(
         path.replace("\\", "/")
-        for path in completed.stdout.splitlines()
+        for path in completed.stdout.split("\0")
         if path
         and path.replace("\\", "/") not in GENERATED
+        and path.replace("\\", "/") not in EXCLUDED_PATHS
+        and (ROOT / path).is_file()
         and Path(path).suffix.casefold() not in EXCLUDED_SUFFIXES
     )
 
 
 def _category(path: str) -> str:
+    if path == "AGENTS.md":
+        return "project-instructions"
     if path.startswith("src/"):
         return "python-runtime"
     if path.startswith("apps/web/src/"):
@@ -87,6 +98,8 @@ def _sha256(path: Path) -> str:
 
 
 def _authority(category: str) -> str:
+    if category == "project-instructions":
+        return "governing-instructions"
     if category in {"python-runtime", "web-runtime", "browser-runtime", "policy", "persistence"}:
         return "authoritative-source"
     if category == "canonical-documentation":
@@ -108,7 +121,10 @@ def _snapshot(files: list[dict[str, str]]) -> str:
 def _resolve_relative(source: str, target: str) -> str | None:
     if target.startswith(("http://", "https://", "mailto:", "#", "/")):
         return None
-    candidate = ((ROOT / source).parent / target).resolve()
+    if target.startswith("@/") and source.startswith("apps/web/"):
+        candidate = (ROOT / "apps/web/src" / target[2:]).resolve()
+    else:
+        candidate = ((ROOT / source).parent / target).resolve()
     try:
         relative = candidate.relative_to(ROOT).as_posix()
     except ValueError:
@@ -127,23 +143,39 @@ def _resolve_relative(source: str, target: str) -> str | None:
     return None
 
 
+def _python_module_target(module: str) -> str | None:
+    if module != "neo_sf_q_intel" and not module.startswith("neo_sf_q_intel."):
+        return None
+    parts = module.split(".")[1:]
+    candidate = ROOT / "src" / "neo_sf_q_intel" / Path(*parts)
+    target = candidate.with_suffix(".py")
+    if not target.is_file():
+        target = candidate / "__init__.py"
+    return target.relative_to(ROOT).as_posix() if target.is_file() else None
+
+
 def _python_imports(path: str, body: str) -> list[str]:
     targets = []
     try:
         tree = ast.parse(body)
-    except SyntaxError:
-        return targets
+    except SyntaxError as exc:
+        raise ValueError(f"Cannot index Python imports for {path}: {exc}") from exc
+    source_parts = list(Path(path).with_suffix("").parts[1:-1])
     for node in ast.walk(tree):
-        module = node.module if isinstance(node, ast.ImportFrom) else None
-        if not module or not module.startswith("neo_sf_q_intel"):
-            continue
-        parts = module.split(".")[1:]
-        candidate = ROOT / "src" / "neo_sf_q_intel" / Path(*parts)
-        target = candidate.with_suffix(".py")
-        if not target.is_file():
-            target = candidate / "__init__.py"
-        if target.is_file():
-            targets.append(target.relative_to(ROOT).as_posix())
+        modules: list[str] = []
+        if isinstance(node, ast.ImportFrom):
+            if node.level:
+                keep = max(0, len(source_parts) - (node.level - 1))
+                prefix = source_parts[:keep]
+                modules.append(".".join([*prefix, *(node.module or "").split(".")]).strip("."))
+            elif node.module:
+                modules.append(node.module)
+        elif isinstance(node, ast.Import):
+            modules.extend(alias.name for alias in node.names)
+        for module in modules:
+            target = _python_module_target(module)
+            if target:
+                targets.append(target)
     return targets
 
 
@@ -191,6 +223,9 @@ def build_documents() -> tuple[dict[str, Any], dict[str, Any]]:
                     }
                 )
     scope = json.loads((ROOT / "config" / "capability-scope.json").read_text())
+    requirement_registry = json.loads(
+        (ROOT / "config" / "requirement-registry.json").read_text()
+    )
     owners = sorted({item["owner"] for item in scope["capabilities"]})
     nodes.extend(
         {"id": f"owner:{owner}", "kind": "owner", "label": owner, "authority": "policy"}
@@ -233,6 +268,26 @@ def build_documents() -> tuple[dict[str, Any], dict[str, Any]]:
             for path in capability.get("verification", [])
             if path in known
         )
+    for requirement in requirement_registry["requirements"]:
+        requirement_id = f"requirement:{requirement['requirementId']}"
+        nodes.append(
+            {
+                "id": requirement_id,
+                "kind": "requirement",
+                "label": requirement["requirementId"],
+                "status": requirement["status"],
+                "summary": requirement["statement"],
+                "authority": "policy",
+            }
+        )
+        edges.extend(
+            {
+                "from": requirement_id,
+                "relation": "requires_capability",
+                "to": f"capability:{capability_id}",
+            }
+            for capability_id in requirement["capabilityIds"]
+        )
     index = {
         "schemaVersion": "1.0.0",
         "project": "Neo SF Q-Intel",
@@ -241,7 +296,12 @@ def build_documents() -> tuple[dict[str, Any], dict[str, Any]]:
         "generatedOutputs": sorted(GENERATED),
         "readOrder": [path for path in READ_ORDER if path in known],
         "capabilities": scope["capabilities"],
+        "requirements": requirement_registry["requirements"],
         "files": files,
+    }
+    unique_edges = {
+        (edge["from"], edge["relation"], edge["to"]): edge
+        for edge in edges
     }
     graph = {
         "schemaVersion": "1.0.0",
@@ -250,7 +310,10 @@ def build_documents() -> tuple[dict[str, Any], dict[str, Any]]:
         "provenance": "Static repository structure and explicit import/reference relationships.",
         "authorization": "Discovery only; graph edges grant no tool or write authority.",
         "nodes": nodes,
-        "edges": sorted(edges, key=lambda edge: (edge["from"], edge["relation"], edge["to"])),
+        "edges": sorted(
+            unique_edges.values(),
+            key=lambda edge: (edge["from"], edge["relation"], edge["to"]),
+        ),
     }
     return index, graph
 

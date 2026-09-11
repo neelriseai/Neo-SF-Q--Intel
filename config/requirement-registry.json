@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "1.0.0",
+  "requirements": [
+    {
+      "requirementId": "REQ-SRC-001",
+      "statement": "Capture a complete pinned Salesforce source change and its evidence graph without caller-narrowed scope.",
+      "capabilityIds": [
+        "source.contract-ingestion",
+        "source.verified-change-set",
+        "source.tree-graph-production",
+        "source.change-seed-mapping"
+      ],
+      "acceptanceClasses": ["UC", "F", "L"],
+      "exactTestNodeIds": [],
+      "currentReceiptIds": [],
+      "status": "TRACEABILITY_GAP",
+      "gaps": ["Exact test-node mapping and current source-bound receipts are not yet recorded."]
+    },
+    {
+      "requirementId": "REQ-RSN-001",
+      "statement": "Produce source-neutral graph-grounded impact, context, proposals and test obligations with deterministic validation.",
+      "capabilityIds": [
+        "knowledge.evidence-graph",
+        "knowledge.trusted-edge-envelope",
+        "knowledge.complete-path-replay",
+        "knowledge.canonical-ontology",
+        "reasoning.graph-impact",
+        "reasoning.directional-propagation",
+        "reasoning.graph-context-compiler",
+        "reasoning.hybrid-candidate-fusion",
+        "reasoning.graph-grounded-agent",
+        "reasoning.semantic-retrieval",
+        "retrieval.chromadb",
+        "quality.test-selection",
+        "assurance.candidate-comparison"
+      ],
+      "acceptanceClasses": ["UC", "F", "G"],
+      "exactTestNodeIds": [
+        "tests/test_candidate_assurance.py::test_host_owned_candidate_runs_both_modify_sides_and_persists",
+        "tests/test_candidate_persistence.py::test_sqlite_candidate_bundle_round_trip_is_atomic_and_idempotent"
+      ],
+      "currentReceiptIds": [],
+      "status": "TRACEABILITY_GAP",
+      "gaps": ["Exact candidate-comparison tests are mapped, but the broader reasoning foundations are not connected into one ordinary provider-backed assurance run; Chroma, an adjudicated corpus, complete exact-node mapping and current receipts remain missing."]
+    },
+    {
+      "requirementId": "REQ-ORC-001",
+      "statement": "Coordinate typed cooperating specialists with replayable observability and durable resumable memory.",
+      "capabilityIds": [
+        "orchestration.multi-agent",
+        "observability.agent-trace",
+        "memory.postgresql",
+        "memory.resilient-fallback",
+        "memory.release-outcomes"
+      ],
+      "acceptanceClasses": ["UC", "F", "L"],
+      "exactTestNodeIds": [
+        "tests/test_candidate_persistence.py::test_postgresql_candidate_persistence_is_atomic_and_idempotent",
+        "tests/test_postgres_schema.py::test_schema_initialization_uses_quoted_identifier_then_marker_before_migrations"
+      ],
+      "currentReceiptIds": [],
+      "status": "TRACEABILITY_GAP",
+      "gaps": ["Atomic candidate persistence and dedicated-schema contracts have exact offline tests, but provider-backed participation, live PostgreSQL resume, durable audit, complete exact-node mapping and current acceptance receipts are missing."]
+    },
+    {
+      "requirementId": "REQ-SF-001",
+      "statement": "From the configured org machine, independently classify a non-production Salesforce org with the host-pinned v1.1.0 display/Organization/userinfo-subject/active-User reconciliation sequence, repeat server subject and display before completion, authenticate locally without relying on preferred alias display, execute bounded MCP-backed standard and source-contract custom APIs, retrieve scoped metadata, run selected live tests, and complete an exactly authorized candidate deployment plus mandatory restoration campaign with phase-bound receipts.",
+      "capabilityIds": [
+        "tools.mcp",
+        "runtime.salesforce-target-planning",
+        "runtime.salesforce-live-evidence",
+        "runtime.salesforce-candidate-deployment",
+        "quality.live-test-execution"
+      ],
+      "acceptanceClasses": ["UC", "F", "L"],
+      "exactTestNodeIds": [
+        "tests/test_classification_bootstrap.py::test_realistic_display_is_reconciled_with_system_queries_without_exporting_secrets",
+        "tests/test_classification_bootstrap.py::test_authenticated_subject_mismatch_blocks_before_any_application_dispatch",
+        "tests/test_classification_bootstrap.py::test_userinfo_requires_bounded_exact_cli_http_envelope",
+        "tests/test_classification_bootstrap.py::test_two_aliases_for_same_identity_do_not_depend_on_display_preference",
+        "tests/test_live_baseline.py::test_local_proof_is_replayed_before_even_sf_version",
+        "tests/test_live_baseline.py::test_cached_baseline_replays_local_artifact_bytes_without_more_salesforce",
+        "tests/test_live_baseline_phase.py::test_factory_accepts_phase_authority_only_from_separate_exact_private_pin",
+        "tests/test_live_baseline_phase.py::test_source_phase_request_never_grants_its_own_baseline_exemption",
+        "tests/test_live_baseline_phase.py::test_partial_deferral_cannot_narrow_required_local_validation_set",
+        "tests/test_live_read_evidence.py::test_phase_authority_must_match_plan_and_exact_read_only_gate_set_before_cli",
+        "tests/test_local_validation_runner.py::test_batch_seals_one_expiry_after_all_obligations_not_first_terminal_plus_five_minutes",
+        "tests/test_local_validation_runner.py::test_real_node_test_requires_unforgeable_attestation_before_acceptance",
+        "tests/test_local_validation_runner_p0.py::test_candidate_test_programs_are_blocked_before_any_process_or_output",
+        "tests/test_local_validation_phase.py::test_baseline_composition_preserves_unresolved_checks_and_pins_every_representation",
+        "tests/test_live_baseline_phase.py::test_exact_host_deferral_may_reach_read_only_baseline_without_local_receipt",
+        "tests/test_live_baseline_phase.py::test_completed_deferral_baseline_reconstructs_exact_durable_cache_without_dispatch",
+        "tests/test_candidate_live_targets.py::test_host_adapter_binds_complete_operation_aware_scope_without_authority",
+        "tests/test_candidate_target_compiler.py::test_rehashed_contract_from_same_project_cannot_replace_candidate_bytes",
+        "tests/test_candidate_target_compiler.py::test_legacy_capability_prose_cannot_satisfy_explicit_operation_schema",
+        "tests/test_candidate_target_compiler.py::test_non_apex_obligation_cannot_be_hidden_by_same_entity_apex_target",
+        "tests/test_live_target_plan.py::test_complete_host_authorized_plan_binds_raw_and_canonical_profile",
+        "tests/test_live_read_evidence.py::test_exact_three_partition_read_appends_digest_only_nonrelease_receipts",
+        "tests/test_live_read_evidence.py::test_expected_contract_bytes_cannot_be_substituted_before_cli_access",
+        "tests/test_live_read_evidence.py::test_signed_but_undurable_expected_contract_receipt_cannot_bind_gate",
+        "tests/test_live_read_evidence.py::test_unpinned_salesforce_cli_version_blocks_before_any_cli_access",
+        "tests/test_sf_cli_rest_contract.py::test_installed_cli_source_confirms_the_transport_fixture_contract",
+        "tests/test_sf_cli_rest_contract.py::test_current_aut_declared_route_uses_canonical_api_version"
+      ],
+      "currentReceiptIds": [],
+      "status": "NOT_RUN",
+      "gaps": ["The closed sourceOperations contract, candidate compiler, host-owned no-argument baseline service, strict API/MCP adapters, real Salesforce CLI response contracts, independently reconciled non-production identity bootstrap, bounded read executor and durable receipt replay are implemented and verified offline. Candidate-controlled Node test output is intentionally not accepted as execution authority; it remains an unresolved obligation for candidate check, deployment, restoration and release. An exact host-pinned phase policy may defer only the declared non-runtime catalog/document obligations for the read-only LIVE_BASELINE gates, but no private phase policy or host authority has been issued on this machine. A 2026-09-10 real-org browser diagnostic remains diagnostic-only and earns zero acceptance credit. All SF-L01 through SF-L09 and SF-C01 through SF-C06 gates remain NOT_RUN until the joint live session creates current product-owned receipts; deployed-candidate, selected Apex-test and restoration behavior remain unimplemented or unexecuted as identified by their gates."]
+    },
+    {
+      "requirementId": "REQ-UIA-001",
+      "statement": "Establish an ephemeral authenticated Playwright session to the classified live Salesforce Lightning app, then capture, propose, authorize, apply and verify generic UI locator recovery while abstaining on ambiguity.",
+      "capabilityIds": [
+        "automation.locator-healing",
+        "automation.browser-worker",
+        "automation.applied-healing"
+      ],
+      "acceptanceClasses": ["UC", "B", "L"],
+      "exactTestNodeIds": [
+        "packages/browser/tests/locator-healer.spec.ts::abstains when target identity is ambiguous",
+        "packages/browser/tests/locator-healer.spec.ts::candidate discovery never claims approval, action, verification, or healing",
+        "packages/browser/tests/browser-worker.spec.ts::discovers exactly one candidate and verifies readback without applying an action",
+        "packages/browser/tests/salesforce-cli-session.spec.ts::verifies fixed-alias identity before acquiring an opaque session",
+        "packages/browser/tests/salesforce-browser-coordinator.spec.ts::coordinator passes only opaque handles and a fixed read-only request",
+        "packages/browser/tests/browser-recovery.spec.ts::executes an independently authorized reversible action, restores, closes, and signs",
+        "packages/browser/tests/browser-recovery.spec.ts::rejects unchanged readback as healing and still restores and cleans up",
+        "packages/browser/tests/browser-recovery.spec.ts::atomically claims each permit once and blocks replay",
+        "packages/browser/tests/browser-recovery.spec.ts::uses an immutable request snapshot and revalidates authority immediately before action",
+        "packages/browser/tests/healing-probe.spec.ts::proves a complete baseline without mutating the page",
+        "packages/browser/tests/healing-probe.spec.ts::proves stale hooks, discovers semantic candidates, and reruns assertions",
+        "packages/browser/tests/healing-probe.spec.ts::fails closed for an incomplete, ambiguous, or non-editable target",
+        "tests/test_live_healing.py::test_complete_sequence_preserves_all_obligations_and_separate_restoration",
+        "tests/test_live_healing.py::test_timeout_partial_effects_always_attempt_both_independent_recoveries",
+        "tests/test_live_healing.py::test_rejected_adapter_shape_emits_no_raw_payload_warning",
+        "tests/test_live_healing.py::test_entity_rename_and_additional_targets_do_not_narrow_algorithm_or_leak_names",
+        "tests/test_live_healing_bridge.py::test_complete_source_obligations_are_derived_not_inferred",
+        "tests/test_live_healing_bridge.py::test_default_preparation_reports_missing_proof_and_dispatch",
+        "tests/test_live_healing_bridge.py::test_authenticated_candidate_binding_builds_request_but_does_not_execute",
+        "tests/test_live_healing_bridge.py::test_no_baseline_check_only_or_restored_phase_can_be_relabelled",
+        "tests/test_metadata_recovery.py::test_success_check_only_once_deploy_once_exact_preimage_restore_and_no_unrelated_changes",
+        "tests/test_metadata_recovery.py::test_check_only_failure_never_dispatches_candidate_or_restore",
+        "tests/test_metadata_recovery.py::test_unknown_job_after_dispatch_quarantines_without_any_further_transport",
+        "tests/test_metadata_recovery.py::test_absent_scalar_set_preserves_other_bytes_and_restores_original_absence",
+        "tests/test_metadata_recovery.py::test_absent_requires_explicit_source_allowed_state_and_exact_existing_component"
+      ],
+      "currentReceiptIds": [],
+      "status": "NOT_RUN",
+      "gaps": ["Offline locator, worker, fixed-alias session and coordinator tests pass. A disabled-by-default product sequence now enforces complete source-bound obligations, genuine stale-locator proof, unique semantic candidates, full rerun assertions, independent Salesforce metadata/residue restoration, locator reset and local session closure. BrowserTarget carries the closed source-bound locator/assertion/restoration contract; metadata recovery supports only exact SET_SCALAR edits with declared ABSENT/PRESENT-baseline prestates inside one existing component instance. A 2026-09-11 headless fixed-alias Developer Edition smoke returned PASSED with diagnosticOnly=true, releaseEligible=false, evidencePhase=null and complete context/browser cleanup, but it produced no acceptance receipt. Production browser dispatch and durable accepted receipt production are absent; the interrupted host factory is unreviewed. The browser probe still admits an unknown-key duplicate-identity bypass, and deployment test selection lacks a source-closed complete Apex class method inventory. No live drift or healing was dispatched, and SF-L06, SF-L07, SF-L09 plus the browser portion of SF-C05 remain NOT_RUN; these FOUNDATION tests earn no acceptance credit."]
+    },
+    {
+      "requirementId": "REQ-GOV-001",
+      "statement": "Ground material claims, measure explicit populations and fail closed on incomplete release evidence.",
+      "capabilityIds": [
+        "governance.claim-grounding",
+        "governance.release-decision",
+        "governance.release-input-integrity",
+        "governance.measurement-contract",
+        "governance.live-acceptance-evidence"
+      ],
+      "acceptanceClasses": ["UC", "F", "G"],
+      "exactTestNodeIds": [
+        "tests/test_live_receipts.py::test_complete_signed_bundle_remains_incomplete_without_durable_ledger",
+        "tests/test_execution_assertions.py::test_exact_bytes_round_trip_and_scope_bound_replay",
+        "tests/test_execution_assertions.py::test_independent_contract_and_runner_key_bind_exact_execution",
+        "tests/test_execution_assertions.py::test_resigned_fabricated_assertion_predicate_fails_independent_contract",
+        "tests/test_execution_assertions.py::test_result_bytes_and_runner_signature_cannot_be_fabricated",
+        "tests/test_execution_assertions.py::test_expected_assertion_set_is_exact_and_caller_cannot_add_outcome",
+        "tests/test_live_receipt_ledger.py::test_sqlite_setup_is_idempotent_and_replay_preserves_exact_ordered_bytes",
+        "tests/test_live_receipt_producer.py::test_host_and_product_producers_append_exact_registry_verified_bytes",
+        "tests/test_live_campaign_status.py::test_durable_replay_reports_local_gate_validity_without_acceptance_overclaim"
+      ],
+      "currentReceiptIds": [],
+      "status": "TRACEABILITY_GAP",
+      "gaps": ["Exact offline execution-assertion replay, receipt-validation, append, producer and status tests are mapped, but no current live receipt exists; complete exact-node mapping, live execution and any release eligibility remain absent."]
+    },
+    {
+      "requirementId": "REQ-UX-001",
+      "statement": "Present a polished dashboard that distinguishes recorded evidence, proposals, execution and unavailable capabilities.",
+      "capabilityIds": ["ui.assurance-dashboard"],
+      "acceptanceClasses": ["B", "F", "L"],
+      "exactTestNodeIds": [
+        "packages/browser/tests/candidate-client.spec.ts::candidate view decoder keeps bounded authority and identity boundaries",
+        "packages/browser/tests/dashboard.spec.ts::dashboard opens as a clean, truthful assurance workspace",
+        "packages/browser/tests/dashboard.spec.ts::live campaign panel replays durable status without implying execution or release",
+        "packages/browser/tests/live-campaign-client.spec.ts::live campaign decoder preserves the fail-closed acceptance projection",
+        "packages/browser/tests/live-campaign-client.spec.ts::live campaign decoder rejects release promotion, extra data, and inconsistent gates"
+      ],
+      "currentReceiptIds": [],
+      "status": "TRACEABILITY_GAP",
+      "gaps": ["Mocked browser contracts and the read-only durable-campaign status projection pass, but product-owned Salesforce execution is not initiated by this view and a real frontend-to-backend-to-Salesforce journey and accessibility receipt remain absent."]
+    }
+  ]
+}

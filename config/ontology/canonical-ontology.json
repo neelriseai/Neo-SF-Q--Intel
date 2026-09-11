@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
   "ontologyId": "change-evidence-core",
-  "ontologyVersion": "1.0.0",
-  "sha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a",
+  "ontologyVersion": "1.1.0",
+  "sha256": "7690ae231829b79e672800d77b343a9451a6bd0403978cd778123a48870173eb",
   "nodeClasses": [
     {"id": "requirement", "role": "REQUIREMENT", "materiality": "MATERIAL"},
     {"id": "capability", "role": "CAPABILITY", "materiality": "MATERIAL"},
@@ -139,6 +139,7 @@
       "id": "reads",
       "materiality": "MATERIAL",
       "legalEndpoints": [
+        {"sourceClass": "automated-test", "targetClass": "data-field"},
         {"sourceClass": "automation", "targetClass": "configuration"},
         {"sourceClass": "automation", "targetClass": "data-field"},
         {"sourceClass": "code", "targetClass": "configuration"},

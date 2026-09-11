@@ -3,7 +3,64 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from neo_sf_q_intel.config import AIProvider, Settings
+from neo_sf_q_intel.config import (
+    PROVIDER_CREDENTIAL_SOURCE_CONFLICT,
+    AIProvider,
+    Settings,
+)
+from neo_sf_q_intel.ontology import load_canonical_ontology, load_source_graph_profile
+from neo_sf_q_intel.providers import (
+    ProviderConfigurationBlockedError,
+    create_model_provider,
+)
+from neo_sf_q_intel.salesforce_source import (
+    DEFAULT_ONTOLOGY_PATH,
+    DEFAULT_SOURCE_PROFILE_PATH,
+    DEFAULT_SOURCE_PROFILE_SHA256,
+)
+
+
+def test_default_source_profile_pins_load_the_current_contract() -> None:
+    ontology = load_canonical_ontology(DEFAULT_ONTOLOGY_PATH)
+    settings_pin = Settings.model_fields["source_graph_profile_sha256"].default
+
+    assert settings_pin == DEFAULT_SOURCE_PROFILE_SHA256
+    profile = load_source_graph_profile(
+        DEFAULT_SOURCE_PROFILE_PATH, ontology, expected_sha256=settings_pin
+    )
+
+    assert profile.ontology.ontology_sha256 == ontology.sha256
+    assert profile.ontology.ontology_version == ontology.ontology_version
+
+
+def test_local_phase_policy_is_disabled_without_explicit_private_file_pin():
+    settings = Settings(_env_file=None, allow_llm=False)
+    assert settings.live_local_validation_phase_policy_enabled is False
+    assert settings.live_local_validation_phase_policy_sha256 is None
+    assert not settings.live_local_validation_phase_policy_path.is_absolute()
+    assert (
+        Settings(
+            _env_file=None, allow_llm=False, live_local_validation_phase_policy_sha256=""
+        ).live_local_validation_phase_policy_sha256
+        is None
+    )
+    with pytest.raises(ValidationError, match="exact SHA-256"):
+        Settings(_env_file=None, allow_llm=False, live_local_validation_phase_policy_enabled=True)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/host/policy.json",
+        "C:/host/policy.json",
+        "../policy.json",
+        "config/policy.json",
+        ".runtime/policy.txt",
+    ],
+)
+def test_local_phase_policy_path_must_be_private_repository_relative_json(path):
+    with pytest.raises((ValidationError, ValueError)):
+        Settings(_env_file=None, allow_llm=False, live_local_validation_phase_policy_path=path)
 
 
 def test_openai_and_azure_are_explicit_profiles() -> None:
@@ -25,10 +82,119 @@ def test_selected_provider_requires_only_its_credentials() -> None:
         Settings(ai_provider="openai", openai_api_key=None)
 
 
+def test_same_process_and_dotenv_provider_configuration_is_not_a_conflict(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "AI_PROVIDER=openai\nOPENAI_API_KEY=matching-secret\nOPENAI_CHAT_MODEL=matching-model\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("AI_PROVIDER", "openai")
+    monkeypatch.setenv("OPENAI_API_KEY", "matching-secret")
+    monkeypatch.setenv("OPENAI_CHAT_MODEL", "matching-model")
+
+    settings = Settings(_env_file=env_file)
+
+    assert settings.provider_configuration_codes == ()
+    assert settings.provider_calls_blocked is False
+
+
+def test_different_process_and_dotenv_credentials_block_provider_without_secret_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env_file = tmp_path / ".env"
+    env_file.write_text("OPENAI_API_KEY=project-secret\n", encoding="utf-8")
+    monkeypatch.setenv("OPENAI_API_KEY", "stale-process-secret")
+
+    settings = Settings(ai_provider="openai", _env_file=env_file)
+
+    assert settings.provider_configuration_codes == (PROVIDER_CREDENTIAL_SOURCE_CONFLICT,)
+    assert settings.provider_calls_blocked is True
+    with pytest.raises(
+        ProviderConfigurationBlockedError,
+        match=f"^{PROVIDER_CREDENTIAL_SOURCE_CONFLICT}$",
+    ) as error:
+        create_model_provider(settings)
+    rendered = str(error.value)
+    assert "project-secret" not in rendered
+    assert "stale-process-secret" not in rendered
+
+
+@pytest.mark.parametrize("source", ["process", "dotenv"])
+def test_one_nonempty_credential_source_does_not_conflict(
+    source: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env_file = tmp_path / ".env"
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    if source == "process":
+        env_file.write_text("UNRELATED=value\n", encoding="utf-8")
+        monkeypatch.setenv("OPENAI_API_KEY", "process-only-secret")
+    else:
+        env_file.write_text("OPENAI_API_KEY=dotenv-only-secret\n", encoding="utf-8")
+
+    settings = Settings(ai_provider="openai", _env_file=env_file)
+
+    assert settings.provider_configuration_codes == ()
+    assert settings.provider_calls_blocked is False
+
+
+def test_azure_endpoint_and_deployment_source_conflicts_are_detected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "AZURE_OPENAI_API_KEY=azure-secret\n"
+        "AZURE_OPENAI_ENDPOINT=https://project.example.invalid\n"
+        "AZURE_OPENAI_API_VERSION=v1\n"
+        "AZURE_OPENAI_CHAT_DEPLOYMENT=project-chat\n"
+        "AZURE_OPENAI_EMBEDDING_DEPLOYMENT=embedding\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://stale.example.invalid")
+    monkeypatch.setenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "stale-chat")
+
+    settings = Settings(ai_provider="azure_openai", _env_file=env_file)
+
+    assert settings.provider_configuration_codes == (PROVIDER_CREDENTIAL_SOURCE_CONFLICT,)
+    assert settings.provider_calls_blocked is True
+
+
 def test_relative_salesforce_root_is_resolved_from_repository() -> None:
     settings = Settings(allow_llm=False, salesforce_app_root=Path("../app"))
     expected = Path("workspace/app").resolve()
     assert settings.resolved_salesforce_root(Path("workspace/agent")) == expected
+
+
+def test_web_allowed_origins_are_exact_configurable_and_deduplicated() -> None:
+    settings = Settings(
+        allow_llm=False,
+        web_allowed_origins=(
+            "http://localhost:3100,https://neo.example.test,http://localhost:3100"
+        ),
+    )
+
+    assert settings.parsed_web_allowed_origins() == (
+        "http://localhost:3100",
+        "https://neo.example.test",
+    )
+
+
+@pytest.mark.parametrize(
+    "origin",
+    [
+        "*",
+        "",
+        "ftp://neo.example.test",
+        "https://user@neo.example.test",
+        "https://neo.example.test/path",
+    ],
+)
+def test_web_allowed_origins_reject_wildcards_credentials_and_paths(origin: str) -> None:
+    settings = Settings(allow_llm=False, web_allowed_origins=origin)
+
+    with pytest.raises(ValueError, match="WEB_ALLOWED_ORIGINS"):
+        settings.parsed_web_allowed_origins()
 
 
 def test_distinct_repository_and_nested_app_roots_are_validated() -> None:
@@ -69,11 +235,6 @@ def test_source_repository_must_be_explicitly_configured() -> None:
         ).resolved_salesforce_repository_root()
 
 
-def test_source_graph_digest_must_be_explicitly_configured() -> None:
-    with pytest.raises(ValueError, match="SOURCE_GRAPH_SHA256"):
-        Settings(allow_llm=False, source_graph_sha256=None, _env_file=None).require_graph_sha256()
-
-
 def test_sqlite_fallback_path_is_repository_relative() -> None:
     settings = Settings(allow_llm=False, sqlite_path=Path("runtime/fallback.db"))
 
@@ -96,6 +257,41 @@ def test_outcome_fallback_paths_are_repository_relative() -> None:
         settings.resolved_outcome_json_path(Path("workspace"))
         == Path("workspace/runtime/outcomes").resolve()
     )
+
+
+def test_live_receipt_paths_are_repository_relative_and_profile_is_pinned() -> None:
+    settings = Settings(
+        allow_llm=False,
+        live_receipt_sqlite_path=Path("runtime/live-receipts.db"),
+        live_acceptance_profile_path=Path("config/live-profile.json"),
+    )
+
+    assert (
+        settings.resolved_live_receipt_sqlite_path(Path("workspace"))
+        == Path("workspace/runtime/live-receipts.db").resolve()
+    )
+    assert (
+        settings.resolved_live_acceptance_profile_path(Path("workspace"))
+        == Path("workspace/config/live-profile.json").resolve()
+    )
+    assert len(settings.require_live_acceptance_profile_sha256()) == 64
+
+
+def test_live_receipt_issuer_configuration_is_atomic_and_profile_pin_is_strict() -> None:
+    with pytest.raises(ValidationError, match="requires an ID, secret key, and role list"):
+        Settings(
+            allow_llm=False,
+            live_product_receipt_issuer_id="issuer-only",
+            _env_file=None,
+        )
+
+    settings = Settings(
+        allow_llm=False,
+        live_acceptance_profile_sha256="not-a-digest",
+        _env_file=None,
+    )
+    with pytest.raises(ValueError, match="LIVE_ACCEPTANCE_PROFILE_SHA256"):
+        settings.require_live_acceptance_profile_sha256()
 
 
 def test_ontology_and_source_profile_paths_are_repository_relative() -> None:

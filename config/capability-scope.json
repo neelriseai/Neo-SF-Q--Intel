@@ -61,6 +61,21 @@
       }
     },
     {
+      "id": "assurance.candidate-comparison",
+      "owner": "Change Analyst",
+      "status": "FOUNDATION",
+      "genericity": "Replays both sides of the host-captured Git candidate through the same source-neutral assurance path, binds every component run to exact graph/seed identities, persists the complete bundle atomically and exposes only a bounded release-ineligible client view. The caller cannot supply paths, sides, graph fragments or verified-change authority. This is offline candidate evidence; it is not a build, live-org, deployment or release receipt.",
+      "implementation": ["src/neo_sf_q_intel/candidate_assurance.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/api.py", "src/neo_sf_q_intel/repository.py", "apps/web/src/lib/candidate-client.ts", "apps/web/src/lib/types.ts"],
+      "verification": ["tests/test_candidate_assurance.py", "tests/test_candidate_persistence.py", "packages/browser/tests/candidate-client.spec.ts"],
+      "verificationCases": {
+        "positive": ["tests/test_candidate_assurance.py", "tests/test_candidate_persistence.py", "packages/browser/tests/candidate-client.spec.ts"],
+        "negative": ["tests/test_candidate_assurance.py", "tests/test_candidate_persistence.py", "packages/browser/tests/candidate-client.spec.ts"],
+        "failure": ["tests/test_candidate_assurance.py", "tests/test_candidate_persistence.py", "packages/browser/tests/candidate-client.spec.ts"],
+        "degradation": ["tests/test_candidate_assurance.py", "tests/test_candidate_persistence.py"],
+        "scenarioIndependence": ["tests/test_candidate_assurance.py", "packages/browser/tests/candidate-client.spec.ts"]
+      }
+    },
+    {
       "id": "reasoning.graph-impact",
       "owner": "Change Analyst",
       "status": "FOUNDATION",
@@ -196,15 +211,15 @@
       "id": "ui.assurance-dashboard",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Projects the typed assurance-run contract and a separately owned local-candidate foundation contract without scenario literals or client-side governance decisions. The foundation client sends no caller scope, bounds and runtime-decodes every response, replays canonical contract digests, rejects impossible stage chains, clears stale evidence and preserves analysis-only, incomplete and release-ineligible interlocks. The run view separately distinguishes source-confirmed, human-recorded, inferred, contradictory and unresolved evidence; selected validations from execution receipts; proposals from applied actions; recorded activity from live dependency availability; and current decisions from audit-only history. Ordered path receipts, A6 advisory payloads, persistence health, runtime validation of the legacy assurance-run response and automated accessibility auditing remain planned.",
-      "implementation": ["apps/web/src/app/page.tsx", "apps/web/src/app/styles.css", "apps/web/src/components/foundation-evidence-panel.tsx", "apps/web/src/lib/foundation-client.ts", "apps/web/src/lib/foundation-contract.ts", "apps/web/src/lib/foundation-view-model.ts", "apps/web/src/lib/types.ts", "apps/web/src/lib/run-view-model.ts"],
-      "verification": ["packages/browser/tests/dashboard.spec.ts"],
+      "genericity": "Projects typed assurance-run, local-candidate-foundation and durable live-campaign-status contracts without scenario literals, execution controls or client-side governance decisions. The live campaign client accepts only a bounded campaign identifier for read-only replay, runtime-decodes a closed 15-gate projection and cannot submit Salesforce scope, evidence or authority. It keeps locally valid receipts distinct from accepted gates and preserves incomplete, zero-accepted and release-ineligible interlocks. The foundation client sends no caller scope, bounds and runtime-decodes every response, replays canonical contract digests, rejects impossible stage chains, clears stale evidence and preserves analysis-only, incomplete and release-ineligible interlocks. The run view separately distinguishes source-confirmed, human-recorded, inferred, contradictory and unresolved evidence; selected validations from execution receipts; proposals from applied actions; recorded activity from live dependency availability; and current decisions from audit-only history. Product-owned live execution, ordered path receipts, A6 advisory payloads, accessibility receipts and runtime validation of the legacy assurance-run response remain planned.",
+      "implementation": ["apps/web/src/app/page.tsx", "apps/web/src/app/styles.css", "apps/web/src/components/foundation-evidence-panel.tsx", "apps/web/src/lib/candidate-client.ts", "apps/web/src/lib/foundation-client.ts", "apps/web/src/lib/foundation-contract.ts", "apps/web/src/lib/foundation-view-model.ts", "apps/web/src/lib/live-campaign-client.ts", "apps/web/src/lib/types.ts", "apps/web/src/lib/run-view-model.ts"],
+      "verification": ["packages/browser/tests/dashboard.spec.ts", "packages/browser/tests/candidate-client.spec.ts", "packages/browser/tests/live-campaign-client.spec.ts"],
       "verificationCases": {
-        "positive": ["packages/browser/tests/dashboard.spec.ts"],
-        "negative": ["packages/browser/tests/dashboard.spec.ts"],
-        "failure": ["packages/browser/tests/dashboard.spec.ts"],
+        "positive": ["packages/browser/tests/dashboard.spec.ts", "packages/browser/tests/candidate-client.spec.ts", "packages/browser/tests/live-campaign-client.spec.ts"],
+        "negative": ["packages/browser/tests/dashboard.spec.ts", "packages/browser/tests/candidate-client.spec.ts", "packages/browser/tests/live-campaign-client.spec.ts"],
+        "failure": ["packages/browser/tests/dashboard.spec.ts", "packages/browser/tests/candidate-client.spec.ts", "packages/browser/tests/live-campaign-client.spec.ts"],
         "degradation": ["packages/browser/tests/dashboard.spec.ts"],
-        "scenarioIndependence": ["packages/browser/tests/dashboard.spec.ts"]
+        "scenarioIndependence": ["packages/browser/tests/dashboard.spec.ts", "packages/browser/tests/candidate-client.spec.ts", "packages/browser/tests/live-campaign-client.spec.ts"]
       }
     },
     {
@@ -219,7 +234,7 @@
       "id": "automation.locator-healing",
       "owner": "UI Healing",
       "status": "FOUNDATION",
-      "genericity": "Uses metadata identity, accessibility semantics and ambiguity abstention.",
+      "genericity": "Discovers generic locator candidates from metadata identity and accessibility semantics and abstains on ambiguity. This library does not authorize or apply a browser mutation and cannot claim an executed heal.",
       "implementation": ["src/neo_sf_q_intel/healing.py", "packages/browser/src/locator-healer.ts"],
       "verification": ["packages/browser/tests/locator-healer.spec.ts"]
     },
@@ -266,17 +281,17 @@
       "id": "memory.postgresql",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Target primary non-vector memory. Run documents and checkpoints are wired, and outcome candidates have an append-only replay-validating adapter foundation. Live PostgreSQL outcome transactions/concurrency plus evidence/chunk, graph, audit, approval and evaluation application ports remain.",
-      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/outcome_repository.py", "src/neo_sf_q_intel/service.py", "migrations/001_assurance_runs.sql", "migrations/002_remove_postgres_embeddings.sql", "migrations/003_outcome_memory.sql"],
-      "verification": ["tests/test_repository.py", "tests/test_outcome_repository.py", "tests/test_service_fallback.py"]
+      "genericity": "Primary non-vector relational memory uses a dedicated validated Neo schema and ownership marker. Run documents, atomic candidate bundles, LangGraph checkpoints, append-only outcome candidates and exact-byte live receipt records have adapter foundations. Live target-runtime save/resume/concurrency plus governed graph, audit, approval and evaluation application ports remain unaccepted.",
+      "implementation": ["src/neo_sf_q_intel/postgres_schema.py", "src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/outcome_repository.py", "src/neo_sf_q_intel/live_receipt_ledger.py", "src/neo_sf_q_intel/service.py", "migrations/001_assurance_runs.sql", "migrations/002_remove_postgres_embeddings.sql", "migrations/003_outcome_memory.sql"],
+      "verification": ["tests/test_postgres_schema.py", "tests/test_repository.py", "tests/test_candidate_persistence.py", "tests/test_outcome_repository.py", "tests/test_live_receipt_ledger.py", "tests/test_service_fallback.py"]
     },
     {
       "id": "memory.resilient-fallback",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
-      "genericity": "Run storage falls back from PostgreSQL to auto-created SQLite/process memory; outcome storage independently falls back through auto-created SQLite, immutable JSON and process cache. Health exposes each active mode and never falls through on corruption, replay, schema, idempotency or ambiguous-write failures.",
-      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/outcome_repository.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/config.py", "src/neo_sf_q_intel/api.py"],
-      "verification": ["tests/test_repository.py", "tests/test_outcome_repository.py", "tests/test_service_fallback.py", "tests/test_api.py", "tests/test_config.py"]
+      "genericity": "Run storage falls back from PostgreSQL to auto-created SQLite/process memory; outcome storage independently falls back through auto-created SQLite, immutable JSON and process cache. The live-receipt reader uses PostgreSQL or auto-created SQLite and becomes explicitly unavailable rather than granting acceptance when neither is usable. Health exposes active modes and never falls through on corruption, replay, schema, idempotency or ambiguous-write failures.",
+      "implementation": ["src/neo_sf_q_intel/repository.py", "src/neo_sf_q_intel/outcome_repository.py", "src/neo_sf_q_intel/live_receipt_ledger.py", "src/neo_sf_q_intel/live_campaign_status.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/config.py", "src/neo_sf_q_intel/api.py"],
+      "verification": ["tests/test_repository.py", "tests/test_outcome_repository.py", "tests/test_live_receipt_ledger.py", "tests/test_live_campaign_status.py", "tests/test_service_fallback.py", "tests/test_api.py", "tests/test_config.py"]
     },
     {
       "id": "memory.release-outcomes",
@@ -294,6 +309,21 @@
       }
     },
     {
+      "id": "governance.live-acceptance-evidence",
+      "owner": "Governance Review",
+      "status": "FOUNDATION",
+      "genericity": "Defines a pinned fifteen-gate live campaign, strict signed receipt contracts, issuer-role separation, exact-byte append-only receipt storage, independently compiled expected-execution contracts and authenticated typed execution-assertion artifacts. The host-owned no-argument baseline service can compose only the fixed read-only LIVE_BASELINE phase; local obligations are either exactly verified from signed durable evidence or preserved as policy-pinned unresolved non-runtime deferrals, never converted into passes. Candidate-controlled Node test output is explicitly refused as receipt authority. The modules cannot self-authorize, keep requirements_satisfied and release_eligible false, and have no current live acceptance receipt.",
+      "implementation": ["config/live-salesforce-acceptance-profile.json", "src/neo_sf_q_intel/execution_assertions.py", "src/neo_sf_q_intel/live_receipts.py", "src/neo_sf_q_intel/live_receipt_ledger.py", "src/neo_sf_q_intel/live_receipt_producer.py", "src/neo_sf_q_intel/live_campaign_status.py", "src/neo_sf_q_intel/local_validation.py", "src/neo_sf_q_intel/local_validation_phase.py", "src/neo_sf_q_intel/local_validation_runner.py", "src/neo_sf_q_intel/live_baseline.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/api.py", "src/neo_sf_q_intel/mcp_server.py"],
+      "verification": ["tests/test_execution_assertions.py", "tests/test_live_salesforce_acceptance_profile.py", "tests/test_live_receipts.py", "tests/test_live_receipt_ledger.py", "tests/test_live_receipt_producer.py", "tests/test_live_campaign_status.py", "tests/test_local_validation.py", "tests/test_local_validation_phase.py", "tests/test_local_validation_runner.py", "tests/test_local_validation_runner_p0.py", "tests/test_live_baseline.py", "tests/test_live_baseline_phase.py", "tests/test_live_baseline_transport.py"],
+      "verificationCases": {
+        "positive": ["tests/test_execution_assertions.py", "tests/test_live_receipts.py", "tests/test_live_receipt_ledger.py", "tests/test_live_receipt_producer.py", "tests/test_live_campaign_status.py"],
+        "negative": ["tests/test_execution_assertions.py", "tests/test_live_salesforce_acceptance_profile.py", "tests/test_live_receipts.py", "tests/test_live_receipt_ledger.py", "tests/test_live_receipt_producer.py", "tests/test_live_campaign_status.py"],
+        "failure": ["tests/test_execution_assertions.py", "tests/test_live_receipts.py", "tests/test_live_receipt_ledger.py", "tests/test_live_receipt_producer.py", "tests/test_live_campaign_status.py"],
+        "degradation": ["tests/test_execution_assertions.py", "tests/test_live_receipt_ledger.py", "tests/test_live_campaign_status.py"],
+        "scenarioIndependence": ["tests/test_execution_assertions.py", "tests/test_live_receipts.py", "tests/test_live_receipt_producer.py"]
+      }
+    },
+    {
       "id": "tools.mcp",
       "owner": "Orchestrator",
       "status": "FOUNDATION",
@@ -302,11 +332,41 @@
       "verification": ["tests/test_mcp_server.py", "tests/test_salesforce_cli.py"]
     },
     {
+      "id": "runtime.salesforce-target-planning",
+      "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "Derives a complete target obligation partition from the verified candidate and independently binds it to default-deny host policy. A closed, versioned source operation document declares variables, response projection, dataset ownership/cardinality, browser intent, changed-file disposition and local validation obligations; every admitted source is bound by exact relative locator, bytes and candidate tree digest. A host-pinned phase policy may mark only exact declared non-runtime checks as unresolved and not required for the fixed read-only LIVE_BASELINE gate set. It cannot erase them, execute Apex/browser/mutation targets, or waive candidate-check, deployment, restoration or release obligations. Unknown, runtime, consumed-contract, omitted, extra, wildcard, expired, production or caller-widened targets block. The plan grants no authority and no target has been executed live.",
+      "implementation": ["config/live-target-policy.json", "config/source-profiles/source-operation-declarations.schema.json", "src/neo_sf_q_intel/candidate_live_targets.py", "src/neo_sf_q_intel/candidate_target_compiler.py", "src/neo_sf_q_intel/live_target_plan.py", "src/neo_sf_q_intel/local_validation_phase.py", "src/neo_sf_q_intel/phase_policy_proposal.py"],
+      "verification": ["tests/test_candidate_live_targets.py", "tests/test_candidate_target_compiler.py", "tests/test_live_target_plan.py", "tests/test_local_validation_phase.py", "tests/test_phase_policy_proposal.py"],
+      "verificationCases": {
+        "positive": ["tests/test_candidate_live_targets.py", "tests/test_candidate_target_compiler.py", "tests/test_live_target_plan.py"],
+        "negative": ["tests/test_candidate_live_targets.py", "tests/test_candidate_target_compiler.py", "tests/test_live_target_plan.py"],
+        "failure": ["tests/test_candidate_live_targets.py", "tests/test_candidate_target_compiler.py", "tests/test_live_target_plan.py"],
+        "degradation": ["tests/test_live_target_plan.py"],
+        "scenarioIndependence": ["tests/test_candidate_live_targets.py", "tests/test_candidate_target_compiler.py", "tests/test_live_target_plan.py"]
+      }
+    },
+    {
       "id": "runtime.salesforce-live-evidence",
       "owner": "Orchestrator",
+      "status": "FOUNDATION",
+      "genericity": "A host-owned no-argument service compiles the verified candidate, independently proves the active Salesforce access-token subject and non-production organization, seals a fixed SF-L03/SF-L04/SF-L05 read-only target set, resolves exact synthetic dataset membership, and executes bounded standard REST, source-contract custom REST and metadata reads. It validates the real Salesforce CLI status/result/statusCode/headers/body envelope, canonicalizes API versions, revalidates identity and expiry before dependent work, persists exact signed assertion/receipt bytes and replays cached evidence. FastAPI and MCP expose only bounded sanitized status and accept no caller alias, route, scope, receipt or campaign. Private host authority and phase-policy files remain unissued, candidate-controlled Node tests remain blocked for candidate phases, and no live receipt exists.",
+      "implementation": ["src/neo_sf_q_intel/salesforce_cli.py", "src/neo_sf_q_intel/classification_bootstrap.py", "src/neo_sf_q_intel/live_read_evidence.py", "src/neo_sf_q_intel/execution_assertions.py", "src/neo_sf_q_intel/live_receipt_producer.py", "src/neo_sf_q_intel/live_baseline.py", "src/neo_sf_q_intel/service.py", "src/neo_sf_q_intel/api.py", "src/neo_sf_q_intel/mcp_server.py"],
+      "verification": ["tests/test_salesforce_cli.py", "tests/test_live_read_evidence.py", "tests/test_execution_assertions.py", "tests/test_live_receipt_producer.py", "tests/test_classification_bootstrap.py", "tests/test_live_baseline.py", "tests/test_live_baseline_phase.py", "tests/test_live_baseline_transport.py", "tests/test_sf_cli_rest_contract.py"],
+      "verificationCases": {
+        "positive": ["tests/test_live_read_evidence.py", "tests/test_execution_assertions.py"],
+        "negative": ["tests/test_salesforce_cli.py", "tests/test_live_read_evidence.py", "tests/test_execution_assertions.py", "tests/test_live_receipt_producer.py"],
+        "failure": ["tests/test_live_read_evidence.py", "tests/test_execution_assertions.py", "tests/test_live_receipt_producer.py"],
+        "degradation": ["tests/test_execution_assertions.py"],
+        "scenarioIndependence": ["tests/test_live_read_evidence.py", "tests/test_execution_assertions.py"]
+      }
+    },
+    {
+      "id": "runtime.salesforce-candidate-deployment",
+      "owner": "Orchestrator",
       "status": "NEXT",
-      "genericity": "Planned live reads require validated contract routes, field/route allowlists, production-org refusal and redacted audit events; the current CLI adapter only proves bounded inspection and route validation.",
-      "implementation": ["src/neo_sf_q_intel/salesforce_cli.py"],
+      "genericity": "Planned exactly authorized non-production check-only, candidate deployment, mandatory restoration and zero-residue reconciliation use independently issued mutation and recovery permits. No current module, offline test or live receipt authorizes deployment or metadata mutation.",
+      "implementation": [],
       "verification": []
     },
     {
@@ -320,10 +380,46 @@
     {
       "id": "automation.browser-worker",
       "owner": "UI Healing",
-      "status": "NEXT",
-      "genericity": "Typed worker accepts a generic intent and ephemeral session handoff.",
-      "implementation": ["packages/browser/src/locator-healer.ts"],
-      "verification": []
+      "status": "FOUNDATION",
+      "genericity": "A typed Playwright worker, fixed-alias CLI session broker and digest-pinned coordinator use one-shot in-memory session handoff, nonpersistent browser contexts, bounded DOM capture or non-mutating candidate readback, origin/identity checks, cleanup reporting and secret-safe process boundaries. The live-smoke command is diagnostic-only: it emits no signed campaign receipt, and even a diagnostic PASSED result cannot satisfy SF-L06, SF-L07 or SF-L09.",
+      "implementation": ["packages/browser/src/browser-worker.ts", "packages/browser/src/salesforce-cli-session.ts", "packages/browser/src/salesforce-browser-coordinator.ts", "packages/browser/src/live-smoke-cli.ts"],
+      "verification": ["packages/browser/tests/browser-worker.spec.ts", "packages/browser/tests/salesforce-cli-session.spec.ts", "packages/browser/tests/salesforce-browser-coordinator.spec.ts"],
+      "diagnosticObservations": [
+        {
+          "observedOn": "2026-09-10",
+          "targetReference": "CONFIGURED_FIXED_ALIAS",
+          "orgClassification": "DEVELOPER_EDITION",
+          "status": "PASSED",
+          "diagnosticOnly": true,
+          "releaseEligible": false,
+          "evidencePhase": null,
+          "cleanup": {"contextClosed": true, "browserClosed": true},
+          "acceptanceCredit": 0,
+          "currentReceiptId": null
+        }
+      ],
+      "verificationCases": {
+        "positive": ["packages/browser/tests/browser-worker.spec.ts", "packages/browser/tests/salesforce-cli-session.spec.ts", "packages/browser/tests/salesforce-browser-coordinator.spec.ts"],
+        "negative": ["packages/browser/tests/browser-worker.spec.ts", "packages/browser/tests/salesforce-cli-session.spec.ts", "packages/browser/tests/salesforce-browser-coordinator.spec.ts"],
+        "failure": ["packages/browser/tests/browser-worker.spec.ts", "packages/browser/tests/salesforce-cli-session.spec.ts", "packages/browser/tests/salesforce-browser-coordinator.spec.ts"],
+        "degradation": ["packages/browser/tests/browser-worker.spec.ts", "packages/browser/tests/salesforce-cli-session.spec.ts"],
+        "scenarioIndependence": ["packages/browser/tests/browser-worker.spec.ts", "packages/browser/tests/salesforce-browser-coordinator.spec.ts"]
+      }
+    },
+    {
+      "id": "automation.applied-healing",
+      "owner": "UI Healing",
+      "status": "FOUNDATION",
+      "genericity": "Disabled-by-default browser and metadata recovery boundaries consume a complete source-bound BrowserTarget contract, prove baseline and actual stale-locator failures, accept exactly one fresh semantic candidate per stale obligation, rerun every declared read-only assertion, and independently reconcile Salesforce metadata/residue, locator-state reset and local session closure. The headless probe never clicks, fills, submits, saves or persists raw locators. Unknown, ambiguous, partial, untrusted, stale, concurrent or leaking adapter results fail closed. Concrete signed production authority, cross-language dispatch and durable accepted receipts remain absent, so live execution stays disabled and no live healing claim exists.",
+      "implementation": ["packages/browser/src/browser-recovery.ts", "packages/browser/src/healing-probe.ts", "src/neo_sf_q_intel/live_healing.py", "src/neo_sf_q_intel/metadata_recovery.py", "src/neo_sf_q_intel/live_healing_bridge.py"],
+      "verification": ["packages/browser/tests/browser-recovery.spec.ts", "packages/browser/tests/healing-probe.spec.ts", "tests/test_live_healing.py", "tests/test_metadata_recovery.py", "tests/test_live_healing_bridge.py"],
+      "verificationCases": {
+        "positive": ["packages/browser/tests/browser-recovery.spec.ts", "packages/browser/tests/healing-probe.spec.ts", "tests/test_live_healing.py", "tests/test_metadata_recovery.py", "tests/test_live_healing_bridge.py"],
+        "negative": ["packages/browser/tests/browser-recovery.spec.ts", "packages/browser/tests/healing-probe.spec.ts", "tests/test_live_healing.py", "tests/test_metadata_recovery.py", "tests/test_live_healing_bridge.py"],
+        "failure": ["packages/browser/tests/browser-recovery.spec.ts", "packages/browser/tests/healing-probe.spec.ts", "tests/test_live_healing.py", "tests/test_metadata_recovery.py", "tests/test_live_healing_bridge.py"],
+        "degradation": ["packages/browser/tests/browser-recovery.spec.ts", "packages/browser/tests/healing-probe.spec.ts", "tests/test_live_healing.py", "tests/test_metadata_recovery.py", "tests/test_live_healing_bridge.py"],
+        "scenarioIndependence": ["packages/browser/tests/browser-recovery.spec.ts", "packages/browser/tests/healing-probe.spec.ts", "tests/test_live_healing.py", "tests/test_metadata_recovery.py", "tests/test_live_healing_bridge.py"]
+      }
     }
   ]
 }

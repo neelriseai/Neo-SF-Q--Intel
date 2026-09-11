@@ -1,0 +1,1707 @@
+Yes. After reconciling the earlier discussion with the plan I gave you, I would **change the Salesforce curriculum materially**.
+
+The biggest correction is this:
+
+> **You should not spend your learning time building another Salesforce automation tool. You should learn to build a Salesforce Intelligence/Engineering Agent that can 
+understand the org, understand existing automation frameworks, reason about changes and business behaviour, generate/modify portable code, execute through existing tooling, 
+and produce evidence.**
+
+That matches the direction we reached earlier much better.
+
+It also matters because Salesforce's own DX MCP Server now exposes **60+ tools**, including metadata, DevOps, LWC and code-analysis capabilities, while Salesforce Hosted MCP Servers
+ provide governed access to Salesforce data/automation. GitHub Copilot can consume custom MCP servers directly. ([Developer][1])
+
+Meanwhile, Provar MCP already exposes 40+ tools around generation, validation, execution and inspection; Tosca has agentic natural-language test generation for Salesforce; 
+and Copado TestAgent can generate and modify Salesforce test scripts. Therefore **MCP + AI test generation + self-healing alone is no longer enough differentiation**. 
+([Provar Documentation][2])
+
+# 1. Revised product vision
+
+The architecture we should learn toward is closer to:
+
+```text
+                           USER
+                            │
+             ┌──────────────┴──────────────┐
+             │                             │
+       GitHub Copilot                 Agentforce
+       / IDE Agent                    / Business Agent
+             │                             │
+             └──────────── MCP ────────────┘
+                            │
+                            ▼
+                 YOUR ORCHESTRATOR
+                            │
+                    Salesforce Agent
+                            │
+        ┌───────────────────┼────────────────────┐
+        │                   │                    │
+        ▼                   ▼                    ▼
+  SALESFORCE            REPOSITORY          AUTOMATION
+  INTELLIGENCE          INTELLIGENCE        INTELLIGENCE
+        │                   │                    │
+ Metadata Graph          Java/Python          Selenium
+ Process Graph           Apex/LWC             Playwright
+ Permission Graph        Tests                API
+ Dependency Graph        Git history          Apex tests
+        │                   │                    │
+        └───────────────────┼────────────────────┘
+                            │
+                      REASONING ENGINE
+                            │
+             deterministic analysis first
+                            +
+                     LLM reasoning
+                            │
+       ┌────────────────────┼────────────────────┐
+       ▼                    ▼                    ▼
+  Business tasks       Development tasks      QA tasks
+
+  Process explain      Change impact         Test design
+  Access analysis      Code generation       Test generation
+  RCA                  Refactoring           Execution
+  Org analysis         PR generation         Healing
+  Release risk         Code review           Evidence
+```
+
+And underneath it:
+
+```text
+Salesforce DX MCP
+Salesforce Hosted MCP
+GitHub MCP
+Custom Salesforce Intelligence MCP
+Custom Test Intelligence MCP
+Browser/execution adapters
+CI/CD
+```
+
+Salesforce explicitly supports GitHub Copilot with its DX MCP Server, so the strategy of **extending the Copilot people already use instead of requiring another proprietary 
+testing UI** is technically aligned with the current ecosystem. ([Developer][3])
+
+---
+
+# 2. The critical philosophy change
+
+Previously, we were thinking somewhat like:
+
+```text
+Salesforce
+   ↓
+AI
+   ↓
+Test generation
+   ↓
+Execution
+   ↓
+Healing
+```
+
+The earlier discussion led us somewhere better:
+
+```text
+                   SALESFORCE CHANGE
+                           │
+                           ▼
+                 Understand the change
+                           │
+                           ▼
+                  Understand the org
+                           │
+              ┌────────────┼────────────┐
+              ▼            ▼            ▼
+          Business      Code        Security
+           impact       impact       impact
+              │            │            │
+              └────────────┼────────────┘
+                           ▼
+                   Determine risk
+                           │
+                           ▼
+                 Determine coverage
+                           │
+                  ┌────────┴────────┐
+                  ▼                 ▼
+            Existing tests       Gap exists
+                  │                 │
+                  │              Generate
+                  │              portable
+                  │                code
+                  └────────┬────────┘
+                           ▼
+                        Execute
+                           │
+                           ▼
+                    Gather evidence
+                           │
+                           ▼
+                  Diagnose failures
+                           │
+                    ┌──────┴───────┐
+                    ▼              ▼
+               Product bug      Test issue
+                                  │
+                             repair safely
+                           │
+                           ▼
+                    produce PR/report
+```
+
+**This entire chain is your product.**
+
+Test automation is only one segment.
+
+---
+
+# 3. Therefore, your learning priority changes
+
+I would divide your learning into **six capabilities**, in this order:
+
+```text
+1. Salesforce domain understanding
+2. Salesforce org intelligence
+3. Existing-code/framework intelligence
+4. Deterministic reasoning engines
+5. MCP + Copilot + agent orchestration
+6. Business/Dev/QA autonomous workflows
+```
+
+Notice automation comes much later than it did in my previous roadmap.
+
+---
+
+# STAGE 1 — Salesforce as a business system
+
+### Goal
+
+Don't initially become a Salesforce Admin.
+
+Become capable of answering:
+
+> **"What business process is this Salesforce configuration implementing?"**
+
+Learn approximately these process families:
+
+```text
+Lead → Account/Contact → Opportunity
+
+Opportunity → Product → Quote → Order
+
+Customer → Case → Resolution
+
+User → Role → Permission → Data Access
+
+Record change → Flow/Rule/Apex → downstream effect
+
+External system → Salesforce → process → external system
+```
+
+For each one, follow our meta-learning technique.
+
+### Example: Opportunity approval
+
+First understand the business requirement:
+
+> Discount over 20% requires approv
+l.
+
+Then map:
+
+```text
+Business requirement
+      ↓
+Opportunity
+      ↓
+Discount field
+      ↓
+Flow / approval logic
+      ↓
+Approver
+      ↓
+Opportunity status
+      ↓
+Quote/order consequence
+```
+
+Then ask yourself:
+
+```text
+What metadata represents this?
+
+What code might participate?
+
+What permission influences it?
+
+What downstream processes depend on it?
+
+How could I discover this automatically?
+```
+
+That's the important learning.
+
+### Build during this stage
+
+A tiny:
+
+**Salesforce Process Explorer**
+
+Input:
+
+```text
+Opportunity
+```
+
+Output eventually:
+
+```text
+Fields
+Relationships
+Automations
+Validation
+Apex
+Layouts
+Permissions
+Downstream objects
+```
+
+---
+
+# STAGE 2 — Salesforce org internals
+
+This is one of the deepest parts of your curriculum.
+
+## Learn deeply
+
+```text
+Objects
+Fields
+Relationships
+Record Types
+
+Validation Rules
+
+Flows
+Subflows
+
+Apex Classes
+Triggers
+
+LWC
+
+Permission Sets
+Profiles
+Sharing
+
+Layouts
+
+Integration definitions
+
+Metadata API
+Tooling API
+REST API
+SOQL
+Salesforce CLI
+```
+
+But **don't learn each independently**.
+
+Always learn relationships.
+
+Example:
+
+```text
+Opportunity.Amount
+      │
+      ├── read by Flow A
+      │
+      ├── referenced by Validation B
+      │
+      ├── queried by Apex C
+      │
+      ├── displayed by LWC D
+      │
+      ├── available through Permission E
+      │
+      └── tested by Test F
+```
+
+This naturally leads into your most important data structure.
+
+---
+
+# STAGE 3 — Build the Salesforce Org Intelligence Graph
+
+This should now be **the centre of the learning plan**.
+
+Not RAG.
+
+Not the LLM.
+
+Not Selenium.
+
+The graph.
+
+Build nodes:
+
+```text
+Object
+Field
+Flow
+ApexClass
+ApexMethod
+Trigger
+LWC
+ValidationRule
+RecordType
+PermissionSet
+Profile
+Layout
+Integration
+Test
+Requirement
+```
+
+Edges:
+
+```text
+READS
+WRITES
+REFERENCES
+CALLS
+TRIGGERS
+DISPLAYS
+DEPENDS_ON
+SECURES
+TESTED_BY
+IMPLEMENTS
+```
+
+Example:
+
+```text
+             Requirement
+                  │
+             implemented_by
+                  ▼
+              Flow A
+             /      \
+          reads     calls
+           ↓          ↓
+       Field X      Apex B
+           │          │
+           └────┬─────┘
+                ↓
+            Object Y
+                │
+            tested_by
+                ▼
+             Test T1
+```
+
+Now questions become computable:
+
+> What depends on `Opportunity.Discount__c`?
+
+> Which tests cover this Flow?
+
+> What business process changes if Flow X changes?
+
+> Which code writes this field?
+
+> Which personas are affected?
+
+> Where do we have zero coverage?
+
+**These should be deterministic graph queries whenever possible, not LLM guesses.**
+
+---
+
+# STAGE 4 — Effective-access graph
+
+This was one of the stronger differentiators from our earlier discussion and deserves its own learning track.
+
+Learn Salesforce security sufficiently deeply that you can answer:
+
+```text
+User X
+  ↓
+Can they access Object Y?
+  ↓
+Can they see Field Z?
+  ↓
+Can they edit it?
+  ↓
+Can they access Record R?
+  ↓
+WHY?
+```
+
+Your engine eventually produces:
+
+```text
+User: Sales Rep A
+
+Opportunity:
+READ ✓
+EDIT ✓
+
+Discount__c:
+READ ✓
+EDIT ✕
+
+Reason:
+Permission Set A
+  → Opportunity Edit
+
+Field-level security:
+  → Discount__c Read Only
+
+Record:
+accessible because
+Role hierarchy → owner relationship
+```
+
+This is much harder and more valuable than a generic LLM answering Salesforce questions.
+
+Then expose:
+
+```text
+explain_effective_access()
+
+compare_user_access()
+
+find_permission_change_impact()
+
+find_overprivileged_users()
+```
+
+as higher-level capabilities.
+
+---
+
+# STAGE 5 — Learn existing automation frameworks as data
+
+This is a major revision from the previous roadmap.
+
+Your platform should **not require companies to throw away existing Selenium/Playwright/API/Apex frameworks**.
+
+That's important for the product positioning we reached earlier.
+
+Companies may already have:
+
+```text
+4,000 Selenium tests
+500 API tests
+Apex tests
+Page Objects
+utility libraries
+test data
+CI jobs
+screenshots
+reports
+years of framework investment
+```
+
+Your agent needs to understand those assets.
+
+So learn to programmatically inspect:
+
+```text
+Test class
+Test method
+Page Object
+locator
+business function
+API call
+test data
+assertion
+scenario
+tag
+dependency
+execution result
+```
+
+Create another graph:
+
+# Automation Intelligence Graph
+
+```text
+Test Scenario
+     │
+     ├── calls → BusinessFunction
+     │
+     ├── uses → PageObject
+     │
+     ├── uses → TestData
+     │
+     ├── validates → SalesforceField
+     │
+     └── exercises → BusinessProcess
+```
+
+Now join it with the Salesforce graph.
+
+---
+
+# STAGE 6 — The unified intelligence graph
+
+Eventually:
+
+```text
+                 REQUIREMENT
+                     │
+                     ▼
+               BUSINESS PROCESS
+                     │
+                     ▼
+                 METADATA
+               /     |      \
+              /      |       \
+            FLOW    APEX      LWC
+              \      |       /
+               \     |      /
+                 FIELD
+                   │
+                   ▼
+                  TEST
+                   │
+             ┌─────┼─────┐
+             ▼     ▼     ▼
+         Selenium API   Apex
+```
+
+This is closer to your **core intellectual property**.
+
+---
+
+# STAGE 7 — Change-impact reasoning
+
+Now create the capability we discussed before:
+
+```text
+Git diff
+   ↓
+Changed Salesforce components
+   ↓
+Dependency traversal
+   ↓
+Business-process impact
+   ↓
+Persona/security impact
+   ↓
+Existing test coverage
+   ↓
+Coverage gaps
+   ↓
+Risk score
+```
+
+### Learning exercise
+
+Change:
+
+```text
+Validation Rule:
+Opportunity discount threshold
+20% → 15%
+```
+
+Your system should eventually determine:
+
+```text
+Affected:
+
+Sales user
+Sales manager
+Approval Flow
+Opportunity editing
+Quote creation
+Discount scenarios
+existing tests T12, T35
+
+New uncovered boundary:
+15–20%
+```
+
+Then:
+
+```text
+Recommended:
+Run T12/T35
+Generate boundary scenario
+Generate negative scenario
+```
+
+That's much more compelling than:
+
+> "AI generated a Selenium script."
+
+---
+
+# STAGE 8 — Test-gap intelligence
+
+Do not ask the LLM:
+
+> "Generate tests."
+
+First determine:
+
+```text
+What behaviour exists?
+
+What changed?
+
+What is already covered?
+
+What isn't covered?
+```
+
+Then generate **only the missing tests**.
+
+Architecture:
+
+```text
+Requirement
+     +
+Metadata change
+     +
+Existing automation
+        ↓
+Coverage model
+        ↓
+Missing behaviour
+        ↓
+Test design
+```
+
+Output:
+
+```text
+Covered:
+discount < 15%
+
+Covered:
+discount > 20%
+
+Missing:
+15–20% boundary after rule change
+
+Missing:
+Sales Manager override
+```
+
+Then generation becomes purposeful.
+
+---
+
+# STAGE 9 — Portable code generation
+
+This is another important adjustment from our previous conversation.
+
+Don't invent a proprietary test representation unless absolutely necessary.
+
+Learn to generate:
+
+```text
+Java Selenium
+
+Python Playwright
+
+REST/API tests
+
+Apex tests
+
+LWC Jest tests
+```
+
+into the customer's **existing repository structure**.
+
+Your agent should learn:
+
+```text
+repo conventions
+framework conventions
+utility methods
+existing Page Objects
+assertion style
+naming conventions
+test-data conventions
+```
+
+Then generate something that looks as though the existing team wrote it.
+
+This is where repository RAG/code intelligence matters.
+
+---
+
+# STAGE 10 — Execution intelligence
+
+Next learn:
+
+```text
+GitHub Actions
+existing CI
+Maven/PyTest/TestNG
+Salesforce Apex test execution
+Playwright/Selenium
+test reports
+screenshots
+logs
+```
+
+Your agent shouldn't necessarily replace them.
+
+It orchestrates them:
+
+```text
+determine tests
+     ↓
+execute existing command
+     ↓
+capture result
+     ↓
+collect evidence
+     ↓
+analyse
+```
+
+---
+
+# STAGE 11 — Failure classification before healing
+
+This was another important idea from our earlier discussion.
+
+Don't immediately heal a failed locator.
+
+Perform:
+
+```text
+TEST FAILED
+    │
+    ▼
+What category?
+    │
+    ├── Product defect
+    ├── Environment
+    ├── Test data
+    ├── Permission
+    ├── Locator/UI
+    ├── Timing
+    ├── Changed business rule
+    ├── Integration
+    └── Unknown
+```
+
+Only then:
+
+```text
+Locator failure?
+       ↓
+Can repair be proven?
+       ↓
+YES
+       ↓
+Generate candidate
+       ↓
+execute
+       ↓
+verify semantics
+       ↓
+show evidence
+       ↓
+propose repair
+```
+
+This is **governed, explainable healing**.
+
+Not:
+
+```text
+XPath broke
+→ LLM invents XPath
+→ commit
+```
+
+---
+
+# STAGE 12 — Evidence-driven repair
+
+For every repair produce:
+
+```text
+Old locator
+
+Observed UI/metadata change
+
+Candidate locator
+
+Why candidate represents same Salesforce concept
+
+Execution evidence
+
+Screenshot
+
+DOM evidence
+
+Salesforce metadata evidence
+
+Confidence
+
+Code diff
+```
+
+Then:
+
+```text
+Create PR
+```
+
+This is a much stronger demo.
+
+---
+
+# STAGE 13 — MCP: learn what NOT to build
+
+This is where today's Salesforce ecosystem changes the learning plan significantly.
+
+Salesforce already supplies a DX MCP Server with more than 60 tools, including standard DX operations such as metadata retrieve/deploy and Apex testing. ([Developer][1])
+
+So **do not spend valuable hackathon time recreating**:
+
+```text
+retrieve_metadata()
+
+run_apex_test()
+
+list_orgs()
+
+deploy_metadata()
+
+basic SOQL tooling
+```
+
+unless needed as a thin internal adapter.
+
+Instead compose those tools.
+
+---
+
+# STAGE 14 — Build your Intelligence MCP
+
+Your MCP should expose **high-level Salesforce reasoning capabilities**.
+
+For example:
+
+```text
+analyze_change_impact()
+
+find_affected_business_processes()
+
+explain_effective_access()
+
+find_regression_tests()
+
+find_coverage_gaps()
+
+generate_missing_tests()
+
+classify_test_failure()
+
+propose_test_repair()
+
+verify_test_repair()
+
+explain_production_failure()
+
+compare_org_behavior()
+```
+
+These are much stronger than:
+
+```text
+click_element()
+
+query_salesforce()
+
+get_metadata()
+```
+
+MCP is therefore:
+
+> **delivery/integration mechanism**
+
+not:
+
+> **the product moat**.
+
+---
+
+# STAGE 15 — Learn the three Salesforce-MCP directions separately
+
+This wasn't sufficiently explicit in my previous plan.
+
+You should understand three different roles.
+
+### A. Salesforce DX MCP
+
+For developers/IDE agents.
+
+```text
+Copilot
+   ↓
+Salesforce DX MCP
+   ↓
+org/project/dev operations
+```
+
+Salesforce documents this specifically for AI development tools, including workflows through VS Code/Copilot. ([Developer][4])
+
+### B. Salesforce Hosted MCP
+
+For governed Salesforce business/data capabilities.
+
+```text
+External AI
+   ↓
+Hosted MCP
+   ↓
+Salesforce data/actions
+```
+
+Hosted MCP Servers became generally available in April 2026 and can expose custom domain workflows backed by Salesforce logic such as Apex and REST capabilities. ([Developer][5])
+
+### C. Your MCP
+
+```text
+Agent
+ ↓
+Salesforce Intelligence MCP
+ ↓
+graphs + repo + automation + reasoning
+```
+
+That's where your differentiated intelligence sits.
+
+---
+
+# STAGE 16 — GitHub Copilot integration
+
+This should actually be your **first major user interface**.
+
+Because Copilot already supports MCP servers and the Copilot SDK can consume MCP servers, you can let developers stay inside the IDE. ([GitHub Docs][6])
+
+The experience could be:
+
+> **Developer:** Analyse my current Salesforce changes.
+
+Agent:
+
+```text
+Changed:
+Opportunity.ValidationRule
+PricingFlow
+Apex DiscountService
+```
+
+Then automatically:
+
+```text
+Impact analysis
+      ↓
+Business processes
+      ↓
+Personas
+      ↓
+Existing tests
+      ↓
+Coverage gap
+```
+
+Developer:
+
+> Implement missing test coverage.
+
+Agent:
+
+```text
+read framework
+     ↓
+find reusable components
+     ↓
+generate Java test
+     ↓
+compile
+     ↓
+run
+     ↓
+inspect
+```
+
+Developer:
+
+> Fix failures if they are automation defects.
+
+Agent:
+
+```text
+classify
+ ↓
+repair eligible failures
+ ↓
+rerun
+ ↓
+produce evidence
+ ↓
+PR
+```
+
+That's a very good end-to-end workflow.
+
+---
+
+# STAGE 17 — Agentforce, but for different users
+
+Then use the same intelligence for **business-side Salesforce agents**.
+
+This directly answers the concern you raised in that earlier discussion: the product shouldn't look like something useful only for QA.
+
+For example:
+
+### BA agent
+
+> Explain the Opportunity approval process.
+
+### Salesforce architect
+
+> What depends on this field?
+
+### Support agent
+
+> Why did Order 729 fail?
+
+### Security/admin agent
+
+> Why can this user edit this field?
+
+### Release manager
+
+> What is risky about tomorrow's deployment?
+
+### QA
+
+> What exactly needs regression?
+
+### Developer
+
+> Generate the required implementation/tests.
+
+Same intelligence fabric.
+
+Different persona.
+
+---
+
+# STAGE 18 — Production RCA Agent
+
+I would now elevate RCA higher in the curriculum.
+
+Teach the agent to investigate:
+
+```text
+Incident
+   ↓
+Affected record
+   ↓
+business process
+   ↓
+Salesforce metadata
+   ↓
+Flow/Apex
+   ↓
+permissions
+   ↓
+integration
+   ↓
+recent deployment
+   ↓
+logs
+```
+
+Output:
+
+```text
+Probable cause
+
+Evidence
+
+Confidence
+
+Affected users/process
+
+Recent relevant change
+
+Recommended remediation
+
+Required verification
+```
+
+This is one of the best use cases for combining deterministic analysis with LLM reasoning.
+
+---
+
+# STAGE 19 — Business-process intelligence
+
+Another capability we discussed that shouldn't be hidden under testing:
+
+```text
+"Why does this process behave this way?"
+
+"What happens after Closed Won?"
+
+"Which automation creates this Order?"
+
+"What prevents this user from completing the transaction?"
+
+"What changed in our sales workflow in release X?"
+
+```
+
+Build a **process digital twin** from actual org evidence.
+
+That gives your platform an identity beyond QA.
+
+---
+
+# STAGE 20 — Multi-agent comes LAST
+
+Then construct:
+
+```text
+                     ORCHESTRATOR
+                          │
+         ┌────────────────┼────────────────┐
+         ▼                ▼                ▼
+      BUSINESS        ENGINEERING       QUALITY
+       AGENT             AGENT           AGENT
+         │                │                │
+         ▼                ▼                ▼
+   Process Graph      Code/Metadata     Test Graph
+   Access Graph       Git/MCP           Execution
+```
+
+Potential specialists underneath:
+
+```text
+Impact Agent
+
+Access Agent
+
+Repository Agent
+
+Test Designer
+
+Execution Agent
+
+Failure Analyst
+
+Repair Agent
+
+RCA Agent
+```
+
+But don't make eight LLM agents just because you have eight responsibilities.
+
+Where you have:
+
+```text
+graph query
+parser
+rule engine
+diff analyser
+compiler
+test runner
+```
+
+keep it deterministic.
+
+---
+
+# 21. Your revised learning order
+
+So I would now teach you Salesforce in this exact order:
+
+```text
+PHASE 1
+Salesforce business processes
+
+        ↓
+
+PHASE 2
+Objects + relationships + SOQL
+
+        ↓
+
+PHASE 3
+Flow + validation + Apex + LWC
+
+        ↓
+
+PHASE 4
+Permissions/sharing/effective access
+
+        ↓
+
+PHASE 5
+Metadata + Tooling + REST + CLI
+
+        ↓
+
+PHASE 6
+Salesforce metadata/dependency graph
+
+        ↓
+
+PHASE 7
+Business-process graph
+
+        ↓
+
+PHASE 8
+Existing repository/framework parsing
+
+        ↓
+
+PHASE 9
+Automation intelligence graph
+
+        ↓
+
+PHASE 10
+Join Salesforce + code + test graphs
+
+        ↓
+
+PHASE 11
+Change-impact engine
+
+        ↓
+
+PHASE 12
+Coverage-gap engine
+
+        ↓
+
+PHASE 13
+Portable code/test generation
+
+        ↓
+
+PHASE 14
+Execution/evidence engine
+
+        ↓
+
+PHASE 15
+Failure classification
+
+        ↓
+
+PHASE 16
+Explainable healing
+
+        ↓
+
+PHASE 17
+Production RCA
+
+        ↓
+
+PHASE 18
+Salesforce RAG for unstructured knowledge
+
+        ↓
+
+PHASE 19
+Official Salesforce MCP tooling
+
+        ↓
+
+PHASE 20
+Your Intelligence MCP
+
+        ↓
+
+PHASE 21
+GitHub Copilot custom agent/SDK integration
+
+        ↓
+
+PHASE 22
+Agentforce business agents
+
+        ↓
+
+PHASE 23
+Multi-agent orchestration
+
+        ↓
+
+PHASE 24
+Evaluation + governance + observability
+```
+
+That's the revised roadmap I would use.
+
+---
+
+# 22. What RAG does — and does NOT do
+
+Another important architectural refinement.
+
+Don't put Salesforce metadata into embeddings and expect RAG to become your intelligence engine.
+
+Use:
+
+```text
+STRUCTURED FACT
+       ↓
+Graph/query/parser
+```
+
+Examples:
+
+```text
+Which Flow uses Field X?
+
+Which Apex class writes Opportunity?
+
+Which tests reference this component?
+
+Which permissions produce access?
+```
+
+Use RAG for:
+
+```text
+User stories
+
+Design documents
+
+Confluence documentation
+
+Defects
+
+Incident notes
+
+Release notes
+
+Test descriptions
+
+Business policies
+
+Architecture documentation
+```
+
+Then combine:
+
+```text
+Deterministic org evidence
+          +
+Repository evidence
+          +
+RAG knowledge
+          +
+LLM reasoning
+```
+
+That should be one of your central architectural principles.
+
+---
+
+# 23. Revised hackathon MVP
+
+This is perhaps the biggest practical outcome of revisiting the old discussion.
+
+For a hackathon, **do not attempt the whole platform**.
+
+Build one spectacular closed loop:
+
+## Scenario
+
+Developer changes:
+
+```text
+Opportunity validation rule
++
+permission
+```
+
+Your Copilot agent receives:
+
+> Analyse these Salesforce changes and ensure sufficient regression coverage.
+
+Then demonstrate:
+
+```text
+1. Git diff detected
+         ↓
+2. Salesforce metadata understood
+         ↓
+3. Dependency graph traversed
+         ↓
+4. Impacted business process identified
+         ↓
+5. Impacted personas identified
+         ↓
+6. Existing Selenium/API/Apex tests discovered
+         ↓
+7. Coverage gaps identified
+         ↓
+8. Missing test generated
+   using existing framework style
+         ↓
+9. Existing + generated tests executed
+         ↓
+10. Failure classified
+         ↓
+11. Repair performed only if test defect
+         ↓
+12. Tests rerun
+         ↓
+13. Evidence collected
+         ↓
+14. Impact report + code diff produced
+```
+
+That single demonstration shows:
+
+**Salesforce expertise + domain understanding + AI + MCP + Copilot + automation + RCA + existing-framework reuse + agentic behaviour.**
+
+Much better than demonstrating ten unrelated agents.
+
+---
+
+# 24. 16-week learning/build plan
+
+| Week | Learn                                     | Build                         |
+| ---- | ----------------------------------------- | ----------------------------- |
+| 1    | CRM/business processes                    | Process maps                  |
+| 2    | Objects, fields, relationships, SOQL      | Schema explorer               |
+| 3    | Flow + validation rules                   | Flow dependency parser        |
+| 4    | Apex + LWC                                | Code/component analyser       |
+| 5    | Salesforce security                       | Effective-access analyser     |
+| 6    | Metadata/Tooling/CLI/DX MCP               | Org intelligence adapter      |
+| 7    | Graph modelling                           | Metadata graph                |
+| 8    | Process reconstruction                    | Business-process graph        |
+| 9    | Selenium/Playwright/API framework parsing | Automation graph              |
+| 10   | Graph joining                             | Requirement→metadata→test map |
+| 11   | Git diff/change impact                    | Impact engine                 |
+| 12   | Coverage analysis + generation            | Test-gap engine               |
+| 13   | Execution/failure classification/healing  | Verification engine           |
+| 14   | MCP + Copilot integration                 | Intelligence MCP              |
+| 15   | Agentforce + business/RCA agents          | Domain agent                  |
+| 16   | Eval/governance + demo                    | Hackathon end-to-end system   |
+
+---
+
+# 25. Apply our meta-learning method inside every week
+
+Suppose the week's topic is **Salesforce permissions**.
+
+Don't do:
+
+```text
+watch 15 Trailhead lessons
+take notes
+finish module
+```
+
+Do:
+
+```text
+1. Understand one real problem
+
+"Why can't Sales Rep edit Discount?"
+
+            ↓
+
+2. Manually investigate it in Salesforce.
+
+            ↓
+
+3. Understand every permission layer involved.
+
+            ↓
+
+4. Reproduce another access problem.
+
+            ↓
+
+5. Inspect corresponding Salesforce metadata.
+
+            ↓
+
+6. Write code to retrieve that information.
+
+            ↓
+
+7. Build deterministic effective-access logic.
+
+            ↓
+
+8. Ask an LLM to explain the result.
+
+            ↓
+
+9. Expose:
+
+explain_effective_access()
+
+through MCP.
+
+            ↓
+
+10. Call it from Copilot.
+
+            ↓
+
+11. Teach yourself:
+"What exactly determines effective access?"
+```
+
+Then you've simultaneously learned:
+
+```text
+Salesforce
++
+Python
++
+data structures
++
+API
++
+reasoning
++
+MCP
++
+GenAI
++
+product development
+```
+
+That's exactly the high-leverage learning strategy we developed earlier.
+
+---
+
+# 26. What NOT to spend significant time learning
+
+This is equally important.
+
+Don't initially invest heavily in:
+
+```text
+building another Selenium engine
+
+creating another low-code test designer
+
+making another recorder
+
+generic AI test-case generation
+
+basic Salesforce MCP wrappers
+
+another standalone QA dashboard
+
+another proprietary automation format
+
+generic XPath self-healing alone
+
+building a Salesforce IDE from scratch
+```
+
+Tosca, Provar and Copado already cover substantial portions of test authoring/execution and increasingly AI-assisted generation. Provar even has its own MCP now. ([Provar Documentation][7])
+
+Instead learn deeply:
+
+```text
+Salesforce semantics
+
+metadata dependencies
+
+effective access
+
+business-process reconstruction
+
+Git/repository intelligence
+
+existing-test understanding
+
+change impact
+
+coverage reasoning
+
+failure RCA
+
+evidence-driven repair
+
+portable code generation
+
+MCP capability design
+
+agent orchestration
+```
+
+---
+
+# 27. The competitive sentence
+
+After revisiting the earlier discussion, I would summarize your product much more precisely as:
+
+> **An AI-native Salesforce engineering and quality intelligence layer that plugs into GitHub Copilot and Agentforce through MCP, understands the customer's Salesforce org and existing automation codebase, reasons from business/metadata changes to impact and coverage, generates portable code, executes through existing tools, diagnoses failures, and produces auditable evidence—without requiring teams to migrate their existing automation investment into another proprietary testing platform.**
+
+That is substantially stronger than:
+
+> "AI testing tool better than Provar/Tosca/CRT."
+
+And the core moat should be thought of as:
+
+```text
+NOT:
+
+LLM
++
+MCP
++
+Selenium
+
+
+BUT:
+
+        SALESFORCE SEMANTIC INTELLIGENCE
+                    +
+          BROWNFIELD CODE INTELLIGENCE
+                    +
+             DEPENDENCY GRAPH
+                    +
+          EFFECTIVE-ACCESS GRAPH
+                    +
+           BUSINESS-PROCESS GRAPH
+                    +
+            AUTOMATION GRAPH
+                    ↓
+       CHANGE / RISK / COVERAGE REASONING
+                    ↓
+           AGENTIC EXECUTION
+                    ↓
+          AUDITABLE EVIDENCE
+```
+
+**That is the version I would now use as the master learning plan and product architecture.**
+
+[1]: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_mcp.htm?utm_source=chatgpt.com "Salesforce DX MCP Server and Tools"
+[2]: https://documentation.provar.com/documentation/v3/v3-release-notes/provar-automation-summer-26-release/?utm_source=chatgpt.com "Provar Automation Summer '26 Release"
+[3]: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_mcp_get_started.htm?utm_source=chatgpt.com "Quick Start Using the VS Code With Copilot MCP Client"
+[4]: https://developer.salesforce.com/blogs/2025/06/level-up-your-developer-tools-with-salesforce-dx-mcp?utm_source=chatgpt.com "Level Up Your Developer Tools with Salesforce DX MCP"
+[5]: https://developer.salesforce.com/blogs/2026/04/salesforce-hosted-mcp-servers-are-now-generally-available?utm_source=chatgpt.com "Salesforce Hosted MCP Servers Are Now Generally ..."
+[6]: https://docs.github.com/en/copilot/concepts/context/mcp?utm_source=chatgpt.com "About Model Context Protocol (MCP) - GitHub Copilot"
+[7]: https://documentation.provar.com/documentation/v3/provar-mcp/?utm_source=chatgpt.com "Provar MCP"

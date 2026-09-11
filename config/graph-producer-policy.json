@@ -1,28 +1,28 @@
 {
   "schemaVersion": "1.0.0",
   "policyId": "verified-tree-graph-production",
-  "policyVersion": "1.0.0",
-  "sha256": "a10136b49aee73d9c46522774fba189cc0f6e02a30cc655235434872000a061b",
+  "policyVersion": "1.0.1",
+  "sha256": "d3d5f6a7efc7a636b477c83b6609b08427dcc24b762d63b2b6cf3dab3e2bc290",
   "verifiedChangePolicy": {
     "contractId": "verified-local-git-change",
-    "contractVersion": "1.0.0",
-    "contractSha256": "ef43e79fb8e2244d7187ae2a18b4d77ae7e7d17758f10fd6fe7ddb75df5a8d05"
+    "contractVersion": "1.1.0",
+    "contractSha256": "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175"
   },
   "ontology": {
     "contractId": "change-evidence-core",
-    "contractVersion": "1.0.0",
-    "contractSha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+    "contractVersion": "1.1.0",
+    "contractSha256": "7690ae231829b79e672800d77b343a9451a6bd0403978cd778123a48870173eb"
   },
   "sourceProfile": {
     "contractId": "salesforce-dx-semantic-graph",
-    "contractVersion": "1.0.0",
-    "contractSha256": "1544b379d56d635a21984e7c56175c11ca529aa5233302eece95d917bbee01a2"
+    "contractVersion": "1.0.1",
+    "contractSha256": "1f1593cee50842d142ee734519582ac20cbcfc824f9509c3b8428a7db9726a44"
   },
   "producer": {
     "implementationId": "verified-local-tree-graph-producer",
     "implementationVersion": "1.0.0",
     "implementationLocator": "src/neo_sf_q_intel/graph_production.py",
-    "implementationSha256": "64b838af97909d7e03d09bbaaf12dc806e6856fa7367e26df88de55f8b091560"
+    "implementationSha256": "b1df6baf0785519e1f803de434b275f75a0da831415af91abfefc4af00b95e44"
   },
   "adapter": {
     "implementationId": "salesforce-dx-semantic-graph-adapter",

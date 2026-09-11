@@ -3,9 +3,9 @@
   "unknownKindAction": "ABSTAIN",
   "ontologyRef": {
     "id": "change-evidence-core",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "path": "config/ontology/canonical-ontology.json",
-    "sha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+    "sha256": "7690ae231829b79e672800d77b343a9451a6bd0403978cd778123a48870173eb"
   },
   "lowInformationTokens": [
     "about", "add", "an", "and", "any", "are", "as", "assess", "at", "be", "by",

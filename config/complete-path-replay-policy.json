@@ -2,11 +2,11 @@
   "schemaVersion": "1.0.0",
   "policyId": "complete-material-path-replay",
   "policyVersion": "1.0.0",
-  "sha256": "0c86193a76dd48dcdd04597e65ec202ba6cae61fc93537eee209df8bfdbc19aa",
+  "sha256": "5e53fa0355e62fd95dae24153a9cc0f5d2cfe2a158bfb98adcb1b6b8fb8dafb1",
   "propagationPolicy": {
     "policyId": "canonical-propagation",
     "policyVersion": "1.0.0",
-    "policySha256": "66c83e8cb13b68cbffb363a582f0a3b5927f4ec04bddc3dcab5b560b02c2cdf5"
+    "policySha256": "d78b40d1bc78a5ac855d466dfb0adb600d44f071d2ea82741aa04c318d627395"
   },
   "trustedEdgePolicy": {
     "policyId": "trusted-edge-envelope",

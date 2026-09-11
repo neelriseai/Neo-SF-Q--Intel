@@ -5,7 +5,17 @@ from typing import Any, Protocol
 
 from openai import AsyncAzureOpenAI, AsyncOpenAI
 
-from neo_sf_q_intel.config import AIProvider, Settings
+from neo_sf_q_intel.config import (
+    PROVIDER_CREDENTIAL_SOURCE_CONFLICT,
+    AIProvider,
+    Settings,
+)
+
+
+class ProviderConfigurationBlockedError(RuntimeError):
+    """Raised before network dispatch when provider configuration is unsafe."""
+
+    code = PROVIDER_CREDENTIAL_SOURCE_CONFLICT
 
 
 class ModelProvider(Protocol):
@@ -18,6 +28,8 @@ class ModelProvider(Protocol):
 
 class OpenAIModelProvider:
     def __init__(self, settings: Settings) -> None:
+        if settings.provider_calls_blocked:
+            raise ProviderConfigurationBlockedError(PROVIDER_CREDENTIAL_SOURCE_CONFLICT)
         self.settings = settings
         if settings.ai_provider is AIProvider.AZURE_OPENAI:
             self.client = AsyncAzureOpenAI(
@@ -53,4 +65,6 @@ class OpenAIModelProvider:
 def create_model_provider(settings: Settings) -> ModelProvider | None:
     if not settings.allow_llm:
         return None
+    if settings.provider_calls_blocked:
+        raise ProviderConfigurationBlockedError(PROVIDER_CREDENTIAL_SOURCE_CONFLICT)
     return OpenAIModelProvider(settings)

@@ -5,11 +5,16 @@ import re
 import shutil
 import subprocess
 import sys
+from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from neo_sf_q_intel.config import Settings
 from neo_sf_q_intel.salesforce_source import SourceContractError, load_salesforce_source
+from neo_sf_q_intel.subprocess_environment import build_subprocess_environment
+
+Runner = Callable[..., subprocess.CompletedProcess[str]]
+Which = Callable[[str], str | None]
 
 
 @dataclass(frozen=True)
@@ -19,16 +24,34 @@ class Check:
     detail: str
 
 
-def _tool_check(name: str, arguments: list[str]) -> Check:
-    executable = shutil.which(name)
+def _tool_check(
+    name: str,
+    arguments: list[str],
+    *,
+    runner: Runner | None = None,
+    environment: Mapping[str, str] | None = None,
+    which: Which | None = None,
+) -> Check:
+    executable = (which or shutil.which)(name)
     if not executable:
         return Check(name, False, "not found on PATH")
-    completed = subprocess.run(
+    completed = (runner or subprocess.run)(
         [executable, *arguments],
         check=False,
         capture_output=True,
         text=True,
         shell=False,
+        env=build_subprocess_environment(
+            environment,
+            controls=(
+                {
+                    "SF_AUTOUPDATE_DISABLE": "true",
+                    "SF_DISABLE_TELEMETRY": "true",
+                }
+                if name.casefold() == "sf"
+                else None
+            ),
+        ),
     )
     detail = (completed.stdout or completed.stderr).strip().splitlines()[0]
     return Check(name, completed.returncode == 0, detail)
@@ -47,14 +70,20 @@ def _minimum_version(check: Check, minimum: tuple[int, ...]) -> Check:
     )
 
 
-def _hook_check(repository_root: Path) -> Check:
-    completed = subprocess.run(
+def _hook_check(
+    repository_root: Path,
+    *,
+    runner: Runner | None = None,
+    environment: Mapping[str, str] | None = None,
+) -> Check:
+    completed = (runner or subprocess.run)(
         ["git", "config", "--get", "core.hooksPath"],
         cwd=repository_root,
         check=False,
         capture_output=True,
         text=True,
         shell=False,
+        env=build_subprocess_environment(environment),
     )
     configured = completed.stdout.strip().replace("\\", "/")
     return Check(
@@ -64,24 +93,45 @@ def _hook_check(repository_root: Path) -> Check:
     )
 
 
-def collect_checks(settings: Settings, repository_root: Path) -> list[Check]:
+def collect_checks(
+    settings: Settings,
+    repository_root: Path,
+    *,
+    runner: Runner | None = None,
+    environment: Mapping[str, str] | None = None,
+    which: Which | None = None,
+) -> list[Check]:
     checks = [
         Check(
             "python",
             sys.version_info[:2] >= (3, 14),
             sys.version.split()[0],
         ),
-        _minimum_version(_tool_check("node", ["--version"]), (26, 0, 0)),
         _minimum_version(
-            _tool_check("sf", ["--version"]),
+            _tool_check(
+                "node",
+                ["--version"],
+                runner=runner,
+                environment=environment,
+                which=which,
+            ),
+            (26, 0, 0),
+        ),
+        _minimum_version(
+            _tool_check(
+                "sf",
+                ["--version"],
+                runner=runner,
+                environment=environment,
+                which=which,
+            ),
             tuple(int(part) for part in settings.sf_min_cli_version.split(".")),
         ),
-        _hook_check(repository_root),
+        _hook_check(repository_root, runner=runner, environment=environment),
     ]
     try:
         source = load_salesforce_source(
             settings.resolved_salesforce_root(repository_root),
-            expected_graph_sha256=settings.require_graph_sha256(),
             minimum_contract_version=settings.source_min_contract_version,
             required_capabilities=settings.required_capabilities,
             ontology_path=settings.resolved_canonical_ontology_path(repository_root),

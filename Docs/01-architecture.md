@@ -66,7 +66,15 @@ only deterministic verification or a separately scoped human-approval receipt ca
 - PostgreSQL: target primary durable relational memory for checkpoints, runs, evidence/chunk
   metadata, graph edges, claims, test/healing outcomes and audit. The current runtime wires runs
   and checkpoints; the remaining repository ports are a foundation milestone. Schemas and reviewed
-  migrations self-apply on startup.
+  migrations self-apply on startup. Every Neo repository and LangGraph checkpoint connection is
+  restricted to the validated `POSTGRES_SCHEMA` (default `neo_sf_q_intel`) with no `public`
+  fallback. Startup creates that schema through an identifier-safe statement, claims an empty
+  namespace with a product/layout marker, and validates the marker before any migration. It never
+  adopts, migrates or mutates similarly named tables in `public` or another schema. PostgreSQL may
+  therefore be shared with other applications: Neo validates the vector-storage prohibition only
+  against tables in its owned schema. A pgvector extension or vector column owned by another
+  application is neither read nor treated as a Neo policy violation; a vector/embedding payload
+  added to a Neo-owned table remains a startup-blocking violation.
 - SQLite: auto-created durable fallback for complete run documents when PostgreSQL is unavailable.
 - Versioned JSON plus process cache: source/evidence continuity and final non-durable runtime fallback.
 - ChromaDB: the only supported persistent vector documents, embeddings and semantic index;

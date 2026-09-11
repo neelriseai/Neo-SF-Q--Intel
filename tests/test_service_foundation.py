@@ -15,6 +15,8 @@ from neo_sf_q_intel.service import (
 from tests.test_foundation_pipeline import _pipeline, _repository
 from tests.test_workflow import source
 
+ROOT = Path(__file__).resolve().parents[1]
+
 
 class RecordingPipeline:
     def __init__(self, captured: Any, *, verify_error: Exception | None = None) -> None:
@@ -129,12 +131,16 @@ def test_service_factory_binds_loaded_project_and_configured_nested_roots(
         source_graph_sha256="fixture",
         sqlite_path=tmp_path / "runs.db",
         outcome_sqlite_path=tmp_path / "outcomes.db",
+        live_receipt_sqlite_path=tmp_path / "live-receipts.db",
+        live_acceptance_profile_path=(ROOT / "config" / "live-salesforce-acceptance-profile.json"),
     )
 
     service = create_service(settings, tmp_path)
 
     assert service.foundation_capture_configured is True
     assert service.foundation_configuration_code is None
+    assert service.live_receipt_ledger_mode == "SQLITE"
+    assert service.live_receipt_ledger_degradation_code == "POSTGRES_NOT_CONFIGURED"
     assert captured_arguments == {
         "project_id": source().project_id,
         "repository_root": git_root.resolve(),
@@ -158,6 +164,8 @@ def test_service_factory_keeps_legacy_service_when_foundation_roots_mismatch(
         source_graph_sha256="fixture",
         sqlite_path=tmp_path / "runs.db",
         outcome_sqlite_path=tmp_path / "outcomes.db",
+        live_receipt_sqlite_path=tmp_path / "live-receipts.db",
+        live_acceptance_profile_path=(ROOT / "config" / "live-salesforce-acceptance-profile.json"),
     )
 
     service = create_service(settings, tmp_path)

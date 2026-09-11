@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
   "profileId": "salesforce-application-graph",
-  "profileVersion": "1.0.0",
-  "sha256": "4cf073120c223126be161243bb394d57b808346a8011b25730b52a8917648e10",
+  "profileVersion": "1.0.1",
+  "sha256": "20f062050584fa4259485df0f5dc00c3ef186562495583f6c846cd9adaa6f7ae",
   "ontology": {
     "ontologyId": "change-evidence-core",
-    "ontologyVersion": "1.0.0",
-    "ontologySha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+    "ontologyVersion": "1.1.0",
+    "ontologySha256": "7690ae231829b79e672800d77b343a9451a6bd0403978cd778123a48870173eb"
   },
   "sourceSelector": {
     "sourceType": "salesforce-application-graph",

@@ -6,9 +6,13 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
+from fastapi.testclient import TestClient
 from langgraph.checkpoint.memory import InMemorySaver
+from psycopg import OperationalError
+from psycopg.conninfo import conninfo_to_dict
 
-from neo_sf_q_intel.config import Settings
+from neo_sf_q_intel.api import create_app
+from neo_sf_q_intel.config import PROVIDER_CREDENTIAL_SOURCE_CONFLICT, Settings
 from neo_sf_q_intel.domain import (
     ChangeIntent,
     ChangeRequest,
@@ -39,6 +43,8 @@ from neo_sf_q_intel.repository import (
 from neo_sf_q_intel.service import AssuranceService, create_service
 from tests.test_workflow import source
 
+ROOT = Path(__file__).resolve().parents[1]
+
 
 def fallback_settings(tmp_path: Path) -> Settings:
     return Settings(
@@ -47,6 +53,8 @@ def fallback_settings(tmp_path: Path) -> Settings:
         sqlite_path=tmp_path / "fallback.db",
         outcome_sqlite_path=tmp_path / "outcomes.db",
         outcome_json_path=tmp_path / "outcomes-json",
+        live_receipt_sqlite_path=tmp_path / "live-receipts.db",
+        live_acceptance_profile_path=(ROOT / "config" / "live-salesforce-acceptance-profile.json"),
         salesforce_app_root=Path("source"),
         source_graph_sha256="fixture",
     )
@@ -127,6 +135,10 @@ def configured_outcome_postgresql_is_offline(monkeypatch) -> None:
         "neo_sf_q_intel.service.PostgresOutcomeRepository.setup",
         lambda self: (_ for _ in ()).throw(ConnectionError("offline")),
     )
+    monkeypatch.setattr(
+        "neo_sf_q_intel.live_receipt_ledger.PostgresLiveReceiptLedger.setup",
+        lambda self: (_ for _ in ()).throw(OperationalError("offline")),
+    )
 
 
 def test_postgresql_failure_falls_back_to_auto_created_sqlite(tmp_path: Path, monkeypatch) -> None:
@@ -149,6 +161,7 @@ def test_postgresql_failure_falls_back_to_auto_created_sqlite(tmp_path: Path, mo
     assert service.outcome_persistence == "sqlite"
     assert service.outcome_durable is True
     assert service.degradation_codes == (
+        "POSTGRES_UNAVAILABLE",
         "RUN_POSTGRESQL_UNAVAILABLE",
         "OUTCOME_POSTGRESQL_UNAVAILABLE",
     )
@@ -158,6 +171,72 @@ def test_postgresql_failure_falls_back_to_auto_created_sqlite(tmp_path: Path, mo
     assert service.query_outcomes(project_id="workflow-fixture").records == (outcome,)
     assert (tmp_path / "fallback.db").is_file()
     assert (tmp_path / "outcomes.db").is_file()
+
+
+def test_live_ledger_total_outage_keeps_health_up_and_blocks_status(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("neo_sf_q_intel.service.load_salesforce_source", lambda *a, **k: source())
+    monkeypatch.setattr(
+        "neo_sf_q_intel.service.PostgresRunRepository.setup",
+        lambda self: (_ for _ in ()).throw(ConnectionError("offline")),
+    )
+    monkeypatch.setattr(
+        "neo_sf_q_intel.live_receipt_ledger.SQLiteLiveReceiptLedger.setup",
+        lambda self: (_ for _ in ()).throw(sqlite3.OperationalError("database is corrupt")),
+    )
+    settings = fallback_settings(tmp_path)
+
+    service = create_service(settings, tmp_path)
+    client = TestClient(create_app(settings=settings, service=service))
+
+    health_response = client.get("/health")
+    status_response = client.get("/api/v1/live-campaigns/campaign-safe/status")
+
+    assert health_response.status_code == 200
+    health = health_response.json()
+    assert health["live_receipt_ledger_mode"] == "UNAVAILABLE"
+    assert health["live_receipt_ledger_degradation_code"] == ("LIVE_RECEIPT_LEDGER_UNAVAILABLE")
+    assert "LIVE_RECEIPT_LEDGER_UNAVAILABLE" in health["degradation_codes"]
+    assert "LIVE_RECEIPT_LEDGER_UNAVAILABLE" in health["gap_codes"]
+    assert status_response.status_code == 503
+    assert status_response.json() == {
+        "type": "LIVE_CAMPAIGN_STATUS_PROBLEM",
+        "code": "LIVE_CAMPAIGN_STATUS_UNAVAILABLE",
+        "evidence_completeness": "INCOMPLETE",
+        "release_eligible": False,
+        "retryable": False,
+    }
+
+
+def test_provider_source_conflict_degrades_service_without_constructing_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env_file = tmp_path / ".env"
+    env_file.write_text("OPENAI_API_KEY=project-secret\n", encoding="utf-8")
+    monkeypatch.setenv("OPENAI_API_KEY", "stale-process-secret")
+    monkeypatch.setattr("neo_sf_q_intel.service.load_salesforce_source", lambda *a, **k: source())
+    monkeypatch.setattr(
+        "neo_sf_q_intel.service.create_model_provider",
+        lambda settings: (_ for _ in ()).throw(AssertionError("provider must stay blocked")),
+    )
+    settings = Settings(
+        ai_provider="openai",
+        database_url=None,
+        sqlite_path=tmp_path / "runs.db",
+        outcome_sqlite_path=tmp_path / "outcomes.db",
+        outcome_json_path=tmp_path / "outcomes-json",
+        live_receipt_sqlite_path=tmp_path / "live-receipts.db",
+        live_acceptance_profile_path=(ROOT / "config" / "live-salesforce-acceptance-profile.json"),
+        salesforce_app_root=Path("source"),
+        source_graph_sha256="fixture",
+        _env_file=env_file,
+    )
+
+    service = create_service(settings, tmp_path)
+
+    assert PROVIDER_CREDENTIAL_SOURCE_CONFLICT in service.degradation_codes
+    assert service.semantic_index is None
 
 
 def test_sqlite_failure_uses_declared_process_cache(tmp_path: Path, monkeypatch) -> None:
@@ -179,9 +258,7 @@ def test_sqlite_failure_uses_declared_process_cache(tmp_path: Path, monkeypatch)
     assert service.outcome_durable is True
 
 
-def test_outcome_sqlite_unavailability_falls_back_to_json(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_outcome_sqlite_unavailability_falls_back_to_json(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr("neo_sf_q_intel.service.load_salesforce_source", lambda *a, **k: source())
     monkeypatch.setattr(
         "neo_sf_q_intel.service.PostgresRunRepository.setup",
@@ -219,8 +296,18 @@ def test_configured_outcome_postgresql_is_selected_when_setup_succeeds(
     monkeypatch.setattr("neo_sf_q_intel.service.PostgresRunRepository.setup", lambda self: None)
     monkeypatch.setattr("neo_sf_q_intel.service.PostgresOutcomeRepository.setup", lambda self: None)
     monkeypatch.setattr(
+        "neo_sf_q_intel.live_receipt_ledger.PostgresLiveReceiptLedger.setup",
+        lambda self: None,
+    )
+    checkpoint_connection_strings: list[str] = []
+
+    def checkpoint_context(value: str) -> _CheckpointContext:
+        checkpoint_connection_strings.append(value)
+        return _CheckpointContext()
+
+    monkeypatch.setattr(
         "neo_sf_q_intel.service.PostgresSaver.from_conn_string",
-        lambda value: _CheckpointContext(),
+        checkpoint_context,
     )
 
     service = create_service(fallback_settings(tmp_path), tmp_path)
@@ -231,6 +318,11 @@ def test_configured_outcome_postgresql_is_selected_when_setup_succeeds(
     assert service.degradation_codes == ()
     assert service.gap_codes == ()
     assert not (tmp_path / "outcomes.db").exists()
+    assert service.repository.schema == "neo_sf_q_intel"
+    assert service.outcome_repository.schema == "neo_sf_q_intel"
+    assert conninfo_to_dict(checkpoint_connection_strings[0])["options"].endswith(
+        "-c search_path=neo_sf_q_intel"
+    )
     service.close()
 
 
@@ -270,9 +362,7 @@ def test_outcome_sqlite_schema_defect_is_not_hidden_by_json_fallback(
     )
     monkeypatch.setattr(
         "neo_sf_q_intel.service.SQLiteOutcomeRepository.setup",
-        lambda self: (_ for _ in ()).throw(
-            sqlite3.OperationalError("malformed database schema")
-        ),
+        lambda self: (_ for _ in ()).throw(sqlite3.OperationalError("malformed database schema")),
     )
 
     with pytest.raises(sqlite3.OperationalError, match="malformed database schema"):
@@ -378,10 +468,7 @@ def test_incident_append_requires_persisted_history_and_reads_reconstruct_it() -
         "operation:acknowledged",
         predecessor=opened,
     )
-    assert (
-        service.get_outcome("workflow-fixture", acknowledged.outcome_id)
-        == acknowledged
-    )
+    assert service.get_outcome("workflow-fixture", acknowledged.outcome_id) == acknowledged
     assert isinstance(service.outcome_repository, InMemoryOutcomeRepository)
     service.outcome_repository._records.pop(("workflow-fixture", opened.outcome_id))
     with pytest.raises(OutcomeReplayError, match="missing outcome"):

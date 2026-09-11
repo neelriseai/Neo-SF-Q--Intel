@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
   "profileId": "salesforce-dx-semantic-graph",
-  "profileVersion": "1.0.0",
-  "sha256": "1544b379d56d635a21984e7c56175c11ca529aa5233302eece95d917bbee01a2",
+  "profileVersion": "1.0.1",
+  "sha256": "1f1593cee50842d142ee734519582ac20cbcfc824f9509c3b8428a7db9726a44",
   "ontology": {
     "ontologyId": "change-evidence-core",
-    "ontologyVersion": "1.0.0",
-    "ontologySha256": "fd0d73b5beadb87071e160d5d6a436d606f88a1f7674fe2b51ef53cf3b267d1a"
+    "ontologyVersion": "1.1.0",
+    "ontologySha256": "7690ae231829b79e672800d77b343a9451a6bd0403978cd778123a48870173eb"
   },
   "sourceSelector": {
     "sourceType": "salesforce-dx-semantic-graph",
@@ -44,7 +44,7 @@
     {"rawRelation": "field_grant", "canonicalRelation": "authorizes", "legalEndpoints": [{"sourceClass": "security-policy", "targetClass": "data-field"}]},
     {"rawRelation": "has_field", "canonicalRelation": "contains", "legalEndpoints": [{"sourceClass": "data-entity", "targetClass": "data-field"}]},
     {"rawRelation": "object_grant", "canonicalRelation": "authorizes", "legalEndpoints": [{"sourceClass": "security-policy", "targetClass": "data-entity"}]},
-    {"rawRelation": "reads", "canonicalRelation": "reads", "legalEndpoints": [{"sourceClass": "automation", "targetClass": "data-field"}, {"sourceClass": "code", "targetClass": "data-field"}]},
+    {"rawRelation": "reads", "canonicalRelation": "reads", "legalEndpoints": [{"sourceClass": "automated-test", "targetClass": "data-field"}, {"sourceClass": "automation", "targetClass": "data-field"}, {"sourceClass": "code", "targetClass": "data-field"}]},
     {"rawRelation": "references", "canonicalRelation": "references", "legalEndpoints": [{"sourceClass": "data-field", "targetClass": "data-entity"}]},
     {"rawRelation": "tests", "canonicalRelation": "tests", "legalEndpoints": [{"sourceClass": "automated-test", "targetClass": "code"}, {"sourceClass": "automated-test", "targetClass": "user-interface"}]},
     {"rawRelation": "triggers", "canonicalRelation": "triggers", "legalEndpoints": [{"sourceClass": "data-entity", "targetClass": "automation"}, {"sourceClass": "data-entity", "targetClass": "code"}]},

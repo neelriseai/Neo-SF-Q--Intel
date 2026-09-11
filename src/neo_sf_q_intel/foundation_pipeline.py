@@ -17,6 +17,9 @@ from neo_sf_q_intel.change_verification import (
     VerifiedChangeSet,
     load_verified_change_policy,
 )
+from neo_sf_q_intel.change_verification import (
+    _static_artifact as _static_change_artifact,
+)
 from neo_sf_q_intel.edge_envelope import stable_sha256
 from neo_sf_q_intel.graph_production import (
     GraphProducerPolicy,
@@ -24,6 +27,9 @@ from neo_sf_q_intel.graph_production import (
     GraphProductionInputs,
     LocalTreeGraphProducer,
     load_graph_producer_policy,
+)
+from neo_sf_q_intel.graph_production import (
+    _static_artifact as _static_graph_artifact,
 )
 from neo_sf_q_intel.ontology import (
     CanonicalOntology,
@@ -38,6 +44,9 @@ from neo_sf_q_intel.operation_seed import (
     OperationSeedInputs,
     OperationSeedPolicy,
     load_operation_seed_policy,
+)
+from neo_sf_q_intel.operation_seed import (
+    _static_artifact as _static_seed_artifact,
 )
 
 
@@ -74,7 +83,7 @@ class _Model(BaseModel):
 Sha256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 
 DEFAULT_FOUNDATION_PIPELINE_POLICY_SHA256 = (
-    "2db12624614e6071a793bf780cd4ad950ced4d983181afd4041fc0ca1be03980"
+    "7beb2e9bb6a2fc9cca647bac29046ea2138045ca1dcc10242873e021be1f24c5"
 )
 
 
@@ -88,7 +97,7 @@ class FoundationImplementationPin(_Model):
 class FoundationPipelinePolicy(_Model):
     schema_version: Literal["1.0.0"] = Field(alias="schemaVersion")
     policy_id: str = Field(alias="policyId", min_length=1, max_length=200)
-    policy_version: Literal["1.0.0"] = Field(alias="policyVersion")
+    policy_version: Literal["1.0.1"] = Field(alias="policyVersion")
     sha256: Sha256
     composer: FoundationImplementationPin
     verified_change_policy_sha256: Sha256 = Field(alias="verifiedChangePolicySha256")
@@ -302,7 +311,7 @@ class CandidateFoundationEvidence(_Model):
     evidence_completeness: Literal["INCOMPLETE"] = "INCOMPLETE"
     non_authoritative_projection: Literal[True] = True
     pipeline_policy_id: str = Field(min_length=1, max_length=200)
-    pipeline_policy_version: Literal["1.0.0"]
+    pipeline_policy_version: Literal["1.0.1"]
     pipeline_policy_sha256: Sha256
     pipeline_implementation_sha256: Sha256
     blocking_gap_codes: tuple[Annotated[str, Field(min_length=1, max_length=100)], ...] = Field(
@@ -470,6 +479,7 @@ class CandidateFoundationPipeline:
             repository_hint=self.repository_root,
             ontology=self.ontology,
             profile=self.source_profile,
+            reuse_request_scoped_capture=True,
         )
         try:
             graph = self.graph_producer.capture(graph_inputs)
@@ -515,6 +525,7 @@ class CandidateFoundationPipeline:
             graph_candidate=graph.artifact,
             graph_producer=self.graph_producer,
             graph_inputs=graph_inputs,
+            reuse_request_scoped_capture=True,
         )
         seed_inputs = _seed_input_receipts(change.artifact, graph.artifact)
         try:
@@ -561,7 +572,7 @@ class CandidateFoundationPipeline:
         )
 
     def verify_current(self, candidate: CandidateFoundationResult) -> CandidateFoundationResult:
-        """Replay retained artifacts and compare their projection with current state."""
+        """Independently recapture once and compare every retained foundation artifact."""
 
         try:
             if not isinstance(candidate, CandidateFoundationResult):
@@ -575,28 +586,6 @@ class CandidateFoundationPipeline:
             if change is None or graph is None or seeds is None:
                 raise ValueError
             _require_projection_artifact_binding(evidence, change, graph, seeds)
-
-            change_replay = self.change_producer.verify(change, self.repository_root)
-            if change_replay.artifact is None:
-                raise ValueError
-            graph_inputs = GraphProductionInputs(
-                candidate=change,
-                change_producer=self.change_producer,
-                repository_hint=self.repository_root,
-                ontology=self.ontology,
-                profile=self.source_profile,
-            )
-            graph_replay = self.graph_producer.verify(graph, graph_inputs)
-            if graph_replay.artifact is None:
-                raise ValueError
-            operation_inputs = OperationSeedInputs(
-                graph_candidate=graph,
-                graph_producer=self.graph_producer,
-                graph_inputs=graph_inputs,
-            )
-            seed_replay = self.operation_compiler.verify(seeds, operation_inputs)
-            if seed_replay.artifact is None:
-                raise ValueError
         except Exception:
             raise FoundationPipelineVerificationError from None
 
@@ -606,6 +595,9 @@ class CandidateFoundationPipeline:
             or current.produced_graph is None
             or current.operation_seeds is None
             or _static_projection(evidence) != _static_projection(current.evidence)
+            or _static_change_artifact(change) != _static_change_artifact(current.verified_change)
+            or _static_graph_artifact(graph) != _static_graph_artifact(current.produced_graph)
+            or _static_seed_artifact(seeds) != _static_seed_artifact(current.operation_seeds)
         ):
             raise FoundationPipelineVerificationError
         return current
@@ -617,7 +609,7 @@ class CandidateFoundationPipeline:
             contract_sha256(document) != self.policy.sha256
             or self.policy.sha256 != DEFAULT_FOUNDATION_PIPELINE_POLICY_SHA256
             or self.policy.composer.implementation_id != "candidate-foundation-pipeline"
-            or self.policy.composer.implementation_version != "1.0.0"
+            or self.policy.composer.implementation_version != "1.0.1"
             or _implementation_sha256(loaded.read_bytes())
             != self.policy.composer.implementation_sha256
             or self.policy.verified_change_policy_sha256 != self.change_producer.policy.sha256

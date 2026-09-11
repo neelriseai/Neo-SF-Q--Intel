@@ -1,0 +1,498 @@
+{
+  "schemaVersion": "1.0.0",
+  "profileId": "live-salesforce-campaign-v1",
+  "definitionOnly": true,
+  "acceptanceProfileDigestRequiredInEveryReceipt": true,
+  "missingReceiptResult": "NOT_RUN",
+  "completionRule": "ALL_REQUIRED_GATES_PASSED",
+  "fixtureSubstitutionPolicy": "PROHIBITED_FOR_LIVE_GATES",
+  "releaseAuthorityEnabled": false,
+  "evidencePhases": [
+    "LIVE_BASELINE",
+    "CANDIDATE_CHECK_ONLY",
+    "DEPLOYED_CANDIDATE",
+    "RESTORED_BASELINE"
+  ],
+  "dependencyReceiptRule": "EACH_DEPENDENCY_PASSED_RECEIPT_IS_AN_IMPLICIT_EXACT_CURRENT_SAME_CAMPAIGN_INPUT_ROOT",
+  "liveTargetPlan": {
+    "schemaVersion": "1.0.0",
+    "producerKind": "HOST_OWNED_LIVE_TARGET_PLAN_PRODUCER",
+    "producerImplementationDigestRequired": true,
+    "producerAuthority": "HOST_POLICY_INTERSECTED_WITH_VERIFIED_SOURCE",
+    "sourceContractMayAuthorize": false,
+    "callerMaySupplyTargets": false,
+    "zeroAmbiguousDuplicateOrUnsupportedResult": "BLOCKED",
+    "requiredRoots": [
+      "captured source-operation profile digest",
+      "verified change and semantic graph digests",
+      "ontology and source-profile identities",
+      "host policy identity and expiry",
+      "organization classification receipt"
+    ],
+    "sourceOperationProfileRules": [
+      "strict versioned schema with unknown and duplicate keys rejected",
+      "exact captured bytes and canonical digest",
+      "typed REST variables and response schema",
+      "typed metadata members, obligation IDs and browser intents",
+      "free-text or heuristic parsing cannot produce targets"
+    ],
+    "partitionRules": [
+      "derive the complete target partition from current verified change, graph and mandatory obligations",
+      "host policy may allow all or block with explicit denied and unmapped targets",
+      "targets may not be silently dropped, substituted or reordered"
+    ],
+    "standardRestRules": ["exact GET operation", "response schema and byte cap"],
+    "customApiRules": ["exact GET route template", "field/schema/byte cap"],
+    "metadataRules": [
+      "exact host-owned type/member allowlist intersected with source-derived scope",
+      "no wildcard or whole-org retrieval",
+      "component/file/byte/time caps",
+      "secret-bearing metadata families refused",
+      "fresh no-follow ignored staging with cleanup"
+    ],
+    "apexRules": [
+      "exact complete executable method set derived from every mandatory source-derived obligation; host policy may allow all or block but never select or drop",
+      "current-task test authority and execution caps",
+      "queued, partial, skipped or broad-suite results cannot pass"
+    ],
+    "browserRules": [
+      "contract-selected application intent intersected with host policy",
+      "verified origin, org and actor",
+      "session closure and secret non-disclosure on every terminal outcome"
+    ],
+    "datasetRules": [
+      "independent current synthetic-dataset scope receipt supplies record values and ownership marker",
+      "exact object, field projection and query predicates are host-owned and default deny",
+      "broad query, list, wildcard field and non-synthetic results are blocked and redacted before evidence"
+    ]
+  },
+  "authorityReceiptRules": {
+    "independentIssuerRequired": true,
+    "executionReceiptMayAuthorizeItself": false,
+    "currentExpiryRequired": true,
+    "exactCampaignOrgSourceBuildManifestAndOperationMatchRequired": true,
+    "scopeWideningAllowed": false
+  },
+  "orgClassificationPolicy": {
+    "schemaVersion": "1.1.0",
+    "allowedNonProductionClasses": ["SANDBOX", "SCRATCH_ORG", "DEVELOPER_EDITION"],
+    "blockedClasses": ["PRODUCTION", "UNKNOWN"],
+    "requiredFingerprintInputs": ["ORGANIZATION_ID", "INSTANCE_HOST", "EDITION", "ENVIRONMENT_CLASS", "AUTHENTICATED_USER_ID", "AUTHENTICATED_USERNAME"],
+    "aliasAloneSufficient": false,
+    "isSandboxAloneSufficient": false,
+    "classificationBootstrapOperation": "ORG_DISPLAY+ORGANIZATION+USERINFO_SUBJECT+ACTIVE_USER_RECONCILIATION",
+    "classificationBootstrapOperationSha256": "8ab99b077a01728f6abe8c3d4c11c73d4f224d858d07308e6f62810e60490944",
+    "serverSubjectObservationRequired": true,
+    "repeatSubjectAndDisplayRequired": true,
+    "displayAliasIsInformational": true,
+    "bootstrapOutputMayLeaveHostBroker": false
+  },
+  "metadataRetrievalPolicy": {
+    "defaultDecision": "DENY",
+    "wildcardsAllowed": false,
+    "wholeOrgRetrievalAllowed": false,
+    "hostCapsRequired": ["COMPONENTS", "FILES", "BYTES", "SECONDS"],
+    "deniedFamilies": [
+      "CONNECTED_APP",
+      "AUTH_PROVIDER",
+      "NAMED_CREDENTIAL",
+      "EXTERNAL_CREDENTIAL",
+      "CERTIFICATE_OR_KEY_MATERIAL"
+    ],
+    "freshNoFollowIgnoredStagingRequired": true,
+    "cleanupOnEveryOutcomeRequired": true,
+    "rawPayloadPersistenceAllowed": false
+  },
+  "candidatePhaseReceiptRules": {
+    "allRequiredRolesDistinct": true,
+    "sameOrgCampaignCandidateDeploymentRootRequired": true,
+    "currentUnexpiredReceiptsRequired": true,
+    "acceptedPhase": "DEPLOYED_CANDIDATE",
+    "receiptReuseAcrossBaselineAndCandidateForbidden": true,
+    "gapsOrUnknownExternalStateMayPass": false
+  },
+  "compensationAuthorizationRules": {
+    "recoveryPermitIssuedBeforeDeploymentDispatch": true,
+    "exactCompensationManifestAndSyntheticDataScopeRequired": true,
+    "remainingValidityMustCoverWorstCaseCampaignAndRestore": true,
+    "recoveryPermitActivatedByDeploymentDispatch": true,
+    "issuerAvailabilityAfterDispatchRequired": false,
+    "narrowerTamperedOrExpiredPermitResult": "DEPLOYMENT_BLOCKED"
+  },
+  "browserActionPolicy": {
+    "allowedActionClasses": [
+      "NAVIGATE",
+      "RELOAD",
+      "FOCUS",
+      "SCROLL",
+      "EXPAND_READ_ONLY",
+      "SELECT_READ_ONLY_VIEW",
+      "LOCATOR_REBIND_PREVIEW"
+    ],
+    "blockedActionClasses": ["SUBMIT", "SAVE", "EDIT_DATA", "DELETE_DATA", "APPROVE", "REJECT"],
+    "unknownActionResult": "BLOCKED"
+  },
+  "requiredGateIds": [
+    "SF-L01",
+    "SF-L02",
+    "SF-L03",
+    "SF-L04",
+    "SF-L05",
+    "SF-L06",
+    "SF-L07",
+    "SF-L08",
+    "SF-L09",
+    "SF-C01",
+    "SF-C02",
+    "SF-C03",
+    "SF-C04",
+    "SF-C05",
+    "SF-C06"
+  ],
+  "gates": [
+    {
+      "gateId": "SF-L01",
+      "kind": "HOST_NONPRODUCTION_ENROLLMENT",
+      "receiptType": "HOST_ENROLLMENT_RECEIPT",
+      "effectClass": "HOST_CONTROL_PLANE",
+      "authorityClass": "HOST_OPERATOR_ENROLLMENT",
+      "targetPlanInput": "NONE",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence"],
+      "dependsOn": [],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": [],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "host-owned expiring enrollment binds alias reference, expected org fingerprint, instance host, non-production class and persona",
+        "trusted issuer is independent of caller, model and source contract",
+        "sanitized organization fingerprint is bound to every later receipt"
+      ]
+    },
+    {
+      "gateId": "SF-L02",
+      "kind": "MACHINE_LOCAL_CLI_AUTHENTICATION",
+      "receiptType": "CLI_AUTHENTICATION_RECEIPT",
+      "effectClass": "CLASSIFICATION_ONLY_READ",
+      "authorityClass": "HOST_ENROLLMENT",
+      "targetPlanInput": "NONE",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence"],
+      "dependsOn": ["SF-L01"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["HOST_ENROLLMENT_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "machine-local Salesforce CLI authentication",
+        "the fixed v1.1.0 classification plan reconciles org display, exact Organization query, server userinfo subject and active User by observed ID against trusted enrollment",
+        "userinfo requires HTTP 200 JSON without redirects and repeats with org display before completion; display alias preference never replaces fixed invocation alias or resolved org/actor pins",
+        "sanitized actor, org and CLI-version receipt matches every later command"
+      ]
+    },
+    {
+      "gateId": "SF-L03",
+      "kind": "MCP_STANDARD_REST_ASSERTIONS",
+      "receiptType": "MCP_LIVE_REST_RECEIPT",
+      "effectClass": "READ_ONLY",
+      "authorityClass": "HOST_READ_POLICY",
+      "targetPlanInput": "LIVE_TARGET_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["tools.mcp", "runtime.salesforce-live-evidence"],
+      "dependsOn": ["SF-L02"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["HOST_ENROLLMENT_RECEIPT", "LIVE_DATASET_SCOPE_RECEIPT", "LIVE_TARGET_PLAN_RECEIPT", "EXPECTED_EXECUTION_CONTRACT_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "bounded standard REST request through MCP wrapping the shared product service and live adapter receipt",
+        "route and response shape validated against policy",
+        "sanitized source-, org- and trace-bound receipt"
+      ]
+    },
+    {
+      "gateId": "SF-L04",
+      "kind": "MCP_SOURCE_CONTRACT_CUSTOM_API",
+      "receiptType": "MCP_LIVE_CUSTOM_API_RECEIPT",
+      "effectClass": "READ_ONLY",
+      "authorityClass": "HOST_READ_POLICY",
+      "targetPlanInput": "LIVE_TARGET_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["tools.mcp", "runtime.salesforce-live-evidence"],
+      "dependsOn": ["SF-L02"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["HOST_ENROLLMENT_RECEIPT", "LIVE_DATASET_SCOPE_RECEIPT", "LIVE_TARGET_PLAN_RECEIPT", "EXPECTED_EXECUTION_CONTRACT_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "custom route derived from the selected source contract and invoked through MCP rather than runtime literals",
+        "exact GET template intersected with host route, field, schema and byte policy",
+        "live non-production response bound to the current organization fingerprint"
+      ]
+    },
+    {
+      "gateId": "SF-L05",
+      "kind": "SCOPED_METADATA_RETRIEVAL",
+      "receiptType": "LIVE_METADATA_RECEIPT",
+      "effectClass": "READ_ONLY",
+      "authorityClass": "HOST_METADATA_READ_POLICY",
+      "targetPlanInput": "LIVE_TARGET_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence"],
+      "dependsOn": ["SF-L02"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["HOST_ENROLLMENT_RECEIPT", "LIVE_TARGET_PLAN_RECEIPT", "EXPECTED_EXECUTION_CONTRACT_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "exact host-owned type/member allowlist intersected with source-derived scope; wildcards, whole-org and secret-bearing families refused",
+        "component, file, byte and time caps plus complete expected/omitted/unexpected accounting",
+        "fresh no-follow ignored staging is cleaned and only canonical digests, counts and safe relative locators persist"
+      ]
+    },
+    {
+      "gateId": "SF-L06",
+      "kind": "EPHEMERAL_PLAYWRIGHT_SESSION",
+      "receiptType": "BROWSER_SESSION_RECEIPT",
+      "effectClass": "SESSION_HANDOFF",
+      "authorityClass": "HOST_BROWSER_POLICY",
+      "targetPlanInput": "LIVE_TARGET_PLAN",
+      "requirementIds": ["REQ-UIA-001"],
+      "capabilityIds": ["automation.browser-worker"],
+      "dependsOn": ["SF-L01", "SF-L02"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["HOST_ENROLLMENT_RECEIPT", "LIVE_TARGET_PLAN_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "ephemeral frontdoor session obtained only after non-production classification",
+        "session handed directly to an isolated Playwright context",
+        "session values absent from logs, exceptions, traces, screenshots, artifact indexes, prompts and MCP/API responses; context always closed"
+      ]
+    },
+    {
+      "gateId": "SF-L07",
+      "kind": "LIVE_LIGHTNING_ASSERTIONS",
+      "receiptType": "LIGHTNING_ASSERTION_RECEIPT",
+      "effectClass": "READ_ONLY",
+      "authorityClass": "HOST_BROWSER_POLICY",
+      "targetPlanInput": "LIVE_TARGET_PLAN",
+      "requirementIds": ["REQ-UIA-001"],
+      "capabilityIds": ["automation.browser-worker", "automation.locator-healing"],
+      "dependsOn": ["SF-L05", "SF-L06"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["BROWSER_SESSION_RECEIPT", "LIVE_DATASET_SCOPE_RECEIPT", "LIVE_METADATA_RECEIPT", "LIVE_TARGET_PLAN_RECEIPT", "EXPECTED_EXECUTION_CONTRACT_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "verified live Lightning origin and selected application surface",
+        "read-only DOM capture with bounded redaction",
+        "candidate ranking, ambiguity abstention and readback receipt"
+      ]
+    },
+    {
+      "gateId": "SF-L08",
+      "kind": "SELECTED_LIVE_APEX_TESTS",
+      "receiptType": "LIVE_TEST_RECEIPT",
+      "effectClass": "SIDE_EFFECTING_TEST",
+      "authorityClass": "CURRENT_TASK_TEST_AUTHORITY",
+      "targetPlanInput": "LIVE_TARGET_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["quality.live-test-execution"],
+      "dependsOn": ["SF-L02", "SF-L05"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["CURRENT_TEST_AUTHORITY_RECEIPT", "LIVE_METADATA_RECEIPT", "LIVE_TARGET_PLAN_RECEIPT", "EXPECTED_EXECUTION_CONTRACT_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "exact complete Apex method set from every mandatory source-derived obligation; host policy may allow all or block but never select or drop",
+        "current-task authority, execution limits and bounded terminal polling through a trusted runner",
+        "queued, partial, skipped or missing outcomes cannot pass; baseline results bind the effective live metadata/source root"
+      ]
+    },
+    {
+      "gateId": "SF-L09",
+      "kind": "AUTHORIZED_BROWSER_RECOVERY",
+      "receiptType": "BROWSER_RECOVERY_RECEIPT",
+      "effectClass": "NON_DESTRUCTIVE_BROWSER_ACTION",
+      "authorityClass": "EXPLICIT_BROWSER_APPROVAL",
+      "targetPlanInput": "LIVE_TARGET_PLAN",
+      "requirementIds": ["REQ-UIA-001"],
+      "capabilityIds": ["automation.browser-worker", "automation.locator-healing"],
+      "dependsOn": ["SF-L07"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["CURRENT_BROWSER_APPROVAL_RECEIPT", "LIGHTNING_ASSERTION_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "current live capture and uniquely scoped locator candidate",
+        "explicit approval for the non-destructive browser action",
+        "permitted application plus current-page readback",
+        "sanitized before-and-after lifecycle receipt"
+      ]
+    }
+  ],
+  "candidateGates": [
+    {
+      "gateId": "SF-C01",
+      "kind": "CANDIDATE_PRESTATE_RESTORE_READINESS",
+      "receiptType": "RESTORE_READINESS_RECEIPT",
+      "effectClass": "READ_ONLY_RESTORE_READINESS_VALIDATION",
+      "authorityClass": "HOST_READ_POLICY",
+      "targetPlanInput": "CANDIDATE_CAMPAIGN_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence"],
+      "dependsOn": ["SF-L05"],
+      "acceptedEvidencePhases": ["LIVE_BASELINE"],
+      "requiredInputReceiptRoles": ["HOST_ENROLLMENT_RECEIPT", "LIVE_METADATA_RECEIPT", "INDEPENDENT_RESTORE_REHEARSAL_RECEIPT", "CANDIDATE_CAMPAIGN_PLAN_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "exact candidate source, build and manifest identity",
+        "current scoped metadata and synthetic-data pre-state",
+        "independently authorized current rehearsal receipt for the same org, metadata families and synthetic-data scope"
+      ]
+    },
+    {
+      "gateId": "SF-C02",
+      "kind": "EXACT_CANDIDATE_CHECK_ONLY",
+      "receiptType": "CHECK_ONLY_RECEIPT",
+      "effectClass": "SIDE_EFFECTING_TEST",
+      "authorityClass": "CURRENT_TASK_TEST_AUTHORITY",
+      "targetPlanInput": "CANDIDATE_CAMPAIGN_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence", "quality.live-test-execution"],
+      "dependsOn": ["SF-C01"],
+      "acceptedEvidencePhases": ["CANDIDATE_CHECK_ONLY"],
+      "requiredInputReceiptRoles": ["CURRENT_TEST_AUTHORITY_RECEIPT", "RESTORE_READINESS_RECEIPT", "CANDIDATE_CAMPAIGN_PLAN_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "check-only execution bound to the exact candidate, manifest and org",
+        "complete component and mandatory-test accounting",
+        "terminal validation receipt that grants no deployment authority"
+      ]
+    },
+    {
+      "gateId": "SF-C03",
+      "kind": "AUTHORIZED_EXACT_DEPLOYMENT",
+      "receiptType": "DEPLOYMENT_RECEIPT",
+      "effectClass": "METADATA_MUTATION",
+      "authorityClass": "CURRENT_TASK_MUTATION_AUTHORITY",
+      "targetPlanInput": "CANDIDATE_CAMPAIGN_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence"],
+      "dependsOn": ["SF-C02"],
+      "acceptedEvidencePhases": ["DEPLOYED_CANDIDATE"],
+      "requiredInputReceiptRoles": ["INDEPENDENT_MUTATION_AUTHORIZATION_RECEIPT", "CAMPAIGN_RECOVERY_PERMIT_RECEIPT", "CHECK_ONLY_RECEIPT", "RESTORE_READINESS_RECEIPT", "CANDIDATE_CAMPAIGN_PLAN_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "versioned current-task mutation authorization",
+        "immediate source and pre-state revalidation",
+        "exact candidate deployment and complete terminal receipt"
+      ]
+    },
+    {
+      "gateId": "SF-C04",
+      "kind": "POST_DEPLOY_CANDIDATE_RECONCILIATION",
+      "receiptType": "CANDIDATE_RECONCILIATION_RECEIPT",
+      "effectClass": "READ_ONLY",
+      "authorityClass": "HOST_METADATA_READ_POLICY",
+      "targetPlanInput": "CANDIDATE_CAMPAIGN_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence"],
+      "dependsOn": ["SF-C03"],
+      "acceptedEvidencePhases": ["DEPLOYED_CANDIDATE"],
+      "requiredInputReceiptRoles": ["DEPLOYMENT_RECEIPT", "CANDIDATE_CAMPAIGN_PLAN_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "fresh post-deploy scoped metadata retrieval",
+        "candidate component and canonical digest reconciliation",
+        "complete additions, modifications, removals and unexpected-residue accounting"
+      ]
+    },
+    {
+      "gateId": "SF-C05",
+      "kind": "DEPLOYED_CANDIDATE_ASSERTIONS",
+      "receiptType": "CANDIDATE_ASSERTION_RECEIPT",
+      "effectClass": "READ_AND_SIDE_EFFECTING_TEST",
+      "authorityClass": "CURRENT_TASK_TEST_AND_BROWSER_AUTHORITY",
+      "targetPlanInput": "CANDIDATE_CAMPAIGN_PLAN",
+      "requirementIds": ["REQ-SF-001", "REQ-UIA-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence", "quality.live-test-execution", "automation.browser-worker", "automation.locator-healing"],
+      "dependsOn": ["SF-C04"],
+      "acceptedEvidencePhases": ["DEPLOYED_CANDIDATE"],
+      "requiredInputReceiptRoles": [
+        "DEPLOYMENT_RECEIPT",
+        "CANDIDATE_RECONCILIATION_RECEIPT",
+        "MCP_LIVE_REST_RECEIPT",
+        "MCP_LIVE_CUSTOM_API_RECEIPT",
+        "LIVE_METADATA_RECEIPT",
+        "LIVE_DATASET_SCOPE_RECEIPT",
+        "BROWSER_SESSION_RECEIPT",
+        "LIGHTNING_ASSERTION_RECEIPT",
+        "LIVE_TEST_RECEIPT",
+        "BROWSER_RECOVERY_RECEIPT",
+        "CURRENT_TEST_AUTHORITY_RECEIPT",
+        "CURRENT_BROWSER_APPROVAL_RECEIPT",
+        "CANDIDATE_CAMPAIGN_PLAN_RECEIPT"
+      ],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "deployed-candidate phase standard and custom API assertions",
+        "deployed-candidate phase live Lightning assertions and browser recovery",
+        "deployed-candidate phase selected Apex results bound to the deployment receipt"
+      ]
+    },
+    {
+      "gateId": "SF-C06",
+      "kind": "RESTORE_AND_RESIDUE_RECONCILIATION",
+      "receiptType": "RESTORE_RECONCILIATION_RECEIPT",
+      "effectClass": "RESTORE_MUTATION",
+      "authorityClass": "PREAUTHORIZED_CAMPAIGN_RECOVERY",
+      "targetPlanInput": "CANDIDATE_CAMPAIGN_PLAN",
+      "requirementIds": ["REQ-SF-001"],
+      "capabilityIds": ["runtime.salesforce-live-evidence"],
+      "dependsOn": [],
+      "activationRule": "ON_DEPLOYMENT_DISPATCH_ATTEMPT_REGARDLESS_OF_C03_C04_C05_OUTCOME",
+      "readbackBeforeRecovery": true,
+      "successPathAdditionalInputReceiptRoles": ["CANDIDATE_ASSERTION_RECEIPT"],
+      "failurePathAdditionalInputReceiptRoles": [],
+      "unknownExternalStateRule": "READBACK_THEN_RESTORE_OR_QUARANTINE",
+      "acceptedEvidencePhases": ["RESTORED_BASELINE"],
+      "requiredInputReceiptRoles": ["DEPLOYMENT_DISPATCH_RECEIPT", "CAMPAIGN_RECOVERY_PERMIT_RECEIPT", "RESTORE_READINESS_RECEIPT"],
+      "requiredForCompletion": true,
+      "fixtureMaySatisfy": false,
+      "evidenceRequirements": [
+        "restore attempted after every deployment attempt",
+        "ADD, MODIFY and DELETE inverted for supported metadata and affected synthetic data",
+        "original state, deletes and residue reconciled with zero unresolved mutation"
+      ]
+    }
+  ],
+  "candidateCampaign": {
+    "requiredForLiveSalesforceCampaignCompletion": true,
+    "baselineEvidenceMaySatisfy": false,
+    "checkOnlyEvidenceMaySatisfy": false,
+    "orderedGateIds": ["SF-C01", "SF-C02", "SF-C03", "SF-C04", "SF-C05", "SF-C06"],
+    "preDispatchFailureRule": "STOP_AND_RECORD_BLOCKED_OR_NOT_RUN",
+    "postDispatchFailureRule": "ALWAYS_ATTEMPT_SF_C06_BEFORE_TERMINATION",
+    "manualRecoveryStatus": "RESTORE_REQUIRED_MANUAL_INTERVENTION",
+    "quarantineOnUnresolvedRestore": true,
+    "deploymentRetryWhileQuarantined": false
+  },
+  "nonEvidence": [
+    "unit fixtures",
+    "mocked CLI output",
+    "mocked browser tests",
+    "an already-open interactive browser tab",
+    "manual CLI output without a product-owned receipt",
+    "historical deployment or API screenshots",
+    "baseline receipts presented as candidate receipts",
+    "check-only receipts presented as deployed-candidate receipts"
+  ]
+}

@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlsplit
 
+from neo_sf_q_intel.subprocess_environment import build_subprocess_environment
+
 
 class SalesforceCLIError(RuntimeError):
     pass
@@ -46,6 +48,12 @@ class SalesforceCLI:
             capture_output=True,
             text=True,
             shell=False,
+            env=build_subprocess_environment(
+                controls={
+                    "SF_AUTOUPDATE_DISABLE": "true",
+                    "SF_DISABLE_TELEMETRY": "true",
+                }
+            ),
         )
         try:
             payload = json.loads(completed.stdout)

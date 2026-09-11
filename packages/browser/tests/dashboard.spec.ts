@@ -170,7 +170,7 @@ async function baseFoundation(projectId = "project-renamed-alpha"): Promise<Cand
     evidence_completeness: "INCOMPLETE",
     non_authoritative_projection: true,
     pipeline_policy_id: "candidate-foundation-pipeline",
-    pipeline_policy_version: "1.0.0",
+    pipeline_policy_version: "1.0.1",
     pipeline_policy_sha256: sha("7"),
     pipeline_implementation_sha256: sha("8"),
     blocking_gap_codes: seedFoundationGaps,
@@ -221,7 +221,12 @@ async function mockFoundation(page: Page, evidence: CandidateFoundationEvidence)
 
 test("dashboard opens as a clean, truthful assurance workspace", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /Trace impact/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Change assurance" })).toBeVisible();
+  await expect(page.getByLabel("Workspace navigation")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Specialist views" })).toBeVisible();
+  await expect(page.locator(".capabilityCard")).toHaveCount(6);
+  await expect(page.locator(".stageRailEmpty")).toContainText("only when they are recorded");
+  await expect(page.locator(".stageState.completed")).toHaveCount(0);
   await expect(page.getByLabel("Requirement or observed change")).toHaveValue("");
   await expect(page.getByLabel("Changed paths optional")).toHaveAttribute("placeholder", "relative/path/to/source");
   await expect(page.getByRole("button", { name: "Analyze change" })).toBeDisabled();
@@ -231,7 +236,86 @@ test("dashboard opens as a clean, truthful assurance workspace", async ({ page }
   await expect(page.getByLabel("Release posture")).toContainText("NOT EXPOSED");
   await expect(page.getByText("graph connected")).toHaveCount(0);
   await expect(page.getByText("snapshot grounded")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test("live campaign panel replays durable status without implying execution or release", async ({ page }) => {
+  const gateIds = [
+    "SF-L01", "SF-L02", "SF-L03", "SF-L04", "SF-L05", "SF-L06", "SF-L07", "SF-L08", "SF-L09",
+    "SF-C01", "SF-C02", "SF-C03", "SF-C04", "SF-C05", "SF-C06",
+  ];
+  await page.route("**/api/v1/live-campaigns/campaign-browser/status", async (route) => {
+    await route.fulfill({ contentType: "application/json", body: JSON.stringify({
+      campaign_id: "campaign-browser",
+      replay_state: "EMPTY",
+      validator_replayed: false,
+      evidence_state: "INCOMPLETE",
+      requirements_satisfied: false,
+      release_eligible: false,
+      accepted_completion_numerator: 0,
+      completion_denominator: 15,
+      receipt_count: 0,
+      acceptance_profile_sha256: sha("a"),
+      ledger_mode: "SQLITE",
+      ledger_degradation_code: "POSTGRESQL_UNAVAILABLE",
+      locally_valid_gate_ids: [],
+      gates: gateIds.map((gate_id) => ({ gate_id, state: "NOT_CURRENT" })),
+      quarantined: false,
+      stored_quarantine_reasons: [],
+      gap_codes: ["CAMPAIGN_RECEIPTS_NOT_FOUND"],
+      evaluation_sha256: null,
+    }) });
+  });
+  await page.goto("/");
+  const panel = page.getByRole("region", { name: "Salesforce campaign evidence" });
+  await panel.getByLabel("Campaign ID").fill("campaign-browser");
+  await panel.getByRole("button", { name: "Replay evidence" }).click();
+  await expect(panel).toContainText("0/15");
+  await expect(panel).toContainText("NOT ELIGIBLE");
+  await expect(panel).toContainText("Replays durable receipts only");
+});
+
+test("workspace view controls have distinct names and move focus to their destination", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const sourceControl = page.getByRole("button", { name: "Open Source Evidence view" });
+  const governanceControl = page.getByRole("button", { name: "Open Governance Review view" });
+  await expect(sourceControl).toBeVisible();
+  await expect(governanceControl).toBeVisible();
+  await sourceControl.click();
+  await expect(page.getByRole("heading", { name: "Local candidate foundation" })).toBeFocused();
+  await governanceControl.click();
+  await expect(page.getByRole("heading", { name: "Assurance evidence" })).toBeFocused();
+  await expect(page.getByRole("tab", { name: "governance" })).toHaveAttribute("aria-selected", "true");
+});
+
+for (const defect of ["unknown-gate", "inconsistent-validity"] as const) {
+  test(`live campaign panel rejects ${defect} without displaying a replay summary`, async ({ page }) => {
+    const gates = [
+      ...Array.from({ length: 9 }, (_, index) => `SF-L0${index + 1}`),
+      ...Array.from({ length: 6 }, (_, index) => `SF-C0${index + 1}`),
+    ].map((gate_id) => ({ gate_id, state: "NOT_CURRENT" }));
+    if (defect === "unknown-gate") gates[14].gate_id = "SF-L10";
+    else gates[0].state = "LOCALLY_VALID";
+    await page.route("**/api/v1/live-campaigns/campaign-browser/status", async (route) => {
+      await route.fulfill({ contentType: "application/json", body: JSON.stringify({
+        campaign_id: "campaign-browser", replay_state: "EMPTY", validator_replayed: false,
+        evidence_state: "INCOMPLETE", requirements_satisfied: false, release_eligible: false,
+        accepted_completion_numerator: 0, completion_denominator: 15, receipt_count: 0,
+        acceptance_profile_sha256: sha("a"), ledger_mode: "SQLITE", ledger_degradation_code: null,
+        locally_valid_gate_ids: [], gates, quarantined: false, stored_quarantine_reasons: [],
+        gap_codes: ["CAMPAIGN_RECEIPTS_NOT_FOUND"], evaluation_sha256: null,
+      }) });
+    });
+    await page.goto("/");
+    const panel = page.getByRole("region", { name: "Salesforce campaign evidence" });
+    await panel.getByLabel("Campaign ID").fill("campaign-browser");
+    await panel.getByRole("button", { name: "Replay evidence" }).click();
+    await expect(panel).toContainText("LIVE_STATUS_INVALID");
+    await expect(panel.locator(".liveCampaignSummary")).toHaveCount(0);
+    await expect(panel.getByRole("button", { name: "Replay evidence" })).toBeEnabled();
+  });
+}
 
 test("populated run keeps evidence, selection, execution, and proposals distinct", async ({ page }) => {
   const run = baseRun();
@@ -253,6 +337,12 @@ test("populated run keeps evidence, selection, execution, and proposals distinct
   await mockRun(page, run);
   await page.goto("/");
   await submit(page);
+
+  const recordedStages = page.locator(".stageRail > li");
+  await expect(recordedStages).toHaveCount(1);
+  await expect(recordedStages.first()).toContainText("Change Analyst");
+  await expect(recordedStages.first()).toContainText("change analysis");
+  await expect(recordedStages.first()).toContainText("COMPLETED");
 
   await expect(page.getByText("Module Kappa", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("evidence:confirmed", { exact: true }).first()).toBeVisible();
@@ -372,8 +462,10 @@ test("tabs support keyboard navigation and the dashboard remains usable on mobil
   await evidenceTab.press("ArrowRight");
   await expect(page.getByRole("tab", { name: "tests" })).toBeFocused();
   await expect(page.getByRole("tab", { name: "tests" })).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByRole("heading", { name: "Start an analysis" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Analyze a change" })).toBeVisible();
   await expect(page.getByLabel("Requirement or observed change")).toBeVisible();
+  await expect(page.getByLabel("Workspace navigation")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
 test("foundation capture sends an unscoped empty POST and renders only local capture evidence", async ({ page }) => {
@@ -492,7 +584,10 @@ test("foundation capture remains keyboard-operable and contained on a mobile vie
   await page.goto("/");
   const button = page.getByRole("button", { name: "Capture candidate" });
   await page.locator("body").click({ position: { x: 1, y: 1 } });
-  for (let index = 0; index < 4; index += 1) await page.keyboard.press("Tab");
+  for (let index = 0; index < 24; index += 1) {
+    await page.keyboard.press("Tab");
+    if (await button.evaluate((element) => element === document.activeElement)) break;
+  }
   await expect(button).toBeFocused();
   await page.keyboard.press("Space");
   await expect(page.getByText("mobile-project-gamma", { exact: true })).toBeVisible();
@@ -506,6 +601,7 @@ test("foundation decoder fails closed across authority, ordering, lineage, and b
   type StageDocument = Record<string, unknown>;
   const stages = (document: Document) => document.stages as StageDocument[];
   const mutations: Array<[string, (document: Document) => void, boolean?]> = [
+    ["stale pipeline policy version", (document) => { document.pipeline_policy_version = "1.0.0"; }],
     ["release authority", (document) => { document.release_eligible = true; }],
     ["unknown field", (document) => { document.private_path = "must-not-be-accepted"; }],
     ["missing global interlock", (document) => {
@@ -675,8 +771,10 @@ test("network failure clears a prior projection without exposing transport detai
 });
 
 test("client-clock expiry only downgrades the projection and requires recapture", async ({ page }) => {
+  const browserNow = new Date("2030-01-01T00:00:00.000Z");
+  await page.clock.install({ time: browserNow });
   const evidence = await baseFoundation("expiring-project");
-  const validUntilMillis = Math.ceil((Date.now() + 1_500) / 1_000) * 1_000;
+  const validUntilMillis = browserNow.getTime() + 60_000;
   const evaluatedMillis = validUntilMillis - 60_000;
   for (const stage of evidence.stages) {
     stage.evaluated_at = new Date(evaluatedMillis).toISOString().replace(".000Z", "Z");
@@ -687,6 +785,7 @@ test("client-clock expiry only downgrades the projection and requires recapture"
   await page.goto("/");
   await page.getByRole("button", { name: "Capture candidate" }).click();
   await expect(page.getByText("expiring-project", { exact: true })).toBeVisible();
-  await expect(page.getByText("Captured evidence has expired. Capture again before using it for analysis.")).toBeVisible({ timeout: 4_000 });
+  await page.clock.fastForward(60_001);
+  await expect(page.getByText("Captured evidence has expired. Capture again before using it for analysis.")).toBeVisible();
   await expect(page.getByText("expiring-project", { exact: true })).toHaveCount(0);
 });

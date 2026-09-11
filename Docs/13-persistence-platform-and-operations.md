@@ -22,6 +22,17 @@
 
 Core tables: project/snapshot/ingest, graph/evidence/artifact, assurance run/checkpoint/output, approval, automation asset/patch/validation/locator history, execution, policy/prompt/eval/feedback, outbox and audit.
 
+The current local PostgreSQL adapters isolate every Neo-owned table and LangGraph checkpoint table
+inside the validated `POSTGRES_SCHEMA` (default `neo_sf_q_intel`). Connections have no `public`
+search-path fallback. An ownership/layout marker must exist before migrations; a non-empty unmarked
+schema is rejected, and similarly named objects in other schemas are never adopted or altered.
+
+Live receipt replay uses a separate fail-closed availability chain: the owned PostgreSQL schema is
+preferred, and an auto-created byte-preserving SQLite ledger is the durable fallback. If neither
+ledger can be initialized (including a corrupt or unwritable SQLite file), API health remains
+available with `LIVE_RECEIPT_LEDGER_UNAVAILABLE`, while live campaign status returns a sanitized
+503 and remains release-ineligible. Process memory is never used as live-acceptance authority.
+
 ### Transactions and workers
 
 - Run/idempotency reservation in one transaction.
@@ -80,6 +91,8 @@ Run/step status/duration/retry; index freshness; graph integrity; evidence compl
 
 - Logs exclude credentials and unrestricted source/record/model content.
 - Migration uses expand/migrate/contract.
+- Schema creation uses identifier-safe composition; configurable schema names are lowercase private
+  identifiers and cannot select `public`, catalog, or `pg_*` namespaces.
 - API instances remain stateless.
 - Object artifacts are content-addressed/encrypted and referentially checked.
 - Unknown external side effects are reconciled before retry.

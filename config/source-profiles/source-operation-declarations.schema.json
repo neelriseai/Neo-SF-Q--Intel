@@ -1,0 +1,980 @@
+{
+  "$defs": {
+    "BrowserAbsentPropertyState": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "ABSENT",
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "title": "BrowserAbsentPropertyState",
+      "type": "object"
+    },
+    "BrowserActionIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ACTION",
+          "title": "Kind",
+          "type": "string"
+        },
+        "objectApiName": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Objectapiname",
+          "type": "string"
+        },
+        "action": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,199}$",
+          "title": "Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "objectApiName",
+        "action"
+      ],
+      "title": "BrowserActionIdentity",
+      "type": "object"
+    },
+    "BrowserFieldIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "FIELD",
+          "title": "Kind",
+          "type": "string"
+        },
+        "objectApiName": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Objectapiname",
+          "type": "string"
+        },
+        "fieldApiName": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Fieldapiname",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "objectApiName",
+        "fieldApiName"
+      ],
+      "title": "BrowserFieldIdentity",
+      "type": "object"
+    },
+    "BrowserLocatorObligation": {
+      "additionalProperties": false,
+      "properties": {
+        "obligationId": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,199}$",
+          "title": "Obligationid",
+          "type": "string"
+        },
+        "originalLocator": {
+          "$ref": "#/$defs/BrowserOriginalLocator"
+        },
+        "semanticIdentity": {
+          "discriminator": {
+            "mapping": {
+              "ACTION": "#/$defs/BrowserActionIdentity",
+              "FIELD": "#/$defs/BrowserFieldIdentity"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/BrowserFieldIdentity"
+            },
+            {
+              "$ref": "#/$defs/BrowserActionIdentity"
+            }
+          ],
+          "title": "Semanticidentity"
+        },
+        "assertions": {
+          "items": {
+            "enum": [
+              "EDITABLE",
+              "ENABLED",
+              "VISIBLE"
+            ],
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Assertions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "obligationId",
+        "originalLocator",
+        "semanticIdentity",
+        "assertions"
+      ],
+      "title": "BrowserLocatorObligation",
+      "type": "object"
+    },
+    "BrowserLocatorRebind": {
+      "additionalProperties": false,
+      "properties": {
+        "navigation": {
+          "$ref": "#/$defs/BrowserRecordNavigation"
+        },
+        "metadataDrift": {
+          "$ref": "#/$defs/BrowserMetadataDrift"
+        },
+        "obligationPolicy": {
+          "const": "COMPLETE_DECLARED_SET",
+          "title": "Obligationpolicy",
+          "type": "string"
+        },
+        "obligations": {
+          "items": {
+            "$ref": "#/$defs/BrowserLocatorObligation"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Obligations",
+          "type": "array"
+        },
+        "dataMutation": {
+          "const": "FORBIDDEN",
+          "title": "Datamutation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "navigation",
+        "metadataDrift",
+        "obligationPolicy",
+        "obligations",
+        "dataMutation"
+      ],
+      "title": "BrowserLocatorRebind",
+      "type": "object"
+    },
+    "BrowserMetadataDrift": {
+      "additionalProperties": false,
+      "properties": {
+        "metadataType": {
+          "const": "FlexiPage",
+          "title": "Metadatatype",
+          "type": "string"
+        },
+        "member": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Member",
+          "type": "string"
+        },
+        "componentName": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,99}:[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Componentname",
+          "type": "string"
+        },
+        "componentIdentifier": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Componentidentifier",
+          "type": "string"
+        },
+        "propertyName": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Propertyname",
+          "type": "string"
+        },
+        "operation": {
+          "const": "SET_SCALAR",
+          "title": "Operation",
+          "type": "string"
+        },
+        "baselineValue": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,99}$",
+          "title": "Baselinevalue",
+          "type": "string"
+        },
+        "allowedPreStates": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "ABSENT": "#/$defs/BrowserAbsentPropertyState",
+                "PRESENT": "#/$defs/BrowserPresentPropertyState"
+              },
+              "propertyName": "state"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/BrowserAbsentPropertyState"
+              },
+              {
+                "$ref": "#/$defs/BrowserPresentPropertyState"
+              }
+            ]
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "title": "Allowedprestates",
+          "type": "array"
+        },
+        "alternateValue": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,99}$",
+          "title": "Alternatevalue",
+          "type": "string"
+        },
+        "restoration": {
+          "const": "PREIMAGE_EXACT",
+          "title": "Restoration",
+          "type": "string"
+        },
+        "maximumFiles": {
+          "const": 1,
+          "title": "Maximumfiles",
+          "type": "integer"
+        },
+        "maximumBytes": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "Maximumbytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "metadataType",
+        "member",
+        "componentName",
+        "componentIdentifier",
+        "propertyName",
+        "operation",
+        "baselineValue",
+        "allowedPreStates",
+        "alternateValue",
+        "restoration",
+        "maximumFiles",
+        "maximumBytes"
+      ],
+      "title": "BrowserMetadataDrift",
+      "type": "object"
+    },
+    "BrowserOriginalLocator": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ATTRIBUTE_EQUALS",
+          "title": "Kind",
+          "type": "string"
+        },
+        "attribute": {
+          "pattern": "^data-[a-z][a-z0-9-]{0,63}$",
+          "title": "Attribute",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "attribute",
+        "value"
+      ],
+      "title": "BrowserOriginalLocator",
+      "type": "object"
+    },
+    "BrowserPresentPropertyState": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "PRESENT",
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,99}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "title": "BrowserPresentPropertyState",
+      "type": "object"
+    },
+    "BrowserRecordNavigation": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "DATASET_RECORD_PAGE",
+          "title": "Kind",
+          "type": "string"
+        },
+        "datasetId": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Datasetid",
+          "type": "string"
+        },
+        "objectApiName": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Objectapiname",
+          "type": "string"
+        },
+        "identityField": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Identityfield",
+          "type": "string"
+        },
+        "markerField": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,199}$",
+          "title": "Markerfield",
+          "type": "string"
+        },
+        "markerValue": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Markervalue",
+          "type": "string"
+        },
+        "resolution": {
+          "const": "EXACTLY_ONE_AUTHORIZED_DATASET_MEMBER",
+          "title": "Resolution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "datasetId",
+        "objectApiName",
+        "identityField",
+        "markerField",
+        "markerValue",
+        "resolution"
+      ],
+      "title": "BrowserRecordNavigation",
+      "type": "object"
+    },
+    "DatasetPredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Field",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "EQUALS",
+            "IN_SET"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "valueSource": {
+          "enum": [
+            "SOURCE_LITERAL_SET",
+            "CURRENT_ENROLLED_ACTOR"
+          ],
+          "title": "Valuesource",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4096,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "field",
+        "operator",
+        "valueSource",
+        "values"
+      ],
+      "title": "DatasetPredicate",
+      "type": "object"
+    },
+    "EvidencePhase": {
+      "enum": [
+        "LIVE_BASELINE",
+        "CANDIDATE_CHECK_ONLY",
+        "DEPLOYED_CANDIDATE",
+        "RESTORED_BASELINE"
+      ],
+      "title": "EvidencePhase",
+      "type": "string"
+    },
+    "ResponseExpectedLiteral": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ResponseExpectedLiteral",
+      "type": "object"
+    },
+    "ResponseField": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "dataType": {
+          "enum": [
+            "STRING",
+            "INTEGER",
+            "NUMBER",
+            "BOOLEAN",
+            "OBJECT",
+            "ARRAY"
+          ],
+          "title": "Datatype",
+          "type": "string"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "nullable": {
+          "title": "Nullable",
+          "type": "boolean"
+        },
+        "expectedLiteral": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResponseExpectedLiteral"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "path",
+        "dataType",
+        "required",
+        "nullable"
+      ],
+      "title": "ResponseField",
+      "type": "object"
+    },
+    "ResponseParentBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "collectionPath": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Collectionpath",
+          "type": "string"
+        },
+        "parentIdPath": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Parentidpath",
+          "type": "string"
+        },
+        "datasetField": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Datasetfield",
+          "type": "string"
+        },
+        "maximumCardinality": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Maximumcardinality",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "collectionPath",
+        "parentIdPath",
+        "datasetField",
+        "maximumCardinality"
+      ],
+      "title": "ResponseParentBinding",
+      "type": "object"
+    },
+    "RestVariable": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "valueSource": {
+          "enum": [
+            "API_VERSION",
+            "SYNTHETIC_DATASET_RECEIPT"
+          ],
+          "title": "Valuesource",
+          "type": "string"
+        },
+        "dataType": {
+          "enum": [
+            "STRING",
+            "ID",
+            "INTEGER"
+          ],
+          "title": "Datatype",
+          "type": "string"
+        },
+        "datasetField": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Datasetfield"
+        }
+      },
+      "required": [
+        "name",
+        "valueSource",
+        "dataType",
+        "datasetField"
+      ],
+      "title": "RestVariable",
+      "type": "object"
+    },
+    "SourceBrowserDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "sourceNodeId": {
+          "minLength": 1,
+          "title": "Sourcenodeid",
+          "type": "string"
+        },
+        "applicationIntent": {
+          "minLength": 1,
+          "title": "Applicationintent",
+          "type": "string"
+        },
+        "actionClass": {
+          "enum": [
+            "EXPAND_READ_ONLY",
+            "FOCUS",
+            "LOCATOR_REBIND_PREVIEW",
+            "NAVIGATE",
+            "RELOAD",
+            "SCROLL",
+            "SELECT_READ_ONLY_VIEW"
+          ],
+          "title": "Actionclass",
+          "type": "string"
+        },
+        "surfaceIntent": {
+          "minLength": 1,
+          "title": "Surfaceintent",
+          "type": "string"
+        },
+        "locatorRebind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BrowserLocatorRebind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "sourceNodeId",
+        "applicationIntent",
+        "actionClass",
+        "surfaceIntent"
+      ],
+      "title": "SourceBrowserDeclaration",
+      "type": "object"
+    },
+    "SourceDatasetDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "datasetId": {
+          "minLength": 1,
+          "title": "Datasetid",
+          "type": "string"
+        },
+        "sourceNodeId": {
+          "minLength": 1,
+          "title": "Sourcenodeid",
+          "type": "string"
+        },
+        "objectApiName": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "title": "Objectapiname",
+          "type": "string"
+        },
+        "fieldProjection": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Fieldprojection",
+          "type": "array"
+        },
+        "predicates": {
+          "items": {
+            "$ref": "#/$defs/DatasetPredicate"
+          },
+          "minItems": 1,
+          "title": "Predicates",
+          "type": "array"
+        },
+        "ownershipMarkerField": {
+          "minLength": 1,
+          "title": "Ownershipmarkerfield",
+          "type": "string"
+        },
+        "exactCardinality": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Exactcardinality",
+          "type": "integer"
+        },
+        "identityField": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Identityfield",
+          "type": "string"
+        }
+      },
+      "required": [
+        "datasetId",
+        "sourceNodeId",
+        "objectApiName",
+        "fieldProjection",
+        "predicates",
+        "ownershipMarkerField",
+        "exactCardinality",
+        "identityField"
+      ],
+      "title": "SourceDatasetDeclaration",
+      "type": "object"
+    },
+    "SourceLocalTestObligation": {
+      "additionalProperties": false,
+      "properties": {
+        "obligationId": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Obligationid",
+          "type": "string"
+        },
+        "runnerKind": {
+          "enum": [
+            "NODE_TEST",
+            "NODE_GENERATED_CHECK"
+          ],
+          "title": "Runnerkind",
+          "type": "string"
+        },
+        "workingDirectory": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Workingdirectory",
+          "type": "string"
+        },
+        "testLocators": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Testlocators",
+          "type": "array"
+        },
+        "maximumSeconds": {
+          "maximum": 900,
+          "minimum": 1,
+          "title": "Maximumseconds",
+          "type": "integer"
+        },
+        "regeneratedLocators": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Regeneratedlocators",
+          "type": "array"
+        },
+        "requiredResult": {
+          "const": "COMPLETE_PASS_NO_SKIP",
+          "title": "Requiredresult",
+          "type": "string"
+        },
+        "requiredEvidencePhases": {
+          "default": [
+            "CANDIDATE_CHECK_ONLY",
+            "DEPLOYED_CANDIDATE",
+            "LIVE_BASELINE",
+            "RESTORED_BASELINE"
+          ],
+          "items": {
+            "$ref": "#/$defs/EvidencePhase"
+          },
+          "maxItems": 4,
+          "minItems": 3,
+          "title": "Requiredevidencephases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "obligationId",
+        "runnerKind",
+        "workingDirectory",
+        "testLocators",
+        "maximumSeconds",
+        "regeneratedLocators",
+        "requiredResult"
+      ],
+      "title": "SourceLocalTestObligation",
+      "type": "object"
+    },
+    "SourceNonRuntimeFile": {
+      "additionalProperties": false,
+      "properties": {
+        "locator": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Locator",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "DOCUMENTATION",
+            "GENERATED_INDEX",
+            "LOCAL_CATALOG_TOOL",
+            "LOCAL_TEST_SPECIFICATION"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "localObligationIds": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Localobligationids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "locator",
+        "category",
+        "localObligationIds"
+      ],
+      "title": "SourceNonRuntimeFile",
+      "type": "object"
+    },
+    "SourceRestDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "sourceNodeId": {
+          "minLength": 1,
+          "title": "Sourcenodeid",
+          "type": "string"
+        },
+        "datasetId": {
+          "minLength": 1,
+          "title": "Datasetid",
+          "type": "string"
+        },
+        "method": {
+          "const": "GET",
+          "title": "Method",
+          "type": "string"
+        },
+        "routeTemplate": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Routetemplate",
+          "type": "string"
+        },
+        "variables": {
+          "items": {
+            "$ref": "#/$defs/RestVariable"
+          },
+          "title": "Variables",
+          "type": "array"
+        },
+        "responseFields": {
+          "items": {
+            "$ref": "#/$defs/ResponseField"
+          },
+          "minItems": 1,
+          "title": "Responsefields",
+          "type": "array"
+        },
+        "minimumCardinality": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Minimumcardinality",
+          "type": "integer"
+        },
+        "maximumCardinality": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Maximumcardinality",
+          "type": "integer"
+        },
+        "maximumResponseBytes": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "Maximumresponsebytes",
+          "type": "integer"
+        },
+        "requestExpansion": {
+          "const": "EACH_DATASET_RECORD",
+          "title": "Requestexpansion",
+          "type": "string"
+        },
+        "responseRecordPath": {
+          "maxLength": 300,
+          "title": "Responserecordpath",
+          "type": "string"
+        },
+        "datasetFieldPaths": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Datasetfieldpaths",
+          "type": "object"
+        },
+        "parentBindings": {
+          "items": {
+            "$ref": "#/$defs/ResponseParentBinding"
+          },
+          "title": "Parentbindings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "sourceNodeId",
+        "datasetId",
+        "method",
+        "routeTemplate",
+        "variables",
+        "responseFields",
+        "minimumCardinality",
+        "maximumCardinality",
+        "maximumResponseBytes",
+        "requestExpansion",
+        "responseRecordPath",
+        "datasetFieldPaths",
+        "parentBindings"
+      ],
+      "title": "SourceRestDeclaration",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Closed source-owned facts; graph binding and host policy supply no missing facts.",
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "standardRest": {
+      "items": {
+        "$ref": "#/$defs/SourceRestDeclaration"
+      },
+      "title": "Standardrest",
+      "type": "array"
+    },
+    "customRest": {
+      "items": {
+        "$ref": "#/$defs/SourceRestDeclaration"
+      },
+      "title": "Customrest",
+      "type": "array"
+    },
+    "syntheticDatasets": {
+      "items": {
+        "$ref": "#/$defs/SourceDatasetDeclaration"
+      },
+      "title": "Syntheticdatasets",
+      "type": "array"
+    },
+    "browserIntents": {
+      "items": {
+        "$ref": "#/$defs/SourceBrowserDeclaration"
+      },
+      "title": "Browserintents",
+      "type": "array"
+    },
+    "nonRuntimeFiles": {
+      "items": {
+        "$ref": "#/$defs/SourceNonRuntimeFile"
+      },
+      "title": "Nonruntimefiles",
+      "type": "array"
+    },
+    "localTestObligations": {
+      "items": {
+        "$ref": "#/$defs/SourceLocalTestObligation"
+      },
+      "title": "Localtestobligations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "standardRest",
+    "customRest",
+    "syntheticDatasets",
+    "browserIntents",
+    "nonRuntimeFiles",
+    "localTestObligations"
+  ],
+  "title": "SourceOperationDeclarations",
+  "type": "object"
+}

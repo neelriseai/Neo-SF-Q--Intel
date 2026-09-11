@@ -23,14 +23,21 @@ around this initial graph and remain scheduled work for the 24-hour implementati
 
 | Stage | Current behavior | Target boundary not yet claimed |
 |---|---|---|
-| Change Analyst | Deterministic lexical/path seed matching plus trusted graph traversal; abstains on unsupported semantics | Provider-backed normalization and semantic proposals fused into assurance evidence |
-| Test Intelligence | Deterministically separates graph-connected mandatory and recommended selections | Trusted execution planning/results and provider explanations |
+| Change Analyst | Deterministic lexical/path seed matching over a pinned, normalized analysis graph; abstains on unsupported semantics | Product-consumed, currently replayed trusted paths plus provider-backed semantic proposals fused into assurance evidence |
+| Test Intelligence | Projects selections already made by deterministic analysis into a typed stage result; it does not independently select tests today | Independent evidence-bound obligation planning, trusted execution results and provider explanations |
 | UI Healing | Converts eligible impacts into approval-gated metadata/accessibility strategy proposals | Current-DOM capture, candidate ranking, apply and before/after browser evidence |
 | Governance Review | Revalidates evidence, exact metrics, guardrails and deterministic decision truth | Durable tool/model audit and human approval workflow |
 
-These nodes are deterministic specialist stages, not yet independent model-backed agents. Each consumes typed state and emits a bounded activity event plus a typed deliverable containing conclusions, evidence IDs, gaps, measurements and the next permitted action. Events contain identifiers and measurements, never raw prompts, credentials, session URLs or chain-of-thought.
+These nodes are deterministic specialist stages, not yet independent model-backed agents. The
+current activity event is useful diagnostic structure but does not yet contain the complete
+replayable measurement and exact-policy receipt required by `AGENTS.md`; durable outbox capture is
+also pending. Events must never contain raw prompts, credentials, session URLs or chain-of-thought.
 
-The multi-agent roadmap capability becomes complete only when provider-backed specialist ports consume bounded context packs, return schema-validated proposals, degrade deterministically when a provider is unavailable, and have independent negative/failure tests. Tool use and state transitions will continue to pass through the orchestrator.
+The multi-agent roadmap capability becomes complete only when provider-backed specialist ports are
+wired into the public service, consume bounded context packs, return schema-validated proposals,
+degrade deterministically when a provider is unavailable, and have independent negative/failure
+tests plus durable invocation receipts. Tool use and state transitions continue to pass through the
+orchestrator.
 
 ## Isolated advisory consumer foundation
 

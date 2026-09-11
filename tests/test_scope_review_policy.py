@@ -78,3 +78,40 @@ def test_reviewer_string_cannot_impersonate_two_reviewers(tmp_path, monkeypatch)
     )
 
     assert [item.code for item in findings] == ["INVALID_SCOPE_REVIEW"]
+
+
+def test_scope_prefix_matching_respects_path_boundaries() -> None:
+    assert check_genericity._is_allowed(
+        "src/neo_sf_q_intel/new_adapter.py", ["src/neo_sf_q_intel"]
+    )
+    assert not check_genericity._is_allowed(
+        "src/neo_sf_q_intelligence/new_adapter.py", ["src/neo_sf_q_intel"]
+    )
+
+
+def test_controlled_scope_unions_head_and_working_policy() -> None:
+    current = {"scopeControlledPaths": [], "scopeControlledRoots": []}
+    previous = {
+        "scopeControlledPaths": ["config/old-policy.json"],
+        "scopeControlledRoots": ["src/neo_sf_q_intel"],
+    }
+    changed = {
+        "config/old-policy.json",
+        "src/neo_sf_q_intel/new_module.py",
+        "src/neo_sf_q_intelligence/not-core.py",
+    }
+
+    assert check_genericity._controlled_changed_paths(changed, current, previous) == {
+        "config/old-policy.json",
+        "src/neo_sf_q_intel/new_module.py",
+    }
+
+
+def test_quality_enforcement_bootstrap_cannot_remove_its_own_review() -> None:
+    changed = {
+        "config/quality-policy.json",
+        "scripts/quality/check_genericity.py",
+        ".githooks/pre-commit",
+    }
+
+    assert check_genericity._controlled_changed_paths(changed, {}, None) == changed

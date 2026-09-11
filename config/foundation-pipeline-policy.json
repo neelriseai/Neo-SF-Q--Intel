@@ -1,16 +1,16 @@
 {
   "schemaVersion": "1.0.0",
   "policyId": "host-owned-candidate-foundation-pipeline",
-  "policyVersion": "1.0.0",
-  "sha256": "2db12624614e6071a793bf780cd4ad950ced4d983181afd4041fc0ca1be03980",
+  "policyVersion": "1.0.1",
+  "sha256": "7beb2e9bb6a2fc9cca647bac29046ea2138045ca1dcc10242873e021be1f24c5",
   "composer": {
     "implementationId": "candidate-foundation-pipeline",
-    "implementationVersion": "1.0.0",
+    "implementationVersion": "1.0.1",
     "implementationLocator": "src/neo_sf_q_intel/foundation_pipeline.py",
-    "implementationSha256": "bef8bc87de79edf3170b307b85a49898b899a070a801d568cad020b0c0e95337"
+    "implementationSha256": "04f81ff788449775f61ad297e0ced0b112248cb0a83c49a560210f7d807c1bcb"
   },
-  "verifiedChangePolicySha256": "ef43e79fb8e2244d7187ae2a18b4d77ae7e7d17758f10fd6fe7ddb75df5a8d05",
-  "graphProducerPolicySha256": "a10136b49aee73d9c46522774fba189cc0f6e02a30cc655235434872000a061b",
-  "operationSeedPolicySha256": "ce49d75ab5037088a6d51631a1c5a0220b1672ec06599bb82c3fe2a5934fa493",
+  "verifiedChangePolicySha256": "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175",
+  "graphProducerPolicySha256": "d3d5f6a7efc7a636b477c83b6609b08427dcc24b762d63b2b6cf3dab3e2bc290",
+  "operationSeedPolicySha256": "4bb0620706ad2b54bc90e0a76488ccb18be2a0f2dcc4ce07457cfed117aeadf7",
   "maximumProjectionBytes": 32768
 }

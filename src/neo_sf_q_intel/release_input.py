@@ -466,7 +466,7 @@ class ReleaseInputEvaluation(ReleaseInputModel):
 
 
 DEFAULT_RELEASE_INPUT_POLICY_SHA256 = (
-    "0ad61225242088f8225aaf07b23cb7edb2d56deaf365af7ebca04c9ba746c60b"
+    "3ca3bf883f597ea0d93deaf62db4f0c320a1f18a555c5d290c9bbfcda6640425"
 )
 
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")

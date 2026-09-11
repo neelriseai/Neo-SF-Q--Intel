@@ -17,17 +17,20 @@ Candidate = tuple[dict, str, str, float, dict]
 
 
 class ChangeIntelligenceService:
-    def __init__(self, retriever: EvidenceRetriever, policy: ReasoningPolicy | None = None) -> None:
+    def __init__(
+        self,
+        retriever: EvidenceRetriever,
+        policy: ReasoningPolicy | None = None,
+        upstream_gaps: tuple[AnalysisGap, ...] = (),
+    ) -> None:
         self.retriever = retriever
         self.policy = policy or ReasoningPolicy.load()
+        self.upstream_gaps = upstream_gaps
 
     def analyze(
         self, request: ChangeRequest
     ) -> tuple[list[EvidenceRef], list[ImpactFinding], list[TestSelection], list[AnalysisGap]]:
-        seeds = self.retriever.search(
-            request.requirement, request.changed_paths, limit=self.policy.seed_count
-        )
-        source_gaps = [
+        source_gaps = list(self.upstream_gaps) + [
             AnalysisGap(
                 code=gap.code,
                 message="The source graph contains an unmapped or illegal ontology record.",
@@ -37,6 +40,33 @@ class ChangeIntelligenceService:
             )
             for gap in self.retriever.normalization_gaps
         ]
+        if request.change_intent is ChangeIntent.VERIFIED_CHANGE:
+            unknown = [
+                seed_id
+                for seed_id in request.verified_seed_ids
+                if seed_id not in self.retriever.nodes
+            ]
+            source_gaps.extend(
+                AnalysisGap(
+                    code="VERIFIED_SEED_NOT_IN_GRAPH_SIDE",
+                    message="A replay-verified operation seed is absent from its bound graph side.",
+                    entity_id=seed_id,
+                )
+                for seed_id in unknown
+            )
+            seeds = [
+                RetrievalHit(
+                    node=self.retriever.nodes[seed_id],
+                    score=1.0,
+                    reasons=("replay-verified operation seed",),
+                )
+                for seed_id in request.verified_seed_ids
+                if seed_id in self.retriever.nodes
+            ]
+        else:
+            seeds = self.retriever.search(
+                request.requirement, request.changed_paths, limit=self.policy.seed_count
+            )
         evidence: list[EvidenceRef] = []
         impacts: list[ImpactFinding] = []
         test_selections: list[TestSelection] = []
@@ -58,7 +88,11 @@ class ChangeIntelligenceService:
                     *source_gaps,
                 ],
             )
-        change_seeds = seeds if request.change_intent is ChangeIntent.PLANNED_CHANGE else []
+        change_seeds = (
+            seeds
+            if request.change_intent in {ChangeIntent.PLANNED_CHANGE, ChangeIntent.VERIFIED_CHANGE}
+            else []
+        )
         if not change_seeds:
             context = [self.retriever.evidence_for(hit.node) for hit in seeds]
             return context, [], [], source_gaps
@@ -78,6 +112,13 @@ class ChangeIntelligenceService:
                     "source_ref": request.source_ref,
                     "source_snapshot": self.retriever.source_snapshot,
                     "source_hash": self.retriever.source_graph_sha256,
+                    **(
+                        {"valid_until": hit.node["validUntil"]}
+                        if hit.node.get("validUntil")
+                        else {}
+                    ),
+                    "verified_change_manifest_sha256": (request.verified_change_manifest_sha256),
+                    "verified_operation_seed_sha256": (request.verified_operation_seed_sha256),
                     **self.retriever.ontology_identity,
                 },
             )

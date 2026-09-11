@@ -76,10 +76,10 @@ def test_specialist_agents_produce_traceable_governed_run() -> None:
     assert run.source_snapshot == "demo"
     assert run.source_graph_sha256 == fixture_digest("workflow-graph")
     assert run.ontology_id == "change-evidence-core"
-    assert run.ontology_version == "1.0.0"
+    assert run.ontology_version == "1.1.0"
     assert len(run.ontology_sha256) == 64
     assert run.source_profile_id == "salesforce-application-graph"
-    assert run.source_profile_version == "1.0.0"
+    assert run.source_profile_version == "1.0.1"
     assert len(run.source_profile_sha256) == 64
     assert len(run.normalized_graph_sha256) == 64
     assert {

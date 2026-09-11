@@ -1,10 +1,62 @@
 # Twenty-four-hour implementation roadmap
 
+> **Development paused 2026-09-11.** The current verified and interrupted state, open P1 findings,
+> live Salesforce non-execution boundary and exact resume order are recorded in
+> [the development stop checkpoint](21-development-stop-checkpoint-2026-09-11.md). No roadmap item
+> below should be interpreted as authorization to continue or as live acceptance evidence.
+
 ## Runtime authority
 
 Build and final verification target the org machine: Python 3.14.3, Node.js 26.5.x, Salesforce CLI 2.148.3 and local PostgreSQL. The development machine may use newer compatible patch releases, but the compatibility gate is the org machine.
 
+## Current fixed execution cycle — eight hours
+
+The scope is not reduced to fit the clock. The eight-hour cycle attempts the complete reusable
+vertical and preserves every whole-demo and live Salesforce gate below. A missed gate remains
+explicitly incomplete; fixtures, screenshots, manual observations or a renamed status cannot turn
+the timebox into a pass.
+
+| Elapsed | Primary integration lane | Salesforce/live-evidence lane | Browser/test lane | Exit evidence |
+|---:|---|---|---|---|
+| 0:00–0:30 | Freeze exact source candidate, acceptance profile, requirement IDs and campaign root; preflight provider/PostgreSQL/API/UI | Validate host enrollment inputs, target org-machine tool versions and non-production proof prerequisites without executing an unclassified adapter | Freeze Playwright TypeScript project, browser policy, selected scenarios and report locations | One immutable execution plan; no caller-narrowed paths or targets |
+| 0:30–3:00 | Connect actual Git candidate → product graph/seeds → context → cooperating real-provider specialists → ordinary run → live PostgreSQL save/resume → FastAPI | Implement strict source-operation profile and `LiveTargetPlan`; execute `SF-L01`–`SF-L05` and `SF-L08` only when their host/data/test authority inputs validate | Implement ephemeral session broker/worker and execute `SF-L06`, `SF-L07`, `SF-L09`; wire the real dashboard path and retain sanitized Playwright reports | Live baseline receipts plus one real persisted run; no mock can satisfy this row |
+| 3:00–5:30 | Bind the exact candidate and all prior receipts to one orchestration/campaign root | Execute `SF-C01`–`SF-C06`: restore readiness, exact check-only, independently authorized deploy, post-deploy retrieval, candidate-phase API/Apex evidence, mandatory restore/reconciliation | Repeat candidate-phase Lightning and recovery/readback under distinct current receipts; exercise ambiguity and authorization failures | `15/15` Salesforce campaign only if restoration and zero-residue reconciliation pass |
+| 5:30–6:45 | Run the complete real FastAPI/dashboard vertical and three golden scenarios | Reconcile every live receipt to org/source/build/policy roots; verify no unknown remote job remains | Run the runnable Playwright TypeScript suite with machine-readable logging/reporting and negative/degradation paths | Source-bound functional, live, browser and persistence evidence bundle |
+| 6:45–7:15 | Freeze development; calculate requirement and gate status only from accepted evidence | Record every live defect/blocker with reproduction, receipt IDs and affected gate | Record browser/API/UI bugs, flaky behavior, screenshots only when sanitized, and proposed CRs | Prioritized P0/P1/P2 defect and change-request ledger; no opportunistic scope additions |
+| 7:15–8:00 | Integrate documentation, project index and knowledge graph; prepare the demo runbook | Recheck restoration/quarantine state and operator actions | Rehearse the viewer path without altering evidence | Final `gpt-6-astra` xhigh review and truthful demo-readiness verdict |
+
+Three agents may work in parallel only on these bounded lanes. The primary agent owns contracts,
+integration and final evidence reconciliation; parallel agents may not redefine scope, relax a gate,
+invent fixture evidence or independently deploy. Astra is invoked once, after development and live
+testing freeze, for the final whole-solution design/debug review.
+
+Only a P0 safety issue or a defect that prevents collection/validation of a mandatory gate is fixed
+inside the timebox. Other bugs, refinements, change requests and enhancements are retained with
+reproduction evidence for the post-review patch cycle. A manual intervention is recorded early and
+parallel work continues, but whole-demo completion cannot be claimed until its mandatory gate is
+actually closed.
+
+### Eight-hour definition of done
+
+The cycle is complete only when one campaign proves all of the following:
+
+1. actual local-Git candidate capture and product-generated graph/impact/test reasoning;
+2. multiple real provider-backed cooperating specialists with governed degradation;
+3. live PostgreSQL save, reload and resume with truthful fallback behavior;
+4. all fifteen live Salesforce baseline/browser/candidate/restore gates;
+5. real MCP/service, FastAPI and dashboard execution rather than fixture projection;
+6. runnable Playwright TypeScript automation with structured logs and machine-readable reports;
+7. three source-bound golden scenarios and a requirement-to-exact-test/receipt matrix; and
+8. successful restoration, no unresolved external job, no leaked secret/session material and no
+   release-authority claim.
+
+`15/15` Salesforce campaign completion is necessary but does not alone satisfy these eight
+whole-demo outcomes.
+
 ## Planned 24-hour schedule and current truth
+
+Elapsed-hour labels are planning order, not completion evidence. The present worktree is not a
+demo-ready vertical until the exit criteria below pass on one source-bound run.
 
 | Hours | Planned outcome | Current status |
 |---:|---|---|
@@ -12,18 +64,45 @@ Build and final verification target the org machine: Python 3.14.3, Node.js 26.5
 | 2–6 | Auto-created PostgreSQL run/checkpoint memory, SQLite/JSON/cache fallback, hybrid retrieval ports and snapshot checks | Run/checkpoint and replay-safe outcome-memory fallback foundations plus isolated deterministic candidate fusion are implemented; channel adapters, governed graph/metadata/audit ports, live PostgreSQL verification and adjudicated retrieval/outcome quality remain |
 | 6–10 | LangGraph workflow and four schema-bounded specialist agents | Deterministic typed stages, a graph-grounded proposal/verifier and an isolated replay-validating advisory consumer are implemented; real provider adapter and durable service/checkpoint workflow integration remain |
 | 10–13 | Salesforce services and five MCP adapters | Three foundation tools exist; governed live reads, policy/audit envelope and remaining adapters pending |
-| 13–16 | Playwright worker and generic locator-ranking/healing path | Locator ranking library implemented; browser capture/apply worker pending |
+| 13–16 | Playwright worker and generic locator-ranking/healing path | Offline locator, browser worker, fixed-alias session broker, pinned coordinator and diagnostic command foundations are implemented; a 2026-09-10 real-org read-only diagnostic passed with zero acceptance credit. Exact target/receipt binding, authorization, action application, before/after persistence and accepted live receipts remain |
 | 16–20 | Next.js dashboard: command center, run timeline, impact/tests, healing and governance | Polished command center and governance view implemented; complete timeline/test/healing/degradation views pending |
-| 20–24 | Unit/contract/golden tests, live integration correction and rehearsal | Unit, contract and mocked dashboard E2E exist; real vertical E2E and three golden scenarios pending |
+| 20–24 | Unit/contract/golden tests, live integration correction and rehearsal | The worktree collects 904 Python and 46 Playwright unit/contract tests, including mocked dashboard, candidate, target, receipt and browser boundaries; a frozen full post-integration run, real vertical E2E, live receipts and three golden scenarios remain pending |
 
-## Gates
+## Non-substitutable live Salesforce completion boundary
+
+The Salesforce part of the live integrated demo is accepted only when every required gate in
+`config/live-salesforce-acceptance-profile.json` has a current, trusted, source-bound receipt from
+the configured org machine. The profile explicitly requires host-owned non-production enrollment,
+machine-local CLI authentication, standard REST connectivity, source-contract-derived custom API
+execution, scoped Metadata API retrieval and hashing, ephemeral Playwright session handoff, live
+Lightning assertions, selected live-org Apex tests, browser recovery/readback and the complete
+deployed-candidate/restore campaign.
+
+No live gate may be satisfied by another gate, a fixture, mock, configuration value, historical AUT
+result, manual CLI output or an already-open browser tab. Offline tests may prove safe refusal but
+cannot increase live completion. Missing evidence is `BLOCKED` or `NOT_RUN`, not an inferred pass.
+
+Every receipt must identify one of `LIVE_BASELINE`, `CANDIDATE_CHECK_ONLY`, `DEPLOYED_CANDIDATE` or
+`RESTORED_BASELINE`. A connected baseline and a successful check-only validation do not prove the
+candidate is deployed. The candidate claim additionally requires tested restore readiness, exact
+check-only and deployment bindings, current-task mutation authorization, post-deploy metadata/API/
+Lightning/Apex evidence, restoration and zero-residue reconciliation. Release authority remains
+disabled. The detailed contract is
+`Docs/18-live-salesforce-demo-execution-contract.md`.
+
+Passing all Salesforce campaign gates is necessary but not sufficient for whole-demo completion;
+the provider, PostgreSQL, ordinary-run, real API/dashboard, receipt-replay and golden-scenario gates
+below remain independently mandatory.
+
+## Whole-demo gates
 
 - Python imports and provider configuration pass without exposing keys.
 - PostgreSQL checkpoint save/resume passes.
 - Missing PostgreSQL falls back to an auto-created SQLite schema; missing SQLite falls back to a
   declared non-durable process cache without blocking JSON/graph analysis.
 - Salesforce contract and graph load through relative/configured paths.
-- Salesforce CLI read-only smoke passes on the org machine.
+- Every required live Salesforce and candidate-campaign gate passes on the org machine; a CLI smoke
+  alone is insufficient.
 - Next.js production build passes under Node 26.5.
 - Playwright launches the selected local browser and returns a structured snapshot.
 - Three golden scenarios produce evidence-backed results.
@@ -45,16 +124,42 @@ recorded.
 
 ## Current implementation checkpoint
 
-The repository now contains a typed LangGraph workflow with four deterministic specialist stages,
-deterministic governance, source graph traversal, OpenAI/Azure provider adapters, a standalone
+The repository contains a typed LangGraph workflow with four deterministic specialist stages,
+deterministic governance, source graph traversal, OpenAI/Azure provider configuration, a standalone
 extension-free semantic index, PostgreSQL run/checkpoint wiring and relational foundation schema,
-three MCP tools, a bounded Salesforce CLI adapter, locator ranking and the first dashboard.
+MCP foundations, a Salesforce CLI transport prototype, locator candidate ranking and a polished
+dashboard. These pieces are not yet one complete product vertical.
 The source graph now normalizes through a strict canonical ontology and source-owned profile; the
 ontology/profile/normalized-graph identities are bound to every run. Missing record provenance
 remains explicitly unverified rather than inheriting trust from the whole graph.
-Semantic results are not yet fused into assurance decisions. Live PostgreSQL, model-provider,
-Salesforce evidence, trusted test execution and browser-worker verification remain environment or
-implementation gates and must not be represented as completed until they are exercised end to end.
+Semantic results and the isolated advisory pipeline are not yet consumed by ordinary assurance
+runs. The browser worker/session/coordinator exist as offline-tested foundations, but live
+PostgreSQL, model-provider, Salesforce evidence, trusted test execution, target-bound browser
+application and receipt verification remain environment or implementation gates and must not be
+represented as completed until they are exercised end to end.
+
+## Demo critical path and exit criteria
+
+Finish one reusable vertical before broadening foundations:
+
+1. Restore coherent ontology, source-profile and policy identities and pass the full local gate.
+2. Feed product-produced, side-qualified source-change seeds and trusted graph paths into one
+   ordinary assurance run.
+3. Invoke one real OpenAI or Azure specialist through strict structured output, cancellation,
+   bounded usage and sanitized provider receipts; prove deterministic outage degradation.
+4. Persist and resume that run against live PostgreSQL, while retaining truthful fallback tests.
+5. Complete live org enrollment, local CLI authentication, standard REST, source-contract custom
+   API, scoped Metadata API retrieval and selected live Apex-test gates with distinct receipts.
+6. Complete the ephemeral browser-session handoff, live Lightning assertions and one authorized
+   capture/candidate/approved-apply/readback journey plus ambiguity and authorization failures.
+7. Complete the exact candidate check-only/deploy/post-deploy validation/restore/reconciliation
+   campaign; baseline or check-only results cannot substitute for candidate-phase evidence.
+8. Drive the real FastAPI service from the Next.js dashboard and retain source-bound Python and
+   Playwright machine-readable reports.
+
+The analysis demo may end `INCOMPLETE` and still be valuable. Release authority stays disabled.
+The exit receipt must bind requirement IDs, exact test IDs, source snapshot, environment/tool
+versions, policy identities, timestamps, persistence mode and sanitized artifacts.
 
 ## Reprioritized graph-reasoning sequence
 

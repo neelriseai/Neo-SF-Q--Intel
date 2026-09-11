@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import fnmatch
 import hashlib
 import inspect
@@ -8,6 +9,7 @@ import re
 import stat
 import subprocess
 import threading
+import time
 import unicodedata
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -43,6 +45,27 @@ class ProducerPin(_Model):
     implementation_sha256: str = Field(alias="implementationSha256", pattern=r"^[a-f0-9]{64}$")
 
 
+class PublicTemplateAdmissionPolicy(_Model):
+    rule_id: Literal["approved-exact-public-template-bytes"] = Field(alias="ruleId")
+    rule_version: str = Field(alias="ruleVersion")
+    exact_basename: Literal[".env.example"] = Field(alias="exactBasename")
+    required_tracking: Literal["TRACKED"] = Field(alias="requiredTracking")
+    allowed_mode: Literal["100644"] = Field(alias="allowedMode")
+    maximum_bytes: int = Field(alias="maximumBytes", ge=0, le=32768)
+    approved_content_sha256: tuple[str, ...] = Field(
+        alias="approvedContentSha256", min_length=1, max_length=64
+    )
+
+    @model_validator(mode="after")
+    def validate_admission(self) -> PublicTemplateAdmissionPolicy:
+        _require_semver(self.rule_version)
+        if self.approved_content_sha256 != tuple(sorted(set(self.approved_content_sha256))):
+            raise ValueError("Approved public-template digests must be sorted and unique")
+        if any(not re.fullmatch(r"[a-f0-9]{64}", value) for value in self.approved_content_sha256):
+            raise ValueError("Approved public-template digests must be complete SHA-256 values")
+        return self
+
+
 class VerifiedChangePolicy(_Model):
     schema_version: str = Field(alias="schemaVersion")
     policy_id: str = Field(alias="policyId", min_length=1, max_length=200)
@@ -58,6 +81,9 @@ class VerifiedChangePolicy(_Model):
         alias="allowedRegularModes", min_length=2, max_length=2
     )
     sensitive_path_globs: tuple[str, ...] = Field(alias="sensitivePathGlobs", min_length=1)
+    public_template_admission: PublicTemplateAdmissionPolicy = Field(
+        alias="publicTemplateAdmission"
+    )
     git_timeout_seconds: int = Field(alias="gitTimeoutSeconds", ge=1, le=120)
     maximum_git_output_bytes: int = Field(alias="maximumGitOutputBytes", ge=1024)
     maximum_files: int = Field(alias="maximumFiles", ge=1)
@@ -79,6 +105,8 @@ class VerifiedChangePolicy(_Model):
             raise ValueError("Sensitive path globs must be sorted and unique")
         if self.maximum_git_output_bytes < self.maximum_file_bytes:
             raise ValueError("Git output capacity must cover one maximum-sized blob")
+        if self.public_template_admission.maximum_bytes > self.maximum_file_bytes:
+            raise ValueError("Public-template capacity must fit the file capacity")
         _require_safe_locator(self.producer.implementation_locator, self.maximum_path_bytes)
         return self
 
@@ -127,6 +155,25 @@ class GitChangeEntry(_Model):
             raise ValueError("MODIFY must bind complete before and after images")
         if self.operation is ChangeOperation.MODIFY and before == after:
             raise ValueError("MODIFY must change bytes or mode")
+        return self
+
+
+class PublicTemplateAdmissionReceipt(_Model):
+    schema_version: Literal["1.0.0"] = "1.0.0"
+    guarantee: Literal["POLICY_APPROVED_EXACT_TEMPLATE_BYTES"] = (
+        "POLICY_APPROVED_EXACT_TEMPLATE_BYTES"
+    )
+    side: Literal["BASE", "CANDIDATE"]
+    path_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    content_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    rule_id: Literal["approved-exact-public-template-bytes"]
+    rule_version: Literal["1.0.0"]
+    policy_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    receipt_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+    @model_validator(mode="after")
+    def validate_receipt(self) -> PublicTemplateAdmissionReceipt:
+        _verify_digest(self, "receipt_sha256")
         return self
 
 
@@ -230,7 +277,7 @@ _PERMANENT_GAPS = (
 
 
 class VerifiedChangeSet(_Model):
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["1.1.0"] = "1.1.0"
     authority_scope: Literal["ANALYSIS_ONLY"] = "ANALYSIS_ONLY"
     release_eligible: Literal[False] = False
     capture_scope: Literal["LOCAL_GIT_CANDIDATE_CAPTURE"] = "LOCAL_GIT_CANDIDATE_CAPTURE"
@@ -253,6 +300,7 @@ class VerifiedChangeSet(_Model):
     freshness_seconds: int = Field(ge=1)
     base_files: tuple[GitFileEntry, ...]
     candidate_files: tuple[GitFileEntry, ...]
+    public_template_admissions: tuple[PublicTemplateAdmissionReceipt, ...] = ()
     changes: tuple[GitChangeEntry, ...] = Field(min_length=1)
     base_tree_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     candidate_input_tree_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
@@ -286,9 +334,7 @@ class VerifiedChangeSet(_Model):
             raise ValueError("Base tree digest differs from its files")
         if _tree_digest(self.candidate_files) != self.candidate_input_tree_sha256:
             raise ValueError("Candidate tree digest differs from its files")
-        expected_repository = _identity(
-            self.project_id, self.base_commit_oid, self.base_tree_oid
-        )
+        expected_repository = _identity(self.project_id, self.base_commit_oid, self.base_tree_oid)
         if self.repository_identity_sha256 != expected_repository:
             raise ValueError("Repository identity differs from the captured base history")
         expected_snapshot = stable_sha256(
@@ -314,6 +360,38 @@ class VerifiedChangeSet(_Model):
             raise ValueError("Candidate build-input digest differs from its exact tree")
         if self.blocking_gap_codes != _PERMANENT_GAPS:
             raise ValueError("Permanent release gaps cannot be omitted")
+        expected_admissions = {
+            (
+                side,
+                hashlib.sha256(item.path.encode()).hexdigest(),
+                item.content_sha256,
+            )
+            for side, files in (("BASE", self.base_files), ("CANDIDATE", self.candidate_files))
+            for item in files
+            if PurePosixPath(item.path).name == ".env.example"
+        }
+        actual_admissions = {
+            (item.side, item.path_sha256, item.content_sha256)
+            for item in self.public_template_admissions
+        }
+        admission_order = tuple(
+            (item.side, item.path_sha256, item.content_sha256)
+            for item in self.public_template_admissions
+        )
+        if (
+            admission_order != tuple(sorted(set(admission_order)))
+            or actual_admissions != expected_admissions
+            or any(
+                item.policy_sha256 != self.policy_sha256 for item in self.public_template_admissions
+            )
+            or any(
+                item.mode != "100644" or item.tracking != "TRACKED"
+                for files in (self.base_files, self.candidate_files)
+                for item in files
+                if PurePosixPath(item.path).name == ".env.example"
+            )
+        ):
+            raise ValueError("Public-template admission receipts do not match the manifest")
         _verify_digest(self, "manifest_sha256")
         return self
 
@@ -341,6 +419,7 @@ class ChangeVerificationGapCode(StrEnum):
     STATUS_AMBIGUOUS = "STATUS_AMBIGUOUS"
     UNSAFE_PATH = "UNSAFE_PATH"
     SENSITIVE_PATH_REFUSED = "SENSITIVE_PATH_REFUSED"
+    SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED = "SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED"
     UNSUPPORTED_ENTRY_TYPE = "UNSUPPORTED_ENTRY_TYPE"
     UNSUPPORTED_INDEX_STATE = "UNSUPPORTED_INDEX_STATE"
     DUPLICATE_PATH = "DUPLICATE_PATH"
@@ -386,7 +465,7 @@ class ChangeVerificationEvaluation(_Model):
 
 
 DEFAULT_VERIFIED_CHANGE_POLICY_SHA256 = (
-    "ef43e79fb8e2244d7187ae2a18b4d77ae7e7d17758f10fd6fe7ddb75df5a8d05"
+    "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -588,6 +667,156 @@ def _run_git(
     return subprocess.CompletedProcess(command, returncode, bytes(buffers[0]), bytes(buffers[1]))
 
 
+def _run_git_batch(
+    command: list[str],
+    requests: bytes,
+    timeout_seconds: int,
+    maximum_stdout_bytes: int,
+    maximum_stderr_bytes: int,
+) -> subprocess.CompletedProcess[bytes]:
+    """Run one bounded binary-safe Git batch under one end-to-end deadline."""
+
+    deadline = time.monotonic() + timeout_seconds
+    process = subprocess.Popen(
+        command,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=False,
+    )
+    streams = (process.stdout, process.stderr)
+    limits = (maximum_stdout_bytes, maximum_stderr_bytes)
+    buffers = (bytearray(), bytearray())
+    exceeded = threading.Event()
+    write_failures: list[BaseException] = []
+
+    def drain(index: int) -> None:
+        stream = streams[index]
+        if stream is None:
+            return
+        while chunk := stream.read(65536):
+            if len(buffers[index]) + len(chunk) > limits[index]:
+                exceeded.set()
+                process.kill()
+                return
+            buffers[index].extend(chunk)
+
+    threads = tuple(
+        threading.Thread(target=drain, args=(index,), daemon=True) for index in range(2)
+    )
+    for thread in threads:
+        thread.start()
+
+    def write_requests() -> None:
+        try:
+            if process.stdin is None:
+                raise RuntimeError("Git batch stdin is unavailable")
+            process.stdin.write(requests)
+            process.stdin.close()
+        except (BrokenPipeError, OSError, ValueError) as exc:
+            write_failures.append(exc)
+
+    writer = threading.Thread(target=write_requests, daemon=True)
+    writer.start()
+    timed_out = False
+    returncode = -1
+    try:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise subprocess.TimeoutExpired(command, timeout_seconds)
+        returncode = process.wait(timeout=remaining)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        process.kill()
+        process.wait()
+    finally:
+        if process.stdin is not None and not process.stdin.closed:
+            with contextlib.suppress(BrokenPipeError, OSError):
+                process.stdin.close()
+        writer.join(max(0.0, deadline - time.monotonic()))
+        for thread in threads:
+            thread.join(max(0.0, deadline - time.monotonic()))
+    if timed_out:
+        raise subprocess.TimeoutExpired(command, timeout_seconds) from None
+    if exceeded.is_set():
+        raise OverflowError("Git batch output exceeds the configured bound")
+    if write_failures and returncode == 0:
+        raise RuntimeError("Git batch request transport failed") from None
+    return subprocess.CompletedProcess(command, returncode, bytes(buffers[0]), bytes(buffers[1]))
+
+
+def read_git_blobs_batch(
+    root: Path,
+    object_ids: tuple[str, ...],
+    *,
+    timeout_seconds: int,
+    maximum_file_bytes: int,
+    maximum_total_bytes: int,
+    maximum_stderr_bytes: int,
+) -> dict[str, bytes]:
+    """Read exact Git blobs through one strictly framed, bounded batch process."""
+
+    unique_ids = tuple(dict.fromkeys(object_ids))
+    if not unique_ids:
+        return {}
+    if any(not _OBJECT_ID.fullmatch(object_id) for object_id in unique_ids):
+        raise ValueError("Git batch object identity is invalid")
+    requests = b"".join(object_id.encode("ascii") + b"\n" for object_id in unique_ids)
+    framing_allowance = len(unique_ids) * 128
+    command = [
+        "git",
+        "-c",
+        "core.quotepath=false",
+        "-C",
+        str(root),
+        "cat-file",
+        "--batch",
+    ]
+    completed = _run_git_batch(
+        command,
+        requests,
+        timeout_seconds,
+        maximum_total_bytes + framing_allowance,
+        maximum_stderr_bytes,
+    )
+    if completed.returncode != 0 or completed.stderr:
+        raise RuntimeError("Git batch command failed")
+
+    output = completed.stdout
+    position = 0
+    total = 0
+    result: dict[str, bytes] = {}
+    for expected_id in unique_ids:
+        header_end = output.find(b"\n", position)
+        if header_end < 0 or header_end - position > 127:
+            raise ValueError("Git batch header framing is invalid")
+        header = output[position:header_end]
+        fields = header.split(b" ")
+        if len(fields) != 3:
+            raise ValueError("Git batch header is invalid")
+        returned_id, object_type, raw_size = fields
+        if returned_id != expected_id.encode("ascii") or object_type != b"blob":
+            raise ValueError("Git batch object identity or type differs")
+        if not raw_size or (raw_size != b"0" and raw_size.startswith(b"0")):
+            raise ValueError("Git batch blob size is invalid")
+        if not raw_size.isdigit():
+            raise ValueError("Git batch blob size is invalid")
+        size = int(raw_size)
+        if size > maximum_file_bytes or total + size > maximum_total_bytes:
+            raise OverflowError("Git batch blob bytes exceed the configured bound")
+        content_start = header_end + 1
+        content_end = content_start + size
+        if content_end >= len(output) or output[content_end : content_end + 1] != b"\n":
+            raise ValueError("Git batch content framing is invalid")
+        content = output[content_start:content_end]
+        result[expected_id] = content
+        total += size
+        position = content_end + 1
+    if position != len(output):
+        raise ValueError("Git batch output contains trailing bytes")
+    return result
+
+
 @dataclass(frozen=True)
 class LocalGitChangeProducer:
     """Capture a complete local repository candidate tree from trusted composition."""
@@ -659,6 +888,120 @@ class LocalGitChangeProducer:
             )
         return current
 
+    def verify_bound(
+        self,
+        candidate: VerifiedChangeSet,
+        repository_hint: Path,
+    ) -> ChangeVerificationEvaluation:
+        """Revalidate one request-scoped capture using cheap mutation anchors.
+
+        This path is for downstream stages that consume the exact artifact just captured by
+        this producer.  It revalidates policy, identity, HEAD/tree/index/status and every
+        candidate byte, but does not respawn Git once per immutable base blob.
+        """
+
+        gaps = _planned_gaps()
+        try:
+            now = _utc_now().astimezone(UTC).replace(microsecond=0)
+            validated = VerifiedChangeSet.model_validate(candidate.model_dump(mode="json"))
+            self._require_runtime_policy()
+            root = Path(
+                self._git(repository_hint, "rev-parse", "--show-toplevel")
+                .decode("utf-8", "strict")
+                .strip()
+            ).resolve()
+            if root != self.expected_repository_root.resolve():
+                raise _CaptureRejected(ChangeVerificationGapCode.REPOSITORY_ROOT_MISMATCH)
+            if (
+                self._object_id(root, "HEAD") != validated.base_commit_oid
+                or self._object_id(root, "HEAD^{tree}") != validated.base_tree_oid
+            ):
+                raise _CaptureRejected(ChangeVerificationGapCode.CONCURRENT_MUTATION, "base")
+            if _parse_timestamp(validated.observed_at) > now:
+                raise _CaptureRejected(ChangeVerificationGapCode.CAPTURE_FROM_FUTURE)
+            if _parse_timestamp(validated.valid_until) <= now:
+                raise _CaptureRejected(ChangeVerificationGapCode.CAPTURE_EXPIRED)
+
+            status_before = self._git(
+                root,
+                "status",
+                "--porcelain=v2",
+                "-z",
+                "--untracked-files=all",
+                "--ignore-submodules=none",
+                "--no-renames",
+            )
+            index = self._parse_index(self._git(root, "ls-files", "-z", "--stage"))
+            sparse = self._git(
+                root,
+                "config",
+                "--type=bool",
+                "--default=false",
+                "core.sparseCheckout",
+            )
+            if sparse.strip() != b"false":
+                raise _CaptureRejected(ChangeVerificationGapCode.UNSUPPORTED_INDEX_STATE, "sparse")
+            self._validate_index_tags(self._git(root, "ls-files", "-z", "-v"))
+            candidate_paths = self._nul_paths(
+                self._git(root, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
+            )
+            status_paths = tuple(sorted(self._parse_status(status_before)))
+            public_template_paths = self._preflight_paths(
+                [*candidate_paths, *status_paths, *(item.path for item in validated.base_files)]
+            )
+            candidate_files = tuple(
+                self._read_candidate_files(
+                    root,
+                    candidate_paths,
+                    index,
+                    validated.base_files,
+                    public_template_paths,
+                )
+            )
+            semantic_paths = _semantic_diff_paths(validated.base_files, candidate_files)
+            changes = self._derive_changes(validated.base_files, candidate_files, semantic_paths)
+            if (
+                candidate_files != validated.candidate_files
+                or changes != validated.changes
+                or not set(status_paths).issubset(item.path for item in changes)
+            ):
+                raise _CaptureRejected(ChangeVerificationGapCode.CONCURRENT_MUTATION, "candidate")
+            if (
+                self._object_id(root, "HEAD") != validated.base_commit_oid
+                or self._object_id(root, "HEAD^{tree}") != validated.base_tree_oid
+                or self._git(
+                    root,
+                    "status",
+                    "--porcelain=v2",
+                    "-z",
+                    "--untracked-files=all",
+                    "--ignore-submodules=none",
+                    "--no-renames",
+                )
+                != status_before
+            ):
+                raise _CaptureRejected(ChangeVerificationGapCode.CONCURRENT_MUTATION, "anchor")
+        except _CaptureRejected as exc:
+            return _evaluation(
+                self.policy,
+                now.strftime("%Y-%m-%dT%H:%M:%SZ") if "now" in locals() else "unavailable",
+                [*gaps, _gap(exc.code, *exc.identity)],
+                None,
+            )
+        except Exception:
+            return _evaluation(
+                self.policy,
+                "unavailable",
+                [*gaps, _gap(ChangeVerificationGapCode.GIT_OUTPUT_INVALID, "bound")],
+                None,
+            )
+        return _evaluation(
+            self.policy,
+            now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            gaps,
+            validated,
+        )
+
     def _capture(
         self,
         repository_hint: Path,
@@ -710,15 +1053,17 @@ class LocalGitChangeProducer:
         all_paths = [record.path for record in base_records]
         all_paths.extend(candidate_paths)
         all_paths.extend(status_paths)
-        self._preflight_paths(all_paths)
+        public_template_paths = self._preflight_paths(all_paths)
         if len(set(candidate_paths)) > self.policy.maximum_files or len(base_records) > (
             self.policy.maximum_files
         ):
             raise _CaptureRejected(ChangeVerificationGapCode.CAPACITY_EXCEEDED, "files")
 
-        base_files = tuple(self._read_base_files(root, base_records))
+        base_files = tuple(self._read_base_files(root, base_records, public_template_paths))
         candidate_files = tuple(
-            self._read_candidate_files(root, candidate_paths, index, base_files)
+            self._read_candidate_files(
+                root, candidate_paths, index, base_files, public_template_paths
+            )
         )
         if sum(item.size_bytes for item in candidate_files) > self.policy.maximum_total_bytes:
             raise _CaptureRejected(ChangeVerificationGapCode.CAPACITY_EXCEEDED, "total-bytes")
@@ -731,7 +1076,11 @@ class LocalGitChangeProducer:
         if not set(status_paths).issubset(item.path for item in changes):
             raise _CaptureRejected(ChangeVerificationGapCode.STATUS_AMBIGUOUS, "delta")
 
-        second = tuple(self._read_candidate_files(root, candidate_paths, index, base_files))
+        second = tuple(
+            self._read_candidate_files(
+                root, candidate_paths, index, base_files, public_template_paths
+            )
+        )
         if second != candidate_files:
             raise _CaptureRejected(ChangeVerificationGapCode.CONCURRENT_MUTATION, "bytes")
         if self._object_id(root, "HEAD") != head or self._object_id(root, "HEAD^{tree}") != tree:
@@ -750,6 +1099,7 @@ class LocalGitChangeProducer:
 
         base_body = [item.model_dump(mode="json") for item in base_files]
         candidate_body = [item.model_dump(mode="json") for item in candidate_files]
+        public_template_admissions = self._public_template_receipts(base_files, candidate_files)
         base_sha = _tree_digest(base_files)
         candidate_sha = _tree_digest(candidate_files)
         repository_identity_sha256 = _identity(self.project_id, head, tree)
@@ -772,7 +1122,7 @@ class LocalGitChangeProducer:
         }
         valid_until = now + timedelta(seconds=self.policy.freshness_seconds)
         body = {
-            "schema_version": "1.0.0",
+            "schema_version": "1.1.0",
             "authority_scope": "ANALYSIS_ONLY",
             "release_eligible": False,
             "capture_scope": "LOCAL_GIT_CANDIDATE_CAPTURE",
@@ -795,6 +1145,9 @@ class LocalGitChangeProducer:
             "freshness_seconds": self.policy.freshness_seconds,
             "base_files": base_body,
             "candidate_files": candidate_body,
+            "public_template_admissions": [
+                item.model_dump(mode="json") for item in public_template_admissions
+            ],
             "changes": [item.model_dump(mode="json") for item in changes],
             "base_tree_sha256": base_sha,
             "candidate_input_tree_sha256": candidate_sha,
@@ -871,26 +1224,34 @@ class LocalGitChangeProducer:
             raise _CaptureRejected(ChangeVerificationGapCode.NO_BASE_COMMIT)
         return value
 
-    def _preflight_paths(self, values: list[str]) -> None:
+    def _preflight_paths(self, values: list[str]) -> frozenset[str]:
         aliases: dict[str, str] = {}
+        public_templates: set[str] = set()
         for value in values:
             try:
                 locator = _require_safe_locator(value, self.policy.maximum_path_bytes)
             except ValueError:
                 raise _CaptureRejected(ChangeVerificationGapCode.UNSAFE_PATH) from None
             lowered = locator.casefold()
-            if any(
+            sensitive = any(
                 fnmatch.fnmatchcase(lowered, pattern.casefold())
                 for pattern in self.policy.sensitive_path_globs
-            ):
+            )
+            is_public_template = (
+                PurePosixPath(locator).name == self.policy.public_template_admission.exact_basename
+            )
+            if sensitive and not is_public_template:
                 raise _CaptureRejected(
                     ChangeVerificationGapCode.SENSITIVE_PATH_REFUSED,
                     hashlib.sha256(locator.encode()).hexdigest(),
                 )
+            if is_public_template:
+                public_templates.add(locator)
             alias = unicodedata.normalize("NFC", locator).casefold()
             prior = aliases.setdefault(alias, locator)
             if prior != locator:
                 raise _CaptureRejected(ChangeVerificationGapCode.DUPLICATE_PATH)
+        return frozenset(public_templates)
 
     def _parse_tree(self, output: bytes) -> tuple[_TreeRecord, ...]:
         records: list[_TreeRecord] = []
@@ -975,24 +1336,46 @@ class LocalGitChangeProducer:
             raise _CaptureRejected(ChangeVerificationGapCode.DUPLICATE_PATH, "candidate")
         return sorted(paths)
 
-    def _read_base_files(self, root: Path, records: tuple[_TreeRecord, ...]) -> list[GitFileEntry]:
+    def _read_base_files(
+        self,
+        root: Path,
+        records: tuple[_TreeRecord, ...],
+        public_template_paths: frozenset[str] = frozenset(),
+    ) -> list[GitFileEntry]:
         files: list[GitFileEntry] = []
         total = 0
-        for record in records:
-            try:
-                size = int(self._git(root, "cat-file", "-s", record.object_id).strip())
-            except ValueError:
-                raise _CaptureRejected(
-                    ChangeVerificationGapCode.GIT_OUTPUT_INVALID, "blob-size"
-                ) from None
+        ordered_records = sorted(
+            records, key=lambda item: (item.path not in public_template_paths, item.path)
+        )
+        try:
+            blobs = read_git_blobs_batch(
+                root,
+                tuple(record.object_id for record in ordered_records),
+                timeout_seconds=self.policy.git_timeout_seconds,
+                maximum_file_bytes=self.policy.maximum_file_bytes,
+                maximum_total_bytes=self.policy.maximum_total_bytes,
+                maximum_stderr_bytes=self.policy.maximum_git_output_bytes,
+            )
+        except subprocess.TimeoutExpired:
+            raise _CaptureRejected(ChangeVerificationGapCode.GIT_TIMEOUT) from None
+        except OverflowError:
+            raise _CaptureRejected(
+                ChangeVerificationGapCode.CAPACITY_EXCEEDED, "base-bytes"
+            ) from None
+        except (OSError, RuntimeError, TypeError, ValueError):
+            raise _CaptureRejected(ChangeVerificationGapCode.GIT_OUTPUT_INVALID, "batch") from None
+        for record in ordered_records:
+            content = blobs[record.object_id]
+            size = len(content)
             if size > self.policy.maximum_file_bytes or total + size > (
                 self.policy.maximum_total_bytes
             ):
                 raise _CaptureRejected(ChangeVerificationGapCode.CAPACITY_EXCEEDED, "base-bytes")
-            content = self._git(root, "cat-file", "blob", record.object_id)
+            if record.path in public_template_paths:
+                self._require_public_template_metadata(record.path, record.mode, "TRACKED", size)
             total += len(content)
-            if len(content) != size:
-                raise _CaptureRejected(ChangeVerificationGapCode.GIT_OUTPUT_INVALID, "blob-size")
+            if record.path in public_template_paths:
+                self._require_approved_public_template(record.path, content)
             files.append(
                 GitFileEntry(
                     path=record.path,
@@ -1002,7 +1385,7 @@ class LocalGitChangeProducer:
                     content_sha256=hashlib.sha256(content).hexdigest(),
                 )
             )
-        return files
+        return sorted(files, key=lambda item: item.path)
 
     def _read_candidate_files(
         self,
@@ -1010,11 +1393,18 @@ class LocalGitChangeProducer:
         paths: list[str],
         index: dict[str, _TreeRecord],
         base_files: tuple[GitFileEntry, ...],
+        public_template_paths: frozenset[str] = frozenset(),
     ) -> list[GitFileEntry]:
         base_paths = {item.path for item in base_files}
         files: list[GitFileEntry] = []
         total = 0
-        for locator in paths:
+        ordered_paths = sorted(paths, key=lambda item: (item not in public_template_paths, item))
+        for locator in ordered_paths:
+            if locator in public_template_paths and locator not in index:
+                raise _CaptureRejected(
+                    ChangeVerificationGapCode.SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED,
+                    hashlib.sha256(locator.encode()).hexdigest(),
+                )
             target = root.joinpath(*PurePosixPath(locator).parts)
             try:
                 details = target.lstat()
@@ -1033,6 +1423,10 @@ class LocalGitChangeProducer:
             ):
                 raise _CaptureRejected(
                     ChangeVerificationGapCode.CAPACITY_EXCEEDED, "candidate-bytes"
+                )
+            if locator in public_template_paths:
+                self._require_public_template_metadata(
+                    locator, index[locator].mode, "TRACKED", details.st_size
                 )
             try:
                 relative = target.resolve(strict=False).relative_to(root)
@@ -1056,6 +1450,8 @@ class LocalGitChangeProducer:
                 raise _CaptureRejected(
                     ChangeVerificationGapCode.CAPACITY_EXCEEDED, "candidate-bytes"
                 )
+            if locator in public_template_paths:
+                self._require_approved_public_template(locator, content)
             tracked = locator in index
             mode = (
                 index[locator].mode
@@ -1072,6 +1468,62 @@ class LocalGitChangeProducer:
                 )
             )
         return sorted(files, key=lambda item: item.path)
+
+    def _require_public_template_metadata(
+        self, locator: str, mode: str, tracking: str, size: int
+    ) -> None:
+        admission = self.policy.public_template_admission
+        if (
+            PurePosixPath(locator).name != admission.exact_basename
+            or tracking != admission.required_tracking
+            or mode != admission.allowed_mode
+            or size > admission.maximum_bytes
+        ):
+            raise _CaptureRejected(
+                ChangeVerificationGapCode.SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED,
+                hashlib.sha256(locator.encode()).hexdigest(),
+            )
+
+    def _require_approved_public_template(self, locator: str, content: bytes) -> None:
+        digest = hashlib.sha256(content).hexdigest()
+        if digest not in self.policy.public_template_admission.approved_content_sha256:
+            raise _CaptureRejected(
+                ChangeVerificationGapCode.SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED,
+                hashlib.sha256(locator.encode()).hexdigest(),
+            )
+
+    def _public_template_receipts(
+        self,
+        base_files: tuple[GitFileEntry, ...],
+        candidate_files: tuple[GitFileEntry, ...],
+    ) -> tuple[PublicTemplateAdmissionReceipt, ...]:
+        admission = self.policy.public_template_admission
+        receipts: list[PublicTemplateAdmissionReceipt] = []
+        for side, files in (("BASE", base_files), ("CANDIDATE", candidate_files)):
+            for item in files:
+                if PurePosixPath(item.path).name != admission.exact_basename:
+                    continue
+                body = {
+                    "schema_version": "1.0.0",
+                    "guarantee": "POLICY_APPROVED_EXACT_TEMPLATE_BYTES",
+                    "side": side,
+                    "path_sha256": hashlib.sha256(item.path.encode()).hexdigest(),
+                    "content_sha256": item.content_sha256,
+                    "rule_id": admission.rule_id,
+                    "rule_version": admission.rule_version,
+                    "policy_sha256": self.policy.sha256,
+                }
+                receipts.append(
+                    PublicTemplateAdmissionReceipt.model_validate(
+                        {**body, "receipt_sha256": stable_sha256(body)}
+                    )
+                )
+        return tuple(
+            sorted(
+                receipts,
+                key=lambda item: (item.side, item.path_sha256, item.content_sha256),
+            )
+        )
 
     @staticmethod
     def _derive_changes(

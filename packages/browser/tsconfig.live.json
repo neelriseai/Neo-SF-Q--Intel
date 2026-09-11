@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": [
+    "src/browser-worker.ts",
+    "src/salesforce-cli-session.ts",
+    "src/salesforce-browser-coordinator.ts",
+    "src/live-smoke-cli.ts"
+  ]
+}

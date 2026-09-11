@@ -555,6 +555,36 @@ def test_comments_and_strings_do_not_create_confirmed_code_facts() -> None:
     }
 
 
+def test_apex_test_field_references_remain_inferred_reads() -> None:
+    graph = SalesforceSemanticGraphAdapter().extract(
+        {
+            "sfdx-project.json": b'{"packageDirectories":[{"path":"pkg"}]}',
+            "pkg/main/default/classes/Worker.cls": (
+                b"public class Worker { void run() { "
+                b"[SELECT State__c FROM Entity__c]; } }"
+            ),
+            "pkg/main/default/classes/Worker.cls-meta.xml": _xml("ApexClass"),
+            "pkg/main/default/classes/WorkerTest.cls": (
+                b"@isTest public class WorkerTest { @isTest static void verifies() { "
+                b"[SELECT State__c FROM Entity__c]; } }"
+            ),
+            "pkg/main/default/classes/WorkerTest.cls-meta.xml": _xml("ApexClass"),
+        },
+        maximum_nodes=100,
+        maximum_edges=100,
+        maximum_work_units=100000,
+    )
+    field_edges = {
+        (item.source_id, item.raw_relation, item.target_id, item.evidence_state)
+        for item in graph.edges
+        if item.target_id == "field:Entity__c.State__c"
+    }
+    assert field_edges == {
+        ("apex:Worker", "reads", "field:Entity__c.State__c", "INFERRED"),
+        ("apex:WorkerTest", "reads", "field:Entity__c.State__c", "INFERRED"),
+    }
+
+
 def test_configuration_values_are_digested_never_plaintext() -> None:
     secret = "password=not-a-real-secret"
     graph = SalesforceSemanticGraphAdapter().extract(
@@ -643,6 +673,109 @@ def test_current_verifier_rejects_rehashed_nested_tamper(tmp_path: Path) -> None
     document["receipt_sha256"] = stable_sha256(artifact_body)
     tampered = GraphProductionArtifact.model_validate(document)
     rejected = producer.verify(tampered, inputs)
+    assert rejected.artifact is None
+    assert GraphProductionGapCode.CAPTURE_TAMPERED in _codes(rejected)
+
+
+def test_bound_verifier_replays_and_rejects_rehashed_producer_tamper(
+    tmp_path: Path,
+) -> None:
+    producer, inputs = _system(_repository(tmp_path))
+    artifact = producer.capture(inputs).artifact
+    assert artifact is not None
+    document = artifact.model_dump(mode="json")
+    document["producer_id"] = "forged-producer"
+    artifact_body = dict(document)
+    artifact_body.pop("receipt_sha256")
+    document["receipt_sha256"] = stable_sha256(artifact_body)
+    tampered = GraphProductionArtifact.model_validate(document)
+
+    rejected = producer.verify_bound(tampered, inputs)
+
+    assert rejected.artifact is None
+    assert GraphProductionGapCode.CAPTURE_TAMPERED in _codes(rejected)
+
+
+@pytest.mark.parametrize("tamper", ["provenance", "semantics"])
+def test_bound_verifier_rejects_rehashed_nested_authority_tamper(
+    tmp_path: Path, tamper: str
+) -> None:
+    producer, inputs = _system(_repository(tmp_path))
+    artifact = producer.capture(inputs).artifact
+    assert artifact is not None
+    document = artifact.model_dump(mode="json")
+
+    if tamper == "provenance":
+        node = document["candidate"]["nodes"][0]
+        owner = node["owners"][0]
+        owner["parser_id"] = "forged-parser"
+        owner_body = dict(owner)
+        owner_body.pop("owner_sha256")
+        owner["owner_sha256"] = stable_sha256(owner_body)
+        node_body = dict(node)
+        node_body.pop("element_sha256")
+        node["element_sha256"] = stable_sha256(node_body)
+        sides = (document["candidate"],)
+    else:
+        base_by_id = {item["node_id"]: item for item in document["base"]["nodes"]}
+        candidate_by_id = {
+            item["node_id"]: item for item in document["candidate"]["nodes"]
+        }
+        unchanged_id = next(
+            node_id
+            for node_id in sorted(set(base_by_id) & set(candidate_by_id))
+            if base_by_id[node_id]["semantic_sha256"]
+            == candidate_by_id[node_id]["semantic_sha256"]
+        )
+        for node in (base_by_id[unchanged_id], candidate_by_id[unchanged_id]):
+            node["label"] = f'{node["label"]} forged'
+            semantic_body = dict(node)
+            semantic_body.pop("owners")
+            semantic_body.pop("semantic_sha256")
+            semantic_body.pop("element_sha256")
+            node["semantic_sha256"] = stable_sha256(semantic_body)
+            node_body = dict(node)
+            node_body.pop("element_sha256")
+            node["element_sha256"] = stable_sha256(node_body)
+        sides = (document["base"], document["candidate"])
+
+    for side in sides:
+        side_body = dict(side)
+        side_body.pop("side_receipt_sha256")
+        side["side_receipt_sha256"] = stable_sha256(side_body)
+    artifact_body = dict(document)
+    artifact_body.pop("receipt_sha256")
+    document["receipt_sha256"] = stable_sha256(artifact_body)
+    tampered = GraphProductionArtifact.model_validate(document)
+
+    rejected = producer.verify_bound(tampered, inputs)
+
+    assert rejected.artifact is None
+    assert GraphProductionGapCode.CAPTURE_TAMPERED in _codes(rejected)
+
+
+def test_bound_verifier_rejects_cross_request_artifact(tmp_path: Path) -> None:
+    first_root = tmp_path / "first"
+    second_root = tmp_path / "second"
+    first_root.mkdir()
+    second_root.mkdir()
+    first_producer, first_inputs = _system(_repository(first_root))
+    artifact = first_producer.capture(first_inputs).artifact
+    assert artifact is not None
+    second_repository = _repository(second_root)
+    _write(
+        second_repository,
+        "source-one/main/default/objects/Entity__c/fields/Link__c.field-meta.xml",
+        _xml(
+            "CustomField",
+            "<fullName>Link__c</fullName><type>Lookup</type>"
+            "<referenceTo>Third__c</referenceTo>",
+        ),
+    )
+    second_producer, second_inputs = _system(second_repository)
+
+    rejected = second_producer.verify_bound(artifact, second_inputs)
+
     assert rejected.artifact is None
     assert GraphProductionGapCode.CAPTURE_TAMPERED in _codes(rejected)
 

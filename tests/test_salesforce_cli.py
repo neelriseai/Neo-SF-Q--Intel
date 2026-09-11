@@ -39,18 +39,34 @@ def test_rest_get_rejects_external_or_unscoped_routes_before_cli_call() -> None:
         )
 
 
-def test_rest_get_accepts_generic_relative_data_route() -> None:
-    captured = []
+def test_rest_get_accepts_generic_relative_data_route(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: list[tuple[list[str], dict[str, object]]] = []
+
+    monkeypatch.setenv("PATH", "safe-path")
+    monkeypatch.setenv("USERPROFILE", "safe-salesforce-home")
+    monkeypatch.setenv("OPENAI_API_KEY", "openai-secret")
+    monkeypatch.setenv("DATABASE_URL", "database-secret")
+    monkeypatch.setenv("LIVE_PRODUCT_RECEIPT_HMAC_KEY", "hmac-secret")
 
     def runner(*args, **kwargs):  # noqa: ANN002, ANN003
-        captured.append(args[0])
+        captured.append((args[0], kwargs))
         return subprocess.CompletedProcess(args[0], 0, '{"status": 0, "result": {}}', "")
 
     SalesforceCLI("test-alias", runner=runner).rest_get(
         "/services/data/v99.0/sobjects/Example__c/describe"
     )
 
-    assert "/services/data/v99.0/sobjects/Example__c/describe" in captured[0]
+    assert "/services/data/v99.0/sobjects/Example__c/describe" in captured[0][0]
+    child_environment = captured[0][1]["env"]
+    assert child_environment["PATH"] == "safe-path"
+    assert child_environment["USERPROFILE"] == "safe-salesforce-home"
+    assert child_environment["SF_AUTOUPDATE_DISABLE"] == "true"
+    assert child_environment["SF_DISABLE_TELEMETRY"] == "true"
+    assert "OPENAI_API_KEY" not in child_environment
+    assert "DATABASE_URL" not in child_environment
+    assert "LIVE_PRODUCT_RECEIPT_HMAC_KEY" not in child_environment
 
 
 def test_cli_error_does_not_publish_urls_or_tokens() -> None:

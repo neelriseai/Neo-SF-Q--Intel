@@ -122,7 +122,7 @@ def test_loads_versioned_hashed_contracts_and_exhaustive_source_vocabulary() -> 
     ontology, profile = _load_default_contracts()
 
     assert ontology.ontology_id == "change-evidence-core"
-    assert ontology.ontology_version == "1.0.0"
+    assert ontology.ontology_version == "1.1.0"
     assert profile.ontology.ontology_sha256 == ontology.sha256
     assert profile.source_selector.source_type == "salesforce-application-graph"
     assert set(profile.node_mapping) == EXPECTED_SOURCE_NODE_KINDS
@@ -178,12 +178,12 @@ def test_rejects_tampered_contract_content(tmp_path: Path, contract_name: str) -
     ontology = load_canonical_ontology(ontology_path)
 
     if contract_name == "ontology":
-        ontology_doc["ontologyVersion"] = "1.0.1"
+        ontology_doc["ontologyVersion"] += ".tampered"
         ontology_path.write_text(json.dumps(ontology_doc), encoding="utf-8")
         with pytest.raises(OntologyContractError, match="digest"):
             load_canonical_ontology(ontology_path)
     else:
-        profile_doc["profileVersion"] = "1.0.1"
+        profile_doc["profileVersion"] += ".tampered"
         profile_path.write_text(json.dumps(profile_doc), encoding="utf-8")
         with pytest.raises(OntologyContractError, match="digest"):
             load_source_graph_profile(profile_path, ontology)

@@ -1,20 +1,37 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 from neo_sf_q_intel.config import Settings
 from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest
-from neo_sf_q_intel.salesforce_cli import SalesforceCLI
 from neo_sf_q_intel.service import AssuranceService, create_service
+
+
+class _NeoMCPServer(MCPServer):
+    """Enforce genuinely empty input for host-owned, zero-scope operations."""
+
+    _EMPTY_INPUT_TOOLS = frozenset({"run_live_salesforce_baseline"})
+
+    async def call_tool(
+        self,
+        name: str,
+        arguments: dict[str, Any],
+        context: Any = None,
+    ) -> Any:
+        if name in self._EMPTY_INPUT_TOOLS and arguments:
+            raise ToolError(f"Tool {name} accepts no caller input")
+        return await super().call_tool(name, arguments, context)
 
 
 def build_mcp(
     settings: Settings,
     service: AssuranceService,
 ) -> MCPServer:
-    server = MCPServer("Neo SF Q-Intel")
+    server = _NeoMCPServer("Neo SF Q-Intel")
 
     @server.tool()
     def analyze_change(
@@ -23,6 +40,8 @@ def build_mcp(
         change_intent: ChangeIntent = ChangeIntent.INFORMATIONAL,
     ) -> dict:
         """Analyze Salesforce change impact and return evidence-governed output."""
+        if change_intent is ChangeIntent.VERIFIED_CHANGE:
+            raise ValueError("VERIFIED_CHANGE_REQUIRES_HOST_CAPTURE")
         run = service.analyze(
             ChangeRequest(
                 requirement=requirement,
@@ -31,6 +50,16 @@ def build_mcp(
             )
         )
         return run.model_dump(mode="json")
+
+    @server.tool()
+    def analyze_current_candidate() -> dict:
+        """Replay and analyze the host-configured Git candidate without caller scope."""
+        return service.analyze_current_candidate_view().model_dump(mode="json")
+
+    @server.tool()
+    def run_live_salesforce_baseline() -> dict:
+        """Run the fixed host-owned live baseline without accepting caller scope."""
+        return service.run_live_baseline().model_dump(mode="json")
 
     @server.tool()
     async def search_evidence(query: str, limit: int = 8, semantic: bool = False) -> list[dict]:
@@ -58,8 +87,16 @@ def build_mcp(
 
     @server.tool()
     def inspect_salesforce() -> dict:
-        """Check the configured non-production org without returning auth material."""
-        return SalesforceCLI(settings.require_operator_alias()).org_status()
+        """Report live inspection unavailable until host-owned org authorization exists."""
+        return {
+            "schema_version": "1.0.0",
+            "status": "UNAVAILABLE",
+            "capability_id": "runtime.salesforce-live-evidence",
+            "reason_code": "SALESFORCE_ORG_CLASSIFICATION_UNAVAILABLE",
+            "execution_status": "NOT_RUN",
+            "evidence_ids": [],
+            "release_eligible": False,
+        }
 
     return server
 

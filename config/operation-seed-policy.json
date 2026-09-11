@@ -1,23 +1,23 @@
 {
   "schemaVersion": "1.0.0",
   "policyId": "operation-aware-semantic-seed-mapping",
-  "policyVersion": "1.0.0",
-  "sha256": "ce49d75ab5037088a6d51631a1c5a0220b1672ec06599bb82c3fe2a5934fa493",
+  "policyVersion": "1.0.1",
+  "sha256": "4bb0620706ad2b54bc90e0a76488ccb18be2a0f2dcc4ce07457cfed117aeadf7",
   "verifiedChangePolicy": {
     "contractId": "verified-local-git-change",
-    "contractVersion": "1.0.0",
-    "contractSha256": "ef43e79fb8e2244d7187ae2a18b4d77ae7e7d17758f10fd6fe7ddb75df5a8d05"
+    "contractVersion": "1.1.0",
+    "contractSha256": "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175"
   },
   "graphProducerPolicy": {
     "contractId": "verified-tree-graph-production",
-    "contractVersion": "1.0.0",
-    "contractSha256": "a10136b49aee73d9c46522774fba189cc0f6e02a30cc655235434872000a061b"
+    "contractVersion": "1.0.1",
+    "contractSha256": "d3d5f6a7efc7a636b477c83b6609b08427dcc24b762d63b2b6cf3dab3e2bc290"
   },
   "compiler": {
     "implementationId": "operation-aware-semantic-seed-compiler",
     "implementationVersion": "1.0.0",
     "implementationLocator": "src/neo_sf_q_intel/operation_seed.py",
-    "implementationSha256": "4022faf49dded80fb41babe0f125342e68529de4431f162622c7b8f5e3f8d797"
+    "implementationSha256": "18b929e65b9a63eb1a4f810e823f28dcb962b68c64d771380613dda69815a852"
   },
   "mappingScope": "SUPPORTED_FAMILY_OPERATION_SEEDS",
   "addSide": "CANDIDATE",

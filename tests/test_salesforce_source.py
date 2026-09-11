@@ -55,17 +55,19 @@ def write_source(
         ),
         encoding="utf-8",
     )
+    graph_hash = hashlib.sha256(graph_path.read_text(encoding="utf-8").encode()).hexdigest()
     (root / "knowledge" / "project-index.json").write_text(
         json.dumps(
             {
                 "pathBase": "project-root",
                 "files": inventory,
                 "sourceSnapshot": snapshot if snapshots_match else "stale",
+                "applicationGraphSha256": graph_hash,
             }
         ),
         encoding="utf-8",
     )
-    return hashlib.sha256(graph_path.read_text(encoding="utf-8").encode()).hexdigest()
+    return graph_hash
 
 
 def test_loads_fresh_implemented_contract(tmp_path: Path) -> None:
@@ -73,6 +75,45 @@ def test_loads_fresh_implemented_contract(tmp_path: Path) -> None:
     source = load_salesforce_source(tmp_path, expected_graph_sha256=graph_hash)
     assert source.project_id == "example-salesforce-application"
     assert source.trusted_graph_sha256 == graph_hash
+
+
+def test_loads_generated_graph_binding_without_a_manual_environment_pin(
+    tmp_path: Path,
+) -> None:
+    graph_hash = write_source(tmp_path)
+
+    source = load_salesforce_source(tmp_path)
+
+    assert source.trusted_graph_sha256 == graph_hash
+
+
+def test_rejects_missing_generated_graph_binding(tmp_path: Path) -> None:
+    write_source(tmp_path)
+    index_path = tmp_path / "knowledge" / "project-index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    del index["applicationGraphSha256"]
+    index_path.write_text(json.dumps(index), encoding="utf-8")
+
+    with pytest.raises(SourceContractError, match="must bind the generated application graph"):
+        load_salesforce_source(tmp_path)
+
+
+def test_rejects_stale_generated_graph_binding(tmp_path: Path) -> None:
+    write_source(tmp_path)
+    index_path = tmp_path / "knowledge" / "project-index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    index["applicationGraphSha256"] = "0" * 64
+    index_path.write_text(json.dumps(index), encoding="utf-8")
+
+    with pytest.raises(SourceContractError, match="generated project-index binding"):
+        load_salesforce_source(tmp_path)
+
+
+def test_rejects_stale_optional_external_graph_pin(tmp_path: Path) -> None:
+    write_source(tmp_path)
+
+    with pytest.raises(SourceContractError, match="trusted digest"):
+        load_salesforce_source(tmp_path, expected_graph_sha256="0" * 64)
 
 
 def test_accepts_compatible_newer_contract_minor_version(tmp_path: Path) -> None:
@@ -100,9 +141,7 @@ def test_rejects_graph_schema_outside_source_profile_range(
 def test_rejects_source_profile_for_a_different_adapter(tmp_path: Path) -> None:
     graph_hash = write_source(tmp_path)
     profile = json.loads(
-        Path("config/source-profiles/salesforce-application-graph.json").read_text(
-            encoding="utf-8"
-        )
+        Path("config/source-profiles/salesforce-application-graph.json").read_text(encoding="utf-8")
     )
     profile["sourceSelector"]["sourceType"] = "different-graph-adapter"
     profile["sha256"] = contract_sha256(profile)
@@ -187,5 +226,5 @@ def test_rejects_validly_shaped_graph_content_tampering(tmp_path: Path) -> None:
     graph["nodes"].append({"id": "object:Injected", "kind": "object", "label": "Injected"})
     graph_path.write_text(json.dumps(graph), encoding="utf-8")
 
-    with pytest.raises(SourceContractError, match="trusted digest"):
+    with pytest.raises(SourceContractError, match="generated project-index binding"):
         load_salesforce_source(tmp_path, expected_graph_sha256=graph_hash)

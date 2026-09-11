@@ -18,6 +18,19 @@ not ingested wholesale.
 10. [Demo scenarios](09-demo-scenarios.md)
 11. [Graph-grounded agent reasoning](10-graph-grounded-agent-reasoning.md)
 12. [Development assurance process](15-development-assurance-process.md)
+13. [Deferred operator actions](16-deferred-operator-actions.md)
+14. [Live Salesforce demo execution contract](18-live-salesforce-demo-execution-contract.md)
+15. [Eight-hour live-integration sprint](19-live-integration-8h-sprint.md)
+16. [Source-operation declarations](20-source-operation-declarations.md)
+17. [Development stop checkpoint — 2026-09-11](21-development-stop-checkpoint-2026-09-11.md)
+
+## Advisory status
+
+[Current solution readiness audit](17-solution-readiness-audit.md) is dated review evidence. It is
+not implementation authority and cannot authorize scope, capability promotion or live actions.
+The dated [development stop checkpoint](21-development-stop-checkpoint-2026-09-11.md) is the current
+working-tree handoff: it records verified evidence, unresolved P1 findings, interrupted files and
+the exact resume order. It also grants no execution authority.
 
 ## Authority and exclusions
 

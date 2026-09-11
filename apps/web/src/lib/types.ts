@@ -92,7 +92,16 @@ export interface AssuranceRun {
   source_profile_sha256: string | null;
   normalized_graph_sha256: string | null;
   status: "PENDING" | "RUNNING" | "WAITING" | "COMPLETED" | "FAILED";
-  request: { requirement: string; changed_paths: string[]; change_intent: "INFORMATIONAL" | "PLANNED_CHANGE" | "OBSERVED_CHANGE"; source_ref: string };
+  request: {
+    requirement: string;
+    changed_paths: string[];
+    change_intent: "INFORMATIONAL" | "PLANNED_CHANGE" | "OBSERVED_CHANGE" | "VERIFIED_CHANGE";
+    project_id?: string | null;
+    source_ref: string;
+    verified_change_manifest_sha256?: string | null;
+    verified_operation_seed_sha256?: string | null;
+    verified_seed_ids?: string[];
+  };
   evidence: EvidenceRef[];
   impacts: ImpactFinding[];
   selected_tests: Array<{ test_id: string; label: string; classification: "MANDATORY" | "RECOMMENDED"; reason: string; evidence_ids: string[] }>;
@@ -105,4 +114,51 @@ export interface AssuranceRun {
   governance: { policy_version: string; policy_sha256: string; analysis_input_sha256: string; metrics: GovernanceMetric[]; guardrails: GuardrailDecision[]; violations: string[]; passed: boolean } | null;
   decision: ReleaseDecision | null;
   recorded_decision: ReleaseDecision | null;
+}
+
+export interface CandidateAnalysisIdentity {
+  project_id: string;
+  ontology_id: string;
+  ontology_version: string;
+  ontology_sha256: string;
+  source_profile_id: string;
+  source_profile_version: string;
+  source_profile_sha256: string;
+  reasoning_policy_version: string;
+  reasoning_policy_sha256: string;
+  reasoning_eval_set_id: string;
+  reasoning_eval_set_sha256: string;
+}
+
+export interface CandidateSideAssuranceView {
+  side: "BASE" | "CANDIDATE";
+  operation_scope: Array<"ADD" | "MODIFY" | "DELETE">;
+  changed_path_count: number;
+  verified_seed_count: number;
+  run_id: string;
+  trace_id: string;
+  status: AssuranceRun["status"];
+  decision_code: DecisionCode | null;
+  source_snapshot: string;
+  source_graph_sha256: string;
+  normalized_graph_sha256: string;
+  graph_side_receipt_sha256: string;
+}
+
+export interface CandidateAssuranceView {
+  schema_version: "1.0.0";
+  authority_scope: "ANALYSIS_ONLY";
+  release_eligible: false;
+  evidence_completeness: "INCOMPLETE";
+  project_id: string;
+  verified_change_manifest_sha256: string;
+  graph_production_receipt_sha256: string;
+  operation_seed_artifact_sha256: string;
+  analysis_identity: CandidateAnalysisIdentity;
+  analyses: CandidateSideAssuranceView[];
+  blocking_gap_codes: string[];
+  checkpoint_commit_scope: "EXCLUDED_FROM_BUNDLE_TRANSACTION";
+  persistence_gap_codes: ["CHECKPOINT_NOT_ATOMIC_WITH_CANDIDATE_BUNDLE"];
+  bundle_sha256: string;
+  view_sha256: string;
 }

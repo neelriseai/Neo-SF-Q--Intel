@@ -1,16 +1,16 @@
 {
   "schemaVersion": "1.0.0",
   "policyId": "verified-local-git-change",
-  "policyVersion": "1.0.0",
-  "sha256": "ef43e79fb8e2244d7187ae2a18b4d77ae7e7d17758f10fd6fe7ddb75df5a8d05",
+  "policyVersion": "1.1.0",
+  "sha256": "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175",
   "captureScope": "FULL_TRACKED_AND_NONIGNORED_UNTRACKED_TREE",
   "baseRevision": "HEAD",
   "renameDetection": "DISABLED_DELETE_ADD",
   "producer": {
     "producerId": "local-git-candidate-capture",
-    "producerVersion": "1.0.0",
+    "producerVersion": "1.1.0",
     "implementationLocator": "src/neo_sf_q_intel/change_verification.py",
-    "implementationSha256": "625383dd9681b7d8dc1341df03a5cd943e81ff13db0ca7672fb15618063c0bfb"
+    "implementationSha256": "cf844ef0ae2f17282e954f4fbdb6205c2374cc2345b05c47750d235be293a68e"
   },
   "allowedRegularModes": ["100644", "100755"],
   "sensitivePathGlobs": [
@@ -39,6 +39,18 @@
     ".sf/**",
     ".sfdx/**"
   ],
+  "publicTemplateAdmission": {
+    "ruleId": "approved-exact-public-template-bytes",
+    "ruleVersion": "1.0.0",
+    "exactBasename": ".env.example",
+    "requiredTracking": "TRACKED",
+    "allowedMode": "100644",
+    "maximumBytes": 32768,
+    "approvedContentSha256": [
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "e92ed4733c74f249c706950d8ff22185904f959f2cb61876b659607aff5b5e9e"
+    ]
+  },
   "gitTimeoutSeconds": 20,
   "maximumGitOutputBytes": 67108864,
   "maximumFiles": 20000,

@@ -4,6 +4,8 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -319,6 +321,122 @@ def test_tracked_secret_path_is_refused_before_blob_admission(
     assert str(repository) not in serialized
 
 
+def test_policy_approved_exact_public_template_bytes_are_receipted(
+    tmp_path: Path,
+) -> None:
+    repository = _repository(
+        tmp_path,
+        {"nested/.env.example": b"", "src/alpha.txt": b"alpha"},
+    )
+    (repository / "src" / "alpha.txt").write_bytes(b"changed")
+
+    artifact = _producer(repository).capture(repository).artifact
+
+    assert artifact is not None
+    assert artifact.schema_version == "1.1.0"
+    assert [item.side for item in artifact.public_template_admissions] == [
+        "BASE",
+        "CANDIDATE",
+    ]
+    assert all(
+        item.guarantee == "POLICY_APPROVED_EXACT_TEMPLATE_BYTES"
+        for item in artifact.public_template_admissions
+    )
+    assert all(
+        item.content_sha256 == hashlib.sha256(b"").hexdigest()
+        for item in artifact.public_template_admissions
+    )
+
+
+def test_public_template_exact_byte_miss_on_either_side_fails_without_content(
+    tmp_path: Path,
+) -> None:
+    canary = b"API_KEY=do-not-publish-this-canary"
+    unsafe_base = _repository(
+        tmp_path / "base",
+        {".env.example": canary, "ordinary.txt": b"before"},
+    )
+    (unsafe_base / "ordinary.txt").write_bytes(b"after")
+    base_evaluation = _producer(unsafe_base).capture(unsafe_base)
+
+    assert ChangeVerificationGapCode.SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED in _codes(
+        base_evaluation
+    )
+    assert base_evaluation.artifact is None
+    assert canary.decode() not in base_evaluation.model_dump_json()
+
+    unsafe_candidate = _repository(
+        tmp_path / "candidate",
+        {".env.example": b"", "ordinary.txt": b"before"},
+    )
+    (unsafe_candidate / ".env.example").write_bytes(canary)
+    candidate_evaluation = _producer(unsafe_candidate).capture(unsafe_candidate)
+
+    assert ChangeVerificationGapCode.SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED in _codes(
+        candidate_evaluation
+    )
+    assert candidate_evaluation.artifact is None
+    assert canary.decode() not in candidate_evaluation.model_dump_json()
+
+
+@pytest.mark.parametrize(
+    "locator",
+    [".ENV.EXAMPLE", ".env.example.local", ".env.local", "nested/.env.production"],
+)
+def test_public_template_near_matches_remain_unconditionally_refused(
+    tmp_path: Path, locator: str
+) -> None:
+    repository = _repository(tmp_path, {locator: b"", "ordinary.txt": b"before"})
+    (repository / "ordinary.txt").write_bytes(b"after")
+
+    evaluation = _producer(repository).capture(repository)
+
+    assert ChangeVerificationGapCode.SENSITIVE_PATH_REFUSED in _codes(evaluation)
+    assert evaluation.artifact is None
+
+
+def test_untracked_or_oversized_public_template_is_refused(tmp_path: Path) -> None:
+    repository = _repository(tmp_path)
+    (repository / ".env.example").write_bytes(b"")
+    untracked = _producer(repository).capture(repository)
+    assert ChangeVerificationGapCode.SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED in _codes(untracked)
+
+    producer = _producer(repository)
+    with pytest.raises(Exception, match="SENSITIVE_TEMPLATE_DIGEST_NOT_APPROVED"):
+        producer._require_public_template_metadata(
+            ".env.example",
+            "100644",
+            "TRACKED",
+            producer.policy.public_template_admission.maximum_bytes + 1,
+        )
+
+
+def test_public_template_admission_receipts_cannot_be_omitted_or_forged(
+    tmp_path: Path,
+) -> None:
+    repository = _repository(
+        tmp_path,
+        {".env.example": b"", "ordinary.txt": b"before"},
+    )
+    (repository / "ordinary.txt").write_bytes(b"after")
+    artifact = _producer(repository).capture(repository).artifact
+    assert artifact is not None
+
+    for mutation in (
+        [],
+        [
+            artifact.public_template_admissions[0].model_copy(update={"path_sha256": "f" * 64}),
+            artifact.public_template_admissions[1],
+        ],
+    ):
+        body = artifact.model_dump(mode="json")
+        body["public_template_admissions"] = [item.model_dump(mode="json") for item in mutation]
+        unsigned = {key: value for key, value in body.items() if key != "manifest_sha256"}
+        body["manifest_sha256"] = change_verification.stable_sha256(unsigned)
+        with pytest.raises(ValidationError):
+            VerifiedChangeSet.model_validate(body)
+
+
 def test_secret_preflight_occurs_before_any_repository_blob_read(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -487,18 +605,18 @@ def test_commit_during_second_byte_capture_is_refused(
     original = LocalGitChangeProducer._read_candidate_files
     calls = 0
 
-    def commit_on_second_read(self, root, paths, index, base_files):
+    def commit_on_second_read(
+        self, root, paths, index, base_files, public_template_paths=frozenset()
+    ):
         nonlocal calls
-        files = original(self, root, paths, index, base_files)
+        files = original(self, root, paths, index, base_files, public_template_paths)
         calls += 1
         if calls == 2:
             _run(root, "add", "--all")
             _run(root, "commit", "--quiet", "-m", "concurrent commit")
         return files
 
-    monkeypatch.setattr(
-        LocalGitChangeProducer, "_read_candidate_files", commit_on_second_read
-    )
+    monkeypatch.setattr(LocalGitChangeProducer, "_read_candidate_files", commit_on_second_read)
 
     evaluation = producer.capture(repository)
 
@@ -527,20 +645,112 @@ def test_capacity_is_checked_before_candidate_or_base_content_read(
     with pytest.raises(Exception, match="CAPACITY_EXCEEDED"):
         producer._read_candidate_files(repository, ["large.bin"], {}, ())
 
-    calls: list[tuple[str, ...]] = []
+    batch_calls: list[tuple[str, ...]] = []
 
-    def size_only(_producer: LocalGitChangeProducer, root: Path, *arguments: str) -> bytes:
+    def oversized_batch(root: Path, object_ids: tuple[str, ...], **kwargs) -> dict[str, bytes]:
         assert root == repository
-        calls.append(arguments)
-        if arguments[:2] == ("cat-file", "-s"):
-            return b"5\n"
-        raise AssertionError("oversized base blob content was read")
+        assert kwargs["maximum_file_bytes"] == 4
+        batch_calls.append(object_ids)
+        raise OverflowError("declared blob is oversized")
 
-    monkeypatch.setattr(LocalGitChangeProducer, "_git", size_only)
+    monkeypatch.setattr(change_verification, "read_git_blobs_batch", oversized_batch)
     record = change_verification._TreeRecord("large.bin", "100644", "0" * 40)
     with pytest.raises(Exception, match="CAPACITY_EXCEEDED"):
         producer._read_base_files(repository, (record,))
-    assert calls == [("cat-file", "-s", "0" * 40)]
+    assert batch_calls == [("0" * 40,)]
+
+
+def test_batch_blob_reader_rejects_malformed_framing_and_oversized_declarations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    object_id = "a" * 40
+
+    def malformed(*args, **kwargs):
+        del args, kwargs
+        return subprocess.CompletedProcess([], 0, b"malformed\n", b"")
+
+    monkeypatch.setattr(change_verification, "_run_git_batch", malformed)
+    with pytest.raises(ValueError, match="header"):
+        change_verification.read_git_blobs_batch(
+            tmp_path,
+            (object_id,),
+            timeout_seconds=1,
+            maximum_file_bytes=10,
+            maximum_total_bytes=10,
+            maximum_stderr_bytes=1024,
+        )
+
+    def oversized(*args, **kwargs):
+        del args, kwargs
+        return subprocess.CompletedProcess(
+            [], 0, f"{object_id} blob 11\n".encode() + b"x" * 11 + b"\n", b""
+        )
+
+    monkeypatch.setattr(change_verification, "_run_git_batch", oversized)
+    with pytest.raises(OverflowError, match="configured bound"):
+        change_verification.read_git_blobs_batch(
+            tmp_path,
+            (object_id,),
+            timeout_seconds=1,
+            maximum_file_bytes=10,
+            maximum_total_bytes=10,
+            maximum_stderr_bytes=1024,
+        )
+
+
+def test_git_batch_deadline_covers_blocked_large_stdin_write() -> None:
+    started = time.monotonic()
+    with pytest.raises(subprocess.TimeoutExpired):
+        change_verification._run_git_batch(
+            [sys.executable, "-c", "import time; time.sleep(10)"],
+            b"x" * (8 * 1024 * 1024),
+            timeout_seconds=1,
+            maximum_stdout_bytes=1024,
+            maximum_stderr_bytes=1024,
+        )
+    assert time.monotonic() - started < 2.5
+
+
+def test_base_blob_process_count_is_constant_for_many_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _repository(
+        tmp_path,
+        {f"src/item-{index:03d}.txt": f"value-{index}\n".encode() for index in range(25)},
+    )
+    (repository / "src" / "item-000.txt").write_bytes(b"changed\n")
+    actual = change_verification._run_git_batch
+    batch_count = 0
+
+    def counted(*args, **kwargs):
+        nonlocal batch_count
+        batch_count += 1
+        return actual(*args, **kwargs)
+
+    monkeypatch.setattr(change_verification, "_run_git_batch", counted)
+
+    evaluation = _producer(repository).capture(repository)
+
+    assert evaluation.artifact is not None
+    assert len(evaluation.artifact.base_files) == 25
+    assert batch_count == 1
+
+
+def test_bound_verification_rejects_candidate_bytes_changed_under_same_status(
+    tmp_path: Path,
+) -> None:
+    repository = _repository(tmp_path)
+    candidate = repository / "src" / "alpha.txt"
+    candidate.write_bytes(b"first change\n")
+    producer = _producer(repository)
+    captured = producer.capture(repository)
+    assert captured.artifact is not None
+
+    candidate.write_bytes(b"second change\n")
+    replay = producer.verify_bound(captured.artifact, repository)
+
+    assert replay.artifact is None
+    assert ChangeVerificationGapCode.CONCURRENT_MUTATION in _codes(replay)
 
 
 def test_clean_and_unborn_repositories_never_seal_empty_scope(tmp_path: Path) -> None:

@@ -108,7 +108,7 @@ def test_policy_covers_source_graph_node_roles_that_are_not_business_impacts() -
     assert policy.retrieval_eval_set_id == "retrieval-boundaries-v1"
     assert policy.schema_version == "2.0.0"
     assert policy.ontology_id == "change-evidence-core"
-    assert policy.ontology_version == "1.0.0"
+    assert policy.ontology_version == "1.1.0"
     assert len(policy.ontology_sha256) == 64
     assert len(policy.policy_sha256) == 64
     assert Path(policy.retrieval_eval_set_path).name == "retrieval-boundaries-v1.json"

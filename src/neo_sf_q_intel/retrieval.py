@@ -12,6 +12,7 @@ from neo_sf_q_intel.salesforce_source import (
     SalesforceSourceSnapshot,
     node_to_evidence,
 )
+from neo_sf_q_intel.temporal import parse_aware_utc
 
 TOKEN_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9_.-]{2,}")
 
@@ -258,9 +259,7 @@ class EvidenceRetriever:
     def _edge_trust_gaps(self, edge: dict[str, Any]) -> tuple[str, ...]:
         return self._record_trust_gaps(edge, record_type="EDGE")
 
-    def _record_trust_gaps(
-        self, record: dict[str, Any], *, record_type: str
-    ) -> tuple[str, ...]:
+    def _record_trust_gaps(self, record: dict[str, Any], *, record_type: str) -> tuple[str, ...]:
         normalization_gaps = record.get("ontologyTrustGaps")
         if isinstance(normalization_gaps, list) and normalization_gaps:
             return tuple(sorted({str(code) for code in normalization_gaps}))
@@ -293,11 +292,9 @@ class EvidenceRetriever:
         valid_until = record.get("validUntil")
         if valid_until:
             try:
-                expires = datetime.fromisoformat(str(valid_until).replace("Z", "+00:00"))
+                expires = parse_aware_utc(str(valid_until))
             except ValueError:
                 return (f"{record_type}_EXPIRY_INVALID",)
-            if expires.tzinfo is None:
-                expires = expires.replace(tzinfo=UTC)
             if expires <= datetime.now(UTC):
                 return (f"{record_type}_EXPIRED",)
         return ()

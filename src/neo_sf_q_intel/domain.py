@@ -76,6 +76,7 @@ class ChangeIntent(StrEnum):
     INFORMATIONAL = "INFORMATIONAL"
     PLANNED_CHANGE = "PLANNED_CHANGE"
     OBSERVED_CHANGE = "OBSERVED_CHANGE"
+    VERIFIED_CHANGE = "VERIFIED_CHANGE"
 
 
 class TestOutcome(StrEnum):
@@ -101,6 +102,28 @@ class ChangeRequest(StrictModel):
     change_intent: ChangeIntent = ChangeIntent.INFORMATIONAL
     project_id: str | None = Field(default=None, min_length=1, max_length=200)
     source_ref: str = "working-tree"
+    verified_change_manifest_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    verified_operation_seed_sha256: str | None = Field(
+        default=None, pattern=r"^[a-f0-9]{64}$"
+    )
+    verified_seed_ids: list[str] = Field(default_factory=list, max_length=500)
+
+    @model_validator(mode="after")
+    def require_verified_change_bindings(self) -> ChangeRequest:
+        bindings = (
+            self.verified_change_manifest_sha256,
+            self.verified_operation_seed_sha256,
+        )
+        if self.change_intent is ChangeIntent.VERIFIED_CHANGE:
+            if not all(bindings) or not self.verified_seed_ids:
+                raise ValueError("Verified change intent requires exact artifact and seed bindings")
+            if self.verified_seed_ids != sorted(set(self.verified_seed_ids)):
+                raise ValueError("Verified seed IDs must be sorted and unique")
+        elif any(bindings) or self.verified_seed_ids:
+            raise ValueError("Unverified change intent cannot carry verified artifact bindings")
+        return self
 
 
 class EvidenceRef(StrictModel):

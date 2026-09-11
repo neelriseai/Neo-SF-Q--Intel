@@ -16,6 +16,13 @@ corrupt, cross-project or inconsistent history. PostgreSQL and SQLite prevent ro
 PostgreSQL also blocks table truncation. The remaining chunk, graph, audit, approval and evaluation
 ports stay `FOUNDATION`; DDL alone is never reported as completed runtime behavior.
 
+All PostgreSQL adapters and LangGraph's checkpoint saver use one configurable private schema,
+`POSTGRES_SCHEMA` (default `neo_sf_q_intel`). Operational connections set that schema as the entire
+`search_path`. Setup creates the schema using a safely quoted identifier and requires an exact
+product/layout ownership marker before running any migration that can alter an object. A pre-existing
+non-empty unmarked schema is refused. Existing Neo-like table names in `public` are deliberately left
+untouched and are not auto-imported; moving legacy data requires a separately reviewed migration.
+
 If PostgreSQL is missing or unreachable, run storage automatically uses the configured SQLite
 database. Outcome storage independently falls back through auto-created SQLite, immutable JSON and
 a declared process cache. Health separates liveness from persistence readiness and reports
@@ -25,8 +32,10 @@ classified backend unavailability; schema defects, corruption, policy/replay fai
 conflicts and ambiguous writes fail closed without switching stores. The versioned contract,
 project index and evidence graph remain available from defined JSON artifacts.
 
-This is an A7 `FOUNDATION`, not completed historical intelligence. PostgreSQL behavior still needs a
-live transaction/concurrency verification on the target machine. JSON publication is atomic per
+This is an A7 `FOUNDATION`, not completed historical intelligence. A target-database startup smoke
+has verified private-schema table placement, exact checkpoint search path, unchanged pre-existing
+`public` table names, and tolerance of an unrelated installed pgvector extension/vector columns.
+PostgreSQL transaction/concurrency behavior still needs a dedicated verification. JSON publication is atomic per
 receipt and record but not a multi-file transaction; an identical retry repairs a receipt left by a
 crash, while a conflicting retry remains refused. HTTP/MCP exposure, signed or independently
 anchored tamper evidence, historical-policy replay, remaining outcome kinds and an adjudicated
@@ -76,7 +85,7 @@ the current in-process implementation and the future ChromaDB adapter interchang
 - The LLM may propose `SEMANTICALLY_RELATED`, `SUPPORTS` or `CONTRADICTS` edges.
 - The LLM cannot create confirmed `READS`, `WRITES`, `CALLS`, `GRANTS_ACCESS_TO` or `TESTS` edges.
 - Snapshot mismatch invalidates earlier decisions.
-- The supplied Salesforce graph is ingested from the configured sibling repository and is never silently replaced by an LLM-extracted graph.
+- The supplied Salesforce graph is ingested from the configured sibling repository and is never silently replaced by an LLM-extracted graph. Its generator writes the canonical graph first and a project index containing the exact normalized graph digest last. Neo requires that generated binding and the indexed source snapshot to agree, so a stale or torn publication fails closed while routine catalog regeneration needs no copied environment digest.
 - Canonical node/relation classes and legal endpoint signatures are implemented in the source-
   independent ontology. The Salesforce source profile exhaustively maps its current vocabulary;
   changing a source vocabulary requires a new profile rather than editing core policy. Both

@@ -1,55 +1,295 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "foundation-dashboard-projection-2026-09-10",
-  "status": "APPROVED",
+  "reviewId": "development-stop-checkpoint-2026-09-11",
+  "status": "IN_PROGRESS",
   "reviewedPaths": [
-    ".env.example",
+    "AGENTS.md",
+    "Docs/00-product-scope.md",
+    "Docs/01-architecture.md",
+    "Docs/02-domain-contracts.md",
+    "Docs/03-data-memory-and-retrieval.md",
+    "Docs/04-agent-orchestration.md",
+    "Docs/05-connectors-and-mcp.md",
+    "Docs/06-ui-automation-and-healing.md",
     "Docs/08-roadmap-24h.md",
-    "Docs/10-graph-grounded-agent-reasoning.md",
-    "Docs/11-api-ui-and-mcp-experience.md",
+    "Docs/09-demo-scenarios.md",
+    "Docs/15-development-assurance-process.md",
+    "Docs/17-solution-readiness-audit.md",
+    "Docs/18-live-salesforce-demo-execution-contract.md",
+    "Docs/20-source-operation-declarations.md",
+    "Docs/21-development-stop-checkpoint-2026-09-11.md",
+    "Docs/README.md",
+    "README.md",
     "apps/web/src/app/page.tsx",
     "apps/web/src/app/styles.css",
     "apps/web/src/components/foundation-evidence-panel.tsx",
-    "apps/web/src/lib/foundation-client.ts",
+    "apps/web/src/lib/candidate-client.ts",
     "apps/web/src/lib/foundation-contract.ts",
-    "apps/web/src/lib/foundation-view-model.ts",
+    "apps/web/src/lib/live-campaign-client.ts",
+    "apps/web/src/lib/types.ts",
+    "config/analysis-risk-policy.json",
     "config/capability-scope.json",
-    "knowledge/application-graph.json",
-    "knowledge/project-index.json",
-    "packages/browser/tests/dashboard.spec.ts",
-    "quality/reviews/2026-09-10-foundation-dashboard-projection.md",
-    "quality/reviews/current-scope-review.json"
+    "config/change-seed-policy.json",
+    "config/complete-path-replay-policy.json",
+    "config/foundation-pipeline-policy.json",
+    "config/graph-producer-policy.json",
+    "config/live-salesforce-acceptance-profile.json",
+    "config/live-target-policy.json",
+    "config/ontology/canonical-ontology.json",
+    "config/operation-seed-policy.json",
+    "config/propagation-policy.json",
+    "config/quality-policy.json",
+    "config/reasoning-policy.json",
+    "config/release-input-policy.json",
+    "config/requirement-registry.json",
+    "config/source-profiles/salesforce-application-graph.json",
+    "config/source-profiles/salesforce-dx-semantic-graph.json",
+    "config/source-profiles/source-operation-declarations.schema.json",
+    "config/specialist-policy.json",
+    "config/verified-change-policy.json",
+    "migrations/001_assurance_runs.sql",
+    "migrations/002_remove_postgres_embeddings.sql",
+    "migrations/003_outcome_memory.sql",
+    "packages/browser/src/browser-recovery.ts",
+    "packages/browser/src/browser-worker.ts",
+    "packages/browser/src/healing-probe.ts",
+    "packages/browser/src/live-smoke-cli.ts",
+    "packages/browser/src/locator-healer.ts",
+    "packages/browser/src/salesforce-browser-coordinator.ts",
+    "packages/browser/src/salesforce-cli-session.ts",
+    "scripts/catalog/build_project_index.py",
+    "scripts/quality/check_genericity.py",
+    "src/neo_sf_q_intel/analysis.py",
+    "src/neo_sf_q_intel/api.py",
+    "src/neo_sf_q_intel/candidate_assurance.py",
+    "src/neo_sf_q_intel/candidate_live_targets.py",
+    "src/neo_sf_q_intel/candidate_target_compiler.py",
+    "src/neo_sf_q_intel/classification_bootstrap.py",
+    "src/neo_sf_q_intel/change_seed.py",
+    "src/neo_sf_q_intel/change_verification.py",
+    "src/neo_sf_q_intel/config.py",
+    "src/neo_sf_q_intel/domain.py",
+    "src/neo_sf_q_intel/execution_assertions.py",
+    "src/neo_sf_q_intel/foundation_pipeline.py",
+    "src/neo_sf_q_intel/graph_production.py",
+    "src/neo_sf_q_intel/live_baseline.py",
+    "src/neo_sf_q_intel/live_campaign_status.py",
+    "src/neo_sf_q_intel/live_healing.py",
+    "src/neo_sf_q_intel/live_healing_bridge.py",
+    "src/neo_sf_q_intel/live_read_evidence.py",
+    "src/neo_sf_q_intel/live_receipt_ledger.py",
+    "src/neo_sf_q_intel/live_receipt_producer.py",
+    "src/neo_sf_q_intel/live_receipts.py",
+    "src/neo_sf_q_intel/live_target_plan.py",
+    "src/neo_sf_q_intel/local_validation.py",
+    "src/neo_sf_q_intel/local_validation_phase.py",
+    "src/neo_sf_q_intel/local_validation_runner.py",
+    "src/neo_sf_q_intel/metadata_recovery.py",
+    "src/neo_sf_q_intel/metadata_recovery_host.py",
+    "src/neo_sf_q_intel/mcp_server.py",
+    "src/neo_sf_q_intel/operation_seed.py",
+    "src/neo_sf_q_intel/outcome_repository.py",
+    "src/neo_sf_q_intel/path_replay.py",
+    "src/neo_sf_q_intel/phase_policy_proposal.py",
+    "src/neo_sf_q_intel/postgres_schema.py",
+    "src/neo_sf_q_intel/preflight.py",
+    "src/neo_sf_q_intel/propagation.py",
+    "src/neo_sf_q_intel/providers.py",
+    "src/neo_sf_q_intel/release_input.py",
+    "src/neo_sf_q_intel/repository.py",
+    "src/neo_sf_q_intel/salesforce_cli.py",
+    "src/neo_sf_q_intel/salesforce_source.py",
+    "src/neo_sf_q_intel/service.py",
+    "src/neo_sf_q_intel/specialist.py",
+    "src/neo_sf_q_intel/subprocess_environment.py"
   ],
   "reviewers": [
-    "r01_genericity_review",
-    "r01_governance_review",
-    "r01_edge_builder"
+    "astra_final_solution_review",
+    "astra_live_integration_review",
+    "astra_final_safe_review",
+    "integration_genericity_audit",
+    "candidate_live_target_resume",
+    "candidate_contract_hardening",
+    "compiler_p1_repairs",
+    "live_executor_hardening",
+    "astra_locator_probe_review",
+    "checkpoint_documentation_review"
   ],
   "findings": [
     {
-      "code": "FOUNDATION_UI_RUNTIME_CONTRACT",
-      "severity": "P1",
-      "resolution": "The browser bounds every response and accepts no stage data until exact authority, stage, capability, permanent-gap, receipt-lineage, timestamp and canonical-digest contracts replay successfully."
+      "code": "MCP_NONPRODUCTION_AUTHORIZATION_BOUNDARY",
+      "severity": "P0",
+      "resolution": "The shared no-argument service, FastAPI route and MCP tool accept no alias, path, target, scope, receipt, runner or campaign input. They remain typed unavailable until exact private host authority and phase-policy files are reviewed and pinned; non-production classification is independently derived at runtime."
     },
     {
-      "code": "FOUNDATION_UI_RELEASE_INTERLOCK",
-      "severity": "P1",
-      "resolution": "The panel permanently displays analysis-only, evidence-incomplete and release-ineligible status and explicitly excludes live-org, deploy, build, test, approval and release claims."
+      "code": "CHILD_PROCESS_SECRET_ENVIRONMENT_ISOLATION",
+      "severity": "P0",
+      "resolution": "One case-insensitive minimal environment builder now strips OpenAI, Azure, database, HMAC, token, auth-profile and Neo secret variables from Python CLI and preflight children while preserving executable lookup, OS, Salesforce credential-store, proxy and certificate controls."
     },
     {
-      "code": "FOUNDATION_UI_STATE_ISOLATION",
-      "severity": "P1",
-      "resolution": "Foundation capture owns separate request and view state; it cannot mutate AssuranceRun, and refresh, malformed, network, timeout, supersession or expiry paths remove older evidence."
+      "code": "POSTGRES_PRIVATE_SCHEMA_OWNERSHIP",
+      "severity": "P0",
+      "resolution": "Neo PostgreSQL adapters and migrations use a validated private configurable schema, ownership marker and schema-only search path; unrelated public tables, extensions and types are neither adopted nor rejected as Neo state."
     },
     {
-      "code": "FOUNDATION_UI_GENERIC_HOST_BUDGET",
-      "severity": "P1",
-      "resolution": "The capture timeout is validated host configuration with a five-minute default and a 30-second to 15-minute range, avoiding a demo-scale repository assumption."
+      "code": "LIVE_COMPLETION_FALSE_PASS",
+      "severity": "P0",
+      "resolution": "Runtime status is forbidden in the acceptance profile, SATISFIED requirements require current durable receipt replay, and the successful real browser diagnostic remains diagnostic-only, release-ineligible and worth zero acceptance credit."
     },
     {
-      "code": "FOUNDATION_UI_ACCESSIBLE_PRESENTATION",
+      "code": "LIVE_TARGET_AND_DATA_SCOPE",
+      "severity": "P0",
+      "resolution": "An offline-tested source-derived target producer and default-deny host planner bind complete REST, metadata, Apex, browser and dataset obligations without granting authority; omitted, extra, expired, wildcard or caller-widened targets block the plan."
+    },
+    {
+      "code": "DEPLOYMENT_RECOVERY_AUTHORITY",
+      "severity": "P0",
+      "resolution": "The definition-only live profile requires independent mutation and pre-authorized recovery permits, post-dispatch restoration, reconciliation and quarantine; no current module or receipt authorizes deployment."
+    },
+    {
+      "code": "EXECUTION_EVIDENCE_FORGERY",
+      "severity": "P0",
+      "resolution": "Receipt production now resolves an independently compiled durable expected-execution contract, rehashes embedded sanitized result bytes and their index, authenticates the runner with a configured key, and compares exact execution, version, assertion, predicate, cardinality, projection, metadata-member and dataset roots. Fabricated execution/version/predicate/result roots and signed-but-undurable expectation receipts fail focused tests."
+    },
+    {
+      "code": "BROWSER_RECOVERY_REPLAY_AND_TOCTOU",
+      "severity": "P0",
+      "resolution": "The offline recovery executor snapshots and freezes the validated request before awaits, binds the expected-execution-contract root, atomically claims each permit once in durable storage, revalidates expiry/origin/org/actor immediately before action, and proves changed readback, exact restoration and cleanup. Production coordination remains read-only."
+    },
+    {
+      "code": "LOCAL_NODE_TEST_EVENT_FORGERY",
+      "severity": "P0",
+      "resolution": "Independent adversarial review proved that candidate-controlled Node output could counterfeit test-runner event framing. Production NODE_TEST attestation is now refused before process creation, child-process permission is prohibited, and no signed local PASS can be minted. Exact host-pinned phase policy may defer only known non-runtime obligations for the fixed read-only baseline; the same obligations remain unresolved and blocking for candidate, deployment, restoration and release phases."
+    },
+    {
+      "code": "POLICY_PROFILE_IDENTITY_MIGRATION",
+      "severity": "P1",
+      "resolution": "Ontology, source-profile and dependent policy and module pins were migrated atomically to a fixed point and verified through the default loaders."
+    },
+    {
+      "code": "REQUIREMENT_ACCEPTANCE_TRACEABILITY",
+      "severity": "P1",
+      "resolution": "The registry maps all 36 capabilities exactly once across seven product requirements and now names exact offline identity, transport, local-proof, phase-deferral, completed-baseline and cache-replay test nodes; every currentReceiptIds list remains empty and incomplete evidence stays nonaccepted."
+    },
+    {
+      "code": "PROJECT_GRAPH_INTEGRITY",
+      "severity": "P1",
+      "resolution": "The AUT catalog remains the separately generated source graph at 1,014 nodes and 3,700 edges. The Neo project index and knowledge graph were regenerated after live-read, concurrency, timezone and status-document changes at 289 files and 892 edges; the freshness check passed."
+    },
+    {
+      "code": "STRICT_BOUND_GRAPH_REPLAY",
+      "severity": "P1",
+      "resolution": "Astra found that bound graph verification could use a weaker partial verifier; verify_bound now delegates to strict complete-path replay and the focused post-fix regression set passed."
+    },
+    {
+      "code": "CANDIDATE_ASSURANCE_ATOMIC_BUNDLE",
+      "severity": "P1",
+      "resolution": "Base and candidate runs plus their bounded bundle publish atomically with exact identities; checkpoints remain explicitly outside that transaction and the resulting persistence gap blocks crash-safe resume claims."
+    },
+    {
+      "code": "LIVE_RECEIPT_VALIDATOR_LEDGER_STATUS",
+      "severity": "P1",
+      "resolution": "Strict signed receipt validation, issuer separation, exact-byte append storage, expected-contract-aware production, realistic Salesforce CLI execution, host baseline composition and a shared no-argument service/API/MCP boundary pass offline integration tests. Machine-local authority was issued for read-only non-production campaigns. No SF-L03/SF-L04/SF-L05 passing receipt exists because the atomic campaign correctly blocked on current source versus deployed custom-REST schema drift; zero partial observations were accepted."
+    },
+    {
+      "code": "BROWSER_DIAGNOSTIC_NON_ACCEPTANCE",
+      "severity": "P1",
+      "resolution": "The fixed-alias real-org browser diagnostic passed with nonpersistent cleanup, but it emitted no signed receipt, performed no authorized apply and cannot satisfy SF-L06, SF-L07, SF-L09 or SF-C05."
+    },
+    {
+      "code": "TRUTHFUL_READINESS_BOUNDARY",
+      "severity": "P1",
+      "resolution": "Documentation separates deterministic and mocked foundations, the diagnostic browser pass and real candidate benchmark from product-owned live execution, durable receipts and release evidence."
+    },
+    {
+      "code": "LIVE_SALESFORCE_NON_SUBSTITUTION",
+      "severity": "P1",
+      "resolution": "Nine baseline/browser and six candidate/recovery gates remain distinct; fixtures, mocks, diagnostics, manual observations, baseline and check-only evidence cannot satisfy incompatible live phases."
+    },
+    {
+      "code": "LIVE_SESSION_SUBJECT_AND_CLI_COMPATIBILITY",
+      "severity": "P1",
+      "resolution": "The classification bootstrap now reconciles the active access-token subject twice through fixed userinfo reads, verifies the organization and active User by the observed IDs, and treats display alias as informational. REST execution validates the installed CLI status/result/statusCode/headers/body envelope, requires exact 2xx JSON bodies and normalizes API versions so source routes contain one version prefix."
+    },
+    {
+      "code": "LIVE_SOURCE_ORG_SCHEMA_DRIFT",
+      "severity": "P1",
+      "resolution": "Two product-owned read-only campaigns and a bounded seven-record diagnostic proved the endpoint is reachable with HTTP 200, but the deployed org returns schema 1.0.0 without the source-contract 1.1.0 history parent binding. Neo reports LIVE_READ_RESPONSE_INVALID, stores no partial passing observation and does not weaken the oracle. Check-only, deployment and restoration remain blocked pending separate current-task mutation authority."
+    },
+    {
+      "code": "TIMEZONE_PORTABILITY_AND_SIGNATURE_COMPATIBILITY",
+      "severity": "P1",
+      "resolution": "Authoritative timestamp ingress rejects naive and unknown-offset values and normalizes known offsets to UTC before chronology and expiry checks. PostgreSQL sessions use UTC independently of server defaults; Git display timezone is not authority. Existing UTC canonical documents and signatures remain byte-identical. Astra's four-timezone PostgreSQL probe, DST-fold cases, expiry/revocation cases and full regression passed."
+    },
+    {
+      "code": "LOCAL_PROOF_AGGREGATE_AND_PHASE_REPLAY",
+      "severity": "P1",
+      "resolution": "Required local evidence is aggregate-verified from exact durable artifact and receipt bytes before any Salesforce subprocess and reverified during composition and cached replay. Deferred read-only obligations remain typed unresolved objects bound to the source, candidate tree, host phase policy and exact SF-L03/SF-L04/SF-L05 gate set; they cannot become PASS or widen execution."
+    },
+    {
+      "code": "QUALITY_POLICY_SELF_PROTECTION",
+      "severity": "P1",
+      "resolution": "Controlled-root union and bootstrap-protected quality paths prevent working-tree policy changes from exempting themselves; this manifest lists every current controlled changed path."
+    },
+    {
+      "code": "FOUNDATION_BROWSER_POLICY_IDENTITY",
+      "severity": "P1",
+      "resolution": "The browser contract requires backend pipeline policy version 1.0.1 and rejects the stale 1.0.0 version."
+    },
+    {
+      "code": "CLIENT_HYDRATION_ACTION_GUARD",
+      "severity": "P1",
+      "resolution": "A real-browser lost-click race was fixed by disabling candidate capture with a truthful preparing label until hydration; independent inspection found no weakened request, evidence, release, focus or keyboard assertion."
+    },
+    {
+      "code": "FINAL_GOVERNANCE_EVIDENCE_REVIEW",
+      "severity": "P1",
+      "resolution": "The final governance reviewer reported no P0 or new product defect; its stale-knowledge and missing-full-run procedural gaps were closed before approval."
+    },
+    {
+      "code": "FINAL_POST_FIX_VERIFICATION",
+      "severity": "P1",
+      "resolution": "The current full Python suite passed 1,547 tests with 3 explicit environment opt-in skips and zero failures in 1,521.73 seconds. TypeScript lint and the live-worker build passed; 46 Playwright worker/session/coordinator/healing/recovery tests and 21 Chromium dashboard E2E tests passed. Astra reported no P0/P1 timezone, concurrency or diagnostic-leakage finding. Live Salesforce acceptance remains separately blocked by the recorded deployed-schema drift."
+    },
+    {
+      "code": "GIT_BATCH_END_TO_END_DEADLINE",
       "severity": "P2",
-      "resolution": "Stage state is text as well as color; natural keyboard activation, ready-state announcements, arbitrary identifiers, wrapping and a 390-pixel viewport are verified."
+      "resolution": "Astra found the batch timeout covered only final process waiting; one bounded deadline now covers request writing, output draining and process completion."
+    },
+    {
+      "code": "DEFERRAL_BASELINE_CACHE_REPLAY_COVERAGE",
+      "severity": "P2",
+      "resolution": "Final Astra review found that a completed deferral-bearing baseline had only preflight coverage. A new real compiler/composer integration test now completes fixture SF-L01 through SF-L05, reconstructs all durable stores, replays with zero CLI dispatch, preserves every unresolved obligation and exact phase-policy identity, emits no local-validation PASS and remains release-ineligible."
+    },
+    {
+      "code": "METADATA_RECOVERY_TRANSACTION_HARDENING",
+      "severity": "P1",
+      "resolution": "Astra reproduced premature recovery, concurrent-drift overwrite, non-quiescent restart, dispatch-expiry and Metadata API named-test defects. The frozen offline adapter corrected those findings with exclusive ownership, independent durable fences, authenticated replay, quarantine and exact source-compiled preimage restoration; 150 tests passed with one Windows symlink-privilege skip. This is foundation evidence only."
+    },
+    {
+      "code": "BROWSER_PROBE_CLOSED_SCHEMA_GAP",
+      "severity": "P1",
+      "resolution": "Unresolved at the user-requested development stop: unknown nested keys can differentiate duplicate obligation hashes while selecting the same locator/control. The probe must enforce exact keys and align bounds with the Python contract before any live use. Eight focused tests pass but do not cover this final reproduced bypass."
+    },
+    {
+      "code": "DEPLOYMENT_APEX_CLASS_INVENTORY_GAP",
+      "severity": "P1",
+      "resolution": "Unresolved at the stop: Metadata API runs complete selected Apex classes while the source profile records method obligations. The bridge must source-capture and authorize each selected class's complete method inventory before check-only; NoTestRun or post-execution extra-method detection is not acceptable."
+    },
+    {
+      "code": "HOST_RECOVERY_FACTORY_INTERRUPTED",
+      "severity": "P1",
+      "resolution": "The new metadata recovery host factory and tests were interrupted before final independent review. They remain disabled and untrusted until exact transport, signed authority, durable frozen recovery evidence and no-retry behavior are rerun and reviewed."
+    },
+    {
+      "code": "DASHBOARD_PROCESS_AND_PROVIDER_RECOVERY",
+      "severity": "P2",
+      "resolution": "The unavailable dashboard was traced to stopped API and Next.js processes. Both were restarted, the provider child received one coherent dotenv credential source without displaying the secret, API health reported provider and persistence ready, the dashboard rendered visibly and 21 Chromium tests passed. Durable launch supervision remains an operational enhancement."
+    },
+    {
+      "code": "DEVELOPMENT_STOP_NON_EXECUTION_BOUNDARY",
+      "severity": "P1",
+      "resolution": "All implementation agents were stopped on user instruction. No Salesforce metadata mutation, check-only, candidate deploy, healing acceptance or restore operation occurred. The current review status is IN_PROGRESS; interrupted files and live gaps are documented in Docs/21-development-stop-checkpoint-2026-09-11.md."
     }
   ],
   "statusDowngrades": []

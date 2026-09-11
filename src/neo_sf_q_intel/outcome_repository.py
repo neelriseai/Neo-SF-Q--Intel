@@ -37,11 +37,17 @@ from neo_sf_q_intel.outcomes import (
     load_outcome_policy,
     validate_outcome_record,
 )
+from neo_sf_q_intel.postgres_schema import (
+    DEFAULT_POSTGRES_SCHEMA,
+    initialize_postgres_schema,
+    scoped_connection_string,
+)
 from neo_sf_q_intel.safety import (
     SensitiveTextError,
     contains_sensitive_text,
     require_no_sensitive_text,
 )
+from neo_sf_q_intel.temporal import aware_utc
 
 MAX_QUERY_LIMIT = 100
 MAX_SCOPE_CHARACTERS = 256
@@ -166,9 +172,7 @@ def _system_clock() -> datetime:
     return datetime.now(UTC)
 
 
-def _replay_append(
-    request: OutcomeAppendRequest, clock: Callable[[], datetime]
-) -> _ReplayedAppend:
+def _replay_append(request: OutcomeAppendRequest, clock: Callable[[], datetime]) -> _ReplayedAppend:
     if not isinstance(request, OutcomeAppendRequest):
         raise OutcomeReplayError("Outcome append requires an authority replay request")
     try:
@@ -176,9 +180,7 @@ def _replay_append(
         if not isinstance(now, datetime) or now.tzinfo is None or now.utcoffset() is None:
             raise ValueError("Repository clock must return an aware datetime")
         policy = load_outcome_policy()
-        evaluation = load_outcome_evaluation_contract(
-            expected_sha256=policy.evaluation_set_sha256
-        )
+        evaluation = load_outcome_evaluation_contract(expected_sha256=policy.evaluation_set_sha256)
         if not isinstance(request.predecessor_chain, tuple):
             raise TypeError("Predecessor chain must be an immutable tuple")
         if len(request.predecessor_chain) > policy.limits.maximum_incident_chain_depth:
@@ -305,7 +307,7 @@ def _outcome_digest(outcome_id: str) -> str:
 
 
 def _utc_text(value: datetime) -> str:
-    return value.astimezone(UTC).isoformat(timespec="microseconds")
+    return aware_utc(value).isoformat(timespec="microseconds")
 
 
 def _query_scope_sha256(
@@ -374,9 +376,7 @@ def _normalize_query(
 ) -> _Query:
     project = _validate_scope(project_id, "project_id")
     snapshot = (
-        _validate_scope(source_snapshot, "source_snapshot")
-        if source_snapshot is not None
-        else None
+        _validate_scope(source_snapshot, "source_snapshot") if source_snapshot is not None else None
     )
     try:
         supplied_kinds: list[OutcomeKind | str] = []
@@ -577,9 +577,7 @@ END;
 class SQLiteOutcomeRepository:
     """Self-creating SQLite adapter with database-enforced append-only rows."""
 
-    def __init__(
-        self, path: Path, *, clock: Callable[[], datetime] | None = None
-    ) -> None:
+    def __init__(self, path: Path, *, clock: Callable[[], datetime] | None = None) -> None:
         self.path = Path(path)
         self._clock = clock or _system_clock
         self.setup()
@@ -634,9 +632,7 @@ class SQLiteOutcomeRepository:
                     (project, validated.outcome_id),
                 ).fetchone()
                 if row is None:
-                    raise OutcomeCorruptionError(
-                        "Idempotency receipt references a missing outcome"
-                    )
+                    raise OutcomeCorruptionError("Idempotency receipt references a missing outcome")
                 return _validate_normalized_row(row)
             row = connection.execute(
                 "SELECT * FROM outcome_records WHERE project_id = ? AND outcome_id = ?",
@@ -645,9 +641,7 @@ class SQLiteOutcomeRepository:
             if row is not None:
                 existing = _validate_normalized_row(row)
                 if existing != validated:
-                    raise OutcomeConflictError(
-                        "Outcome identity is bound to different content"
-                    )
+                    raise OutcomeConflictError("Outcome identity is bound to different content")
             else:
                 connection.execute(
                     """INSERT INTO outcome_records (
@@ -783,13 +777,20 @@ class PostgresOutcomeRepository:
     """Primary relational adapter; PostgreSQL stores no vector representation."""
 
     def __init__(
-        self, database_url: str, *, clock: Callable[[], datetime] | None = None
+        self,
+        database_url: str,
+        *,
+        clock: Callable[[], datetime] | None = None,
+        schema: str = DEFAULT_POSTGRES_SCHEMA,
     ) -> None:
         self.database_url = database_url
+        self.schema = schema
+        self.connection_string = scoped_connection_string(database_url, schema)
         self._clock = clock or _system_clock
 
     def setup(self) -> None:
         with psycopg.connect(self.database_url) as connection:
+            initialize_postgres_schema(connection, self.schema)
             connection.execute(POSTGRES_OUTCOME_SCHEMA_SQL)
 
     def append(self, request: OutcomeAppendRequest, idempotency_key: str) -> OutcomeRecord:
@@ -798,7 +799,8 @@ class PostgresOutcomeRepository:
         document = replayed.document
         project = _validate_scope(validated.lineage.project_id, "project_id")
         key_digest = _idempotency_digest(idempotency_key)
-        with psycopg.connect(self.database_url, row_factory=dict_row) as connection:
+        with psycopg.connect(self.connection_string, row_factory=dict_row) as connection:
+
             def lookup(predecessor_project: str, outcome_id: str) -> OutcomeRecord | None:
                 row = connection.execute(
                     """SELECT * FROM outcome_records
@@ -866,7 +868,7 @@ class PostgresOutcomeRepository:
     def get(self, project_id: str, outcome_id: str) -> OutcomeRecord | None:
         project = _validate_scope(project_id, "project_id")
         _outcome_digest(outcome_id)
-        with psycopg.connect(self.database_url, row_factory=dict_row) as connection:
+        with psycopg.connect(self.connection_string, row_factory=dict_row) as connection:
             row = connection.execute(
                 "SELECT * FROM outcome_records WHERE project_id = %s AND outcome_id = %s",
                 (project, outcome_id),
@@ -912,7 +914,7 @@ class PostgresOutcomeRepository:
             + " AND ".join(clauses)
             + " ORDER BY recorded_at_utc DESC, outcome_id DESC LIMIT %s"
         )
-        with psycopg.connect(self.database_url, row_factory=dict_row) as connection:
+        with psycopg.connect(self.connection_string, row_factory=dict_row) as connection:
             rows = connection.execute(statement, tuple(parameters)).fetchall()
         records = [_validate_normalized_row(_postgres_normalized_row(row)) for row in rows]
         return _page(records, query)
@@ -929,9 +931,7 @@ def _postgres_normalized_row(row: Mapping[str, Any]) -> dict[str, Any]:
 class JsonOutcomeRepository:
     """Immutable one-record-per-file fallback with content-derived safe paths."""
 
-    def __init__(
-        self, root: Path, *, clock: Callable[[], datetime] | None = None
-    ) -> None:
+    def __init__(self, root: Path, *, clock: Callable[[], datetime] | None = None) -> None:
         self.root = Path(root)
         self._clock = clock or _system_clock
         self.root.mkdir(parents=True, exist_ok=True)
@@ -1024,8 +1024,7 @@ class JsonOutcomeRepository:
         if not self._exclusive_publish(receipt_path, receipt_bytes):
             persisted = self._read_json_object(receipt_path, "idempotency receipt")
             if set(persisted) != set(receipt) or any(
-                not isinstance(persisted.get(key), type(value))
-                for key, value in receipt.items()
+                not isinstance(persisted.get(key), type(value)) for key, value in receipt.items()
             ):
                 raise OutcomeCorruptionError(
                     "Persisted idempotency receipt has an invalid contract"

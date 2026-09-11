@@ -529,10 +529,10 @@ class AnalysisRiskResult(PolicyModel):
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _IDENTIFIER = re.compile(r"^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$")
 DEFAULT_PROPAGATION_POLICY_SHA256 = (
-    "66c83e8cb13b68cbffb363a582f0a3b5927f4ec04bddc3dcab5b560b02c2cdf5"
+    "d78b40d1bc78a5ac855d466dfb0adb600d44f071d2ea82741aa04c318d627395"
 )
 DEFAULT_ANALYSIS_RISK_POLICY_SHA256 = (
-    "57ab48f6c9016e20d599aee4ff9070e34b7583b566251ded78019d895c683e6a"
+    "6333b8275ee3f2aca1b291b5f5e4781ea52ca01820d58d82825b58564ea0071e"
 )
 
 

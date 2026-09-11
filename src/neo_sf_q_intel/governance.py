@@ -32,6 +32,7 @@ from neo_sf_q_intel.governance_policy import (
     MetricGate,
     ZeroDenominatorAction,
 )
+from neo_sf_q_intel.temporal import parse_aware_utc
 
 
 def build_grounded_claims(run: AssuranceRun) -> list[Claim]:
@@ -115,11 +116,9 @@ def _valid_evidence_at_release(evidence: object) -> bool:
     if not valid_until:
         return True
     try:
-        expires = datetime.fromisoformat(str(valid_until).replace("Z", "+00:00"))
+        expires = parse_aware_utc(str(valid_until))
     except ValueError:
         return False
-    if expires.tzinfo is None:
-        expires = expires.replace(tzinfo=UTC)
     return expires > datetime.now(UTC)
 
 

@@ -361,7 +361,7 @@ class CompletePathReplayEvaluation(PathReplayModel):
 
 
 DEFAULT_PATH_REPLAY_POLICY_SHA256 = (
-    "0c86193a76dd48dcdd04597e65ec202ba6cae61fc93537eee209df8bfdbc19aa"
+    "5e53fa0355e62fd95dae24153a9cc0f5d2cfe2a158bfb98adcb1b6b8fb8dafb1"
 )
 
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")

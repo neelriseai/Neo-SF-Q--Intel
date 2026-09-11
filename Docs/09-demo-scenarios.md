@@ -1,19 +1,46 @@
 # Demonstration scenarios
 
+> **Development stopped 2026-09-11.** This runbook remains non-authorizing and `NOT_READY`.
+> [The development stop checkpoint](21-development-stop-checkpoint-2026-09-11.md) records the open
+> browser-schema, Apex-test-inventory, host-factory and production-dispatch blockers.
+
+## Execution status
+
+All scenarios below are specifications until one current source-bound receipt proves the complete
+path. Offline unit/contract tests and mocked dashboard browser tests exist. Neo has not yet produced
+a live Salesforce, live provider, live PostgreSQL, trusted test-runner or real Salesforce browser
+receipt. Historical AUT deployment/API evidence is useful input but is not Neo runtime evidence.
+
+All live scenario claims must satisfy the corresponding gates in
+`config/live-salesforce-acceptance-profile.json`. Fixtures, mocks and injected outages test the
+contract but never satisfy a positive live gate. Every live assertion must say whether it concerns
+`LIVE_BASELINE`, `CANDIDATE_CHECK_ONLY`, `DEPLOYED_CANDIDATE` or `RESTORED_BASELINE`. If local
+candidate analysis is paired only with baseline evidence, the dashboard must say **candidate not
+deployed or validated live**.
+
 ## Scenario A — business-rule change
 
-Input a source/requirement change to a policy threshold. The current foundation can show trusted contract/graph ingestion, graph-supported impact, selected validations, evidence gaps and a deterministic posture. Live org evidence and trusted execution receipts are follow-up gates; policy values must come from the selected source contract, never platform literals.
+Input a source/requirement change to a policy threshold. The current foundation can show pinned,
+normalized contract/analysis-graph ingestion, graph-supported impact, selected validations,
+evidence gaps and a deterministic posture. It does not yet consume release-trusted current path
+receipts. The completed scenario requires live source-contract custom API assertions, scoped
+Metadata API retrieval, selected live Apex tests and post-deploy repeats bound to the exact
+candidate. Policy values must come from the selected source contract, never platform literals.
 
 ## Scenario B — permission change (target vertical)
 
 The current foundation can graph a declared permission-related source change and preserve mandatory
 test obligations when those facts exist in the source contract. The complete target adds live
-positive/negative authorization evidence, transport-versus-business-authority policy and a tested
+positive/negative persona authorization evidence, transport-versus-business-authority policy and a tested
 identity rule preventing administrator activity from being represented as VP approval.
 
 ## Scenario C — UI presentation change
 
-Analyze a presentation change and show an evidence-bound healing strategy. The complete demo additionally requires the planned browser worker to capture the current DOM, rank real candidates, abstain on ambiguity, require approval and preserve before/after Playwright evidence. Until then the dashboard must label the output as a strategy proposal, not an executed heal.
+Analyze a presentation change and show an evidence-bound healing strategy. The complete demo
+requires a classified live org, ephemeral in-memory Playwright session handoff, verified Lightning
+origin/persona, current DOM capture, real candidate ranking, ambiguity abstention, explicit approval,
+permitted application and live readback with before/after evidence. Only the final verified outcome
+may be called healed; until then it is a strategy proposal.
 
 ## Scenario D — governed degradation (partial now)
 
@@ -22,6 +49,68 @@ unverified in-run evidence, and an explicit `INCOMPLETE` decision plus sanitized
 fails. Loading an untrusted source fails closed before a run. Model-provider and live-Salesforce
 outage receipts become part of the scorecard only after those dependencies participate in the
 assurance workflow; the demo must not simulate that evidence meanwhile.
+Injected failures and real dependency failures are reported separately. An unknown external job
+state, failed restoration or unreconciled residue blocks candidate-campaign acceptance.
+
+## Operator runbook — live locator-healing demo (NOT_READY)
+
+This is the safe operator sequence for a future source-bound demo. It documents the existing
+interfaces and evidence boundary; it is not an instruction to mutate an org. The production
+authority, browser dispatch/observation producer, and durable acceptance-receipt bridge are not
+implemented, so the run must stop at the first unavailable step and remains `FOUNDATION` with zero
+acceptance credit. Never substitute a fixture, historical screenshot, open browser tab, or the
+diagnostic smoke for a live receipt.
+
+Prerequisites are: the configured non-production alias and actor are enrolled by the host; the
+exact local Git candidate tree (including intended uncommitted changes) is captured and pinned—no
+remote repository is required; the live acceptance profile and execution contract are current;
+the metadata/data restore rehearsal is current; a private task-scoped authority and recovery lease
+exist; and no other campaign owns the change window. Do not paste an alias, path, route, locator,
+session URL, record ID, or raw org payload into a caller request.
+
+Follow this exact sequence, recording only sanitized, digest-bound evidence:
+
+1. Run the repository preflight and stop on any policy, source, environment, or secret-safety
+   failure.
+2. Use the host-only `confirm_classification_only` flow with its literal operator confirmation.
+   Reconcile the fixed display, Organization, userinfo subject, and active User twice. This grants
+   no metadata, browser, test, or mutation authority.
+3. Run the no-argument host source/compiler composition. It must derive the complete target and
+   obligation inventory from the pinned source/graph/policy roots; caller-selected subsets are
+   invalid.
+4. Capture and authenticate the exact metadata preimage and residue/recovery roots into ignored
+   runtime storage. Preserve original property absence when the declaration permits `ABSENT`.
+5. Run complete candidate check-only validation for the exact isolated package and test inventory.
+   A partial check-only result is a stop condition.
+6. **Deploy is currently a placeholder.** Do not invoke a Salesforce deploy: the independently
+   verified production mutation authority, durable dispatch fencing and live transport identity
+   are not available in this workspace.
+7. After a future authorized deployment, run the target's exact nine read-only UI obligations
+   (eight field identities plus the save-action visibility/enabled probe) and record the applicable
+   `SF-L01`–`SF-L09` and `SF-C01`–`SF-C06` campaign gates separately. Campaign gates cover
+   classification/identity, source/API contract, metadata, browser session/origin, selected tests,
+   candidate reconciliation, UI assertions, healing readback and restoration/reconciliation; they
+   are not interchangeable with the nine UI obligations. The exact operation plan and acceptance
+   profile determine the concrete requests; no ad-hoc command is defined here.
+8. **Heal is currently a placeholder.** The browser worker's `runReadOnlySmoke()` is diagnostic
+   capture only and cannot stand in for retained-session all-obligation healing. A future run must
+   prove a genuine stale old-locator failure, exactly one fresh semantic candidate, complete
+   assertion rerun, changed readback, and independent locator/session cleanup.
+9. Restore the journaled exact preimage (including `ABSENT` where applicable), never a guessed
+   reverse edit. Then reconcile metadata bytes, component semantics, changed/added/deleted residue,
+   locator-map reset, pending rebinds, browser/context closure, and all required post-restore
+   assertions. Any unknown job, concurrent change, expiry, non-quiescent process, or failed branch
+   leaves the campaign quarantined for manual intervention.
+
+Expected sanitized evidence contains run/trace IDs, source/campaign/plan/policy roots, phase,
+operation counts, command/receipt/observation digests, timestamps, durations, typed statuses and
+cleanup/reconciliation outcomes. It must contain no DOM, accessible names, selectors, session URLs,
+aliases, record IDs, XML, job IDs, paths, credentials, or exception payloads. Interpret
+`CANDIDATE_DISCOVERED`, `PROPOSAL_APPROVED`, `ACTION_APPLIED`, and `OUTCOME_VERIFIED` separately;
+only the last is a healed outcome, and even that remains non-acceptance evidence until the signed
+live receipt bridge exists. On any abort, do not retry an unknown remote job or overwrite unrelated
+state; quarantine, preserve the journal, and require the host recovery procedure and fresh
+classification before another attempt.
 
 ## Viewer narrative
 

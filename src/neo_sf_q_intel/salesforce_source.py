@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 from typing import Any
@@ -20,12 +21,22 @@ from neo_sf_q_intel.ontology import (
     normalize_source_graph,
 )
 
+
+def canonical_project_id(value: object) -> str:
+    """Return the single project identity form used by every source adapter."""
+
+    normalized = re.sub(r"[^a-z0-9]+", "-", str(value).casefold()).strip("-")
+    if not normalized:
+        raise SourceContractError("Source contract must identify its project")
+    return normalized
+
+
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ONTOLOGY_PATH = REPOSITORY_ROOT / "config" / "ontology" / "canonical-ontology.json"
 DEFAULT_SOURCE_PROFILE_PATH = (
     REPOSITORY_ROOT / "config" / "source-profiles" / "salesforce-application-graph.json"
 )
-DEFAULT_SOURCE_PROFILE_SHA256 = "4cf073120c223126be161243bb394d57b808346a8011b25730b52a8917648e10"
+DEFAULT_SOURCE_PROFILE_SHA256 = "20f062050584fa4259485df0f5dc00c3ef186562495583f6c846cd9adaa6f7ae"
 SOURCE_ADAPTER_TYPE = "salesforce-application-graph"
 
 
@@ -42,8 +53,17 @@ class SalesforceSourceSnapshot:
     trusted_graph_sha256: str | None = None
     ontology: CanonicalOntology | None = None
     source_profile: SourceGraphProfile | None = None
+    normalization_project_id: str | None = None
+    trust_valid_until: str | None = None
 
     def __post_init__(self) -> None:
+        if self.trust_valid_until is not None:
+            try:
+                valid_until = datetime.fromisoformat(self.trust_valid_until.replace("Z", "+00:00"))
+            except ValueError as exc:
+                raise SourceContractError("Source trust expiry is invalid") from exc
+            if valid_until.tzinfo is None:
+                raise SourceContractError("Source trust expiry must include a timezone")
         ontology = self.ontology or load_canonical_ontology(DEFAULT_ONTOLOGY_PATH)
         profile = self.source_profile or load_source_graph_profile(
             DEFAULT_SOURCE_PROFILE_PATH, ontology
@@ -59,7 +79,7 @@ class SalesforceSourceSnapshot:
             self.graph,
             self.ontology,
             self.source_profile,
-            project_id=self.project_id,
+            project_id=self.normalization_project_id or self.project_id,
             source_graph_sha256=self.trusted_graph_sha256,
         )
 
@@ -86,6 +106,11 @@ class SalesforceSourceSnapshot:
                 "evidenceState": node.evidence_state,
                 "sourceSnapshot": node.source_snapshot,
                 "sourceHash": node.source_hash,
+                **(
+                    {"validUntil": self.trust_valid_until}
+                    if self.trust_valid_until is not None
+                    else {}
+                ),
                 "extractorId": node.extractor_id,
                 "ontologyRole": node.role,
                 "ontologyMateriality": node.materiality,
@@ -112,6 +137,11 @@ class SalesforceSourceSnapshot:
                 "evidenceState": edge.evidence_state,
                 "sourceSnapshot": edge.source_snapshot,
                 "sourceHash": edge.source_hash,
+                **(
+                    {"validUntil": self.trust_valid_until}
+                    if self.trust_valid_until is not None
+                    else {}
+                ),
                 "extractorId": edge.extractor_id,
                 "ontologyMateriality": edge.materiality,
                 "ontologyTrustGaps": gaps_by_id.get(edge.edge_id, []),
@@ -132,10 +162,7 @@ class SalesforceSourceSnapshot:
             or self.graph.get("application")
             or ""
         )
-        normalized = re.sub(r"[^a-z0-9]+", "-", candidate.casefold()).strip("-")
-        if not normalized:
-            raise SourceContractError("Source contract must identify its project")
-        return normalized
+        return canonical_project_id(candidate)
 
 
 def _reject_duplicate_source_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -219,6 +246,15 @@ def _normalized_text_hash(path: Path) -> str:
     return hashlib.sha256(body.encode()).hexdigest()
 
 
+def _generated_graph_sha256(project_index: dict[str, Any]) -> str:
+    value = project_index.get("applicationGraphSha256")
+    if not isinstance(value, str) or not re.fullmatch(r"[a-f0-9]{64}", value):
+        raise SourceContractError(
+            "Project index must bind the generated application graph with a SHA-256 digest"
+        )
+    return value
+
+
 def _validate_source_freshness(root: Path, project_index: dict[str, Any]) -> None:
     inventory = project_index.get("files")
     if not isinstance(inventory, list) or not inventory:
@@ -269,7 +305,7 @@ def _validate_source_freshness(root: Path, project_index: dict[str, Any]) -> Non
 def load_salesforce_source(
     root: Path,
     *,
-    expected_graph_sha256: str,
+    expected_graph_sha256: str | None = None,
     minimum_contract_version: str = "1.0.0",
     required_capabilities: tuple[str, ...] = (),
     ontology_path: Path | None = None,
@@ -283,7 +319,15 @@ def load_salesforce_source(
     _validate_graph(graph)
     _validate_source_freshness(resolved, project_index)
     graph_path = resolved / "knowledge" / "application-graph.json"
-    if _normalized_text_hash(graph_path) != expected_graph_sha256.casefold():
+    generated_graph_sha256 = _generated_graph_sha256(project_index)
+    if _normalized_text_hash(graph_path) != generated_graph_sha256:
+        raise SourceContractError(
+            "Application graph does not match its generated project-index binding"
+        )
+    if (
+        expected_graph_sha256 is not None
+        and generated_graph_sha256 != expected_graph_sha256.casefold()
+    ):
         raise SourceContractError("Application graph does not match its trusted digest")
 
     actual_version = _version_tuple(contract.get("schemaVersion"))
@@ -332,7 +376,7 @@ def load_salesforce_source(
             contract,
             graph,
             project_index,
-            trusted_graph_sha256=expected_graph_sha256.casefold(),
+            trusted_graph_sha256=generated_graph_sha256,
             ontology=ontology,
             source_profile=source_profile,
         )

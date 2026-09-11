@@ -9,7 +9,7 @@ from starlette.requests import Request
 
 import neo_sf_q_intel.api as api_module
 from neo_sf_q_intel.api import create_app
-from neo_sf_q_intel.config import Settings
+from neo_sf_q_intel.config import PROVIDER_CREDENTIAL_SOURCE_CONFLICT, Settings
 from neo_sf_q_intel.domain import ChangeRequest, DecisionCode, ReleaseDecision
 from neo_sf_q_intel.repository import InMemoryRunRepository
 from neo_sf_q_intel.service import AssuranceService
@@ -48,6 +48,58 @@ def test_api_exposes_health_and_typed_analysis() -> None:
     )
     assert response.status_code == 200
     assert response.json()["decision"]["code"] == "INCOMPLETE"
+
+
+def test_api_cors_uses_the_exact_configured_dashboard_origin_allowlist() -> None:
+    settings = Settings(
+        allow_llm=False,
+        web_allowed_origins="http://localhost:3100,https://neo.example.test",
+    )
+    service = AssuranceService(source(), InMemoryRunRepository())
+    client = TestClient(create_app(settings=settings, service=service))
+
+    allowed = client.options(
+        "/health",
+        headers={
+            "Origin": "http://localhost:3100",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    blocked = client.options(
+        "/health",
+        headers={
+            "Origin": "http://localhost:3200",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert allowed.status_code == 200
+    assert allowed.headers["access-control-allow-origin"] == "http://localhost:3100"
+    assert blocked.status_code == 400
+    assert "access-control-allow-origin" not in blocked.headers
+
+
+def test_health_surfaces_provider_source_conflict_without_configuration_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env_file = tmp_path / ".env"
+    env_file.write_text("OPENAI_API_KEY=project-secret\n", encoding="utf-8")
+    monkeypatch.setenv("OPENAI_API_KEY", "stale-process-secret")
+    settings = Settings(ai_provider="openai", _env_file=env_file)
+    service = AssuranceService(source(), InMemoryRunRepository())
+
+    response = TestClient(create_app(settings=settings, service=service)).get("/health")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["provider_status"] == "blocked"
+    assert body["provider_configuration_codes"] == [
+        PROVIDER_CREDENTIAL_SOURCE_CONFLICT
+    ]
+    assert PROVIDER_CREDENTIAL_SOURCE_CONFLICT in body["degradation_codes"]
+    rendered = response.text
+    assert "project-secret" not in rendered
+    assert "stale-process-secret" not in rendered
 
 
 def test_api_uses_neutral_intent_when_the_caller_does_not_assert_a_change() -> None:

@@ -1,6 +1,10 @@
 # Neo SF Q-Intel
 
-Neo SF Q-Intel is an evidence-grounded Salesforce change-assurance platform under active development. The current vertical slice combines deterministic source/graph analysis, typed specialist workflow stages, risk-based test selection, healing-strategy proposals and executable AI-governance controls. Provider-backed specialist reasoning, governed live Salesforce reads, trusted test execution, browser capture/healing and persistent ChromaDB retrieval remain explicit roadmap capabilities.
+> Development was stopped on 2026-09-11 before any live Salesforce mutation. See the
+> [current development checkpoint](Docs/21-development-stop-checkpoint-2026-09-11.md) for verified
+> tests, open P1 findings, interrupted files and the exact resume order.
+
+Neo SF Q-Intel is an evidence-grounded Salesforce change-assurance platform under active development. The current vertical slice combines deterministic source/graph analysis, typed specialist workflow stages, risk-based test selection, healing-strategy proposals, executable AI-governance controls and a host-owned no-argument live-baseline service for strictly bounded Salesforce reads. That service is verified offline but disabled until private non-production authority is reviewed and pinned; no live acceptance receipt exists. Provider-backed specialist reasoning, trusted candidate-phase test execution, accepted browser capture/healing and persistent ChromaDB retrieval remain explicit roadmap capabilities.
 
 The authoritative Salesforce system-under-test remains the sibling `SalesForceAgentApp/strategic-deal-assurance` repository. This repository consumes its versioned contract and generated evidence graph; it does not copy Salesforce authentication or app source.
 
@@ -10,9 +14,11 @@ The authoritative Salesforce system-under-test remains the sibling `SalesForceAg
 - `AI_PROVIDER=azure_openai`: org-machine execution with Azure OpenAI deployments.
 
 Both profiles use the same `ReasoningModel` and `EmbeddingModel` ports. Provider secrets are environment-only.
-`SOURCE_GRAPH_SHA256` is a non-secret trust anchor: update it only after independently reviewing
-and regenerating the configured source graph. A mismatch prevents its nodes from becoming
-confirmed evidence.
+The configured Salesforce source generator publishes the application graph first and its
+digest-bearing project index last. Neo validates both the generated binding and the indexed source
+snapshot before any graph node can become confirmed evidence. The independently versioned source
+profile remains pinned by `SOURCE_GRAPH_PROFILE_SHA256`; graph regeneration does not rewrite that
+policy identity.
 
 ## Repository map
 
@@ -48,10 +54,14 @@ Start the API and dashboard in separate terminals:
 npm run dev
 ```
 
-The API prefers PostgreSQL when `DATABASE_URL` is configured. The current runtime wires complete
+The API prefers PostgreSQL when `DATABASE_URL` is configured. `POSTGRES_SCHEMA` selects Neo's
+dedicated private namespace and defaults to `neo_sf_q_intel`; `public`, system, mixed-case and unsafe
+identifiers are rejected. The current runtime wires complete
 run documents and durable LangGraph checkpoints; its schema also reserves governed relational
 tables for evidence chunks, graph edges and tool audit while their application ports remain a
-foundation milestone. Required PostgreSQL tables and reviewed migrations apply at startup. If
+foundation milestone. Required PostgreSQL tables and reviewed migrations apply only after an exact
+ownership/version marker is validated. Other schemas—including legacy similarly named tables and
+unrelated pgvector tables—are neither migrated nor mutated. If
 PostgreSQL is absent or unreachable, the runtime auto-creates the configured `SQLITE_PATH` and
 stores complete run documents there. If SQLite also fails, versioned JSON source artifacts and
 process memory keep deterministic analysis available. `/health` reports the active mode and reason

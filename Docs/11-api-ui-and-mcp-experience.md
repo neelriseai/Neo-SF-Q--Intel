@@ -96,6 +96,31 @@ reported measurements, receipts and blocking gaps while stating that local found
 not evidence of a live org, deployment, build, tests, approval, impact completeness or release
 readiness.
 
+`POST /api/v1/assurance-runs/analyze-current-candidate` runs the full host-owned candidate
+analysis but returns a separate, maximum-32-KiB `CandidateAssuranceView`. The view contains only
+bundle/graph/seed receipt roots, one cross-bound analysis identity, bounded side summaries and run
+references. It never embeds the verified-change set, produced graphs, operation-seed artifact or
+complete runs. The dashboard retrieves the selected run through the ordinary run resource and
+runtime-validates its run/trace, project, source snapshot/graph, ontology, source profile, reasoning
+policy/evaluation and decision identities against the selected side before rendering it. The full
+`CandidateAssuranceBundle` remains an internal persistence and replay contract.
+
+Candidate component runs and their full bundle publish in one repository transaction and become
+immutable through explicit bundle-to-run links. LangGraph checkpoints are not part of that
+transaction: both bundle and view therefore declare
+`checkpoint_commit_scope=EXCLUDED_FROM_BUNDLE_TRANSACTION` and retain the blocking
+`CHECKPOINT_NOT_ATOMIC_WITH_CANDIDATE_BUNDLE` gap. Durable checkpoint staging/outbox work must
+close that gap before crash-safe resume can be claimed.
+
+The dashboard also exposes a separate read-only durable campaign replay panel backed by
+`GET /api/v1/live-campaigns/{campaign_id}/status`. The client accepts only a bounded campaign
+identifier and runtime-decodes the closed 15-gate projection. It cannot submit receipts, targets,
+Salesforce operations or authority, and it always keeps locally valid receipts distinct from the
+accepted completion numerator. The current server projection is intentionally incapable of a
+release claim, so the UI renders incomplete, zero-accepted and release-ineligible states exactly as
+received. This panel proves the Next.js-to-FastAPI-to-service-to-ledger status path; it does not yet
+prove a frontend-to-live-Salesforce execution journey.
+
 ### Engineering rules
 
 - UI and MCP never import domain or orchestration internals.

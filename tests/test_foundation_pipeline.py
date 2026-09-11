@@ -11,7 +11,9 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
+import neo_sf_q_intel.change_verification as change_verification
 import neo_sf_q_intel.foundation_pipeline as foundation_pipeline
+import neo_sf_q_intel.graph_production as graph_production
 from neo_sf_q_intel.change_verification import LocalGitChangeProducer
 from neo_sf_q_intel.edge_envelope import stable_sha256
 from neo_sf_q_intel.foundation_pipeline import (
@@ -146,6 +148,56 @@ def test_host_owned_pipeline_composes_three_replayed_foundations(tmp_path: Path)
 def test_capture_current_accepts_no_caller_scope() -> None:
     signature = inspect.signature(CandidateFoundationPipeline.capture_current)
     assert tuple(signature.parameters) == ("self",)
+
+
+def test_request_scoped_capture_uses_a_constant_number_of_git_processes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = _repository(tmp_path)
+    for index in range(24):
+        _write(
+            repository,
+            "workspace/dx/package/main/default/objects/"
+            f"Entity{index:02d}__c/Entity{index:02d}__c.object-meta.xml",
+            _object(f"Entity {index:02d}"),
+        )
+    _git(repository, "add", ".")
+    _git(repository, "commit", "-qm", "more files")
+    _write(
+        repository,
+        "workspace/dx/package/main/default/objects/Entity__c/Entity__c.object-meta.xml",
+        _object("Changed again"),
+    )
+    counts = {"git": 0, "batch": 0, "graph_git": 0}
+    actual_git = change_verification._run_git
+    actual_batch = change_verification._run_git_batch
+    actual_graph_git = graph_production.LocalTreeGraphProducer._git
+
+    def counted_git(*args, **kwargs):
+        counts["git"] += 1
+        return actual_git(*args, **kwargs)
+
+    def counted_batch(*args, **kwargs):
+        counts["batch"] += 1
+        return actual_batch(*args, **kwargs)
+
+    def counted_graph_git(self, *args, **kwargs):
+        counts["graph_git"] += 1
+        return actual_graph_git(self, *args, **kwargs)
+
+    monkeypatch.setattr(change_verification, "_run_git", counted_git)
+    monkeypatch.setattr(change_verification, "_run_git_batch", counted_batch)
+    monkeypatch.setattr(graph_production.LocalTreeGraphProducer, "_git", counted_graph_git)
+
+    result = _pipeline(repository).capture_current()
+
+    assert result.verified_change is not None
+    assert len(result.verified_change.base_files) == 26
+    # Full graph replay is intentional: it preserves request provenance while
+    # batching blob reads, and the process count remains independent of file count.
+    assert counts["batch"] == 4
+    assert counts["git"] <= 96
+    assert counts["graph_git"] <= 10
 
 
 def test_configured_application_root_must_match_discovered_candidate_project(

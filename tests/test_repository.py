@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from neo_sf_q_intel.domain import AssuranceRun, ChangeRequest
+from neo_sf_q_intel.postgres_schema import POSTGRES_SCHEMA_OWNERSHIP_SQL
 from neo_sf_q_intel.repository import (
     SCHEMA_SQL,
     VECTOR_COLUMN_CHECK_SQL,
@@ -26,8 +27,9 @@ class FakePostgresConnection:
     def __exit__(self, *args: object) -> None:
         return None
 
-    def execute(self, statement: str) -> FakePostgresConnection:
-        self.statements.append(statement)
+    def execute(self, statement: object, parameters: object = None) -> FakePostgresConnection:
+        rendered = statement.as_string() if hasattr(statement, "as_string") else str(statement)
+        self.statements.append(rendered)
         return self
 
     def fetchall(self) -> list[tuple[str, str, str, str]]:
@@ -129,23 +131,27 @@ def test_postgresql_setup_auto_creates_and_applies_vector_boundary_migration(mon
 
     PostgresRunRepository("postgresql://configured").setup()
 
-    assert connection.statements == [SCHEMA_SQL, VECTOR_COLUMN_CHECK_SQL]
-    assert "CREATE TABLE IF NOT EXISTS assurance_runs" in connection.statements[0]
-    assert "DROP COLUMN IF EXISTS embedding" in connection.statements[0]
-    assert "002_remove_postgres_embeddings" in connection.statements[0]
-    assert "table_name = 'knowledge_chunks'" not in connection.statements[1]
-    assert "pg_extension" in connection.statements[1]
+    assert connection.statements[-2:] == [SCHEMA_SQL, VECTOR_COLUMN_CHECK_SQL]
+    assert connection.statements[0].startswith("SELECT pg_advisory_xact_lock")
+    assert connection.statements[1] == 'CREATE SCHEMA IF NOT EXISTS "neo_sf_q_intel"'
+    assert connection.statements[2] == 'SET search_path TO "neo_sf_q_intel"'
+    assert connection.statements[3] == POSTGRES_SCHEMA_OWNERSHIP_SQL
+    assert "CREATE TABLE IF NOT EXISTS assurance_runs" in connection.statements[-2]
+    assert "DROP COLUMN IF EXISTS embedding" in connection.statements[-2]
+    assert "002_remove_postgres_embeddings" in connection.statements[-2]
+    assert "'knowledge_chunks'" in connection.statements[-1]
+    assert "'candidate_assurance_bundles'" in connection.statements[-1]
+    assert "pg_extension" not in connection.statements[-1]
 
 
 @pytest.mark.parametrize(
     "finding",
     [
-        ("column", "evidence_embeddings", "embedding", "_float8"),
-        ("column", "feature_store", "coordinates", "vector"),
-        ("extension", "", "", "vector"),
+        ("column", "knowledge_chunks", "embedding", "_float8"),
+        ("column", "evidence_edges", "coordinates", "vector"),
     ],
 )
-def test_postgresql_setup_rejects_unapproved_vector_state(monkeypatch, finding) -> None:
+def test_postgresql_setup_rejects_vector_state_in_neo_owned_tables(monkeypatch, finding) -> None:
     connection = FakePostgresConnection([finding])
     monkeypatch.setattr(
         "neo_sf_q_intel.repository.psycopg.connect", lambda database_url: connection
@@ -153,3 +159,20 @@ def test_postgresql_setup_rejects_unapproved_vector_state(monkeypatch, finding) 
 
     with pytest.raises(PersistenceSchemaError, match="vector|embedding"):
         PostgresRunRepository("postgresql://configured").setup()
+
+
+@pytest.mark.parametrize(
+    "finding",
+    [
+        ("column", "rag_documents", "embedding", "vector"),
+        ("column", "feature_store", "coordinates", "vector"),
+        ("extension", "", "", "vector"),
+    ],
+)
+def test_postgresql_setup_ignores_vector_state_owned_by_other_apps(monkeypatch, finding) -> None:
+    connection = FakePostgresConnection([finding])
+    monkeypatch.setattr(
+        "neo_sf_q_intel.repository.psycopg.connect", lambda database_url: connection
+    )
+
+    PostgresRunRepository("postgresql://configured").setup()

@@ -289,7 +289,7 @@ class ChangeSeedEvaluation(_Model):
 
 
 DEFAULT_CHANGE_SEED_POLICY_SHA256 = (
-    "03eb5e8cb294c5464e72ebcaaf82ae76651122b05ff45e773161880989eb0b8f"
+    "0425dd77b55b90178902b61ac893bd6f800aee2f019386a1efb5836e46c9a8d3"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")

@@ -371,7 +371,7 @@ class OperationSeedEvaluation(_Model):
 
 
 DEFAULT_OPERATION_SEED_POLICY_SHA256 = (
-    "ce49d75ab5037088a6d51631a1c5a0220b1672ec06599bb82c3fe2a5934fa493"
+    "4bb0620706ad2b54bc90e0a76488ccb18be2a0f2dcc4ce07457cfed117aeadf7"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -581,6 +581,7 @@ class OperationSeedInputs:
     graph_candidate: GraphProductionArtifact
     graph_producer: LocalTreeGraphProducer
     graph_inputs: GraphProductionInputs
+    reuse_request_scoped_capture: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -665,7 +666,12 @@ class OperationAwareSeedCompiler:
         self._require_runtime_policy(inputs)
         if type(inputs.graph_producer) is not LocalTreeGraphProducer:
             raise _OperationRejected(OperationSeedGapCode.GRAPH_REPLAY_FAILED, "producer-type")
-        replay = inputs.graph_producer.verify(inputs.graph_candidate, inputs.graph_inputs)
+        graph_verifier = (
+            inputs.graph_producer.verify_bound
+            if inputs.reuse_request_scoped_capture
+            else inputs.graph_producer.verify
+        )
+        replay = graph_verifier(inputs.graph_candidate, inputs.graph_inputs)
         if replay.artifact is None or not replay.supported_semantic_graph_input_tree_attested:
             raise _OperationRejected(OperationSeedGapCode.GRAPH_REPLAY_FAILED)
         # The replay proves that the caller-bound historical graph artifact still

@@ -19,12 +19,16 @@ scenario-coded answer:
 
 The strategic-deal Salesforce app is the first system-under-test, not a hardcoded domain inside the platform.
 
-The current checkpoint fully demonstrates contract/source ingestion and deterministic evidence
-governance, with foundations for graph impact, test selection, persistence fallback, MCP, semantic
-retrieval, locator strategy and the dashboard. Provider-backed specialists, governed live-org
-evidence, trusted test execution, browser capture/apply, complete relational memory ports and the
-three golden scenarios remain gated roadmap work. Capability status in
-`config/capability-scope.json` is the authoritative current truth.
+The current manifest declares one capability `IMPLEMENTED` under the earlier file-level evidence
+rule and records broad
+offline foundations for the remaining platform. It does not yet demonstrate the complete reusable
+showcase vertical. Provider-backed specialists, product-consumed trusted graph paths, governed
+live-org evidence, trusted test execution, browser capture/apply/readback, live PostgreSQL proof and
+the three golden scenarios remain gates. That declared capability must be re-accepted against the
+new exact-test and current-receipt rule before it is called strictly accepted. Declared status in
+`config/capability-scope.json` is authoritative; acceptance is substantiated only by durable,
+validated, source-bound execution receipts. `Docs/17-solution-readiness-audit.md` is a dated
+advisory audit, and historical pass counts are not current-tree acceptance.
 
 ## Intelligence moat
 

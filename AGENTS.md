@@ -44,6 +44,12 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
 - A capability is `IMPLEMENTED` only when its domain behavior, adapter, positive case,
   negative case and failure path exist. Use `FOUNDATION` for a real but incomplete vertical
   slice and `NEXT` for planned work; never let the dashboard imply a stronger status.
+- Give every active requirement a stable requirement ID, capability ID and acceptance class.
+  Trace it to exact test node IDs and a source-bound execution receipt; a test filename alone is
+  discovery evidence, not acceptance evidence. Keep unit/contract, in-process functional, mocked
+  browser, live dependency and adjudicated-golden evidence as distinct test levels.
+- Do not promote a capability without current positive, negative, failure, degradation and
+  scenario-independence evidence where applicable. Missing categories remain explicit gaps.
 - Preserve the capability IDs in `config/capability-scope.json`. A design change may alter
   implementation, but silently deleting or narrowing an agreed capability is not allowed.
 - Vague input must abstain. Renaming business entities or adding disconnected graph nodes must
@@ -64,6 +70,12 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
 
 ## Independent review lane
 
+- For architecture/design review, material design refinement, and whole-solution debugging, invoke
+  a `gpt-6-astra` sub-agent with `xhigh` reasoning when that model is available. Give it the
+  project index/graph route, affected capability IDs, acceptance boundary and current diff; require
+  an evidence-cited P0/P1/P2 verdict. This is a standing project instruction and does not require
+  the operator to change the main task model. If Astra is unavailable, record that explicitly and
+  use the strongest available independent reviewer without weakening any gate.
 - For every coherent capability or design slice, start independent read-only reviewer sub-agents
   when available. Keep two lanes: (1) genericity/architecture/scope and (2) governance, evidence,
   safety and verification. The developer continues independent work while reviews run.
@@ -100,6 +112,44 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
   full Python, type, browser and dashboard gate before commit/push.
 - Re-audit earlier code when a new invariant is introduced. Apply the invariant consistently to
   stored runs, adapters and UI claims rather than protecting only new code.
+- A policy, ontology or source-profile identity change is one atomic consumer migration. Update and
+  verify every dependent pin, default and replay boundary together; run focused load/startup checks
+  before starting another slice. Never leave the runnable tree between incompatible identities.
+- Prefer finishing the highest-priority reusable end-to-end vertical before adding another isolated
+  foundation. A new foundation requires an explicit roadmap dependency that explains why the
+  current vertical cannot proceed without it.
+- Live Salesforce mutation is prohibited until the exact non-production org is independently
+  classified and a versioned mutation-authorization receipt binds current-task authority, the
+  fixed host-owned alias plus non-secret org fingerprint/class, exact source/build/manifest and
+  operation set, check-only receipt, pre-state digest, bounded expiry, tested metadata-and-data
+  restore artifact/receipt, and post-restore reconciliation including residue/deletes. Unknown or
+  production org, dirty or mismatched source, partial check-only, stale restore proof, or caller
+  alias/scope override is `POLICY_BLOCKED`/`NOT_RUN` before subprocess or browser action.
+
+## Live Salesforce acceptance boundary
+
+- Treat `config/live-salesforce-acceptance-profile.json` and
+  `Docs/18-live-salesforce-demo-execution-contract.md` as the non-substitutable acceptance boundary
+  for the live integrated demo. A fixture, mock, manual observation, historical screenshot or open
+  browser tab may never satisfy a positive live gate or increase live completion.
+- Before any product-controlled Salesforce subprocess or browser action, verify a current
+  host-owned non-production enrollment, exact org/actor binding and task-scoped operation authority.
+  Caller-supplied or unknown classification is blocked before dispatch; identity is revalidated
+  after authentication and before dependent operations.
+- Derive custom REST operations, Metadata API scope, selected tests and Lightning targets from the
+  pinned source contract and evidence graph, then intersect them with host policy. Contracts,
+  models and callers cannot grant authority or widen routes, fields, manifests, tests or personas.
+- Keep CLI authentication, standard REST connectivity, source-contract custom API execution,
+  scoped Metadata API retrieval, ephemeral Playwright session handoff, live Lightning assertions,
+  selected live-org tests and browser recovery as separate receipt gates. Passing one never proves
+  another.
+- Preserve explicit `LIVE_BASELINE`, `CANDIDATE_CHECK_ONLY`, `DEPLOYED_CANDIDATE` and
+  `RESTORED_BASELINE` evidence phases. Baseline and check-only evidence cannot validate the deployed
+  candidate. A live-candidate claim requires exact deployment binding, post-deploy reconciliation,
+  candidate-phase API/UI/test evidence and successful restore/residue reconciliation.
+- Authentication material stays in the machine-local broker. A frontdoor URL is created only after
+  classification, handed directly in memory to an isolated Playwright context and never stored,
+  logged, printed, placed in a prompt or returned through MCP/API output.
 
 ## Agent observability and deliverables
 
@@ -115,6 +165,13 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
   and identify which policy, source snapshot, runner and adapter produced each fact.
 - Capability review evidence belongs in the structured review ledger. Runtime facts belong in
   governed stores. Chat messages are coordination context, not the system of record.
+- Verification output must be durable and sanitized: assign a unique immutable test-run/execution
+  ID plus a separate deterministic input/root digest (and optional idempotency key), and retain
+  machine-readable Python and Playwright results, environment/tool versions, timestamps, source
+  snapshot, policy identities and artifact indexes. Console-only output is diagnostic, not a
+  current acceptance receipt.
+- Until a versioned receipt schema and validator enforce those fields, receipt-based promotion is
+  an acceptance target: no capability may be newly accepted from an ad hoc report.
 
 ## Graph-grounded reasoning
 

@@ -22,6 +22,14 @@
   normalized-graph identities used by the analysis in addition to reasoning/governance policy
   identities. Pre-A1 documents load explicitly as schema `1.0.0` with unavailable identities and
   remain subject to the current fail-closed decision view.
+- `CandidateAssuranceBundle`: internal, canonical and fully replay-validated candidate evidence;
+  cross-binds the foundation, exact graph/operation-seed artifacts, project, per-side source roots,
+  ontology/profile identities, reasoning identities and immutable component runs. Its repository
+  transaction covers the bundle and runs, not workflow checkpoints, which remains an explicit
+  blocking gap.
+- `CandidateAssuranceView`: bounded client/MCP projection containing receipt roots and side/run
+  references only. Large graph, seed and run artifacts are deliberately absent and are never
+  accepted from a client response as authority.
 - `OutcomeRecord`: immutable, append-only historical candidate bound to the complete originating
   run, project/source snapshot, graph/ontology/profile roots and module-pinned outcome/evaluation
   policies. Implemented payloads cover trusted test execution, typed incident lifecycle events and
@@ -34,11 +42,27 @@ satisfy a release obligation, authorize a tool, approve a release or mutate the 
 
 ## Target contracts
 
-The complete tool, live test-execution and browser verticals will add domain-level `TestObligation`
-/ `TestPlan`, authorized `ToolRequest` / `ToolResult`, and executable `HealingIntent` /
-`HealingDecision` contracts. Outcome memory still needs decision/override/production outcome kinds,
-historical-policy replay and public HTTP/MCP contracts. Their absence is why those capabilities
-remain `FOUNDATION` or `NEXT`.
+The live-evidence foundation now includes an independently compiled `ExpectedExecutionContract`
+and a typed `ExecutionAssertionArtifact`. The contract binds exact execution, plan, scope,
+producer/runner/tool-version, assertion/predicate/cardinality/projection, metadata-member and
+dataset roots without authorizing execution. The runner artifact embeds the sanitized result bytes,
+recomputes their size and hash, binds every assertion to one exact result role, and carries a
+host-configured runner-key signature. Exact contract, result and assertion bytes are stored
+append-only in private-schema PostgreSQL or SQLite and replayed before the receipt producer may
+derive an outcome or digest. PostgreSQL outage can degrade explicitly to SQLite; neither outage may
+degrade to volatile memory evidence.
+
+The browser foundation separates `LocatorIntent` candidate discovery from independently authorized
+reversible recovery. A signed recovery permit binds one prior unique worker candidate, exact
+precondition and expected changed state, complete campaign/source/candidate/org/actor roots,
+restoration and cleanup. The resulting signed evidence uses
+`CANDIDATE_DISCOVERED → PROPOSAL_APPROVED → ACTION_APPLIED → OUTCOME_VERIFIED`; discovery alone is
+never `HEALED`. Production target/receipt wiring and live Salesforce application remain incomplete.
+
+The complete tool and live test-execution verticals still require domain-level `TestObligation` /
+`TestPlan` and authorized `ToolRequest` / `ToolResult` contracts. Outcome memory still needs
+decision/override/production outcome kinds, historical-policy replay and public HTTP/MCP contracts.
+Their absence is why those capabilities remain `FOUNDATION` or `NEXT`.
 
 ## Evidence states
 

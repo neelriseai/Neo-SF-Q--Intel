@@ -19,6 +19,7 @@ function shortDigest(value: string): string {
 }
 
 export function FoundationEvidencePanel({ apiBase }: { apiBase: string }) {
+  const [hydrated, setHydrated] = useState(false);
   const [state, setState] = useState<PanelState>({ kind: "IDLE" });
   const requestNumber = useRef(0);
   const controller = useRef<AbortController | null>(null);
@@ -27,7 +28,10 @@ export function FoundationEvidencePanel({ apiBase }: { apiBase: string }) {
     [state],
   );
 
-  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => {
+    setHydrated(true);
+    return () => controller.current?.abort();
+  }, []);
 
   useEffect(() => {
     if (!view?.earliestExpiry) return;
@@ -74,11 +78,11 @@ export function FoundationEvidencePanel({ apiBase }: { apiBase: string }) {
     <section className="shell foundationPanel panel" aria-labelledby="foundation-heading">
       <div className="foundationHeader">
         <div className="sectionHeading compact">
-          <div><span className="sectionNumber">03</span><h2 id="foundation-heading">Local candidate foundation</h2></div>
+          <div><span className="sectionNumber">03</span><h2 id="foundation-heading" tabIndex={-1}>Local candidate foundation</h2></div>
           <p>Fresh, host-scoped evidence from the configured local Git candidate.</p>
         </div>
-        <button className="foundationButton" type="button" onClick={capture} disabled={state.kind === "LOADING"}>
-          {state.kind === "LOADING" ? "Capturing…" : state.kind === "READY" ? "Capture again" : "Capture candidate"}
+        <button className="foundationButton" type="button" onClick={capture} disabled={!hydrated || state.kind === "LOADING"}>
+          {!hydrated ? "Preparing…" : state.kind === "LOADING" ? "Capturing…" : state.kind === "READY" ? "Capture again" : "Capture candidate"}
         </button>
       </div>
 

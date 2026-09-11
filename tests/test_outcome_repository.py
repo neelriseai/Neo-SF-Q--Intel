@@ -238,12 +238,13 @@ class _FakePostgresConnection:
     def __exit__(self, *_args: object) -> None:
         return None
 
-    def execute(
-        self, statement: str, parameters: tuple[Any, ...] | None = None
-    ) -> _FakeResult:
-        self.state.statements.append((statement, parameters))
-        compact = " ".join(statement.split())
+    def execute(self, statement: object, parameters: tuple[Any, ...] | None = None) -> _FakeResult:
+        rendered = statement.as_string() if hasattr(statement, "as_string") else str(statement)
+        self.state.statements.append((rendered, parameters))
+        compact = " ".join(rendered.split())
         if parameters is None:
+            return _FakeResult()
+        if compact.startswith("SELECT pg_advisory_xact_lock"):
             return _FakeResult()
         if compact.startswith("INSERT INTO outcome_idempotency"):
             project, key, outcome_id, outcome_sha = parameters
@@ -255,11 +256,7 @@ class _FakePostgresConnection:
         if compact.startswith("SELECT outcome_id, outcome_sha256 FROM outcome_idempotency"):
             receipt = self.state.receipts.get((parameters[0], parameters[1]))
             return _FakeResult(
-                one=(
-                    {"outcome_id": receipt[0], "outcome_sha256": receipt[1]}
-                    if receipt
-                    else None
-                )
+                one=({"outcome_id": receipt[0], "outcome_sha256": receipt[1]} if receipt else None)
             )
         if compact.startswith("INSERT INTO outcome_records"):
             project, outcome_id, outcome_sha, kind, snapshot, recorded_at, document = parameters
@@ -309,9 +306,7 @@ def repository(request, tmp_path: Path, monkeypatch):
     if request.param == "memory":
         return InMemoryOutcomeRepository(clock=lambda: CLOCK)
     if request.param == "sqlite":
-        return SQLiteOutcomeRepository(
-            tmp_path / "sqlite" / "outcomes.db", clock=lambda: CLOCK
-        )
+        return SQLiteOutcomeRepository(tmp_path / "sqlite" / "outcomes.db", clock=lambda: CLOCK)
     if request.param == "json":
         return JsonOutcomeRepository(tmp_path / "json", clock=lambda: CLOCK)
     state = _FakePostgresState()
@@ -343,9 +338,12 @@ def test_adapter_contract_append_get_scope_filter_and_idempotency(repository) ->
     assert repository.query(
         project_id="project-alpha", kinds=(OutcomeKind.HUMAN_CORRECTION_CLAIM,), limit=10
     ).records == (second,)
-    assert repository.query(
-        project_id="project-alpha", source_snapshot="snapshot-missing", limit=10
-    ).records == ()
+    assert (
+        repository.query(
+            project_id="project-alpha", source_snapshot="snapshot-missing", limit=10
+        ).records
+        == ()
+    )
 
 
 def test_adapter_contract_conflicting_idempotency_key_is_rejected(repository) -> None:
@@ -410,8 +408,7 @@ def test_adapter_contract_accepts_only_fully_persisted_incident_chain(repository
 
 def test_adapter_contract_cursor_is_stable_and_scope_bound(repository) -> None:
     records = [
-        _record(f"item-{index}", recorded_at=NOW + timedelta(minutes=index))
-        for index in range(4)
+        _record(f"item-{index}", recorded_at=NOW + timedelta(minutes=index)) for index in range(4)
     ]
     for index, record in enumerate(records):
         _append(repository, record, f"operation:{index}")
@@ -477,9 +474,7 @@ def test_finite_overbound_kinds_are_rejected(repository) -> None:
         ("outcome_evaluation_set_sha256", "b" * 64),
     ),
 )
-def test_append_replay_rejects_forged_policy_and_evaluation_roots(
-    field: str, value: str
-) -> None:
+def test_append_replay_rejects_forged_policy_and_evaluation_roots(field: str, value: str) -> None:
     original = _record()
     forged = _rehash_record(original, lambda body: body["lineage"].__setitem__(field, value))
     repository = InMemoryOutcomeRepository(clock=lambda: CLOCK)
@@ -621,7 +616,7 @@ def test_json_uses_hashed_paths_restarts_and_fails_closed(tmp_path: Path) -> Non
     restarted = JsonOutcomeRepository(root, clock=lambda: CLOCK)
     assert restarted.get(project, record.outcome_id) == record
     record_path = next(list(root.iterdir())[0].glob("outcome-*.json"))
-    record_path.write_text("{\"schema_version\":", encoding="utf-8")
+    record_path.write_text('{"schema_version":', encoding="utf-8")
     with pytest.raises(OutcomeCorruptionError, match="failed|unreadable"):
         restarted.query(project_id=project)
 
@@ -701,10 +696,12 @@ def test_postgres_setup_is_idempotent_append_only_and_vector_free(monkeypatch) -
     repository.setup()
     repository.setup()
 
-    assert [statement for statement, parameters in state.statements if parameters is None] == [
-        POSTGRES_OUTCOME_SCHEMA_SQL,
-        POSTGRES_OUTCOME_SCHEMA_SQL,
+    setup_statements = [
+        statement
+        for statement, parameters in state.statements
+        if parameters is None and statement == POSTGRES_OUTCOME_SCHEMA_SQL
     ]
+    assert setup_statements == [POSTGRES_OUTCOME_SCHEMA_SQL, POSTGRES_OUTCOME_SCHEMA_SQL]
     lowered = POSTGRES_OUTCOME_SCHEMA_SQL.lower()
     assert "before update or delete" in lowered
     assert lowered.count("before truncate") == 2

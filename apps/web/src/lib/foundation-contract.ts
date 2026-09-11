@@ -48,7 +48,7 @@ export interface CandidateFoundationEvidence {
   evidence_completeness: "INCOMPLETE";
   non_authoritative_projection: true;
   pipeline_policy_id: string;
-  pipeline_policy_version: "1.0.0";
+  pipeline_policy_version: "1.0.1";
   pipeline_policy_sha256: string;
   pipeline_implementation_sha256: string;
   blocking_gap_codes: string[];
@@ -382,7 +382,7 @@ export async function decodeCandidateFoundationEvidence(value: unknown): Promise
     evidence_completeness: literal(item.evidence_completeness, "INCOMPLETE"),
     non_authoritative_projection: literal(item.non_authoritative_projection, true),
     pipeline_policy_id: stringValue(item.pipeline_policy_id, /^.{1,200}$/, 200),
-    pipeline_policy_version: literal(item.pipeline_policy_version, "1.0.0"),
+    pipeline_policy_version: literal(item.pipeline_policy_version, "1.0.1"),
     pipeline_policy_sha256: stringValue(item.pipeline_policy_sha256, SHA256, 64),
     pipeline_implementation_sha256: stringValue(item.pipeline_implementation_sha256, SHA256, 64),
     blocking_gap_codes: blockingGaps,
