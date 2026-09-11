@@ -58,6 +58,7 @@
     "packages/browser/src/browser-recovery.ts",
     "packages/browser/src/browser-worker.ts",
     "packages/browser/src/healing-probe.ts",
+    "packages/browser/src/live-business-action-cli.ts",
     "packages/browser/src/live-candidate-readback-cli.ts",
     "packages/browser/src/live-profile-cli.ts",
     "packages/browser/src/live-smoke-cli.ts",
@@ -359,6 +360,11 @@
       "code": "BROWSER_TYPESCRIPT_PUSH_GATE",
       "severity": "P1",
       "resolution": "Protected push surfaced browser TypeScript regressions after the Python suite passed. Browser recovery now narrows recovery action roles to non-null Playwright roles before getByRole use, and the coordinator test fixtures type candidate lifecycle arrays explicitly. Browser lint and live browser build pass without changing browser authority, mutation, or acceptance behavior."
+    },
+    {
+      "code": "BUSINESS_ACTION_BROWSER_ACCEPTANCE",
+      "severity": "P1",
+      "resolution": "The browser worker now has an explicit BUSINESS_ACTION mode for configured field fill, submit and success-status readback, gated by a live profile mutation opt-in. The live business-action CLI requires a trusted business-action profile, bounded field/action inputs and a post-action Salesforce CLI persistence assertion; projections expose only digests, counts and match booleans. Live mutation was not dispatched in this pass. Browser lint, live build and 27 focused Playwright tests passed."
     }
   ],
   "statusDowngrades": []

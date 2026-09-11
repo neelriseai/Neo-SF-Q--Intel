@@ -1,7 +1,7 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 
-export type WorkerMode = "READ_ONLY_DOM_CAPTURE" | "CANDIDATE_READBACK";
+export type WorkerMode = "READ_ONLY_DOM_CAPTURE" | "CANDIDATE_READBACK" | "BUSINESS_ACTION";
 export type WorkerStatus = "PASSED" | "FAILED" | "BLOCKED";
 
 export interface TrustedEnrollmentAssertion {
@@ -39,11 +39,25 @@ export interface CandidateIntent {
   };
 }
 
+export interface BusinessActionIntent {
+  fields: readonly {
+    fieldApiName: string;
+    value: string;
+  }[];
+  submit: {
+    tag: "lightning-button" | "button";
+    attribute: "data-action";
+    expectedValue: string;
+  };
+  successText: string;
+}
+
 export interface BrowserWorkerRequest {
   handoff: EphemeralSessionHandoff;
   mode: WorkerMode;
   startPath?: string;
   candidate?: CandidateIntent;
+  businessAction?: BusinessActionIntent;
   captureLimit?: number;
 }
 
@@ -83,6 +97,11 @@ export interface BrowserWorkerReceipt {
   capture: readonly SanitizedDomCandidate[];
   candidateCount: number;
   readbackMatched?: boolean;
+  businessAction?: {
+    fieldCount: number;
+    submitted: boolean;
+    successTextMatched: boolean;
+  };
   cleanup: {
     contextClosed: boolean;
     browserClosed: boolean;
@@ -326,6 +345,20 @@ export class BrowserWorker {
                 : undefined,
             }
           : undefined,
+        businessAction: request.businessAction
+          ? {
+              fields: request.businessAction.fields.map((field) => ({
+                fieldApiName: field.fieldApiName,
+                valueDigest: digest(field.value),
+              })),
+              submit: {
+                tag: request.businessAction.submit.tag,
+                attribute: request.businessAction.submit.attribute,
+                expectedValueDigest: digest(request.businessAction.submit.expectedValue),
+              },
+              successTextDigest: digest(request.businessAction.successText),
+            }
+          : undefined,
       }),
     );
 
@@ -434,7 +467,10 @@ export class BrowserWorker {
       !Array.isArray(assertion.permittedModes) ||
       assertion.permittedModes.length === 0 ||
       assertion.permittedModes.some(
-        (mode) => mode !== "READ_ONLY_DOM_CAPTURE" && mode !== "CANDIDATE_READBACK",
+        (mode) =>
+          mode !== "READ_ONLY_DOM_CAPTURE" &&
+          mode !== "CANDIDATE_READBACK" &&
+          mode !== "BUSINESS_ACTION",
       )
     ) {
       throw new BrowserWorkerError("ENROLLMENT_INVALID");
@@ -601,6 +637,96 @@ export class BrowserWorker {
       };
     }
 
+    if (request.mode === "BUSINESS_ACTION") {
+      const action = request.businessAction!;
+      const lifecycle: CandidateLifecycleState[] = ["CAPTURED"];
+      for (const field of action.fields) {
+        const wrapper = page.locator(`[data-field-api="${cssString(field.fieldApiName)}"]`);
+        const wrapperCount = await wrapper.count();
+        if (wrapperCount !== 1) {
+          return {
+            ...base,
+            status: "BLOCKED",
+            lifecycle: [
+              ...lifecycle,
+              wrapperCount === 0 ? "CANDIDATE_NOT_FOUND" : "CANDIDATE_AMBIGUOUS",
+            ],
+            candidateCount: wrapperCount,
+            error: {
+              class: "POLICY_BLOCKED",
+              code: wrapperCount === 0 ? "BUSINESS_FIELD_NOT_FOUND" : "BUSINESS_FIELD_AMBIGUOUS",
+            },
+          };
+        }
+        const control = wrapper.locator(
+          'input:not([type="hidden"]),textarea,select,[role="textbox"],[role="spinbutton"],[role="combobox"]',
+        ).first();
+        try {
+          await control.fill(field.value, { timeout: this.#operationTimeoutMs });
+        } catch {
+          return {
+            ...base,
+            status: "FAILED",
+            lifecycle,
+            candidateCount: 1,
+            error: { class: "CAPTURE_FAILED", code: "BUSINESS_FIELD_FILL_FAILED" },
+          };
+        }
+      }
+      const submit = page.locator(
+        `${action.submit.tag}[${action.submit.attribute}="${cssString(action.submit.expectedValue)}"]`,
+      );
+      const submitCount = await submit.count();
+      if (submitCount !== 1) {
+        return {
+          ...base,
+          status: "BLOCKED",
+          lifecycle: [
+            ...lifecycle,
+            submitCount === 0 ? "CANDIDATE_NOT_FOUND" : "CANDIDATE_AMBIGUOUS",
+          ],
+          candidateCount: submitCount,
+          error: {
+            class: "POLICY_BLOCKED",
+            code: submitCount === 0 ? "BUSINESS_SUBMIT_NOT_FOUND" : "BUSINESS_SUBMIT_AMBIGUOUS",
+          },
+        };
+      }
+      lifecycle.push("CANDIDATE_DISCOVERED");
+      try {
+        await submit.click({ timeout: this.#operationTimeoutMs });
+        await page.getByRole("status").filter({ hasText: action.successText }).first().waitFor({
+          state: "visible",
+          timeout: this.#operationTimeoutMs,
+        });
+        lifecycle.push("READBACK_VERIFIED");
+      } catch {
+        return {
+          ...base,
+          status: "FAILED",
+          lifecycle,
+          candidateCount: 1,
+          businessAction: {
+            fieldCount: action.fields.length,
+            submitted: lifecycle.includes("CANDIDATE_DISCOVERED"),
+            successTextMatched: false,
+          },
+          error: { class: "CAPTURE_FAILED", code: "BUSINESS_ACTION_ASSERTION_FAILED" },
+        };
+      }
+      return {
+        ...base,
+        status: "PASSED",
+        lifecycle,
+        candidateCount: 1,
+        businessAction: {
+          fieldCount: action.fields.length,
+          submitted: true,
+          successTextMatched: true,
+        },
+      };
+    }
+
     const candidate = request.candidate!;
     if (candidate.hostAttribute) {
       const hostLocator = page.locator(
@@ -722,7 +848,11 @@ function validateRequest(request: BrowserWorkerRequest): void {
     ) {
       throw new BrowserWorkerError("CANDIDATE_INTENT_INVALID");
     }
-  } else if (request.candidate) {
+  } else if (request.mode === "BUSINESS_ACTION") {
+    if (!request.businessAction || !hasValidBusinessAction(request.businessAction)) {
+      throw new BrowserWorkerError("BUSINESS_ACTION_INVALID");
+    }
+  } else if (request.candidate || request.businessAction) {
     throw new BrowserWorkerError("CANDIDATE_NOT_ALLOWED_FOR_CAPTURE");
   }
 }
@@ -742,6 +872,29 @@ function hasValidCandidateLocator(candidate: CandidateIntent): boolean {
     /^[A-Za-z0-9][A-Za-z0-9_-]{0,80}$/.test(host.expectedValue);
   if (candidate.readback && !hasRoleLocator) return false;
   return hasRoleLocator || hasHostLocator;
+}
+
+function hasValidBusinessAction(action: BusinessActionIntent): boolean {
+  return (
+    Array.isArray(action.fields) &&
+    action.fields.length >= 1 &&
+    action.fields.length <= 8 &&
+    action.fields.every(
+      (field) =>
+        /^[A-Za-z][A-Za-z0-9_]{0,79}$/.test(field.fieldApiName) &&
+        typeof field.value === "string" &&
+        field.value.length >= 1 &&
+        field.value.length <= 160 &&
+        !containsSensitiveText(field.value),
+    ) &&
+    (action.submit.tag === "button" || action.submit.tag === "lightning-button") &&
+    action.submit.attribute === "data-action" &&
+    /^[A-Za-z0-9][A-Za-z0-9_-]{0,80}$/.test(action.submit.expectedValue) &&
+    typeof action.successText === "string" &&
+    action.successText.length >= 1 &&
+    action.successText.length <= 160 &&
+    !containsSensitiveText(action.successText)
+  );
 }
 
 function cssString(value: string): string {
@@ -1018,6 +1171,15 @@ function isBinding(value: unknown): value is string {
 
 function isSha256(value: unknown): value is string {
   return typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+}
+
+function containsSensitiveText(value: string): boolean {
+  return (
+    /(?:sid=|frontdoor\.jsp|Bearer\s+|Authorization:|api[_-]?key|password|secret|token)/i
+      .test(value) ||
+    /^[A-Za-z]:[\\/]/.test(value) ||
+    value.startsWith("\\\\")
+  );
 }
 
 function boundedTimeout(value: number, code: string): number {

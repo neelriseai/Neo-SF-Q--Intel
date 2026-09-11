@@ -13,6 +13,7 @@
     "src/salesforce-browser-coordinator.ts",
     "src/live-profile-cli.ts",
     "src/live-smoke-cli.ts",
-    "src/live-candidate-readback-cli.ts"
+    "src/live-candidate-readback-cli.ts",
+    "src/live-business-action-cli.ts"
   ]
 }

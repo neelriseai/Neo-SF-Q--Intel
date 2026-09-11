@@ -53,6 +53,9 @@ export async function runLiveProfileCli(
       100,
       "CAPTURE_LIMIT_INVALID",
     );
+    const mutationActionsEnabled =
+      (setting(environment, dotenv, "NEO_BROWSER_ENABLE_BUSINESS_ACTION") ?? "false")
+        .toLowerCase() === "true";
 
     const display = await runSfJson(executable, [
       "org",
@@ -77,6 +80,7 @@ export async function runLiveProfileCli(
       actorBindingSource,
       validitySeconds,
       captureLimit,
+      mutationActionsEnabled,
       now: new Date(),
     });
     const bytes = Buffer.from(`${JSON.stringify(profile, null, 2)}\n`, "utf8");
@@ -90,6 +94,7 @@ export async function runLiveProfileCli(
       profileSha256: sha256,
       expiresAt: profile.enrollment.expiresAt,
       targetOrgAlias: alias,
+      mutationActionsEnabled: profile.execution.mutationActionsEnabled,
       command: "Set NEO_BROWSER_LIVE_PROFILE_PATH and NEO_BROWSER_PROFILE_SHA256, then run npm run live:smoke.",
     })}\n`);
     return 0;
@@ -111,6 +116,7 @@ type ProfileInput = {
   actorBindingSource: "USERNAME" | "USER_ID";
   validitySeconds: number;
   captureLimit: number;
+  mutationActionsEnabled?: boolean;
   now: Date;
 };
 
@@ -131,7 +137,9 @@ type LiveBrowserProfileDocument = {
     policyDigest: string;
     issuedAt: string;
     expiresAt: string;
-    permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"];
+    permittedModes:
+      | readonly ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"]
+      | readonly ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"];
   };
   sessionBroker: Record<string, unknown>;
   browser: Record<string, unknown>;
@@ -163,6 +171,10 @@ export function buildProfile(input: ProfileInput): LiveBrowserProfileDocument {
   const navigationBridgeOrigins = [frontdoorOrigin.replace(/\.my\.salesforce\.com$/i, ".file.force.com")];
   const resourceOrigins = ["https://b.static.lightning.force.com", "https://login.salesforce.com"];
   const orgBinding = digest(`salesforce-org:${orgId}`);
+  const mutationActionsEnabled = input.mutationActionsEnabled === true;
+  const permittedModes = mutationActionsEnabled
+    ? (["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"] as const)
+    : (["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"] as const);
   const policyDigest = digest(
     canonicalJson({
       mode: "READ_ONLY_DOM_CAPTURE",
@@ -170,6 +182,7 @@ export function buildProfile(input: ProfileInput): LiveBrowserProfileDocument {
       frontdoorOrigin,
       lightningOrigin,
       captureLimit: input.captureLimit,
+      mutationActionsEnabled,
     }),
   );
   const enrollment = {
@@ -185,10 +198,7 @@ export function buildProfile(input: ProfileInput): LiveBrowserProfileDocument {
     policyDigest,
     issuedAt: issuedAt.toISOString(),
     expiresAt: expiresAt.toISOString(),
-      permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"] as [
-        "READ_ONLY_DOM_CAPTURE",
-        "CANDIDATE_READBACK",
-      ],
+      permittedModes,
   };
   return {
     schemaVersion: "1.0.0",
@@ -219,7 +229,7 @@ export function buildProfile(input: ProfileInput): LiveBrowserProfileDocument {
     execution: {
       mode: "READ_ONLY_DOM_CAPTURE",
       captureLimit: input.captureLimit,
-      mutationActionsEnabled: false,
+      mutationActionsEnabled,
     },
   };
 }

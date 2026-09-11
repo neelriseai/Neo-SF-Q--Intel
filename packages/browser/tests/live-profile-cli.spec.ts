@@ -77,6 +77,28 @@ test("builds optional user-id actor binding from CLI display output", () => {
   expect(JSON.stringify(profile)).toContain(digest("salesforce-user:005000000000001AAA"));
 });
 
+test("business-action profile opt-in is explicit and reflected in policy", () => {
+  const profile = buildProfile({
+    alias: "host-alias",
+    executable: "sf-fixture",
+    display: display(),
+    open: open(),
+    actorBindingSource: "USERNAME",
+    validitySeconds: 600,
+    captureLimit: 20,
+    mutationActionsEnabled: true,
+    now: new Date("2026-09-11T12:00:00Z"),
+  });
+
+  expect(profile.enrollment.permittedModes).toEqual([
+    "READ_ONLY_DOM_CAPTURE",
+    "CANDIDATE_READBACK",
+    "BUSINESS_ACTION",
+  ]);
+  expect(profile.execution.mutationActionsEnabled).toBe(true);
+});
+
+
 test("rejects unexpected alias and non-frontdoor session URLs", () => {
   const base = {
     alias: "host-alias",

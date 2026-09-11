@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "01f441702b472bcbb9bf2b596d17a2326ef06325edf1070c8ba7d0317a21453a",
+  "sourceSnapshot": "1b89adfb03895b22cc1aae6b9fb2cef8cdf075f60a8286e5931f2f3f34dc3175",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -938,6 +938,14 @@
       "kind": "file",
       "label": "healing-probe.ts",
       "source": "packages/browser/src/healing-probe.ts",
+      "category": "browser-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:packages/browser/src/live-business-action-cli.ts",
+      "kind": "file",
+      "label": "live-business-action-cli.ts",
+      "source": "packages/browser/src/live-business-action-cli.ts",
       "category": "browser-runtime",
       "authority": "authoritative-source"
     },
@@ -4588,6 +4596,21 @@
       "to": "file:packages/browser/src/locator-healer.ts"
     },
     {
+      "from": "file:packages/browser/src/live-business-action-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/browser-worker.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-business-action-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/salesforce-browser-coordinator.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-business-action-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/salesforce-cli-session.ts"
+    },
+    {
       "from": "file:packages/browser/src/live-candidate-readback-cli.ts",
       "relation": "imports",
       "to": "file:packages/browser/src/browser-worker.ts"
@@ -4691,6 +4714,11 @@
       "from": "file:packages/browser/tests/salesforce-browser-coordinator.spec.ts",
       "relation": "imports",
       "to": "file:packages/browser/src/browser-worker.ts"
+    },
+    {
+      "from": "file:packages/browser/tests/salesforce-browser-coordinator.spec.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/live-business-action-cli.ts"
     },
     {
       "from": "file:packages/browser/tests/salesforce-browser-coordinator.spec.ts",

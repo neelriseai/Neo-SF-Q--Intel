@@ -273,3 +273,21 @@ Current result: the system can now present the full 15-gate campaign matrix trut
 LWC deploy/readback/restore evidence remains useful demo evidence, but full live Salesforce
 campaign acceptance still requires trusted current receipts for every required gate and successful
 validator replay over the durable ledger.
+
+## Continuation: business-action browser acceptance
+
+Selected item: move beyond deployed-marker readback toward a real business browser flow.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Browser action primitive | DONE | 1 | Added `BUSINESS_ACTION` worker mode that fills configured `data-field-api` fields, clicks the configured `data-action` submit control, waits for configured success status text, and reports only counts/booleans/digests |
+| Mutation authority boundary | DONE | 1 | Default live profiles remain read-only/readback-only. Business actions require `NEO_BROWSER_ENABLE_BUSINESS_ACTION=true`, `mutationActionsEnabled=true`, and `BUSINESS_ACTION` in permitted modes |
+| Runnable CLI | DONE | 1 | Added `npm run live:business-action`, requiring a trusted live profile plus env-supplied start path, fields, submit action, success text and Salesforce persistence assertion JSON |
+| Persisted outcome assertion | DONE | 1 | After browser success, the CLI runs a bounded Salesforce CLI `data query` against the configured object/match field and verifies expected persisted fields; output contains only digests and match booleans |
+| Live execution | NOT_RUN | 0 | No live mutation was dispatched in this pass. A safe synthetic action recipe and current business-action profile should be generated immediately before live testing |
+| Test it | DONE | 1 | Browser lint, live build and 27 focused Playwright worker/profile/coordinator tests passed |
+
+Boundary: this is now a runnable acceptance mechanism for fill/edit/save/evaluate plus persistence
+verification. It is still not a signed Salesforce campaign gate receipt and remains
+`releaseEligible=false` until the live receipt producer/ledger issues and validates the corresponding
+campaign receipt.

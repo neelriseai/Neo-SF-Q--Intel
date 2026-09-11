@@ -32,7 +32,7 @@ export interface TrustedLiveBrowserProfile {
   readonly execution: {
     readonly mode: "READ_ONLY_DOM_CAPTURE";
     readonly captureLimit: number;
-    readonly mutationActionsEnabled: false;
+    readonly mutationActionsEnabled: boolean;
   };
 }
 
@@ -186,7 +186,7 @@ function validateProfile(value: unknown): TrustedLiveBrowserProfile {
   if (
     browser.headless !== true ||
     execution.mode !== "READ_ONLY_DOM_CAPTURE" ||
-    execution.mutationActionsEnabled !== false ||
+    typeof execution.mutationActionsEnabled !== "boolean" ||
     !isIntegerBetween(execution.captureLimit, 1, 100)
   ) {
     throw new BrowserCoordinatorError("PROFILE_INVALID");
@@ -204,7 +204,8 @@ function validateProfile(value: unknown): TrustedLiveBrowserProfile {
     !equalStrings(enrollment.resourceOrigins, sessionBroker.resourceOrigins) ||
     enrollment.orgBinding !== sessionBroker.orgBinding ||
     enrollment.actorBinding !== sessionBroker.actorBinding ||
-    !enrollment.permittedModes.includes("READ_ONLY_DOM_CAPTURE")
+    !enrollment.permittedModes.includes("READ_ONLY_DOM_CAPTURE") ||
+    (execution.mutationActionsEnabled && !enrollment.permittedModes.includes("BUSINESS_ACTION"))
   ) {
     throw new BrowserCoordinatorError("PROFILE_BINDING_MISMATCH");
   }
@@ -218,7 +219,7 @@ function validateProfile(value: unknown): TrustedLiveBrowserProfile {
     execution: Object.freeze({
       mode: "READ_ONLY_DOM_CAPTURE",
       captureLimit: execution.captureLimit,
-      mutationActionsEnabled: false,
+      mutationActionsEnabled: execution.mutationActionsEnabled,
     }),
   });
 }
@@ -255,7 +256,10 @@ function validateEnrollment(value: unknown): TrustedEnrollmentAssertion {
     !Array.isArray(enrollment.permittedModes) ||
     enrollment.permittedModes.length < 1 ||
     enrollment.permittedModes.some(
-      (mode) => mode !== "READ_ONLY_DOM_CAPTURE" && mode !== "CANDIDATE_READBACK",
+      (mode) =>
+        mode !== "READ_ONLY_DOM_CAPTURE" &&
+        mode !== "CANDIDATE_READBACK" &&
+        mode !== "BUSINESS_ACTION",
     )
   ) {
     throw new BrowserCoordinatorError("PROFILE_INVALID");

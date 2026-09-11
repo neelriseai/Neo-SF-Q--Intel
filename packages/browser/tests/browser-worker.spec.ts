@@ -41,8 +41,12 @@ function makeWorker(html: string, overrides: Partial<ConstructorParameters<typeo
   });
 }
 
-async function handoff(worker: BrowserWorker, canary: string) {
-  const handle = await worker.enroll(enrollment());
+async function handoff(
+  worker: BrowserWorker,
+  canary: string,
+  overrides: Partial<TrustedEnrollmentAssertion> = {},
+) {
+  const handle = await worker.enroll(enrollment(overrides));
   const identity = worker.verifySessionIdentity(handle, {
     orgBinding: "org-fingerprint-001",
     actorBinding: "actor-fingerprint-001",
@@ -146,6 +150,74 @@ test("verifies deployed candidate action marker as read-only readback", async ()
     "READBACK_VERIFIED",
   ]);
   expect(receipt.readbackMatched).toBe(true);
+  expectNoLeak(receipt, canary);
+});
+
+test("executes an explicitly authorized business action and verifies success readback", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+  const worker = makeWorker(`
+    <form onsubmit="event.preventDefault(); document.querySelector('[role=status]').textContent='Saved successfully. The policy results are shown below.'">
+      <div data-field-api="Name"><input aria-label="Opportunity Name" /></div>
+      <div data-field-api="Amount"><input aria-label="Amount" /></div>
+      <button data-action="save-evaluate-live">Save and Evaluate</button>
+      <p role="status"></p>
+    </form>
+  `);
+  const session = await handoff(worker, canary, {
+    permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"],
+  });
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "BUSINESS_ACTION",
+    businessAction: {
+      fields: [
+        { fieldApiName: "Name", value: "SYN-Widget Renewal" },
+        { fieldApiName: "Amount", value: "50000" },
+      ],
+      submit: {
+        tag: "button",
+        attribute: "data-action",
+        expectedValue: "save-evaluate-live",
+      },
+      successText: "Saved successfully. The policy results are shown below.",
+    },
+  });
+
+  expect(receipt.status).toBe("PASSED");
+  expect(receipt.lifecycle).toEqual(["CAPTURED", "CANDIDATE_DISCOVERED", "READBACK_VERIFIED"]);
+  expect(receipt.businessAction).toEqual({
+    fieldCount: 2,
+    submitted: true,
+    successTextMatched: true,
+  });
+  expect(JSON.stringify(receipt)).not.toContain("SYN-Widget Renewal");
+  expect(JSON.stringify(receipt)).not.toContain("50000");
+  expectNoLeak(receipt, canary);
+});
+
+test("blocks business action when the live profile does not explicitly authorize mutation", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+  const worker = makeWorker(`
+    <div data-field-api="Name"><input aria-label="Opportunity Name" /></div>
+    <button data-action="save-evaluate-live">Save and Evaluate</button>
+    <p role="status">Saved successfully. The policy results are shown below.</p>
+  `);
+  const session = await handoff(worker, canary);
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "BUSINESS_ACTION",
+    businessAction: {
+      fields: [{ fieldApiName: "Name", value: "SYN-Unauthorized" }],
+      submit: { tag: "button", attribute: "data-action", expectedValue: "save-evaluate-live" },
+      successText: "Saved successfully. The policy results are shown below.",
+    },
+  });
+
+  expect(receipt.status).toBe("BLOCKED");
+  expect(receipt.error?.code).toBe("MODE_NOT_AUTHORIZED");
+  expect(JSON.stringify(receipt)).not.toContain("SYN-Unauthorized");
   expectNoLeak(receipt, canary);
 });
 

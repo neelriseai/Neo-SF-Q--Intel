@@ -16,6 +16,7 @@ import {
   type TrustedLiveBrowserProfile,
 } from "../src/salesforce-browser-coordinator.js";
 import { liveSmokeProjection, runLiveSmokeCli } from "../src/live-smoke-cli.js";
+import { liveBusinessActionProjection } from "../src/live-business-action-cli.js";
 
 const FRONTDOOR_ORIGIN = "https://example--qa.my.salesforce.com";
 const LIGHTNING_ORIGIN = "https://example--qa.lightning.force.com";
@@ -123,7 +124,7 @@ function receipt(canary = ""): BrowserWorkerReceipt {
   };
 }
 
-test("loads only an exactly digest-pinned, read-only host profile", () => {
+test("loads only an exactly digest-pinned host profile with coherent authority", () => {
   const raw = encodedProfile();
   const loaded = loadTrustedLiveBrowserProfile(raw, digest(raw));
 
@@ -142,7 +143,7 @@ test("loads only an exactly digest-pinned, read-only host profile", () => {
   (mutable.execution as Record<string, unknown>).mutationActionsEnabled = true;
   const mutationRaw = encodedProfile(mutable);
   expect(() => loadTrustedLiveBrowserProfile(mutationRaw, digest(mutationRaw))).toThrow(
-    expect.objectContaining({ code: "PROFILE_INVALID" }),
+    expect.objectContaining({ code: "PROFILE_BINDING_MISMATCH" }),
   );
 });
 
@@ -264,6 +265,80 @@ test("candidate readback projection carries retry context without raw path or ma
   });
   expect(serialized).not.toContain(path);
   expect(serialized).not.toContain(marker);
+  expect(serialized).not.toContain(canary);
+});
+
+test("business-action projection binds values by digest without leaking form input", () => {
+  const canary = randomBytes(12).toString("hex");
+  const actionReceipt = {
+    ...receipt(canary),
+    status: "PASSED" as const,
+    mode: "BUSINESS_ACTION" as const,
+    lifecycle: [
+      "CAPTURED",
+      "CANDIDATE_DISCOVERED",
+      "READBACK_VERIFIED",
+    ] satisfies CandidateLifecycleState[],
+    candidateCount: 1,
+    businessAction: {
+      fieldCount: 1,
+      submitted: true,
+      successTextMatched: true,
+    },
+  };
+  const fieldValue = `SYN-${canary}`;
+  const successText = `Saved successfully ${canary}`;
+
+  const request = {
+    startPath: "/lightning/n/Strategic_Deal_Workbench",
+    businessAction: {
+      fields: [{ fieldApiName: "Name", value: fieldValue }],
+      submit: {
+        tag: "lightning-button" as const,
+        attribute: "data-action" as const,
+        expectedValue: "save-evaluate-live",
+      },
+      successText,
+    },
+    persistence: {
+      objectApiName: "Opportunity",
+      matchField: "Name",
+      matchValue: fieldValue,
+      assertions: [{ fieldApiName: "Name", value: fieldValue }],
+    },
+  };
+  const projection = liveBusinessActionProjection(actionReceipt, request, {
+    matched: true,
+    objectApiName: "Opportunity",
+    matchField: "Name",
+    matchValueDigest: digest(fieldValue),
+    assertedFields: [{ fieldApiName: "Name", valueDigest: digest(fieldValue), matched: true }],
+  });
+  const serialized = JSON.stringify(projection);
+
+  expect(projection).toMatchObject({
+    status: "PASSED",
+    evidencePhase: "LIVE_BUSINESS_ACTION_BROWSER_ACCEPTANCE",
+    acceptanceCredit: false,
+    releaseEligible: false,
+    browserStatus: "PASSED",
+    fieldCount: 1,
+    businessAction: {
+      fieldCount: 1,
+      submitted: true,
+      successTextMatched: true,
+    },
+    persistence: {
+      matched: true,
+      objectApiName: "Opportunity",
+      matchField: "Name",
+      matchValueDigest: digest(fieldValue),
+    },
+  });
+  expect(serialized).toContain(digest(fieldValue));
+  expect(serialized).toContain(digest(successText));
+  expect(serialized).not.toContain(fieldValue);
+  expect(serialized).not.toContain(successText);
   expect(serialized).not.toContain(canary);
 });
 
