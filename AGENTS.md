@@ -67,6 +67,50 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
 - After adding, removing, moving or materially changing code, policy or canonical docs, run
   `python scripts/catalog/build_project_index.py`. Before commit, `--check` must pass.
 - Generated graph edges are discovery aids, not authority or permission.
+- Treat historical execution queues, review ledgers, chat summaries and demo runbooks as evidence of
+  prior decisions, not active instructions. They may inform risk and known gaps, but the current
+  user request, this `AGENTS.md`, current policy/config files and verified source state define the
+  active scope. If an older two-hour/three-hour/demo note pulls work away from the current selected
+  capability, record it as historical/deferred context and continue with the current scope.
+
+## Focused development and context compression
+
+- Make the smallest coherent, reviewable change. Prefer targeted patches and unified diffs; avoid
+  unrelated formatting, large rewrites and full-file regeneration. Rewrites are permitted when
+  required for correctness, generated output or a coherent refactor; explain material exceptions.
+- Treat edits as explicit changes to behavior, structure and state. Use AST-aware or
+  language-aware tooling when it is available and suitable, but do not require it for every
+  language, generated artifact or documentation change.
+- Start from scoped search, relevant symbols, project-index/graph routes and concise summaries.
+  Then read the original implementation and dependencies needed to establish behavior, side
+  effects, security and verification. Summaries, signatures, edge lists and indexes are navigation
+  aids, never authoritative substitutes for source when behavior is changed.
+- Describe tests as state transitions where useful: preconditions, action/event, expected state,
+  externally observable effects and invariants. Keep expected results independent of the
+  implementation and configuration under test.
+- Reuse defined domain vocabulary and compact matrices for repeated development handoffs. Introduce
+  a DSL only when its meaning is unambiguous, reviewed and measurably reduces recurring work.
+- Define domain shorthand before use or link its canonical definition. Preserve exact code, API,
+  object, field, capability, gate and policy identifiers. Do not use a shorthand whose meaning
+  varies by scenario.
+- Every condensed matrix, key-value record, edge list or schema must preserve applicable scope,
+  triggering conditions, required behavior, exceptions and verification criteria. Distinguish
+  requirements, observed facts, assumptions, proposals and unknowns. Missing information is
+  unknown, not permission to infer a default.
+- Keep authorized agent/review handoffs concise and structured: scope, changed files, capability
+  IDs, decisions, verification evidence, uncertainties, gaps and next action. Prefer schemas for
+  machine handoffs, but do not require minified JSON/YAML when readability or safety would suffer.
+- Use maintained impact indexes and graph edge lists when useful; include source locations and
+  freshness information, typed relationships and provenance where relevant, and verify relevant
+  edges against source before relying on them. An omitted node, edge or condition does not prove
+  absence.
+- Correctness, readability, security, evidence integrity and required verification take precedence
+  over context or token reduction. If compression hides uncertainty, expand context rather than
+  guessing. Adopt compression changes only when representative tasks show reduced total token use,
+  including clarification and rework, without reduced task success.
+- Do not allow previous demo data, fixture data, stale screenshots, old roadmap priorities or
+  repeated historical failures to narrow the implementation into a scenario-specific solution.
+  Re-check object/capability boundaries from source and tests before coding behavior.
 
 ## Independent review lane
 
@@ -77,8 +121,9 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
   the operator to change the main task model. If Astra is unavailable, record that explicitly and
   use the strongest available independent reviewer without weakening any gate.
 - For every coherent capability or design slice, start independent read-only reviewer sub-agents
-  when available. Keep two lanes: (1) genericity/architecture/scope and (2) governance, evidence,
-  safety and verification. The developer continues independent work while reviews run.
+  when available and authorized by the current user request/runtime policy. Keep two lanes:
+  (1) genericity/architecture/scope and (2) governance, evidence, safety and verification. The
+  developer continues independent work while reviews run.
 - Reviewers must challenge scenario/data coupling, hardcoding, pass-through or cosmetically named
   agents, weak/thin vertical slices, scope erosion, capability overclaims, missing negative/failure
   tests, and deviations from the canonical roadmap. A demo path is evidence for a reusable

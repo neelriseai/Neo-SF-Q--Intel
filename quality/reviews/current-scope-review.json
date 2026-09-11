@@ -375,6 +375,11 @@
       "code": "LIVE_BUSINESS_ACTION_SAVE_CONTRACT_BLOCKER",
       "severity": "P1",
       "resolution": "Current live blocker is no longer route marker availability or field discovery. After scoped deployment, the live page exposes exactly one `save-evaluate-live` marker; the worker fills Salesforce controls and clicks submit. The remaining failure is post-submit: no configured success status appears and the post-action Salesforce CLI query finds no matching synthetic Opportunity. Next work should add sanitized post-submit validation/error classification and then adjust only the required synthetic payload or route; do not weaken success or persistence assertions."
+    },
+    {
+      "code": "FOCUSED_DEVELOPMENT_CONTEXT_COMPRESSION",
+      "severity": "P1",
+      "resolution": "Astra reviewed the proposed AST/diff-only/minified-handoff development approach and returned GO_WITH_GUARDRAILS. The root project instructions now require smallest coherent targeted patches, graph/index-guided context selection, state-transition test framing and concise structured handoffs, while explicitly treating summaries, signatures and graph edges as navigation aids rather than authoritative substitutes. Correctness, readability, security, evidence integrity and required verification override token reduction. Follow-up anti-bias and intent-compression controls state that historical execution queues, review logs, screenshots, demo runbooks, examples and retrieved summaries are evidence, not active scope; prior demo data, fixture data and repeated historical failures must not narrow implementation into a scenario-specific solution. Condensed matrices, shorthand, schemas and edge lists must preserve scope, conditions, exceptions, verification criteria, provenance and unknowns; omission does not prove absence."
     }
   ],
   "statusDowngrades": []
