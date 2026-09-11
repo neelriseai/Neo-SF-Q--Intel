@@ -23,6 +23,7 @@
     "Docs/22-frozen-three-hour-agentic-live-vertical.md",
     "Docs/23-two-hour-live-demo-execution-queue.md",
     "Docs/24-strategic-deal-change-assurance-demo.md",
+    "Docs/25-strategic-deal-demo-test-pass-2026-09-12.md",
     "Docs/README.md",
     "README.md",
     "apps/web/src/app/page.tsx",
@@ -391,6 +392,11 @@
       "code": "MANDATORY_COMPACT_SLICE_OPERATING_LOOP",
       "severity": "P1",
       "resolution": "The root instructions now require each development slice to start with and operate through a compact task matrix: selected objective, capability IDs, acceptance boundary, project-index/graph-selected files, planned tests, wall-clock budget and maximum three retries. Broad history reads, full-file rewrites, broad reviews and foundation expansion are prohibited unless required for the selected objective, safety or evidence integrity; nonblocking broad work is deferred with a gap record."
+    },
+    {
+      "code": "STRATEGIC_DEAL_DEMO_TEST_PASS_BUG_MAP",
+      "severity": "P1",
+      "resolution": "The 2026-09-12 test-first Strategic Deal demo pass records sanitized evidence locations, pass/fail results, six scenario-mapped bugs, RCA hypotheses, cross-dependencies, severity/priority and a two-hour fix allocation. It preserves the live claim boundary: API LLM advisory, live baseline, full business action acceptance, visible live browser mode and production readiness remain unclaimed until retested evidence passes."
     }
   ],
   "statusDowngrades": []

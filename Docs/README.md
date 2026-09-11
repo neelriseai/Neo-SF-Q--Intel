@@ -25,6 +25,7 @@ not ingested wholesale.
 17. [Development stop checkpoint — 2026-09-11](21-development-stop-checkpoint-2026-09-11.md)
 18. [Frozen three-hour agentic live vertical](22-frozen-three-hour-agentic-live-vertical.md)
 19. [Strategic Deal Change Assurance Demo](24-strategic-deal-change-assurance-demo.md)
+20. [Strategic Deal demo test pass and bug map — 2026-09-12](25-strategic-deal-demo-test-pass-2026-09-12.md)
 
 ## Advisory status
 

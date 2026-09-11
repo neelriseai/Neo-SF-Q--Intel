@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0.0",
+  "scenario": "Strategic Deal Change Assurance Demo",
+  "startedAt": "2026-09-12T04:15:14+05:30",
+  "evidenceDirectory": ".runtime/demo-evidence/20260912-041557",
+  "acceptanceBoundary": "Demo evidence only unless signed live Salesforce gates pass; no production or release claim.",
+  "bugs": [
+    {
+      "id": "DEMO-API-001",
+      "scenarioStep": "Graph-grounded LLM advisory through running platform API",
+      "capabilityIds": [
+        "reasoning.graph-grounded-agent",
+        "assurance.candidate-comparison",
+        "ui.assurance-dashboard"
+      ],
+      "symptom": "Candidate analysis API returns FOUNDATION_PIPELINE_UNAVAILABLE while health reports PROVIDER_CREDENTIAL_SOURCE_CONFLICT.",
+      "rcaHypothesis": "Conflicting provider configuration between process environment and .env blocks provider calls.",
+      "severity": "P1",
+      "priority": 1,
+      "evidenceFiles": [
+        "api-health.json",
+        "api-candidate-analysis.json",
+        "direct-service-candidate-analysis.json"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "id": "DEMO-LIVE-BASELINE-001",
+      "scenarioStep": "Live Salesforce evidence and operator advisory composition",
+      "capabilityIds": [
+        "runtime.salesforce-live-evidence",
+        "governance.live-acceptance-evidence",
+        "demo.live-operator-advisory"
+      ],
+      "symptom": "Live Salesforce baseline API returns LOCAL_VALIDATION_PHASE_POLICY_INVALID.",
+      "rcaHypothesis": "Configured machine-local validation phase policy file/hash or phase expectations are stale or mismatched.",
+      "severity": "P1",
+      "priority": 2,
+      "evidenceFiles": [
+        "api-live-salesforce-baseline.json",
+        "api-live-operator-advisory.json"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "id": "DEMO-LIVE-BA-001",
+      "scenarioStep": "Business-action browser acceptance",
+      "capabilityIds": [
+        "automation.browser-worker",
+        "automation.applied-healing",
+        "runtime.salesforce-live-evidence"
+      ],
+      "symptom": "Live browser action fills fields and submits, but success text is not matched and persistence is not verified.",
+      "rcaHypothesis": "Salesforce save contract or synthetic payload is incomplete for the live Workbench route.",
+      "severity": "P1",
+      "priority": 3,
+      "evidenceFiles": [
+        "live-business-action.jsonl"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "id": "DEMO-BROWSER-001",
+      "scenarioStep": "Browser worker/healing verification gate",
+      "capabilityIds": [
+        "automation.browser-worker",
+        "automation.locator-healing"
+      ],
+      "symptom": "Playwright browser suite has one stale source-invariant failure after 158 passes.",
+      "rcaHypothesis": "Test asserts a literal mutationActionsEnabled false source string instead of read-only production coordinator behavior.",
+      "severity": "P1",
+      "priority": 4,
+      "evidenceFiles": [
+        "playwright-browser-hour4.log"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "id": "DEMO-BOOT-001",
+      "scenarioStep": "Live agentic platform launch",
+      "capabilityIds": [
+        "ui.assurance-dashboard",
+        "observability.agent-trace"
+      ],
+      "symptom": "API and dashboard were initially unavailable; python module import command did not serve API.",
+      "rcaHypothesis": "Run command/runbook mismatch; console entrypoint starts API successfully.",
+      "severity": "P2",
+      "priority": 5,
+      "evidenceFiles": [
+        "platform-health.json",
+        "platform-health-after-api-console.json"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "id": "DEMO-BROWSER-UI-001",
+      "scenarioStep": "User-visible live Salesforce browser execution",
+      "capabilityIds": [
+        "automation.browser-worker"
+      ],
+      "symptom": "Current live browser CLIs force headless browser execution.",
+      "rcaHypothesis": "Browser execution contract has no explicit safe headed operator mode.",
+      "severity": "P2",
+      "priority": 6,
+      "evidenceFiles": [
+        "live-profile.jsonl"
+      ],
+      "status": "OPEN"
+    }
+  ],
+  "fixPlanMinutes": [
+    {
+      "window": "0-25",
+      "bugId": "DEMO-API-001"
+    },
+    {
+      "window": "25-50",
+      "bugId": "DEMO-LIVE-BASELINE-001"
+    },
+    {
+      "window": "50-85",
+      "bugId": "DEMO-LIVE-BA-001"
+    },
+    {
+      "window": "85-105",
+      "bugId": "DEMO-BROWSER-001"
+    },
+    {
+      "window": "105-115",
+      "bugId": "DEMO-BOOT-001"
+    },
+    {
+      "window": "115-120",
+      "bugId": "Retest/report"
+    }
+  ]
+}

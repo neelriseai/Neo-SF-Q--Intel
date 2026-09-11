@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "7b6c89201f58bb28fb9a64a1d708bcbb8eaa8930e464d804751a2edaa3647868",
+  "sourceSnapshot": "5a557e938555ceae396455bbec0966028f6c814d1b3e507b4f6b22f40aaaa8f9",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1579,9 +1579,14 @@
       "sha256": "1ed8850584a63de484ac0a12b723f36749afd5b4f2a084a56f28b11b4971179c"
     },
     {
+      "path": "Docs/25-strategic-deal-demo-test-pass-2026-09-12.md",
+      "category": "reference-documentation",
+      "sha256": "dbfa23ee4f028f4790f1a8f9a5e340cdf3cdadd4a2ec17bbc9cb19c80bcef6cf"
+    },
+    {
       "path": "Docs/README.md",
       "category": "canonical-documentation",
-      "sha256": "15179dc9b8860f097d86116e7b2ef9174c4831693aaa9aa9c1a8afb542f4b58d"
+      "sha256": "745f69687e1602aa3d4b6d874c2259f5d38693a02c3bbfe48f44b9944dc67a86"
     },
     {
       "path": "Docs/deep-research-report.md",
@@ -2136,7 +2141,12 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "c8f0866f429cd6a08a6bd3c4fa2e33b9fee63a098e8bde59f1b0bc333fca0c5e"
+      "sha256": "a123af71a25ec7e9fcd3fd915b0c030ea10e7aa36cdfeece3a77cd9e094bd07e"
+    },
+    {
+      "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
+      "category": "project",
+      "sha256": "b94867ae404e8b01539d44ce6278bc9187c0373cee8f3974e92173a571cb4f49"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
