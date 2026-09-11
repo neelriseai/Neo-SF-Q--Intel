@@ -118,6 +118,81 @@ test("discovers exactly one candidate and verifies readback without applying an 
   expectNoLeak(receipt, canary);
 });
 
+test("verifies deployed candidate action marker as read-only readback", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+  const worker = makeWorker(`
+    <button aria-label="Save proposal and check policy" data-action="save-evaluate-live">
+      Save proposal and check policy
+    </button>
+  `);
+  const session = await handoff(worker, canary);
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "CANDIDATE_READBACK",
+    candidate: {
+      hostAttribute: {
+        tag: "button",
+        attribute: "data-action",
+        expectedValue: "save-evaluate-live",
+      },
+    },
+  });
+
+  expect(receipt.status).toBe("PASSED");
+  expect(receipt.lifecycle).toEqual([
+    "CAPTURED",
+    "CANDIDATE_DISCOVERED",
+    "READBACK_VERIFIED",
+  ]);
+  expect(receipt.readbackMatched).toBe(true);
+  expectNoLeak(receipt, canary);
+});
+
+test("navigates to a bounded same-origin start path before candidate readback", async () => {
+  const worker = makeWorker(`<button aria-label="Wrong page">Wrong page</button>`, {
+    offlineDocumentForPath: (pathname) => ({
+      body:
+        pathname === "/lightning/n/Strategic_Deal_Workbench"
+          ? `<button aria-label="Save proposal and check policy" data-action="save-evaluate-live">
+              Save proposal and check policy
+            </button>`
+          : `<button aria-label="Wrong page">Wrong page</button>`,
+    }),
+  });
+  const session = await handoff(worker, "bounded-start-path");
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "CANDIDATE_READBACK",
+    startPath: "/lightning/n/Strategic_Deal_Workbench",
+    candidate: {
+      role: "button",
+      accessibleName: "Save proposal and check policy",
+      readback: { attribute: "data-action", expectedValue: "save-evaluate-live" },
+    },
+  });
+
+  expect(receipt.status).toBe("PASSED");
+  expect(receipt.readbackMatched).toBe(true);
+});
+
+test("rejects unsafe start paths before browser navigation", async () => {
+  const worker = makeWorker(`<button aria-label="Review">Review</button>`);
+  const session = await handoff(worker, "unsafe-start-path");
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "CANDIDATE_READBACK",
+    startPath: "//evil.invalid/path",
+    candidate: { role: "button", accessibleName: "Review" },
+  });
+
+  expect(receipt.status).toBe("BLOCKED");
+  expect(receipt.error?.code).toBe("START_PATH_INVALID");
+  expect(receipt.cleanup).toEqual({ contextClosed: true, browserClosed: true });
+});
+
 test("blocks ambiguous candidates and still closes the ephemeral browser", async () => {
   const canary = `session-${randomBytes(12).toString("hex")}`;
   const worker = makeWorker(`

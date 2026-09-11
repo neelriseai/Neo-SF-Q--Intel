@@ -211,3 +211,30 @@ Current remaining live-vertical gaps:
 4. Full live Salesforce acceptance gates/receipts are incomplete.
 5. The Salesforce app repo intentionally retains uncommitted demo candidate changes until a protected
    mutation/deploy milestone is explicitly authorized.
+
+## Continuation: scoped LWC deploy, live readback and restore
+
+Selected capability: deployed-candidate readback for the current AUT locator-drift candidate.
+The user authorized the lightweight archive/manifest approach for this demo milestone.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Preimage archive | DONE | 2 | Created operation `restore-20260911T155750Z-1e31703f`, retrieved the live `strategicDealWorkbench` bundle into ignored runtime artifacts, and wrote a sanitized manifest with preimage/candidate hashes. Live preimage differed from Git HEAD only by EOL normalization |
+| Check-only | DONE | 1 | Scoped `LightningComponentBundle:strategicDealWorkbench` dry-run/check-only deployment succeeded with explicit `NoTestRun` |
+| Candidate deploy | DONE | 1 | Scoped LWC bundle deployment succeeded. No Apex, data, permission, destructive or broad package mutation was dispatched |
+| Live browser readback | DONE | 3 | Added a generic read-only candidate readback CLI using the existing browser worker and fixed host-owned Workbench path. First two attempts proved browser cleanup but missed the host marker; final run passed with one `lightning-button[data-action="save-evaluate-live"]`, `readbackMatched=true`, and closed browser/context cleanup |
+| Restore/reconcile | DONE | 1 | Deployed the archived preimage bundle back to Salesforce, retrieved it again, and verified restored HTML SHA-256 equals archived preimage SHA-256 |
+| Full live campaign gates | PARTIAL | 1 | This proves the scoped LWC deployed-candidate browser readback and restoration for the candidate marker. It is not yet the complete signed live campaign receipt set across all Salesforce acceptance gates |
+
+Sanitized receipt digests:
+
+- Candidate live readback execution digest: `dd6d236e5ec754c229b52d2d42559fb9d4f096f7b526874b92c9b9f500ab466b`.
+- Browser profile digest: `665ff873a5a90ea6f646ca1833566e2340eefbc221c8d3946e71166a072d96b8`.
+- Archived/restored preimage SHA-256: `7777e3ef35d0709e091acf6b076d7dd62767ab44f0382eee476d78d4bcdbd5a3`.
+
+Remaining boundary after this continuation:
+
+- The local Salesforce app repo still intentionally contains the candidate LWC/knowledge changes for
+  analysis replay; the live org has been restored to the archived baseline.
+- The full acceptance profile remains incomplete because this milestone covers only the scoped LWC
+  deploy/readback/restore path, not every API, metadata, browser, test and campaign gate.

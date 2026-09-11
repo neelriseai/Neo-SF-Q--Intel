@@ -15,6 +15,7 @@
     "build:live": "tsc -p tsconfig.live.json",
     "live:profile": "npm run build:live && node dist/live-profile-cli.js",
     "live:smoke": "npm run build:live && node dist/live-smoke-cli.js",
+    "live:candidate-readback": "npm run build:live && node dist/live-candidate-readback-cli.js",
     "test:e2e": "playwright test tests/dashboard.spec.ts --config=playwright.e2e.config.ts"
   },
   "dependencies": {

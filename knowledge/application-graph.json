@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "4035993216db5220525457e7026b2680cedb5c430f75b2c6cb93c5064da9c8e3",
+  "sourceSnapshot": "a0d91f695ef68259b5f6aa7d3975dfa4ef218ae5915c524c41330a94e3c384bb",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -938,6 +938,14 @@
       "kind": "file",
       "label": "healing-probe.ts",
       "source": "packages/browser/src/healing-probe.ts",
+      "category": "browser-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:packages/browser/src/live-candidate-readback-cli.ts",
+      "kind": "file",
+      "label": "live-candidate-readback-cli.ts",
+      "source": "packages/browser/src/live-candidate-readback-cli.ts",
       "category": "browser-runtime",
       "authority": "authoritative-source"
     },
@@ -4578,6 +4586,21 @@
       "from": "file:packages/browser/src/healing-probe.ts",
       "relation": "imports",
       "to": "file:packages/browser/src/locator-healer.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-candidate-readback-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/browser-worker.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-candidate-readback-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/salesforce-browser-coordinator.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-candidate-readback-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/salesforce-cli-session.ts"
     },
     {
       "from": "file:packages/browser/src/live-profile-cli.ts",

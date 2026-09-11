@@ -52,7 +52,7 @@ test("builds a short-lived live browser profile without session material", () =>
       actorBinding: digest("salesforce-username:admin@example.invalid"),
       issuedAt: "2026-09-11T12:00:00.000Z",
       expiresAt: "2026-09-11T12:10:00.000Z",
-      permittedModes: ["READ_ONLY_DOM_CAPTURE"],
+      permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"],
     },
     execution: {
       mode: "READ_ONLY_DOM_CAPTURE",

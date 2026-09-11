@@ -131,7 +131,7 @@ type LiveBrowserProfileDocument = {
     policyDigest: string;
     issuedAt: string;
     expiresAt: string;
-    permittedModes: ["READ_ONLY_DOM_CAPTURE"];
+    permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"];
   };
   sessionBroker: Record<string, unknown>;
   browser: Record<string, unknown>;
@@ -185,7 +185,10 @@ export function buildProfile(input: ProfileInput): LiveBrowserProfileDocument {
     policyDigest,
     issuedAt: issuedAt.toISOString(),
     expiresAt: expiresAt.toISOString(),
-    permittedModes: ["READ_ONLY_DOM_CAPTURE"] as ["READ_ONLY_DOM_CAPTURE"],
+      permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"] as [
+        "READ_ONLY_DOM_CAPTURE",
+        "CANDIDATE_READBACK",
+      ],
   };
   return {
     schemaVersion: "1.0.0",

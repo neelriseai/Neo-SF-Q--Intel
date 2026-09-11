@@ -21,10 +21,20 @@ export interface TrustedEnrollmentAssertion {
 }
 
 export interface CandidateIntent {
-  role: Parameters<Page["getByRole"]>[0];
-  accessibleName: string;
+  role?: Parameters<Page["getByRole"]>[0];
+  accessibleName?: string;
   readback?: {
-    attribute: "aria-checked" | "aria-expanded" | "aria-pressed" | "data-state";
+    attribute:
+      | "aria-checked"
+      | "aria-expanded"
+      | "aria-pressed"
+      | "data-action"
+      | "data-state";
+    expectedValue: string;
+  };
+  hostAttribute?: {
+    tag: "lightning-button" | "button";
+    attribute: "data-action";
     expectedValue: string;
   };
 }
@@ -32,6 +42,7 @@ export interface CandidateIntent {
 export interface BrowserWorkerRequest {
   handoff: EphemeralSessionHandoff;
   mode: WorkerMode;
+  startPath?: string;
   candidate?: CandidateIntent;
   captureLimit?: number;
 }
@@ -293,14 +304,24 @@ export class BrowserWorker {
       canonicalJson({
         enrollmentId: session.enrollment.enrollmentId,
         mode: request.mode,
+        startPath: request.startPath,
         candidate: request.candidate
           ? {
               role: request.candidate.role,
-              accessibleNameDigest: digest(request.candidate.accessibleName),
+              accessibleNameDigest: request.candidate.accessibleName
+                ? digest(request.candidate.accessibleName)
+                : undefined,
               readback: request.candidate.readback
                 ? {
                     attribute: request.candidate.readback.attribute,
                     expectedValueDigest: digest(request.candidate.readback.expectedValue),
+                  }
+                : undefined,
+              hostAttribute: request.candidate.hostAttribute
+                ? {
+                    tag: request.candidate.hostAttribute.tag,
+                    attribute: request.candidate.hostAttribute.attribute,
+                    expectedValueDigest: digest(request.candidate.hostAttribute.expectedValue),
                   }
                 : undefined,
             }
@@ -336,6 +357,15 @@ export class BrowserWorker {
         this.#navigationTimeoutMs,
       );
       validateCurrentPageOrigin(page, session.enrollment.canonicalLightningOrigin);
+      if (request.startPath) {
+        await navigate(
+          page,
+          new URL(request.startPath, session.enrollment.canonicalLightningOrigin).toString(),
+          session.enrollment.canonicalLightningOrigin,
+          this.#navigationTimeoutMs,
+        );
+        validateCurrentPageOrigin(page, session.enrollment.canonicalLightningOrigin);
+      }
 
       pending = await this.#executeOnPage(
         page,
@@ -572,6 +602,47 @@ export class BrowserWorker {
     }
 
     const candidate = request.candidate!;
+    if (candidate.hostAttribute) {
+      const hostLocator = page.locator(
+        `${candidate.hostAttribute.tag}[${candidate.hostAttribute.attribute}="${cssString(
+          candidate.hostAttribute.expectedValue,
+        )}"]`,
+      );
+      try {
+        await hostLocator.first().waitFor({ state: "attached", timeout: this.#operationTimeoutMs });
+      } catch {
+        return {
+          ...base,
+          status: "BLOCKED",
+          lifecycle: ["CAPTURED", "CANDIDATE_NOT_FOUND"],
+          candidateCount: 0,
+          error: { class: "POLICY_BLOCKED", code: "CANDIDATE_NOT_FOUND" },
+        };
+      }
+      const count = await hostLocator.count();
+      if (count !== 1) {
+        return {
+          ...base,
+          status: "BLOCKED",
+          lifecycle: ["CAPTURED", count === 0 ? "CANDIDATE_NOT_FOUND" : "CANDIDATE_AMBIGUOUS"],
+          candidateCount: count,
+          error: {
+            class: "POLICY_BLOCKED",
+            code: count === 0 ? "CANDIDATE_NOT_FOUND" : "CANDIDATE_AMBIGUOUS",
+          },
+        };
+      }
+      return {
+        ...base,
+        status: "PASSED",
+        lifecycle: ["CAPTURED", "CANDIDATE_DISCOVERED", "READBACK_VERIFIED"],
+        candidateCount: 1,
+        readbackMatched: true,
+      };
+    }
+    if (!candidate.role || !candidate.accessibleName) {
+      throw new BrowserWorkerError("CANDIDATE_INTENT_INVALID");
+    }
     const locator = page.getByRole(candidate.role, {
       name: candidate.accessibleName,
       exact: true,
@@ -641,19 +712,65 @@ function validateRequest(request: BrowserWorkerRequest): void {
   ) {
     throw new BrowserWorkerError("CAPTURE_LIMIT_INVALID");
   }
+  if (request.startPath !== undefined && !isSafeRelativeStartPath(request.startPath)) {
+    throw new BrowserWorkerError("START_PATH_INVALID");
+  }
   if (request.mode === "CANDIDATE_READBACK") {
     if (
       !request.candidate ||
-      typeof request.candidate.accessibleName !== "string" ||
-      request.candidate.accessibleName.length < 1 ||
-      request.candidate.accessibleName.length > 200 ||
-      typeof request.candidate.role !== "string"
+      !hasValidCandidateLocator(request.candidate)
     ) {
       throw new BrowserWorkerError("CANDIDATE_INTENT_INVALID");
     }
   } else if (request.candidate) {
     throw new BrowserWorkerError("CANDIDATE_NOT_ALLOWED_FOR_CAPTURE");
   }
+}
+
+function hasValidCandidateLocator(candidate: CandidateIntent): boolean {
+  const hasRoleLocator =
+    typeof candidate.accessibleName === "string" &&
+    candidate.accessibleName.length >= 1 &&
+    candidate.accessibleName.length <= 200 &&
+    typeof candidate.role === "string";
+  const host = candidate.hostAttribute;
+  const hasHostLocator =
+    host !== undefined &&
+    (host.tag === "button" || host.tag === "lightning-button") &&
+    host.attribute === "data-action" &&
+    typeof host.expectedValue === "string" &&
+    /^[A-Za-z0-9][A-Za-z0-9_-]{0,80}$/.test(host.expectedValue);
+  if (candidate.readback && !hasRoleLocator) return false;
+  return hasRoleLocator || hasHostLocator;
+}
+
+function cssString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function isSafeRelativeStartPath(value: string): boolean {
+  if (
+    typeof value !== "string" ||
+    value.length < 1 ||
+    value.length > 256 ||
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    /[\u0000-\u001f\u007f\\]/.test(value)
+  ) {
+    return false;
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(value, "https://example.lightning.force.com");
+  } catch {
+    return false;
+  }
+  return (
+    parsed.origin === "https://example.lightning.force.com" &&
+    parsed.pathname === value &&
+    !parsed.search &&
+    !parsed.hash
+  );
 }
 
 async function captureDom(
@@ -859,6 +976,7 @@ function mapFailure(error: unknown): NonNullable<BrowserWorkerReceipt["error"]> 
       "CANDIDATE_NOT_ALLOWED_FOR_CAPTURE",
       "POST_NAVIGATION_ORIGIN_INVALID",
       "POST_NAVIGATION_ORIGIN_MISMATCH",
+      "START_PATH_INVALID",
     ]);
     return {
       class: error.code === "NAVIGATION_FAILED" ? "NAVIGATION_FAILED" : policyCodes.has(error.code) ? "POLICY_BLOCKED" : "CAPTURE_FAILED",

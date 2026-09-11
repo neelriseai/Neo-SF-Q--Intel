@@ -106,6 +106,10 @@ Current 2026-09-11 recheck receipts for this slice:
   through environment variables; it remained `diagnosticOnly=true` and `releaseEligible=false`.
 - The first browser-smoke attempt blocked as `PROFILE_SOURCE_INVALID` because the generated profile
   path and digest were not exported. This is an operator sequencing issue, not a product claim.
+- The scoped LWC candidate was later deployed under operation `restore-20260911T155750Z-1e31703f`,
+  read back live through headless Playwright as one matching `save-evaluate-live` host action marker,
+  then restored and reconciled to the archived preimage SHA-256. This is deployed-candidate readback
+  evidence for the marker only, not complete full-campaign acceptance.
 
 ## Operator runbook — live locator-healing demo (NOT_READY)
 
