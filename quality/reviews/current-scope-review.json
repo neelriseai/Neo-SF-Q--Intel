@@ -114,7 +114,8 @@
     "src/neo_sf_q_intel/subprocess_environment.py",
     "tests/test_candidate_assurance.py",
     "packages/browser/tests/browser-worker.spec.ts",
-    "packages/browser/tests/live-profile-cli.spec.ts"
+    "packages/browser/tests/live-profile-cli.spec.ts",
+    "packages/browser/tests/salesforce-browser-coordinator.spec.ts"
   ],
   "reviewers": [
     "astra_final_solution_review",
@@ -342,6 +343,11 @@
       "code": "SCOPED_LWC_DEPLOY_READBACK_RESTORE",
       "severity": "P1",
       "resolution": "The user-authorized lightweight preimage archive closed the immediate demo mutation blocker for the exact Workbench LWC candidate. The live preimage was archived under an operation id with sanitized hashes, check-only succeeded, the scoped LWC candidate deployed, a new fixed-scope read-only Playwright CLI verified one deployed `lightning-button[data-action=\"save-evaluate-live\"]`, and the archived preimage was restored and reconciled by SHA-256. The path remains diagnostic/demo-scoped and does not claim complete signed campaign acceptance."
+    },
+    {
+      "code": "LIVE_BROWSER_STEP_CONTEXT_RETRY",
+      "severity": "P1",
+      "resolution": "The blueprint review found the useful near-term addition was not a new architecture but a small runtime execution/evaluation envelope. The live candidate readback CLI now emits sanitized step context, selected strategy, expected postcondition and per-attempt receipts, caps retries at three, retries only bounded readback failures after browser/context cleanup, and avoids raw paths, selectors, marker values, sessions or org payloads. Focused browser build and 23 Playwright tests passed."
     }
   ],
   "statusDowngrades": []

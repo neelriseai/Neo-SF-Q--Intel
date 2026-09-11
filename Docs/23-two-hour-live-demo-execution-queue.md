@@ -203,7 +203,8 @@ candidate advisory were computed beside each other instead of inside the same sp
 | Document pass/fail | DONE | 1 | This section records that gap #1 is addressed at the foundation/operator-composition layer. The full live vertical is still incomplete until candidate deploy, deployed-candidate browser acceptance, restore/reconciliation and live acceptance gates pass |
 | Move to next capability | BLOCKED | 1 | Astra review blocks deployment until the restore/reconciliation mechanism covers the exact current LWC HTML candidate mutation, not only the older metadata property case |
 
-Current remaining live-vertical gaps:
+Current remaining live-vertical gaps at this point in the chronology, before the scoped LWC
+deploy/readback/restore continuation below:
 
 1. Local AUT candidate change is not deployed to Salesforce.
 2. No live deployed-candidate browser acceptance has run.
@@ -238,3 +239,19 @@ Remaining boundary after this continuation:
   analysis replay; the live org has been restored to the archived baseline.
 - The full acceptance profile remains incomplete because this milestone covers only the scoped LWC
   deploy/readback/restore path, not every API, metadata, browser, test and campaign gate.
+
+## Continuation: runtime step-context and bounded retry envelope
+
+Selected improvement: use the user's blueprint as a bug-fix aid without widening into a new
+planner/vector/vision architecture. The implemented slice adds a small runtime step-context
+envelope to the live candidate readback CLI.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Runtime context envelope | DONE | 1 | `live:candidate-readback` now emits sanitized intent kind, strategy, retry policy, start-path digest, host attribute name, expected-value digest and expected postcondition |
+| Bounded retry loop | DONE | 1 | Readback attempts are capped at three, retry only sanitized readback failures with closed browser/context cleanup, and record per-attempt status, lifecycle, candidate count, cleanup, error code and execution/input digests |
+| Scope control | DONE | 1 | The CLI remains generic and host-configured through bounded environment values; it stores no raw path, marker value, selector, session URL, username, org payload or credential |
+| Test it | DONE | 1 | Browser build passed and 23 focused Playwright worker/profile/coordinator tests passed, including projection no-leak coverage |
+
+Deferred from this blueprint-inspired slice: broad LangGraph rewrite, vector example retrieval,
+vision/bounding boxes, full layout/FLS extraction and forced JavaScript-click fallback.

@@ -18,6 +18,39 @@ import { SalesforceCliSessionBroker } from "./salesforce-cli-session.js";
 type Environment = Readonly<Record<string, string | undefined>>;
 type OutputWriter = (value: string) => void;
 
+type CandidateReadbackRequest = {
+  readonly startPath: string;
+  readonly candidate: CandidateIntent;
+  readonly maximumAttempts: number;
+  readonly retryDelayMs: number;
+};
+
+type CandidateReadbackStepContext = {
+  readonly schemaVersion: "1.0.0";
+  readonly intentKind: "HOST_ATTRIBUTE_READBACK";
+  readonly strategy: "BOUNDED_HOST_ATTRIBUTE_READBACK";
+  readonly retryPolicy: "MAX_THREE_ATTEMPTS_SAME_INTENT";
+  readonly startPathDigest: string;
+  readonly hostTag: "button" | "lightning-button";
+  readonly hostAttribute: "data-action";
+  readonly expectedValueDigest: string;
+  readonly expectedPostcondition: "EXACTLY_ONE_HOST_ATTRIBUTE_MATCH";
+  readonly maximumAttempts: number;
+};
+
+type CandidateReadbackAttempt = {
+  readonly attempt: number;
+  readonly strategy: "BOUNDED_HOST_ATTRIBUTE_READBACK";
+  readonly status: BrowserWorkerReceipt["status"];
+  readonly lifecycle: BrowserWorkerReceipt["lifecycle"];
+  readonly candidateCount: number;
+  readonly readbackMatched?: boolean;
+  readonly cleanup: BrowserWorkerReceipt["cleanup"];
+  readonly errorCode?: string;
+  readonly executionIdDigest: string;
+  readonly inputDigest: string;
+};
+
 export async function runLiveCandidateReadbackCli(
   arguments_: readonly string[],
   environment: Environment,
@@ -49,16 +82,30 @@ export async function runLiveCandidateReadbackCli(
     });
     const broker = new SalesforceCliSessionBroker(profile.sessionBroker, worker);
     const enrollment = await worker.enroll(profile.enrollment);
-    const handoff = await broker.acquire(enrollment);
-    const receipt = await worker.execute({
-      handoff,
-      mode: "CANDIDATE_READBACK",
-      startPath: request.startPath,
-      candidate: request.candidate,
-      captureLimit: profile.execution.captureLimit,
-    });
-    write(`${JSON.stringify(liveCandidateReadbackProjection(receipt))}\n`);
-    return receipt.status === "PASSED" ? 0 : 2;
+    const receipts: BrowserWorkerReceipt[] = [];
+    for (let attempt = 1; attempt <= request.maximumAttempts; attempt += 1) {
+      const handoff = await broker.acquire(enrollment);
+      const receipt = await worker.execute({
+        handoff,
+        mode: "CANDIDATE_READBACK",
+        startPath: request.startPath,
+        candidate: request.candidate,
+        captureLimit: profile.execution.captureLimit,
+      });
+      receipts.push(receipt);
+      if (receipt.status === "PASSED" || !isRetryableReadbackFailure(receipt)) {
+        break;
+      }
+      if (attempt < request.maximumAttempts) {
+        await delay(request.retryDelayMs);
+      }
+    }
+    const projection = liveCandidateReadbackProjection(
+      receipts,
+      candidateStepContext(request),
+    );
+    write(`${JSON.stringify(projection)}\n`);
+    return projection.status === "PASSED" ? 0 : 2;
   } catch (error) {
     const code = safeErrorCode(error);
     write(
@@ -74,10 +121,7 @@ export async function runLiveCandidateReadbackCli(
   }
 }
 
-function candidateReadbackRequest(environment: Environment): {
-  startPath: string;
-  candidate: CandidateIntent;
-} {
+function candidateReadbackRequest(environment: Environment): CandidateReadbackRequest {
   const startPath = environment.NEO_BROWSER_CANDIDATE_START_PATH;
   if (!startPath || !isSafeStartPath(startPath)) {
     throw new BrowserCoordinatorError("CANDIDATE_START_PATH_INVALID");
@@ -93,6 +137,20 @@ function candidateReadbackRequest(environment: Environment): {
   ) {
     throw new BrowserCoordinatorError("CANDIDATE_HOST_READBACK_INVALID");
   }
+  const maximumAttempts = boundedInteger(
+    environment.NEO_BROWSER_CANDIDATE_MAX_ATTEMPTS,
+    3,
+    1,
+    3,
+    "CANDIDATE_MAX_ATTEMPTS_INVALID",
+  );
+  const retryDelayMs = boundedInteger(
+    environment.NEO_BROWSER_CANDIDATE_RETRY_DELAY_MS,
+    1_000,
+    0,
+    5_000,
+    "CANDIDATE_RETRY_DELAY_INVALID",
+  );
   return {
     startPath,
     candidate: {
@@ -102,29 +160,77 @@ function candidateReadbackRequest(environment: Environment): {
         expectedValue,
       },
     },
+    maximumAttempts,
+    retryDelayMs,
   };
 }
 
 export function liveCandidateReadbackProjection(
-  receipt: BrowserWorkerReceipt,
+  receipts: readonly BrowserWorkerReceipt[],
+  stepContext: CandidateReadbackStepContext,
 ): Record<string, unknown> {
+  const finalReceipt = receipts.at(-1);
+  if (!finalReceipt) {
+    throw new BrowserCoordinatorError("READBACK_RECEIPT_MISSING");
+  }
   return Object.freeze({
     schemaVersion: "1.0.0",
     diagnosticOnly: true,
     releaseEligible: false,
     evidencePhase: "DEPLOYED_CANDIDATE_READBACK",
-    capabilityId: receipt.capabilityId,
-    status: receipt.status,
-    mode: receipt.mode,
-    executionIdDigest: digest(receipt.executionId),
-    inputDigest: receipt.inputDigest,
-    policyDigest: receipt.enrollment.policyDigest,
-    lifecycle: receipt.lifecycle,
-    candidateCount: receipt.candidateCount,
-    readbackMatched: receipt.readbackMatched,
-    cleanup: receipt.cleanup,
-    errorCode: receipt.error?.code,
+    capabilityId: finalReceipt.capabilityId,
+    status: finalReceipt.status,
+    mode: finalReceipt.mode,
+    attemptCount: receipts.length,
+    stepContext,
+    attempts: receipts.map((receipt, index): CandidateReadbackAttempt => ({
+      attempt: index + 1,
+      strategy: "BOUNDED_HOST_ATTRIBUTE_READBACK",
+      status: receipt.status,
+      lifecycle: receipt.lifecycle,
+      candidateCount: receipt.candidateCount,
+      readbackMatched: receipt.readbackMatched,
+      cleanup: receipt.cleanup,
+      errorCode: receipt.error?.code,
+      executionIdDigest: digest(receipt.executionId),
+      inputDigest: receipt.inputDigest,
+    })),
+    policyDigest: finalReceipt.enrollment.policyDigest,
+    lifecycle: finalReceipt.lifecycle,
+    candidateCount: finalReceipt.candidateCount,
+    readbackMatched: finalReceipt.readbackMatched,
+    cleanup: finalReceipt.cleanup,
+    errorCode: finalReceipt.error?.code,
   });
+}
+
+function candidateStepContext(
+  request: CandidateReadbackRequest,
+): CandidateReadbackStepContext {
+  const host = request.candidate.hostAttribute;
+  if (!host) throw new BrowserCoordinatorError("CANDIDATE_HOST_READBACK_INVALID");
+  return Object.freeze({
+    schemaVersion: "1.0.0",
+    intentKind: "HOST_ATTRIBUTE_READBACK",
+    strategy: "BOUNDED_HOST_ATTRIBUTE_READBACK",
+    retryPolicy: "MAX_THREE_ATTEMPTS_SAME_INTENT",
+    startPathDigest: digest(request.startPath),
+    hostTag: host.tag,
+    hostAttribute: host.attribute,
+    expectedValueDigest: digest(host.expectedValue),
+    expectedPostcondition: "EXACTLY_ONE_HOST_ATTRIBUTE_MATCH",
+    maximumAttempts: request.maximumAttempts,
+  });
+}
+
+function isRetryableReadbackFailure(receipt: BrowserWorkerReceipt): boolean {
+  return (
+    receipt.status !== "PASSED" &&
+    receipt.cleanup.contextClosed &&
+    receipt.cleanup.browserClosed &&
+    (receipt.error?.code === "CANDIDATE_NOT_FOUND" ||
+      receipt.error?.code === "READBACK_MISMATCH")
+  );
 }
 
 async function loadProfileBytes(environment: Environment): Promise<Uint8Array> {
@@ -148,6 +254,26 @@ function safeErrorCode(error: unknown): string {
     return error instanceof BrowserCoordinatorError ? error.code : error.message;
   }
   return "LIVE_CANDIDATE_READBACK_FAILED";
+}
+
+function boundedInteger(
+  value: string | undefined,
+  fallback: number,
+  minimum: number,
+  maximum: number,
+  code: string,
+): number {
+  const parsed = value === undefined || value === "" ? fallback : Number(value);
+  if (!Number.isInteger(parsed) || parsed < minimum || parsed > maximum) {
+    throw new BrowserCoordinatorError(code);
+  }
+  return parsed;
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolveDelay) => {
+    setTimeout(resolveDelay, milliseconds);
+  });
 }
 
 function isSafeStartPath(value: string): boolean {

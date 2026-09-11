@@ -6,6 +6,9 @@ import type {
   TrustedEnrollmentHandle,
 } from "../src/browser-worker.js";
 import {
+  liveCandidateReadbackProjection,
+} from "../src/live-candidate-readback-cli.js";
+import {
   BrowserCoordinatorError,
   ReadOnlyBrowserSessionCoordinator,
   loadTrustedLiveBrowserProfile,
@@ -210,6 +213,53 @@ test("live smoke projection omits DOM, session material, and raw execution ident
     capabilityId: "automation.browser-worker",
     cleanup: { contextClosed: true, browserClosed: true },
   });
+});
+
+test("candidate readback projection carries retry context without raw path or marker", () => {
+  const canary = randomBytes(12).toString("hex");
+  const path = "/lightning/app/Private_App/n/Private_Tab";
+  const marker = `candidate-${canary}`;
+  const first = {
+    ...receipt(canary),
+    status: "BLOCKED" as const,
+    mode: "CANDIDATE_READBACK" as const,
+    lifecycle: ["CAPTURED", "CANDIDATE_NOT_FOUND"] as const,
+    candidateCount: 0,
+    error: { class: "POLICY_BLOCKED" as const, code: "CANDIDATE_NOT_FOUND" },
+  };
+  const second = {
+    ...receipt(canary),
+    mode: "CANDIDATE_READBACK" as const,
+    lifecycle: ["CAPTURED", "CANDIDATE_DISCOVERED", "READBACK_VERIFIED"] as const,
+    readbackMatched: true,
+  };
+
+  const projection = liveCandidateReadbackProjection([first, second], {
+    schemaVersion: "1.0.0",
+    intentKind: "HOST_ATTRIBUTE_READBACK",
+    strategy: "BOUNDED_HOST_ATTRIBUTE_READBACK",
+    retryPolicy: "MAX_THREE_ATTEMPTS_SAME_INTENT",
+    startPathDigest: digest(path),
+    hostTag: "lightning-button",
+    hostAttribute: "data-action",
+    expectedValueDigest: digest(marker),
+    expectedPostcondition: "EXACTLY_ONE_HOST_ATTRIBUTE_MATCH",
+    maximumAttempts: 3,
+  });
+  const serialized = JSON.stringify(projection);
+
+  expect(projection).toMatchObject({
+    status: "PASSED",
+    attemptCount: 2,
+    readbackMatched: true,
+    stepContext: {
+      intentKind: "HOST_ATTRIBUTE_READBACK",
+      maximumAttempts: 3,
+    },
+  });
+  expect(serialized).not.toContain(path);
+  expect(serialized).not.toContain(marker);
+  expect(serialized).not.toContain(canary);
 });
 
 test("CLI refuses caller alias or selector arguments without starting live work", async () => {

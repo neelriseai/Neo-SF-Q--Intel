@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "a0d91f695ef68259b5f6aa7d3975dfa4ef218ae5915c524c41330a94e3c384bb",
+  "sourceSnapshot": "a42068c84d26535ac7fb3d4d10788bc1d73d62448e5750c61e0241914493bc52",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1571,7 +1571,7 @@
     {
       "path": "Docs/23-two-hour-live-demo-execution-queue.md",
       "category": "reference-documentation",
-      "sha256": "d549ab879a6112fec67f71baaadc910a7c8d6dfe743df1253a181c3bf64dfaaf"
+      "sha256": "3662b3945e96bd5418b7243aede68e6eb6d7c7788875ae6dfde59a97dc7d263b"
     },
     {
       "path": "Docs/README.md",
@@ -1896,7 +1896,7 @@
     {
       "path": "packages/browser/src/live-candidate-readback-cli.ts",
       "category": "browser-runtime",
-      "sha256": "e610a54869bca6f166749ab38208f7114a7d9a434e9b0292b06549c5b1ae341d"
+      "sha256": "a7dcc0142a60aa99c2d62476deeb178838d87216d4614a9faf2bc72011223a40"
     },
     {
       "path": "packages/browser/src/live-profile-cli.ts",
@@ -1966,7 +1966,7 @@
     {
       "path": "packages/browser/tests/salesforce-browser-coordinator.spec.ts",
       "category": "test",
-      "sha256": "3f6236bbdf2a0c76df14953b74e37af9f30f6ab157a37873151c0cf8b5b83990"
+      "sha256": "d141b1440164dd542c219572fb3e78b28868f775816264142c62cfd9aa8d486f"
     },
     {
       "path": "packages/browser/tests/salesforce-cli-session.spec.ts",
@@ -2126,7 +2126,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "3d2e58b39786bb83647ffd83f4458a5477171ce3ceaa3e034fef27fdea5e1df0"
+      "sha256": "19e8151b76644cfd8190f95b9d4f02aeda6a42089601eeee25ba0588a36e6653"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
