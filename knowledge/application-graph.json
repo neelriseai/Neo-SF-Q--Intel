@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "b5c8cc780da48f75cf17869f096cad1b9e046de9d2414135e5cf866d7606cb51",
+  "sourceSnapshot": "80b83d0347be8aa55a32d766c49ef8a55779606e6658067d6f9567fc4575e96e",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -410,6 +410,14 @@
       "kind": "file",
       "label": "21-development-stop-checkpoint-2026-09-11.md",
       "source": "Docs/21-development-stop-checkpoint-2026-09-11.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/22-frozen-three-hour-agentic-live-vertical.md",
+      "kind": "file",
+      "label": "22-frozen-three-hour-agentic-live-vertical.md",
+      "source": "Docs/22-frozen-three-hour-agentic-live-vertical.md",
       "category": "reference-documentation",
       "authority": "reference-only"
     },
@@ -4353,9 +4361,19 @@
       "to": "file:Docs/21-development-stop-checkpoint-2026-09-11.md"
     },
     {
+      "from": "file:Docs/19-live-integration-8h-sprint.md",
+      "relation": "references",
+      "to": "file:Docs/22-frozen-three-hour-agentic-live-vertical.md"
+    },
+    {
       "from": "file:Docs/20-source-operation-declarations.md",
       "relation": "references",
       "to": "file:Docs/06-ui-automation-and-healing.md"
+    },
+    {
+      "from": "file:Docs/21-development-stop-checkpoint-2026-09-11.md",
+      "relation": "references",
+      "to": "file:Docs/22-frozen-three-hour-agentic-live-vertical.md"
     },
     {
       "from": "file:Docs/README.md",
@@ -4446,6 +4464,11 @@
       "from": "file:Docs/README.md",
       "relation": "references",
       "to": "file:Docs/21-development-stop-checkpoint-2026-09-11.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/22-frozen-three-hour-agentic-live-vertical.md"
     },
     {
       "from": "file:README.md",

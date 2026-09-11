@@ -1,8 +1,9 @@
 # Eight-hour live-integration sprint
 
-> **Stopped 2026-09-11 before live mutation.** The authoritative current handoff is
-> [the development stop checkpoint](21-development-stop-checkpoint-2026-09-11.md). Remaining items
-> in this sprint are not complete and this document grants no authority to resume them.
+> **Resumed under a narrower timebox, not a narrower capability.** The authoritative current
+> execution boundary is [the frozen three-hour agentic live vertical](22-frozen-three-hour-agentic-live-vertical.md).
+> The [development stop checkpoint](21-development-stop-checkpoint-2026-09-11.md) remains historical
+> handoff evidence. Neither document grants Salesforce action authority by itself.
 
 ## Objective
 

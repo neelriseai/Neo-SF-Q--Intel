@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "b5c8cc780da48f75cf17869f096cad1b9e046de9d2414135e5cf866d7606cb51",
+  "sourceSnapshot": "80b83d0347be8aa55a32d766c49ef8a55779606e6658067d6f9567fc4575e96e",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1551,7 +1551,7 @@
     {
       "path": "Docs/19-live-integration-8h-sprint.md",
       "category": "reference-documentation",
-      "sha256": "750235b248040b470ca851f60b3de548cf5a25328572da2618793546a957e2f7"
+      "sha256": "3484516d45ef004a55ca59f857972e802f405e7d2b04fefdd75ceb4a599f55f9"
     },
     {
       "path": "Docs/20-source-operation-declarations.md",
@@ -1561,12 +1561,17 @@
     {
       "path": "Docs/21-development-stop-checkpoint-2026-09-11.md",
       "category": "reference-documentation",
-      "sha256": "66af78dc5abff33aceac911df2fdf106ccc43148852da2c701a1d4a9797a7f90"
+      "sha256": "6e9a2374b5b9bdb3421fb35556d8cae8b7916016c2cdbac36145d629454b87ee"
+    },
+    {
+      "path": "Docs/22-frozen-three-hour-agentic-live-vertical.md",
+      "category": "reference-documentation",
+      "sha256": "d924dc1a0eafcc6b10bc168e50057b616073075c204691c6fe8a4320fe983c85"
     },
     {
       "path": "Docs/README.md",
       "category": "canonical-documentation",
-      "sha256": "dec42206227c1f1e97a4b58ece65031db12aeee6bc23d87f3308de19a9391067"
+      "sha256": "2b4f18871f00260c4b7a5a0eb5e063a8b7308c93ec5f716c69d2ffb45181bcf0"
     },
     {
       "path": "Docs/deep-research-report.md",

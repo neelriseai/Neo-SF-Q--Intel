@@ -23,6 +23,7 @@ not ingested wholesale.
 15. [Eight-hour live-integration sprint](19-live-integration-8h-sprint.md)
 16. [Source-operation declarations](20-source-operation-declarations.md)
 17. [Development stop checkpoint — 2026-09-11](21-development-stop-checkpoint-2026-09-11.md)
+18. [Frozen three-hour agentic live vertical](22-frozen-three-hour-agentic-live-vertical.md)
 
 ## Advisory status
 
@@ -30,7 +31,9 @@ not ingested wholesale.
 not implementation authority and cannot authorize scope, capability promotion or live actions.
 The dated [development stop checkpoint](21-development-stop-checkpoint-2026-09-11.md) is the current
 working-tree handoff: it records verified evidence, unresolved P1 findings, interrupted files and
-the exact resume order. It also grants no execution authority.
+the state at interruption. The subsequently authorized execution scope is frozen in
+[the three-hour agentic live vertical](22-frozen-three-hour-agentic-live-vertical.md); neither
+document grants live authority by itself.
 
 ## Authority and exclusions
 

@@ -1,5 +1,9 @@
 # Development stop checkpoint — 2026-09-11
 
+> **Resumed by explicit user instruction.** Preserve this file as the immutable interruption
+> record. Execute only the corrected, non-deterministic-only boundary in
+> [the frozen three-hour agentic live vertical](22-frozen-three-hour-agentic-live-vertical.md).
+
 ## Purpose and authority
 
 The user stopped all feature development and live-execution work on 2026-09-11 and requested a
@@ -175,7 +179,10 @@ concurrent drift requires quarantine, not blind retry or overwrite.
 
 ## Exact resume priority
 
-Do not broaden scope on resume. Use this order:
+This historical order is superseded where incomplete by the frozen three-hour plan linked above.
+In particular, completion now requires a real graph-grounded provider invocation joined to the
+same accepted live Salesforce and Playwright trace. Do not treat this list as permission to deliver
+a deterministic-only result. Preserve the following unfinished-work order within that boundary:
 
 1. Fix and re-review the browser-probe closed-schema P1.
 2. Close source-derived Apex class/method inventory and remove the `NoTestRun` mismatch.
