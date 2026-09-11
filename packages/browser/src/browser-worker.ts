@@ -1,5 +1,5 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
-import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+import { chromium, type Browser, type BrowserContext, type Locator, type Page } from "playwright";
 import { discoverLocatorCandidate } from "./locator-healer.js";
 
 export type WorkerMode = "READ_ONLY_DOM_CAPTURE" | "CANDIDATE_READBACK" | "BUSINESS_ACTION";
@@ -651,18 +651,16 @@ export class BrowserWorker {
       const strategies: string[] = [];
       for (const field of action.fields) {
         const wrapper = page.locator(`[data-field-api="${cssString(field.fieldApiName)}"]`);
+        await wrapper.first().waitFor({ state: "attached", timeout: this.#operationTimeoutMs })
+          .catch(() => undefined);
         const wrapperCount = await wrapper.count();
         let filled = false;
+        let fieldStrategy: string | undefined;
         if (wrapperCount === 1) {
-          const control = wrapper.locator(
-            'input:not([type="hidden"]),textarea,select,[role="textbox"],[role="spinbutton"],[role="combobox"]',
-          ).first();
-          try {
-            await control.fill(field.value, { timeout: this.#operationTimeoutMs });
-            strategies.push("direct-data-field-api");
+          fieldStrategy = await fillBusinessField(wrapper, field.value, this.#operationTimeoutMs);
+          if (fieldStrategy) {
+            strategies.push(fieldStrategy);
             filled = true;
-          } catch {
-            filled = false;
           }
         }
         if (!filled) {
@@ -671,13 +669,15 @@ export class BrowserWorker {
             fieldApiName: field.fieldApiName,
           });
           if (healed.status === "CANDIDATE_DISCOVERED" && healed.locator) {
-            try {
-              await healed.locator.fill(field.value, { timeout: this.#operationTimeoutMs });
+            fieldStrategy = await fillBusinessField(
+              healed.locator,
+              field.value,
+              this.#operationTimeoutMs,
+            );
+            if (fieldStrategy) {
               healedFieldCount += 1;
-              strategies.push(healed.strategy ?? "metadata-healer");
+              strategies.push(healed.strategy ?? fieldStrategy);
               filled = true;
-            } catch {
-              filled = false;
             }
           } else {
             abstainedFieldCount += 1;
@@ -712,6 +712,8 @@ export class BrowserWorker {
       const submit = page.locator(
         `${action.submit.tag}[${action.submit.attribute}="${cssString(action.submit.expectedValue)}"]`,
       );
+      await submit.first().waitFor({ state: "attached", timeout: this.#operationTimeoutMs })
+        .catch(() => undefined);
       let submitCount = await submit.count();
       let submitLocator = submit;
       if (submitCount !== 1) {
@@ -962,6 +964,65 @@ function hasValidBusinessAction(action: BusinessActionIntent): boolean {
 
 function cssString(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+async function fillBusinessField(
+  scope: Locator,
+  value: string,
+  timeoutMs: number,
+): Promise<string | undefined> {
+  try {
+    await scope.fill(value, { timeout: timeoutMs });
+    return "direct-data-field-api";
+  } catch {
+    // Continue to scoped descendants and Salesforce base-component fallbacks.
+  }
+
+  const native = scope.locator(
+    'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),textarea,[role="textbox"],[role="spinbutton"],[role="combobox"]',
+  ).first();
+  try {
+    if (await native.count()) {
+      await native.fill(value, { timeout: timeoutMs });
+      return "direct-data-field-api";
+    }
+  } catch {
+    // Continue to select and Lightning component fallbacks.
+  }
+
+  const select = scope.locator("select").first();
+  try {
+    if (await select.count()) {
+      await select.selectOption(value, { timeout: timeoutMs });
+      return "direct-data-field-api";
+    }
+  } catch {
+    // Continue to Salesforce base-component fallback.
+  }
+
+  const lightningInputField = scope.locator("lightning-input-field").first();
+  try {
+    if (!(await lightningInputField.count())) return undefined;
+    const applied = await lightningInputField.evaluate((element, nextValue) => {
+      const target = element as HTMLElement & { value?: unknown };
+      target.value = nextValue;
+      target.setAttribute("value", nextValue);
+      target.dispatchEvent(new InputEvent("input", {
+        bubbles: true,
+        composed: true,
+        data: nextValue,
+      }));
+      target.dispatchEvent(new CustomEvent("change", {
+        bubbles: true,
+        composed: true,
+        detail: { value: nextValue },
+      }));
+      return String(target.value ?? target.getAttribute("value") ?? "") === nextValue;
+    }, value, { timeout: timeoutMs });
+    return applied ? "salesforce-lightning-input-field" : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function isSafeRelativeStartPath(value: string): boolean {

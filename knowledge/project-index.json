@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "c82830f7b84b684e4de3ceadac2e9145f543e00487e7b5b4c3f54369d518313e",
+  "sourceSnapshot": "3f7527eb3934c50cd894164641f9e54d61e7a24b8c629f5e34fb47eb7e66617e",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1571,7 +1571,7 @@
     {
       "path": "Docs/23-two-hour-live-demo-execution-queue.md",
       "category": "reference-documentation",
-      "sha256": "bda7378c58abf1324949862b91512d9e556fc7e4100007e7cec2645629115bcb"
+      "sha256": "d0c9d0bd125d2476f308020c4eb07209434706b361ae1ec68f760c29b7dbabd4"
     },
     {
       "path": "Docs/README.md",
@@ -1886,7 +1886,7 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "8e1e2b4c5caa95f32d88172913bac4826ebda4ae8ebabb08a62c32b62e06390a"
+      "sha256": "2b10a92bfca3708553b1dcf37b4bfd67114dbef893c8f71b494bad1702936633"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
@@ -1936,7 +1936,7 @@
     {
       "path": "packages/browser/tests/browser-worker.spec.ts",
       "category": "test",
-      "sha256": "3e2d07bf5568f44494a44761ef71ac4e50f3a0af13e8d1ea65536b1deb821894"
+      "sha256": "d9a94c18ff8e22cf1ba9a11ebb1b3888884c3f24a9410ff866426dba8e49e923"
     },
     {
       "path": "packages/browser/tests/candidate-client.spec.ts",
@@ -2131,7 +2131,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "e1fb7ed1e2af53d122260914bc1b666e10598f4c4e0da07a5e69d3faeb59c26f"
+      "sha256": "aff644c891c8d57c38895fcb1aae62aa16def708066298e42c307ece9281ac60"
     },
     {
       "path": "scripts/catalog/build_project_index.py",

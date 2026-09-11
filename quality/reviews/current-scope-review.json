@@ -364,12 +364,17 @@
     {
       "code": "BUSINESS_ACTION_BROWSER_ACCEPTANCE",
       "severity": "P1",
-      "resolution": "The browser worker now has an explicit BUSINESS_ACTION mode for configured field fill, submit and success-status readback, gated by a live profile mutation opt-in. The live business-action CLI requires a trusted business-action profile, bounded field/action inputs and a post-action Salesforce CLI persistence assertion; projections expose only digests, counts and match booleans. Live mutation was not dispatched in this pass. Browser lint, live build and 27 focused Playwright tests passed."
+      "resolution": "The browser worker now has an explicit BUSINESS_ACTION mode for configured field fill, submit and success-status readback, gated by a live profile mutation opt-in. The live business-action CLI requires a trusted business-action profile, bounded field/action inputs and a post-action Salesforce CLI persistence assertion; projections expose only digests, counts and match booleans. The scoped Workbench LWC/tab/page deploy succeeded and read-only marker readback passed. The live business action reached submit, but Salesforce did not produce the configured success status or persisted Opportunity proof, so acceptance remains failed. Browser lint, live build and focused Playwright tests passed."
     },
     {
       "code": "BUSINESS_ACTION_SELF_HEALING_LOOP",
       "severity": "P1",
-      "resolution": "Business-action execution now has a bounded observe, alternate-locator selection, execute and evaluate loop. Field actions carry object identity, direct field/action locators fall back to the metadata-aware locator healer, and receipts report healed/abstained counts plus strategy names without leaking raw values or selectors. Ambiguous candidates abstain. Browser lint, live build and 23 focused Playwright worker/coordinator tests passed."
+      "resolution": "Business-action execution now has a bounded observe, alternate-locator selection, execute and evaluate loop. Field actions carry object identity, direct field/action locators fall back to the metadata-aware locator healer, Salesforce lightning-input-field controls are handled through a bounded component value fallback, and receipts report healed/abstained counts plus strategy names without leaking raw values or selectors. Ambiguous candidates abstain. Browser lint, live build and 24 focused Playwright worker/coordinator tests passed."
+    },
+    {
+      "code": "LIVE_BUSINESS_ACTION_SAVE_CONTRACT_BLOCKER",
+      "severity": "P1",
+      "resolution": "Current live blocker is no longer route marker availability or field discovery. After scoped deployment, the live page exposes exactly one `save-evaluate-live` marker; the worker fills Salesforce controls and clicks submit. The remaining failure is post-submit: no configured success status appears and the post-action Salesforce CLI query finds no matching synthetic Opportunity. Next work should add sanitized post-submit validation/error classification and then adjust only the required synthetic payload or route; do not weaken success or persistence assertions."
     }
   ],
   "statusDowngrades": []

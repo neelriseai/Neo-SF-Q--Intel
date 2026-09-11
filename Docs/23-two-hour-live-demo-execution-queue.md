@@ -284,13 +284,14 @@ Selected item: move beyond deployed-marker readback toward a real business brows
 | Mutation authority boundary | DONE | 1 | Default live profiles remain read-only/readback-only. Business actions require `NEO_BROWSER_ENABLE_BUSINESS_ACTION=true`, `mutationActionsEnabled=true`, and `BUSINESS_ACTION` in permitted modes |
 | Runnable CLI | DONE | 1 | Added `npm run live:business-action`, requiring a trusted live profile plus env-supplied start path, fields, submit action, success text and Salesforce persistence assertion JSON |
 | Persisted outcome assertion | DONE | 1 | After browser success, the CLI runs a bounded Salesforce CLI `data query` against the configured object/match field and verifies expected persisted fields; output contains only digests and match booleans |
-| Live execution | NOT_RUN | 0 | No live mutation was dispatched in this pass. A safe synthetic action recipe and current business-action profile should be generated immediately before live testing |
-| Test it | DONE | 1 | Browser lint, live build and 27 focused Playwright worker/profile/coordinator tests passed |
+| Live execution | PARTIAL | 3 | Live marker readback initially failed until the scoped Workbench LWC/tab/page source was deployed to `caip-dev`; after deploy, marker readback passed. Live business action then found fields and clicked submit against the synthetic Workbench route, but Salesforce did not emit the configured success status and the post-action CLI persistence query found no matching Opportunity. No raw record IDs, field values, session URLs or org payloads were written to tracked files. |
+| Test it | DONE | 2 | Browser lint, live build and focused Playwright worker/profile/coordinator tests passed after adding Salesforce `lightning-input-field` writing and bounded Lightning attachment waits |
 
 Boundary: this is now a runnable acceptance mechanism for fill/edit/save/evaluate plus persistence
-verification. It is still not a signed Salesforce campaign gate receipt and remains
-`releaseEligible=false` until the live receipt producer/ledger issues and validates the corresponding
-campaign receipt.
+verification, and it has reached the live org through scoped deployment and browser submit. It is still
+not a signed Salesforce campaign gate receipt and remains `releaseEligible=false` until the live save
+produces configured success text plus persisted-state proof and the receipt producer/ledger issues and
+validates the corresponding campaign receipt.
 
 ## Continuation: general self-healing loop for business actions
 
@@ -304,9 +305,14 @@ observe → choose alternate locator → execute → evaluate loop.
 | Execute | DONE | 1 | The worker fills the healed field/action locator only when the candidate is unique, visible, enabled, metadata/action scoped and non-readonly |
 | Evaluate | DONE | 1 | The worker requires configured success status text and the live CLI still performs the post-action Salesforce persistence assertion before returning `PASSED` |
 | Heal evidence | DONE | 1 | Receipts include healed/abstained counts and strategy names, without exposing raw selectors, form values, session URLs, record IDs or org payloads |
-| Live execution | NOT_RUN | 0 | No new live Salesforce mutation was dispatched in this pass |
-| Test it | DONE | 1 | Browser lint, live build and 23 focused Playwright worker/coordinator tests passed, including stable-action submit healing |
+| Live execution | PARTIAL | 2 | After the scoped Workbench deployment, live readback proved exactly one deployed `save-evaluate-live` marker. The live business-action worker filled Salesforce controls and clicked submit, but evaluation failed because Salesforce did not produce the success status/persisted record. |
+| Test it | DONE | 2 | Browser lint, live build and 24 focused Playwright worker/coordinator tests passed, including stable-action submit healing and Salesforce `lightning-input-field` value writing |
 
 Boundary: this is a generalized self-healing execution loop for browser business actions, not a
 signed live-campaign receipt producer. Ambiguous or unsafe candidates still abstain rather than
 forcing an action.
+
+Current live blocker: the Workbench runtime accepts the click path but the synthetic create/edit recipe
+does not yet satisfy Salesforce's live save contract. The next focused fix should capture sanitized
+validation/error classification after submit, then adjust only the required synthetic business payload
+or route. Do not weaken the success assertion or bypass Salesforce validation to claim acceptance.

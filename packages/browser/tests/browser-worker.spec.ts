@@ -264,6 +264,47 @@ test("self-heals business submit locators through stable action identity before 
   expectNoLeak(receipt, canary);
 });
 
+test("writes Salesforce lightning-input-field values before business submit", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+  const worker = makeWorker(`
+    <form data-object-api="Opportunity"
+      onsubmit="event.preventDefault();
+        const value = document.querySelector('lightning-input-field').value;
+        document.querySelector('[role=status]').textContent =
+          value === 'SYN-Lightning Field' ? 'Saved successfully. The policy results are shown below.' : 'Unexpected value';">
+      <section data-field-api="Name">
+        <lightning-input-field field-name="Name"></lightning-input-field>
+      </section>
+      <button data-action="save-evaluate-live">Save and Evaluate</button>
+      <p role="status"></p>
+    </form>
+  `);
+  const session = await handoff(worker, canary, {
+    permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"],
+  });
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "BUSINESS_ACTION",
+    businessAction: {
+      objectApiName: "Opportunity",
+      fields: [{ fieldApiName: "Name", value: "SYN-Lightning Field" }],
+      submit: { tag: "button", attribute: "data-action", expectedValue: "save-evaluate-live" },
+      successText: "Saved successfully. The policy results are shown below.",
+    },
+  });
+
+  expect(receipt.status).toBe("PASSED");
+  expect(receipt.businessAction).toMatchObject({
+    fieldCount: 1,
+    submitted: true,
+    successTextMatched: true,
+    strategies: ["salesforce-lightning-input-field"],
+  });
+  expect(JSON.stringify(receipt)).not.toContain("SYN-Lightning Field");
+  expectNoLeak(receipt, canary);
+});
+
 test("navigates to a bounded same-origin start path before candidate readback", async () => {
   const worker = makeWorker(`<button aria-label="Wrong page">Wrong page</button>`, {
     offlineDocumentForPath: (pathname) => ({
