@@ -52,6 +52,55 @@ assurance workflow; the demo must not simulate that evidence meanwhile.
 Injected failures and real dependency failures are reported separately. An unknown external job
 state, failed restoration or unreconciled residue blocks candidate-campaign acceptance.
 
+## Current two-hour operator demo slice — ready as a truthful sequence
+
+This is the current demo slice selected on 2026-09-11. It is intentionally narrower than the full
+live Salesforce campaign. It proves that Neo can use a real LLM over a real local Salesforce-app
+candidate, and it separately proves live Salesforce connectivity plus a headless browser diagnostic.
+It does **not** claim that the local candidate was deployed to Salesforce, restored, reconciled, or
+accepted by all live campaign gates.
+
+Run and present the slice in this order:
+
+1. **Real LLM candidate advisory.** Use the no-scope candidate advisory endpoint or service call
+   against the configured local Salesforce app repository. The expected demo evidence is:
+   `candidate_available=true`, at least one analysis, at least one successful specialist capture,
+   a bounded `view_sha256`, and explicit release-blocking gap codes. This is the agentic reasoning
+   proof: the advisory is produced by the configured model provider over graph/source-derived
+   candidate context, not by a canned fixture.
+2. **Live Salesforce read proof.** Use the host-owned Salesforce CLI/API read path only. Evidence
+   must be sanitized: connected/non-connected status, target classification, API/custom REST status,
+   digest and gap code are acceptable; aliases, usernames, record IDs, raw org payloads, paths,
+   session URLs and tokens are not.
+3. **Live headless browser diagnostic.** From `packages/browser`, run the profile refresh and live
+   smoke only when the machine-local Salesforce CLI identity is already authorized:
+   `npm run live:profile` then `npm run live:smoke`. The expected result remains diagnostic-only:
+   `status=PASSED`, `diagnosticOnly=true`, `releaseEligible=false`, cleanup closed. It is not a
+   healed locator or deployed-candidate acceptance receipt.
+4. **Optional composition view.** `POST /api/v1/demo/live-operator-advisory` may be shown only if
+   it returns both live diagnostic pass and model-backed candidate advisory. If it returns
+   `CANDIDATE_ADVISORY_UNAVAILABLE`, `LIVE_DIAGNOSTIC_NOT_CONFIGURED`, or another gap, present that
+   as a truthful blocker instead of downgrading the guardrail.
+
+Current non-negotiable claim boundary:
+
+- Local candidate + real LLM = demoable agentic advisory.
+- Live Salesforce read/browser diagnostic = demoable live connectivity.
+- Local candidate + live deployed Salesforce behavior = not yet claimed.
+- Full live campaign acceptance = deferred until explicit mutation authority, deploy/check-only,
+  restored baseline and signed receipt gates exist.
+
+Current 2026-09-11 recheck receipts for this slice:
+
+- Real LLM candidate advisory passed with two analyses, six specialist captures, 15 blocking gaps
+  and `releaseEligible=false`.
+- Live Salesforce read-only proof passed through the configured CLI/API route and printed only
+  bounded status/digest evidence.
+- Live headless browser diagnostic passed after binding the generated profile path and digest
+  through environment variables; it remained `diagnosticOnly=true` and `releaseEligible=false`.
+- The first browser-smoke attempt blocked as `PROFILE_SOURCE_INVALID` because the generated profile
+  path and digest were not exported. This is an operator sequencing issue, not a product claim.
+
 ## Operator runbook — live locator-healing demo (NOT_READY)
 
 This is the safe operator sequence for a future source-bound demo. It documents the existing

@@ -24,6 +24,17 @@ good-enough capability delivery, not foundation perfection.
 - Select work one demo capability at a time: make it run end-to-end with live Salesforce and a
   real LLM, add only the foundation required for truthful/safe operation, test it, document the
   pass/fail result, then move to the next capability.
+- Current-scope prioritization overrides earlier holistic design pressure. Older roadmap, memory,
+  governance and architecture instructions remain binding only for safety, credential protection,
+  non-production/live-mutation authority, and truthful claims. If an older instruction would pull
+  the work into broad hardening, extra architecture, or production completeness beyond the selected
+  demo slice, record it as deferred work instead of coding it now.
+- For every selected task: plan, challenge the plan, correct it, implement the minimum complete
+  path, integrate, run focused tests, fix failures one by one up to three retries, then mark
+  `DONE`, `PARTIAL`, `BLOCKED`, or `DEFERRED`. Do not chase perfection after the demo output is
+  truthful and safe enough.
+- Keep a visible wall-clock. Each two-hour run records start time, hard stop, selected capability,
+  elapsed-window status, completed items and deferred bias items.
 
 ## Time allocation
 
@@ -107,3 +118,73 @@ the actual configured Salesforce app repository.
 | Test it | DONE | 2 | Focused tests passed for specialist gap allowlist, candidate advisory composition, workflow result bounds and Salesforce CLI timeout/failure behavior |
 | Document pass/fail | DONE | 1 | This is real local candidate + real LLM advisory evidence. It is not a deployed-candidate or live Salesforce acceptance receipt, and the AUT change remains local/uncommitted unless a separate deployment/mutation milestone is authorized |
 | Move to next capability | READY | 0 | Next slice should either run the live-operator advisory endpoint with an accepted governed live diagnostic, or bind source-derived live read payload into the same specialist context pack |
+
+## Current two-hour execution run - 2026-09-11
+
+Started: 2026-09-11T20:49:02+05:30
+
+Hard stop target: 2026-09-11T22:49:02+05:30
+
+### Current scope
+
+Complete the most valuable remaining live-demo path without broadening scope:
+
+1. Preserve the latest time-boxed execution method as the active project instruction for this
+   sprint.
+2. Make the operator demo story coherent from current evidence: real local AUT candidate + real LLM
+   advisory, live Salesforce read proof, and live headless browser diagnostic proof.
+3. If the single public endpoint cannot truthfully combine those inside the timebox because a
+   governed live-baseline receipt is missing, do not weaken the boundary. Record the missing gate
+   and provide the runnable demo sequence from existing safe commands/evidence.
+
+### Time allocation
+
+| Window | Subtask | Completion bar |
+|---:|---|---|
+| 0-10m | Save latest approach and bias deferrals | This file plus deferred queue updated; no older doc can silently broaden current scope |
+| 10-35m | Operator demo coherence check | Verify current candidate advisory, live read and browser diagnostic can be demonstrated from safe commands/evidence |
+| 35-70m | Patch only demo-blocking gaps | Fix at most the minimum gap that prevents a truthful operator demo; otherwise defer |
+| 70-100m | Focused tests and runbook | Run focused checks and update demo scenario/how-to docs |
+| 100-120m | Commit/checkpoint | Regenerate knowledge, run genericity/secret checks and commit completed current-scope changes |
+
+### Deferred bias rules for this run
+
+| Bias source | Current handling |
+|---|---|
+| Production-grade live campaign acceptance | Defer unless needed to avoid a false demo claim |
+| Full metadata deploy/restore/reconciliation | Defer; local candidate evidence remains local unless separately authorized |
+| Complete GraphRAG/vector/Chroma implementation | Defer; graph-grounded candidate context already proves the selected advisory path |
+| UI polish outside the selected demo path | Defer |
+| Broad foundation refactors discovered during testing | Fix only if they block current demo output or create a safety/false-claim issue |
+
+### Task history
+
+| Item | Status | Attempts | Notes |
+|---|---|---:|---|
+| Clock started | DONE | 1 | Start 2026-09-11T20:49:02+05:30; hard stop 2026-09-11T22:49:02+05:30 |
+| Latest approach saved | DONE | 1 | This section records the merged latest approach and current-scope override |
+| Operator demo coherence check | DONE | 1 | Current demo is a truthful three-part sequence: real local AUT candidate + real LLM advisory, live Salesforce read proof, and live headless browser diagnostic proof. It is not the full live deployed-candidate campaign |
+| Demo-blocking patch decision | DONE | 1 | No code guardrail was weakened. The only immediate patch is documentation: make the runnable sequence explicit and defer production campaign closure rather than forcing a misleading 200 response |
+| Real LLM candidate advisory recheck | DONE | 1 | Current OpenAI-backed run passed with 2 analyses, 6 specialist captures, 15 blocking gaps, `releaseEligible=false`, view digest `d1cf1e6b93c6f4d6ff6981a3ed48b618b66ab84ec759f6e5b32ca8cc3d307fba` |
+| Live Salesforce read recheck | DONE | 1 | Current CLI/API read-only proof passed against `caip-dev`: org display succeeded, one Opportunity was queried, custom REST returned a bounded body digest `74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b`; no raw org payload was printed |
+| Live headless browser diagnostic recheck | DONE | 2 | First smoke retry lacked the required profile env binding and blocked as `PROFILE_SOURCE_INVALID`; second run passed with `diagnosticOnly=true`, `releaseEligible=false`, cleanup closed context/browser, execution digest `a24f5ca68185ea4fc31cdcf705084fa15a782ea19d09e0d9f43706b5fd72a661` |
+
+### Current runnable demo sequence
+
+Use this sequence for the next operator walkthrough:
+
+1. Real LLM candidate advisory over the configured Salesforce app local Git state. Expected
+   evidence: candidate available, analysis count greater than zero, successful specialist captures
+   greater than zero, bounded view digest, and explicit release-blocking gaps. This proves the
+   agentic reasoning path with the configured model provider.
+2. Live Salesforce read proof through the host-owned Salesforce CLI/API/custom REST read path.
+   Evidence must remain sanitized and read-only.
+3. Live headless browser diagnostic from `packages/browser`: `npm run live:profile` and
+   `npm run live:smoke`. Evidence remains diagnostic-only and non-release-eligible.
+4. Optional `POST /api/v1/demo/live-operator-advisory` composition. Show it only as a truthful
+   composition/gap projection; do not relax the endpoint if a governed live diagnostic or candidate
+   advisory precondition is missing.
+
+Deferred from this two-hour run: deployed-candidate mutation, restoration/reconciliation, full
+live campaign gate closure, Chroma/GraphRAG breadth, UI polish outside the selected route, and broad
+architecture refactors.

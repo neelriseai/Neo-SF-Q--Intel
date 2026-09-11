@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "live-browser-profile-diagnostic-proof-2026-09-11",
+  "reviewId": "two-hour-operator-demo-scope-freeze-2026-09-11",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -15,11 +15,13 @@
     "Docs/09-demo-scenarios.md",
     "Docs/10-graph-grounded-agent-reasoning.md",
     "Docs/15-development-assurance-process.md",
+    "Docs/16-deferred-operator-actions.md",
     "Docs/17-solution-readiness-audit.md",
     "Docs/18-live-salesforce-demo-execution-contract.md",
     "Docs/20-source-operation-declarations.md",
     "Docs/21-development-stop-checkpoint-2026-09-11.md",
     "Docs/22-frozen-three-hour-agentic-live-vertical.md",
+    "Docs/23-two-hour-live-demo-execution-queue.md",
     "Docs/README.md",
     "README.md",
     "apps/web/src/app/page.tsx",
@@ -120,7 +122,8 @@
     "astra_locator_probe_review",
     "checkpoint_documentation_review",
     "astra_live_llm_provider_review",
-    "live_browser_profile_diagnostic_review"
+    "live_browser_profile_diagnostic_review",
+    "two_hour_operator_demo_scope_review"
   ],
   "findings": [
     {
@@ -317,6 +320,11 @@
       "code": "REAL_CANDIDATE_LLM_ADVISORY_PATH",
       "severity": "P1",
       "resolution": "A real local-Git AUT locator-drift candidate now runs through the candidate assurance path with OpenAI-backed specialist dispatch, producing two side analyses and six specialist captures. The implementation preserves release-ineligible advisory status, adds current source-foundation context gap allowlisting, increases bounded specialist artifact capacity for graph-backed captures, deduplicates equivalent workflow gaps before enforcing finite result limits, and keeps this evidence separate from live Salesforce deployment/browser/restoration gates."
+    },
+    {
+      "code": "TWO_HOUR_OPERATOR_DEMO_SCOPE_FREEZE",
+      "severity": "P1",
+      "resolution": "The active two-hour run uses the latest timeboxed method as the current scope authority: one demo capability at a time, real LLM/live Salesforce evidence where available, maximum three retries per subtask, and deferral of broad production hardening unless needed for safety, credential protection, mutation authority or truthful claims. The current operator demo is documented as a truthful sequence of real local AUT candidate LLM advisory, live Salesforce read proof and live headless browser diagnostic proof; deployed-candidate mutation, restoration/reconciliation, full live campaign gates, Chroma/GraphRAG breadth and non-route UI polish are deferred."
     }
   ],
   "statusDowngrades": []

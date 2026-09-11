@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "5fee852c702a6d6d974cdd8f6fe4b34635c706940a3c02b577754fbd3693a940",
+  "sourceSnapshot": "c0a4ff88437942596a89a46417a203f0f704575796057f8ff780e1031c694291",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1481,7 +1481,7 @@
     {
       "path": "Docs/09-demo-scenarios.md",
       "category": "canonical-documentation",
-      "sha256": "54d5a93bfb5da119efad950869d0b50dd97a442b24abf53823cfd8c434f5e26d"
+      "sha256": "25b3b208eeb691b5ac50b78484f6f409d3ac35782c7e8672e8cbe49956845423"
     },
     {
       "path": "Docs/09-tool-mcp-and-agent-security.md",
@@ -1536,7 +1536,7 @@
     {
       "path": "Docs/16-deferred-operator-actions.md",
       "category": "canonical-documentation",
-      "sha256": "f99358cf672678308668f43d153b10e9abb32ccea02a48b529ddf4012233d8c6"
+      "sha256": "7b468f9b3681c26c65f5f31a5a9b6e33ebbaf8b06158beabac236e422e1378c9"
     },
     {
       "path": "Docs/17-solution-readiness-audit.md",
@@ -1571,7 +1571,7 @@
     {
       "path": "Docs/23-two-hour-live-demo-execution-queue.md",
       "category": "reference-documentation",
-      "sha256": "a98b3231c4e54dc17609f7c4bc18f9e83eb64756cb7746df345267c9d3a94134"
+      "sha256": "751ca931b6f19cde81f6ba25d2bed0511a38c07ba9b1bf4bc0cde7feef64bbf6"
     },
     {
       "path": "Docs/README.md",
@@ -2121,7 +2121,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "61e85a6e6cf029904b0f7f635c47ff1906e90a2bdf0ca334c60d540c05da8649"
+      "sha256": "501d8e5b2cfe854cfffb12a3aed7ee64aad59c7baa7032331e818286bcc18e0c"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
