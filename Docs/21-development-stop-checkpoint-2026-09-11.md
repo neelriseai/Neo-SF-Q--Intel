@@ -227,3 +227,12 @@ pre-structured-output API versions before client construction.
 This post-checkpoint addendum still does not change the stop state: live Salesforce acceptance is
 zero accepted gates, no metadata candidate was dispatched, no headless live browser acceptance was
 run, and no release authority is claimed.
+
+The later `demo.live-operator-advisory` endpoint adds an operator-visible composition layer for the
+live diagnostic projection plus candidate LLM advisory path. It forbids caller-supplied org scope,
+uses the existing governed live-baseline boundary rather than a direct alias-only CLI shortcut, and
+requires model-backed advisory captures before reporting success. Current execution is truthfully
+blocked by an empty Salesforce app candidate (`CANDIDATE_ADVISORY_UNAVAILABLE`). This remains
+diagnostic/advisory foundation evidence only; it does not dispatch Salesforce mutation, create
+accepted live campaign receipts, run headless acceptance against a deployed candidate, or approve a
+release.

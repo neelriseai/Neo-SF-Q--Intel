@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "d9b1f662f8caff95a1a33c32870f908000b618b362645a80abfb75de52ecb244",
+  "sourceSnapshot": "ebc06475578c3a53b692fe72de7f0a323c78f273b4b62de689ce42d2050229b3",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1561,17 +1561,17 @@
     {
       "path": "Docs/21-development-stop-checkpoint-2026-09-11.md",
       "category": "reference-documentation",
-      "sha256": "644838758391bfb918e055c86ae796543eaa32ed7d7205967fa74f6c5067d41a"
+      "sha256": "d2027d10a30007a9b8aaea3c685325a5bba12560c3b32abdba10025f06ad51cb"
     },
     {
       "path": "Docs/22-frozen-three-hour-agentic-live-vertical.md",
       "category": "reference-documentation",
-      "sha256": "39ae9ddd4f3cef15377ef9aecb0b889a3f50ff168ea5df942029410a75c18a04"
+      "sha256": "fd191eda8806274bcd37fda1a77cd750a6186e6e6702781f23be7c5ce108bc39"
     },
     {
       "path": "Docs/23-two-hour-live-demo-execution-queue.md",
       "category": "reference-documentation",
-      "sha256": "ff38d5a4b69fc8a6a2ca19dbcce10f3ba1a2156d8b26a26da48ee380f5b1470c"
+      "sha256": "78626376105b112492794d1a7e242d4e407ed00cbe941c312e42df0fbf6dde5f"
     },
     {
       "path": "Docs/README.md",
@@ -2121,7 +2121,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "81feb3c33b132abfe21289b53f449e9634292a2b9fa0b606a6e7ea6734c64a29"
+      "sha256": "3760793920c49bd7b361095aafab10ee31415c76e1b771aba1c049a2009d2d30"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -2161,7 +2161,7 @@
     {
       "path": "src/neo_sf_q_intel/api.py",
       "category": "python-runtime",
-      "sha256": "85b0975a351f34a1ed788636580c8bf2588124f7168908321cb79d82af6585a2"
+      "sha256": "b954c5dc1c2b91c31e46d251a8aee9a7ee85b8d70a568caa497eeb6e1df3877e"
     },
     {
       "path": "src/neo_sf_q_intel/baseline_enrollment_proposal.py",
@@ -2426,7 +2426,7 @@
     {
       "path": "src/neo_sf_q_intel/salesforce_cli.py",
       "category": "python-runtime",
-      "sha256": "202a76fe1ee70be41d7341fc083b183016ffee188ae6ade77a9c44f86dd31a2d"
+      "sha256": "61240cbf1ca4c1b9f4ef324001e0a97132d6dcf502bf486a52560751658bc46e"
     },
     {
       "path": "src/neo_sf_q_intel/salesforce_graph_adapter.py",
@@ -2446,7 +2446,7 @@
     {
       "path": "src/neo_sf_q_intel/service.py",
       "category": "python-runtime",
-      "sha256": "9ae654a6707f6ed306375d641df193aec69ba2c9d300d9c76378df0460fdefd6"
+      "sha256": "2c890ba763e2e345028dc1140fac80420719f9f52680f38f34d747f1dad3fa57"
     },
     {
       "path": "src/neo_sf_q_intel/specialist.py",
@@ -2496,7 +2496,7 @@
     {
       "path": "tests/test_api.py",
       "category": "test",
-      "sha256": "5b5a43b971b33d605e237a632d2cd1d8aa4c6c39b1d502dd1156f861869cbd14"
+      "sha256": "bf57c762a2b8a7017a02a990cdbd390f61860ee2571f2132506caad3e9618313"
     },
     {
       "path": "tests/test_aut_source_operations_integration.py",
@@ -2511,7 +2511,7 @@
     {
       "path": "tests/test_candidate_assurance.py",
       "category": "test",
-      "sha256": "491be56f3674414157a94d9e86ce22f230a48cb63bec05df3f622a5f09adbc5f"
+      "sha256": "cf60a00107c9806cff32ab9e978122c146d6fada944a9f1578b8b2eea4374f84"
     },
     {
       "path": "tests/test_candidate_live_targets.py",
@@ -2776,7 +2776,7 @@
     {
       "path": "tests/test_salesforce_cli.py",
       "category": "test",
-      "sha256": "1bc938ee910d4cbdb8e60518c033cf3418b3b88c559e662f1d6578a46891050e"
+      "sha256": "380b1903c2ff59a3ed77502706488e7d19e9d4e80d380003fbe96d18a227d7dc"
     },
     {
       "path": "tests/test_salesforce_source.py",

@@ -16,6 +16,7 @@ from starlette.concurrency import run_in_threadpool
 from neo_sf_q_intel.candidate_assurance import CandidateAssuranceView
 from neo_sf_q_intel.config import Settings
 from neo_sf_q_intel.domain import AssuranceRun, ChangeIntent, ChangeRequest
+from neo_sf_q_intel.edge_envelope import stable_sha256
 from neo_sf_q_intel.foundation_pipeline import CandidateFoundationEvidence
 from neo_sf_q_intel.live_campaign_status import (
     LiveCampaignStatus,
@@ -25,6 +26,7 @@ from neo_sf_q_intel.service import (
     AssuranceService,
     FoundationPipelineUnavailable,
     LiveBaselineView,
+    LiveOperatorAdvisoryView,
     create_service,
 )
 
@@ -110,6 +112,32 @@ def _live_baseline_problem(code: str) -> LiveBaselineView:
 def _foundation_problem(code: str, *, retryable: bool, status_code: int) -> JSONResponse:
     problem = FoundationCaptureProblem.model_validate({"code": code, "retryable": retryable})
     return JSONResponse(status_code=status_code, content=problem.model_dump(mode="json"))
+
+
+def _live_operator_advisory_blocked(code: str) -> LiveOperatorAdvisoryView:
+    body = {
+        "schema_version": "1.0.0",
+        "capability_id": "demo.live-operator-advisory",
+        "authority_scope": "DIAGNOSTIC_ADVISORY_ONLY",
+        "live_salesforce": {
+            "status": "BLOCKED",
+            "target_alias_configured": False,
+            "connected": False,
+            "diagnostic_only": True,
+            "release_eligible": False,
+            "error_code": code,
+        },
+        "candidate": None,
+        "candidate_available": False,
+        "llm_advisory_available": False,
+        "candidate_analysis_count": 0,
+        "specialist_capture_count": 0,
+        "release_eligible": False,
+        "gap_codes": (code,),
+    }
+    return LiveOperatorAdvisoryView.model_validate(
+        {**body, "view_sha256": stable_sha256(body)}
+    )
 
 
 def create_app(
@@ -287,6 +315,36 @@ def create_app(
                 retryable=False,
                 status_code=503,
             )
+
+    @app.post(
+        "/api/v1/demo/live-operator-advisory",
+        response_model=LiveOperatorAdvisoryView,
+        responses={
+            400: {"model": LiveOperatorAdvisoryView},
+            503: {"model": LiveOperatorAdvisoryView},
+        },
+    )
+    async def run_live_operator_advisory_demo(
+        request: Request,
+    ) -> LiveOperatorAdvisoryView | JSONResponse:
+        if (
+            request.query_params
+            or any(_is_live_baseline_caller_header(name) for name in request.headers)
+            or await _foundation_request_has_body(request)
+        ):
+            problem = _live_operator_advisory_blocked("LIVE_DEMO_CALLER_INPUT_FORBIDDEN")
+            return JSONResponse(status_code=400, content=problem.model_dump(mode="json"))
+        view = await run_in_threadpool(active_service.run_live_operator_advisory_demo)
+        if (
+            view.candidate_available
+            and view.llm_advisory_available
+            and view.live_salesforce.status == "PASSED"
+        ):
+            return view
+        return JSONResponse(
+            status_code=503,
+            content=view.model_dump(mode="json"),
+        )
 
     @app.get("/api/v1/assurance-runs", response_model=list[AssuranceRun])
     def list_assurance_runs(limit: int = Query(default=20, ge=1, le=100)) -> list[AssuranceRun]:

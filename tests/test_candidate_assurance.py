@@ -15,7 +15,7 @@ from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest, DecisionCode
 from neo_sf_q_intel.edge_envelope import stable_sha256
 from neo_sf_q_intel.foundation_pipeline import CandidateFoundationPipeline
 from neo_sf_q_intel.repository import InMemoryRunRepository
-from neo_sf_q_intel.service import AssuranceService
+from neo_sf_q_intel.service import AssuranceService, LiveSalesforceDiagnosticView
 from neo_sf_q_intel.specialist import (
     ProviderCallOutcome,
     ProviderCallStatus,
@@ -200,6 +200,62 @@ def test_candidate_endpoint_invokes_and_persists_specialist_capture(tmp_path: Pa
         assert capture.capture_sha256
     assert all(item.specialist_capture_count == 3 for item in view.analyses)
     assert all(len(item.specialist_artifact_sha256s) == 3 for item in view.analyses)
+
+
+def test_live_operator_advisory_combines_live_read_and_real_candidate_advisory(
+    tmp_path: Path,
+) -> None:
+    repository_root = _repository(tmp_path)
+    repository = InMemoryRunRepository()
+    provider = _RecordingSpecialistProvider()
+    service = AssuranceService(
+        source(),
+        repository,
+        foundation_pipeline=_pipeline(repository_root),
+        specialist_provider=provider,
+        live_diagnostic_reader=lambda: LiveSalesforceDiagnosticView(
+            status="PASSED",
+            target_alias_configured=True,
+            connected=True,
+        ),
+    )
+
+    view = service.run_live_operator_advisory_demo()
+
+    assert view.authority_scope == "DIAGNOSTIC_ADVISORY_ONLY"
+    assert view.live_salesforce.status == "PASSED"
+    assert view.live_salesforce.release_eligible is False
+    assert view.candidate_available is True
+    assert view.llm_advisory_available is True
+    assert view.candidate is not None
+    assert view.candidate_analysis_count == 2
+    assert view.specialist_capture_count == 6
+    assert len(provider.prompts) == 6
+    assert view.release_eligible is False
+    assert view.gap_codes == ()
+
+
+def test_live_operator_advisory_records_independent_blockers(tmp_path: Path) -> None:
+    service = AssuranceService(
+        source(),
+        InMemoryRunRepository(),
+        live_diagnostic_reader=lambda: LiveSalesforceDiagnosticView(
+            status="BLOCKED",
+            target_alias_configured=True,
+            error_code="LIVE_SALESFORCE_NOT_CONNECTED",
+        ),
+    )
+
+    view = service.run_live_operator_advisory_demo()
+
+    assert view.live_salesforce.status == "BLOCKED"
+    assert view.candidate_available is False
+    assert view.llm_advisory_available is False
+    assert view.specialist_capture_count == 0
+    assert view.gap_codes == (
+        "CANDIDATE_ADVISORY_UNAVAILABLE",
+        "LIVE_SALESFORCE_NOT_CONNECTED",
+    )
 
 
 @pytest.mark.parametrize("component_name", ["panel", "accountSummary"])

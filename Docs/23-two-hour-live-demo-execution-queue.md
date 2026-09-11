@@ -68,3 +68,29 @@ Selected capability: `automation.browser-worker` live Salesforce browser smoke.
 | Test it | DONE | 2 | `npm run build:live` passed; `tests/live-profile-cli.spec.ts` passed 4/4; live smoke returned `status=PASSED`, `diagnosticOnly=true`, `releaseEligible=false`, and cleanup closed both browser context and browser |
 | Document pass/fail | DONE | 1 | This continuation records the live result as diagnostic proof only; it still does not satisfy signed live acceptance receipt gates |
 | Move to next capability | READY | 0 | Next slice should combine live Salesforce read evidence plus real LLM advisory into one operator-visible demo flow |
+
+## Continuation: live operator advisory slice
+
+Selected capability: `demo.live-operator-advisory` as an operator-visible foundation slice. This
+slice composes a governed live Salesforce diagnostic projection with the real candidate LLM
+advisory path. It is intentionally diagnostic/advisory-only and cannot approve release, satisfy
+live campaign gates or substitute fixture output for live evidence.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Make it run end-to-end | PARTIAL | 2 | Added `POST /api/v1/demo/live-operator-advisory`. Focused tests prove the endpoint combines a live diagnostic projection and model-backed candidate advisory when verified candidate changes exist. The real current run remains blocked because the configured Salesforce app repository has no candidate changes, so Neo returns `CANDIDATE_ADVISORY_UNAVAILABLE` rather than fabricating advisory output |
+| Minimal truthful foundation | DONE | 2 | The endpoint accepts no body, query, org alias, authorization header, `x-*` override or caller-selected scope. After Astra review, the implementation no longer creates a direct `sf org display` shortcut from only an alias; the real service projects the existing governed live-baseline boundary when available or blocks as `LIVE_DIAGNOSTIC_NOT_CONFIGURED` |
+| Test it | DONE | 1 | Focused Python tests passed for positive in-process composition, independent blocker reporting, API caller-scope rejection and the bounded Salesforce CLI helper |
+| Document pass/fail | DONE | 1 | This section records that live Salesforce connectivity evidence and candidate LLM evidence are still separate. The current public slice is not the final evidence-bound live reasoning vertical because live Salesforce read payload is not yet part of the specialist context pack |
+| Move to next capability | READY | 0 | Next slice should bind source-derived live Salesforce read evidence into the same graph context/LLM advisory pack, or first introduce an authorized local candidate change so the real candidate advisory path has non-empty input |
+
+### Additional task history
+
+- The Windows Salesforce CLI adapter now invokes the platform executable through a bounded timeout
+  and sanitized subprocess environment.
+- `demo.live-operator-advisory` returns HTTP 200 only when both the live diagnostic passes and at
+  least one model-backed advisory capture is available. Empty candidates, disabled providers,
+  unavailable live diagnostics and caller-supplied scope return bounded non-release responses.
+- Current real-machine blocker: no verified local candidate changes are present in the configured
+  Salesforce app repository. This is a data/setup precondition, not a reason to weaken candidate
+  validation or substitute fixture output.

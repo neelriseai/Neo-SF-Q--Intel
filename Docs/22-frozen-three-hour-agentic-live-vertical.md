@@ -73,6 +73,16 @@ That is an accepted fail-closed behavior for malformed or unsupported model outp
 dispatch plus guardrail enforcement, but it does not yet prove an accepted public-path advisory
 proposal. Prompt/contract refinement for accepted public-path proposals remains open.
 
+The public `POST /api/v1/demo/live-operator-advisory` foundation endpoint now composes a governed
+live Salesforce diagnostic projection with the candidate LLM advisory path and rejects caller
+scope before service execution. It returns success only when live diagnostic evidence passes and
+at least one model-backed specialist advisory capture is available. The current real-machine
+invocation remains blocked because the configured Salesforce app repository has no verified
+candidate changes; Neo reports `CANDIDATE_ADVISORY_UNAVAILABLE` instead of manufacturing a demo
+candidate. This endpoint is useful for operator demonstration once candidate input exists, but it
+still does not bind live Salesforce read payload into the same specialist context pack and
+therefore is not the completed evidence-bound live vertical.
+
 ## Fixed implementation sequence
 
 1. Correct and re-review the browser closed-schema P1 and the source-closed Apex class/method test

@@ -104,6 +104,7 @@ from neo_sf_q_intel.salesforce_source import SalesforceSourceSnapshot, load_sale
 from neo_sf_q_intel.semantic import SemanticEvidenceIndex, SemanticHit
 from neo_sf_q_intel.specialist import (
     GraphContextReplayInputs,
+    ProviderCallStatus,
     ProviderPort,
     SpecialistIdentity,
     SpecialistRequest,
@@ -170,6 +171,68 @@ class LiveBaselineView(BaseModel):
         return self
 
 
+class LiveSalesforceDiagnosticView(BaseModel):
+    """Secret-safe live connectivity projection for the operator demo."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    status: Literal["PASSED", "BLOCKED"]
+    target_alias_configured: bool
+    connected: bool = False
+    diagnostic_only: Literal[True] = True
+    release_eligible: Literal[False] = False
+    error_code: Annotated[str, Field(pattern=r"^[A-Z][A-Z0-9_]{0,127}$")] | None = None
+
+    @model_validator(mode="after")
+    def validate_diagnostic(self) -> LiveSalesforceDiagnosticView:
+        if (self.status == "PASSED") != self.connected:
+            raise ValueError("Live diagnostic status and connectivity differ")
+        if self.status == "PASSED" and self.error_code is not None:
+            raise ValueError("Passed live diagnostic cannot carry an error code")
+        if self.status == "BLOCKED" and self.error_code is None:
+            raise ValueError("Blocked live diagnostic requires an error code")
+        return self
+
+
+class LiveOperatorAdvisoryView(BaseModel):
+    """One bounded demo slice: live Salesforce connectivity plus real LLM candidate advisory."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    schema_version: Literal["1.0.0"] = "1.0.0"
+    capability_id: Literal["demo.live-operator-advisory"] = "demo.live-operator-advisory"
+    authority_scope: Literal["DIAGNOSTIC_ADVISORY_ONLY"] = "DIAGNOSTIC_ADVISORY_ONLY"
+    live_salesforce: LiveSalesforceDiagnosticView
+    candidate: CandidateAssuranceView | None = None
+    candidate_available: bool
+    llm_advisory_available: bool
+    candidate_analysis_count: int = Field(ge=0, le=2)
+    specialist_capture_count: int = Field(ge=0, le=16)
+    release_eligible: Literal[False] = False
+    gap_codes: tuple[Annotated[str, Field(pattern=r"^[A-Z][A-Z0-9_]{0,127}$")], ...] = Field(
+        max_length=32
+    )
+    view_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+    @model_validator(mode="after")
+    def validate_view(self) -> LiveOperatorAdvisoryView:
+        if (self.candidate is not None) != self.candidate_available:
+            raise ValueError("Candidate availability differs from candidate projection")
+        if self.candidate is None and self.specialist_capture_count:
+            raise ValueError("Specialist captures require a candidate projection")
+        if self.llm_advisory_available != (self.specialist_capture_count > 0):
+            raise ValueError("LLM advisory availability differs from specialist captures")
+        if self.llm_advisory_available and self.candidate is None:
+            raise ValueError("LLM advisory requires a candidate projection")
+        body = self.model_dump(mode="json")
+        declared = body.pop("view_sha256")
+        if declared != stable_sha256(body):
+            raise ValueError("Live operator advisory view digest is invalid")
+        if len(self.model_dump_json().encode("utf-8")) > 65_536:
+            raise ValueError("Live operator advisory view exceeds its response bound")
+        return self
+
+
 @dataclass(frozen=True, slots=True)
 class _VerifiedCandidateAuthority:
     manifest_sha256: str
@@ -199,6 +262,7 @@ class AssuranceService:
         foundation_pipeline: CandidateFoundationPipeline | None = None,
         foundation_configuration_code: str | None = None,
         live_campaign_status_reader: LiveCampaignStatusReader | None = None,
+        live_diagnostic_reader: Callable[[], LiveSalesforceDiagnosticView] | None = None,
         live_baseline_service_factory: (
             Callable[[Callable[[], CandidateAssuranceBundle]], _LiveBaselineRunner] | None
         ) = None,
@@ -225,6 +289,7 @@ class AssuranceService:
         self.gap_codes = tuple(dict.fromkeys(configured_gaps))
         self._foundation_pipeline = foundation_pipeline
         self._live_campaign_status_reader = live_campaign_status_reader
+        self._live_diagnostic_reader = live_diagnostic_reader
         self.foundation_configuration_code = (
             None
             if foundation_pipeline is not None
@@ -750,6 +815,74 @@ class AssuranceService:
 
         return build_candidate_assurance_view(self.analyze_current_candidate())
 
+    def run_live_operator_advisory_demo(self) -> LiveOperatorAdvisoryView:
+        """Run one diagnostic demo slice without accepting caller scope or release authority."""
+
+        live = self._run_live_diagnostic()
+        candidate: CandidateAssuranceView | None = None
+        gaps: list[str] = []
+        successful_specialist_count = 0
+        try:
+            bundle = self.analyze_current_candidate()
+            successful_specialist_count = _successful_specialist_capture_count(bundle)
+            candidate = build_candidate_assurance_view(bundle)
+        except Exception:
+            gaps.append("CANDIDATE_ADVISORY_UNAVAILABLE")
+        if live.status == "BLOCKED" and live.error_code is not None:
+            gaps.append(live.error_code)
+        if candidate is not None and successful_specialist_count == 0:
+            gaps.append("LLM_ADVISORY_UNAVAILABLE")
+        candidate_count = len(candidate.analyses) if candidate is not None else 0
+        specialist_count = (
+            sum(item.specialist_capture_count for item in candidate.analyses)
+            if candidate is not None
+            else 0
+        )
+        body = {
+            "schema_version": "1.0.0",
+            "capability_id": "demo.live-operator-advisory",
+            "authority_scope": "DIAGNOSTIC_ADVISORY_ONLY",
+            "live_salesforce": live.model_dump(mode="json"),
+            "candidate": candidate.model_dump(mode="json") if candidate is not None else None,
+            "candidate_available": candidate is not None,
+            "llm_advisory_available": successful_specialist_count > 0,
+            "candidate_analysis_count": candidate_count,
+            "specialist_capture_count": specialist_count,
+            "release_eligible": False,
+            "gap_codes": sorted(set(gaps)),
+        }
+        return LiveOperatorAdvisoryView.model_validate(
+            {**body, "view_sha256": stable_sha256(body)}
+        )
+
+    def _run_live_diagnostic(self) -> LiveSalesforceDiagnosticView:
+        if self._live_diagnostic_reader is None:
+            baseline = self.run_live_baseline()
+            if baseline.state == "COMPLETED" and baseline.read is not None:
+                return LiveSalesforceDiagnosticView(
+                    status="PASSED",
+                    target_alias_configured=True,
+                    connected=True,
+                )
+            code = (
+                baseline.gap_codes[0]
+                if baseline.gap_codes
+                else "LIVE_DIAGNOSTIC_NOT_CONFIGURED"
+            )
+            return LiveSalesforceDiagnosticView(
+                status="BLOCKED",
+                target_alias_configured=(baseline.ledger_mode != "UNAVAILABLE"),
+                error_code=code,
+            )
+        try:
+            return LiveSalesforceDiagnosticView.model_validate(self._live_diagnostic_reader())
+        except Exception:
+            return LiveSalesforceDiagnosticView(
+                status="BLOCKED",
+                target_alias_configured=True,
+                error_code="LIVE_DIAGNOSTIC_UNAVAILABLE",
+            )
+
     @property
     def live_receipt_ledger_mode(self) -> str:
         if self._live_campaign_status_reader is None:
@@ -1033,3 +1166,12 @@ def create_service(settings: Settings, repository_root: Path) -> AssuranceServic
             with suppress(Exception):
                 checkpoint_context.__exit__(type(exc), exc, exc.__traceback__)
         raise
+
+
+def _successful_specialist_capture_count(bundle: CandidateAssuranceBundle) -> int:
+    return sum(
+        1
+        for analysis in bundle.analyses
+        for capture in analysis.specialist_captures
+        if capture.artifact.provider_receipt.status is ProviderCallStatus.SUCCESS
+    )

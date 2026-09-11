@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -39,22 +40,28 @@ def _sanitize(value: Any) -> Any:
 class SalesforceCLI:
     alias: str
     runner: Runner = subprocess.run
+    executable: str = "sf.cmd" if os.name == "nt" else "sf"
+    timeout_seconds: float = 30.0
 
     def _run_json(self, arguments: list[str]) -> dict[str, Any]:
-        command = ["sf", *arguments, "--target-org", self.alias, "--json"]
-        completed = self.runner(
-            command,
-            check=False,
-            capture_output=True,
-            text=True,
-            shell=False,
-            env=build_subprocess_environment(
-                controls={
-                    "SF_AUTOUPDATE_DISABLE": "true",
-                    "SF_DISABLE_TELEMETRY": "true",
-                }
-            ),
-        )
+        command = [self.executable, *arguments, "--target-org", self.alias, "--json"]
+        try:
+            completed = self.runner(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+                shell=False,
+                timeout=self.timeout_seconds,
+                env=build_subprocess_environment(
+                    controls={
+                        "SF_AUTOUPDATE_DISABLE": "true",
+                        "SF_DISABLE_TELEMETRY": "true",
+                    }
+                ),
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise SalesforceCLIError("Salesforce CLI command timed out") from exc
         try:
             payload = json.loads(completed.stdout)
         except json.JSONDecodeError as exc:

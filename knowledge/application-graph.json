@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "d9b1f662f8caff95a1a33c32870f908000b618b362645a80abfb75de52ecb244",
+  "sourceSnapshot": "ebc06475578c3a53b692fe72de7f0a323c78f273b4b62de689ce42d2050229b3",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -4728,6 +4728,11 @@
       "from": "file:src/neo_sf_q_intel/api.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/api.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/edge_envelope.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/api.py",

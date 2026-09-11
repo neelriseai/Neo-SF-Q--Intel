@@ -400,3 +400,35 @@ def test_foundation_capture_api_runs_blocking_capture_off_event_loop(
     assert response.status_code == 503
     assert event_loop_threads and capture_threads
     assert capture_threads[0] != event_loop_threads[0]
+
+
+@pytest.mark.parametrize(
+    "request_kwargs",
+    [
+        {"json": {}},
+        {"params": {"alias": "caller-scope"}},
+        {"headers": {"x-target-org": "caller-scope"}},
+        {"headers": {"authorization": "Bearer caller-token"}},
+    ],
+)
+def test_live_operator_advisory_rejects_caller_scope_before_service(
+    monkeypatch: pytest.MonkeyPatch,
+    request_kwargs: dict,
+) -> None:
+    service = AssuranceService(source())
+    calls = 0
+
+    def forbidden():  # noqa: ANN202
+        nonlocal calls
+        calls += 1
+        raise AssertionError("service must not run")
+
+    monkeypatch.setattr(service, "run_live_operator_advisory_demo", forbidden)
+    client = TestClient(create_app(settings=Settings(allow_llm=False), service=service))
+
+    response = client.post("/api/v1/demo/live-operator-advisory", **request_kwargs)
+
+    assert response.status_code == 400
+    assert response.json()["gap_codes"] == ["LIVE_DEMO_CALLER_INPUT_FORBIDDEN"]
+    assert response.json()["release_eligible"] is False
+    assert calls == 0

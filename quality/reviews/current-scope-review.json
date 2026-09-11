@@ -305,6 +305,11 @@
       "code": "LIVE_BROWSER_PROFILE_DIAGNOSTIC_BOUNDARY",
       "severity": "P1",
       "resolution": "A generic host-local profile command now refreshes the short-lived browser diagnostic profile from current Salesforce CLI identity, derives only hashed org/actor bindings and pinned origins, writes only the ignored runtime profile, and prints only path, digest and expiry. It never prints or stores the frontdoor credential URL and does not issue signed live acceptance, mutation, deployment or release authority. The live browser smoke passed as diagnosticOnly=true and releaseEligible=false."
+    },
+    {
+      "code": "LIVE_OPERATOR_ADVISORY_BOUNDARY",
+      "severity": "P1",
+      "resolution": "Astra found that the first live-operator advisory draft dispatched a direct Salesforce CLI diagnostic after only requiring an alias. The implementation now removes that public alias-only shortcut, projects the existing governed live-baseline boundary when available, blocks otherwise, adds a bounded CLI timeout, forbids all caller scope at the endpoint, and requires at least one model-backed specialist advisory capture before HTTP success. The slice remains diagnostic/advisory-only and current real execution is blocked by an empty Salesforce app candidate rather than substituting fixture evidence."
     }
   ],
   "statusDowngrades": []

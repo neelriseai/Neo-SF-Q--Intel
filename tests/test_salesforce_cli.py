@@ -84,3 +84,16 @@ def test_cli_error_does_not_publish_urls_or_tokens() -> None:
     rendered = str(exc_info.value)
     assert "secret-value" not in rendered
     assert "https://" not in rendered
+
+
+def test_cli_timeout_is_bounded_and_sanitized() -> None:
+    def runner(*args, **kwargs):  # noqa: ANN002, ANN003
+        assert kwargs["timeout"] == 0.25
+        raise subprocess.TimeoutExpired(args[0], kwargs["timeout"], output="secret-token")
+
+    with pytest.raises(SalesforceCLIError) as exc_info:
+        SalesforceCLI("test-alias", runner=runner, timeout_seconds=0.25).org_status()
+
+    rendered = str(exc_info.value)
+    assert "timed out" in rendered
+    assert "secret-token" not in rendered
