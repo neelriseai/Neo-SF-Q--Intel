@@ -82,6 +82,12 @@ Run and present the slice in this order:
    `CANDIDATE_ADVISORY_UNAVAILABLE`, `LIVE_DIAGNOSTIC_NOT_CONFIGURED`, or another gap, present that
    as a truthful blocker instead of downgrading the guardrail.
 
+2026-09-11 update: the optional composition path now binds the sanitized live Salesforce read
+summary into the same specialist `GraphContextPack` as the candidate advisory when a governed
+completed live baseline is available. This is still diagnostic/advisory evidence only. The live
+fragment is non-authorizing, digest-addressed, source-bound and explicitly blocked from satisfying
+deploy, browser, restore, mutation or release gates.
+
 Current non-negotiable claim boundary:
 
 - Local candidate + real LLM = demoable agentic advisory.

@@ -115,25 +115,27 @@ def _foundation_problem(code: str, *, retryable: bool, status_code: int) -> JSON
 
 
 def _live_operator_advisory_blocked(code: str) -> LiveOperatorAdvisoryView:
+    diagnostic = {
+        "status": "BLOCKED",
+        "target_alias_configured": False,
+        "connected": False,
+        "diagnostic_only": True,
+        "release_eligible": False,
+        "error_code": code,
+        "read": None,
+    }
     body = {
         "schema_version": "1.0.0",
         "capability_id": "demo.live-operator-advisory",
         "authority_scope": "DIAGNOSTIC_ADVISORY_ONLY",
-        "live_salesforce": {
-            "status": "BLOCKED",
-            "target_alias_configured": False,
-            "connected": False,
-            "diagnostic_only": True,
-            "release_eligible": False,
-            "error_code": code,
-        },
+        "live_salesforce": diagnostic,
         "candidate": None,
         "candidate_available": False,
         "llm_advisory_available": False,
         "candidate_analysis_count": 0,
         "specialist_capture_count": 0,
         "release_eligible": False,
-        "gap_codes": (code,),
+        "gap_codes": [code],
     }
     return LiveOperatorAdvisoryView.model_validate(
         {**body, "view_sha256": stable_sha256(body)}

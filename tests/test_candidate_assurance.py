@@ -15,7 +15,11 @@ from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest, DecisionCode
 from neo_sf_q_intel.edge_envelope import stable_sha256
 from neo_sf_q_intel.foundation_pipeline import CandidateFoundationPipeline
 from neo_sf_q_intel.repository import InMemoryRunRepository
-from neo_sf_q_intel.service import AssuranceService, LiveSalesforceDiagnosticView
+from neo_sf_q_intel.service import (
+    AssuranceService,
+    LiveBaselineReadView,
+    LiveSalesforceDiagnosticView,
+)
 from neo_sf_q_intel.specialist import (
     ProviderCallOutcome,
     ProviderCallStatus,
@@ -78,6 +82,76 @@ class _RecordingSpecialistProvider:
                     "assumptions": [],
                     "gaps": ["test provider abstained"],
                     "abstained": True,
+                },
+                separators=(",", ":"),
+            ),
+            provider_profile_sha256=self._profile.profile_sha256,
+            invoked_at="2026-01-01T00:00:00.000Z",
+            completed_at="2026-01-01T00:00:00.001Z",
+            finish_reason=ProviderFinishReason.STOP,
+            input_tokens=10,
+            output_tokens=8,
+            duration_milliseconds=1,
+        )
+
+
+class _LiveEvidenceProposalProvider(_RecordingSpecialistProvider):
+    def __call__(
+        self,
+        prompt: str,
+        *,
+        timeout_milliseconds: int,
+        maximum_output_tokens: int,
+    ) -> ProviderCallOutcome:
+        self.prompts.append(prompt)
+        envelope = json.loads(prompt)
+        payload = envelope["untrusted_payload"]
+        context_pack = payload["context_pack"]
+        live_fragment = next(
+            item
+            for item in context_pack["unresolved_fragments"]
+            if item["evidence_id"].startswith("live-salesforce-read:")
+        )
+        relation_evidence, source_id, target_id, relation = payload["allowlists"][
+            "relation_proposal_edges"
+        ][0]
+        evidence_ids = sorted((relation_evidence, live_fragment["evidence_id"]))
+        return ProviderCallOutcome(
+            status=ProviderCallStatus.SUCCESS,
+            raw_response=json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "posture": "ANALYSIS_ONLY",
+                    "candidate_state": "CANDIDATE",
+                    "relationship_state": "INFERRED",
+                    "may_authorize": False,
+                    "may_satisfy_release_evidence": False,
+                    "authority_eligible": False,
+                    "conclusion": "Live Salesforce read context and graph relation merit review.",
+                    "proposals": [
+                        {
+                            "proposal_id": "proposal-001",
+                            "proposal_kind": "RELATION",
+                            "posture": "ANALYSIS_ONLY",
+                            "candidate_state": "CANDIDATE",
+                            "relationship_state": "INFERRED",
+                            "may_authorize": False,
+                            "may_satisfy_release_evidence": False,
+                            "authority_eligible": False,
+                            "subject_entity_id": source_id,
+                            "target_entity_id": target_id,
+                            "canonical_relation": relation,
+                            "proposition_sha256": None,
+                            "evidence_ids": evidence_ids,
+                            "candidate_refs": [],
+                            "basis": "The proposal cites a graph edge and the live read fragment.",
+                            "assumptions": [],
+                            "gaps": [],
+                        }
+                    ],
+                    "assumptions": [],
+                    "gaps": [],
+                    "abstained": False,
                 },
                 separators=(",", ":"),
             ),
@@ -207,7 +281,7 @@ def test_live_operator_advisory_combines_live_read_and_real_candidate_advisory(
 ) -> None:
     repository_root = _repository(tmp_path)
     repository = InMemoryRunRepository()
-    provider = _RecordingSpecialistProvider()
+    provider = _LiveEvidenceProposalProvider()
     service = AssuranceService(
         source(),
         repository,
@@ -217,6 +291,16 @@ def test_live_operator_advisory_combines_live_read_and_real_candidate_advisory(
             status="PASSED",
             target_alias_configured=True,
             connected=True,
+            read=LiveBaselineReadView(
+                plan_sha256="1" * 64,
+                result_sha256="2" * 64,
+                artifact_set_sha256="3" * 64,
+                observation_count=3,
+                receipt_count=3,
+                item_count=4,
+                byte_count=512,
+                invocation_count=3,
+            ),
         ),
     )
 
@@ -231,8 +315,43 @@ def test_live_operator_advisory_combines_live_read_and_real_candidate_advisory(
     assert view.candidate_analysis_count == 2
     assert view.specialist_capture_count == 6
     assert len(provider.prompts) == 6
+    prompt_payload = json.loads(provider.prompts[0])["untrusted_payload"]
+    live_fragments = [
+        item
+        for item in prompt_payload["context_pack"]["unresolved_fragments"]
+        if item["evidence_id"].startswith("live-salesforce-read:")
+    ]
+    assert len(live_fragments) == 1
+    live_content = json.loads(live_fragments[0]["content"])
+    assert live_content["read"]["result_sha256"] == "2" * 64
+    assert "live-salesforce-read:" in provider.prompts[0]
     assert view.release_eligible is False
     assert view.gap_codes == ()
+
+
+def test_live_operator_advisory_does_not_treat_abstention_as_llm_advisory(
+    tmp_path: Path,
+) -> None:
+    repository_root = _repository(tmp_path)
+    provider = _RecordingSpecialistProvider()
+    service = AssuranceService(
+        source(),
+        InMemoryRunRepository(),
+        foundation_pipeline=_pipeline(repository_root),
+        specialist_provider=provider,
+        live_diagnostic_reader=lambda: LiveSalesforceDiagnosticView(
+            status="PASSED",
+            target_alias_configured=True,
+            connected=True,
+        ),
+    )
+
+    view = service.run_live_operator_advisory_demo()
+
+    assert view.candidate_available is True
+    assert view.specialist_capture_count == 6
+    assert view.llm_advisory_available is False
+    assert view.gap_codes == ("LLM_ADVISORY_UNAVAILABLE",)
 
 
 def test_live_operator_advisory_records_independent_blockers(tmp_path: Path) -> None:

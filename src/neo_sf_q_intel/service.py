@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import sqlite3
 from collections.abc import Callable, Iterable
 from contextlib import suppress
@@ -27,6 +29,7 @@ from neo_sf_q_intel.candidate_assurance import (
 from neo_sf_q_intel.config import Settings
 from neo_sf_q_intel.context_pack import (
     DEFAULT_CONTEXT_COMPILER_POLICY_SHA256,
+    UnresolvedSourceFragment,
     compile_graph_context_pack,
     load_context_compiler_policy,
 )
@@ -55,6 +58,7 @@ from neo_sf_q_intel.live_campaign_status import (
     LiveCampaignStatusReader,
     create_live_campaign_status_reader,
 )
+from neo_sf_q_intel.ontology import SourceEvidenceState
 from neo_sf_q_intel.outcome_repository import (
     InMemoryOutcomeRepository,
     JsonOutcomeRepository,
@@ -179,6 +183,7 @@ class LiveSalesforceDiagnosticView(BaseModel):
     status: Literal["PASSED", "BLOCKED"]
     target_alias_configured: bool
     connected: bool = False
+    read: LiveBaselineReadView | None = None
     diagnostic_only: Literal[True] = True
     release_eligible: Literal[False] = False
     error_code: Annotated[str, Field(pattern=r"^[A-Z][A-Z0-9_]{0,127}$")] | None = None
@@ -191,6 +196,8 @@ class LiveSalesforceDiagnosticView(BaseModel):
             raise ValueError("Passed live diagnostic cannot carry an error code")
         if self.status == "BLOCKED" and self.error_code is None:
             raise ValueError("Blocked live diagnostic requires an error code")
+        if self.status == "BLOCKED" and self.read is not None:
+            raise ValueError("Blocked live diagnostic cannot carry read evidence")
         return self
 
 
@@ -220,8 +227,8 @@ class LiveOperatorAdvisoryView(BaseModel):
             raise ValueError("Candidate availability differs from candidate projection")
         if self.candidate is None and self.specialist_capture_count:
             raise ValueError("Specialist captures require a candidate projection")
-        if self.llm_advisory_available != (self.specialist_capture_count > 0):
-            raise ValueError("LLM advisory availability differs from specialist captures")
+        if self.llm_advisory_available and self.specialist_capture_count == 0:
+            raise ValueError("LLM advisory availability requires at least one specialist capture")
         if self.llm_advisory_available and self.candidate is None:
             raise ValueError("LLM advisory requires a candidate projection")
         body = self.model_dump(mode="json")
@@ -241,6 +248,60 @@ class _VerifiedCandidateAuthority:
 
 def _utc_timestamp() -> str:
     return datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+def _content_sha256(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def _live_salesforce_context_fragment(
+    live: LiveSalesforceDiagnosticView | None,
+    source: SalesforceSourceSnapshot,
+    *,
+    node_id: str,
+) -> tuple[UnresolvedSourceFragment, ...]:
+    if live is None:
+        return ()
+    node = next(
+        (item for item in source.normalized_graph.nodes if item.node_id == node_id),
+        None,
+    )
+    if node is None or not node.source or not node.extractor_id:
+        return ()
+    body = {
+        "schema_version": "1.0.0",
+        "evidence_type": "LIVE_SALESFORCE_READ_DIAGNOSTIC",
+        "authority_scope": "READ_ONLY_DIAGNOSTIC_CONTEXT",
+        "status": live.status,
+        "connected": live.connected,
+        "target_alias_configured": live.target_alias_configured,
+        "diagnostic_only": live.diagnostic_only,
+        "release_eligible": live.release_eligible,
+        "error_code": live.error_code,
+        "read": live.read.model_dump(mode="json") if live.read is not None else None,
+        "claim_boundary": (
+            "This runtime evidence is context for LLM advisory only. It is not deployment, "
+            "browser acceptance, restore, reconciliation, or release evidence."
+        ),
+    }
+    content = json.dumps(body, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    body_sha256 = stable_sha256(body)
+    return (
+        UnresolvedSourceFragment(
+            fragment_id=f"live-salesforce-read:{body_sha256[:32]}",
+            evidence_id=f"live-salesforce-read:{body_sha256[:32]}",
+            node_id=node_id,
+            source_locator=node.source,
+            content=content,
+            content_sha256=_content_sha256(content),
+            source_snapshot=source.normalized_graph.source_snapshot,
+            source_graph_sha256=source.normalized_graph.source_graph_sha256,
+            extractor_id=node.extractor_id,
+            evidence_state=SourceEvidenceState.UNVERIFIED,
+            mandatory=False,
+            may_authorize=False,
+        ),
+    )
 
 
 class AssuranceService:
@@ -579,6 +640,8 @@ class AssuranceService:
         self,
         run: AssuranceRun,
         source: SalesforceSourceSnapshot,
+        *,
+        live_salesforce: LiveSalesforceDiagnosticView | None = None,
     ) -> tuple[CandidateSpecialistCapture, ...]:
         """Run configured advisory specialists for one verified candidate side."""
 
@@ -611,6 +674,11 @@ class AssuranceService:
             expected_retrieval_eval_set_sha256=self._reasoning_policy.retrieval_eval_set_sha256,
             expected_propagation_policy_sha256=propagation_policy.sha256,
             expected_compiler_policy_sha256=compiler_policy.sha256,
+            unresolved_fragments=_live_salesforce_context_fragment(
+                live_salesforce,
+                source,
+                node_id=run.request.verified_seed_ids[0],
+            ),
         )
         context = replay_verify_analysis_context(
             pack,
@@ -630,6 +698,11 @@ class AssuranceService:
                 ),
                 expected_propagation_policy_sha256=propagation_policy.sha256,
                 expected_compiler_policy_sha256=compiler_policy.sha256,
+                unresolved_fragments=_live_salesforce_context_fragment(
+                    live_salesforce,
+                    source,
+                    node_id=run.request.verified_seed_ids[0],
+                ),
             ),
         )
         workflow_policy = load_reasoning_workflow_policy()
@@ -721,7 +794,11 @@ class AssuranceService:
             )
         return tuple(captures)
 
-    def analyze_current_candidate(self) -> CandidateAssuranceBundle:
+    def analyze_current_candidate(
+        self,
+        *,
+        live_salesforce: LiveSalesforceDiagnosticView | None = None,
+    ) -> CandidateAssuranceBundle:
         """Replay and analyze host-owned Git state; accepts no caller-selected scope."""
 
         if self._foundation_pipeline is None:
@@ -780,7 +857,11 @@ class AssuranceService:
                         operation_seed_sha256=seeds.artifact_sha256,
                     ),
                 )
-                specialist_captures = self._candidate_specialist_captures(run, source)
+                specialist_captures = self._candidate_specialist_captures(
+                    run,
+                    source,
+                    live_salesforce=live_salesforce,
+                )
                 analyses.append(
                     CandidateSideAssurance(
                         side=side,
@@ -823,7 +904,7 @@ class AssuranceService:
         gaps: list[str] = []
         successful_specialist_count = 0
         try:
-            bundle = self.analyze_current_candidate()
+            bundle = self.analyze_current_candidate(live_salesforce=live)
             successful_specialist_count = _successful_specialist_capture_count(bundle)
             candidate = build_candidate_assurance_view(bundle)
         except Exception:
@@ -863,6 +944,7 @@ class AssuranceService:
                     status="PASSED",
                     target_alias_configured=True,
                     connected=True,
+                    read=baseline.read,
                 )
             code = (
                 baseline.gap_codes[0]
@@ -1174,4 +1256,5 @@ def _successful_specialist_capture_count(bundle: CandidateAssuranceBundle) -> in
         for analysis in bundle.analyses
         for capture in analysis.specialist_captures
         if capture.artifact.provider_receipt.status is ProviderCallStatus.SUCCESS
+        and bool(capture.artifact.proposals)
     )

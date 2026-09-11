@@ -108,7 +108,8 @@
     "src/neo_sf_q_intel/salesforce_source.py",
     "src/neo_sf_q_intel/service.py",
     "src/neo_sf_q_intel/specialist.py",
-    "src/neo_sf_q_intel/subprocess_environment.py"
+    "src/neo_sf_q_intel/subprocess_environment.py",
+    "tests/test_candidate_assurance.py"
   ],
   "reviewers": [
     "astra_final_solution_review",
@@ -123,7 +124,8 @@
     "checkpoint_documentation_review",
     "astra_live_llm_provider_review",
     "live_browser_profile_diagnostic_review",
-    "two_hour_operator_demo_scope_review"
+    "two_hour_operator_demo_scope_review",
+    "astra_live_vertical_review"
   ],
   "findings": [
     {
@@ -325,6 +327,11 @@
       "code": "TWO_HOUR_OPERATOR_DEMO_SCOPE_FREEZE",
       "severity": "P1",
       "resolution": "The active two-hour run uses the latest timeboxed method as the current scope authority: one demo capability at a time, real LLM/live Salesforce evidence where available, maximum three retries per subtask, and deferral of broad production hardening unless needed for safety, credential protection, mutation authority or truthful claims. The current operator demo is documented as a truthful sequence of real local AUT candidate LLM advisory, live Salesforce read proof and live headless browser diagnostic proof; deployed-candidate mutation, restoration/reconciliation, full live campaign gates, Chroma/GraphRAG breadth and non-route UI polish are deferred."
+    },
+    {
+      "code": "LIVE_READ_BOUND_LLM_CONTEXT",
+      "severity": "P1",
+      "resolution": "Astra found that the live Salesforce diagnostic and candidate LLM advisory were adjacent rather than evidence-bound in one context pack. The operator advisory path now passes the governed live diagnostic into candidate analysis, compiles a source-bound non-authorizing live-read unresolved fragment into the specialist GraphContextPack, counts LLM advisory availability only when verifier-accepted proposals exist, and keeps blocked diagnostics from carrying read evidence. Focused regression passed 28 tests. Deployment remains blocked until exact LWC candidate restore/reconciliation support exists."
     }
   ],
   "statusDowngrades": []

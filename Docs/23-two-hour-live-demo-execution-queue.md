@@ -188,3 +188,26 @@ Use this sequence for the next operator walkthrough:
 Deferred from this two-hour run: deployed-candidate mutation, restoration/reconciliation, full
 live campaign gate closure, Chroma/GraphRAG breadth, UI polish outside the selected route, and broad
 architecture refactors.
+
+## Continuation: live read bound into LLM advisory context
+
+Selected capability: `demo.live-operator-advisory` context binding for the current live-integrated
+vertical. This closes the immediate foundation defect that live Salesforce read evidence and LLM
+candidate advisory were computed beside each other instead of inside the same specialist context.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Make it run end-to-end | DONE | 2 | `run_live_operator_advisory_demo()` now passes the governed live diagnostic projection into `analyze_current_candidate()`, and the specialist context compiler receives a non-authorizing unresolved fragment derived from the live read summary when the live baseline is completed |
+| Minimal truthful foundation | DONE | 2 | The live fragment is digest-addressed, marks `READ_ONLY_DIAGNOSTIC_CONTEXT`, cites only sanitized counts/digests/status, binds to an existing verified graph seed, and explicitly says it cannot satisfy deploy, browser, restore, release or mutation evidence |
+| Test it | DONE | 2 | Focused regression passed 28/28, proving positive live-read context inclusion, abstention does not count as LLM advisory, independent blocker reporting and API caller-scope rejection |
+| Document pass/fail | DONE | 1 | This section records that gap #1 is addressed at the foundation/operator-composition layer. The full live vertical is still incomplete until candidate deploy, deployed-candidate browser acceptance, restore/reconciliation and live acceptance gates pass |
+| Move to next capability | BLOCKED | 1 | Astra review blocks deployment until the restore/reconciliation mechanism covers the exact current LWC HTML candidate mutation, not only the older metadata property case |
+
+Current remaining live-vertical gaps:
+
+1. Local AUT candidate change is not deployed to Salesforce.
+2. No live deployed-candidate browser acceptance has run.
+3. No metadata restore/reconciliation campaign has run for the exact current LWC candidate change.
+4. Full live Salesforce acceptance gates/receipts are incomplete.
+5. The Salesforce app repo intentionally retains uncommitted demo candidate changes until a protected
+   mutation/deploy milestone is explicitly authorized.
