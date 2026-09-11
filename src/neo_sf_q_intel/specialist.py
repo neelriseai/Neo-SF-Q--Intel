@@ -1034,8 +1034,8 @@ def _visible_allowlists(context: VerifiedAnalysisContext) -> _VisibilityMaps:
             hop = path.hops[0]
             evidence_bindings[path.path_sha256] = (
                 _EvidenceBinding(
-                    source_entity_id=hop.traversal_from_id,
-                    target_entity_id=hop.traversal_to_id,
+                    source_entity_id=hop.edge_source_id,
+                    target_entity_id=hop.edge_target_id,
                     canonical_relation=hop.relation_class,
                 ),
             )
@@ -1044,8 +1044,8 @@ def _visible_allowlists(context: VerifiedAnalysisContext) -> _VisibilityMaps:
             evidence.add(hop.edge_id)
             evidence_bindings[hop.edge_id] = (
                 _EvidenceBinding(
-                    source_entity_id=hop.traversal_from_id,
-                    target_entity_id=hop.traversal_to_id,
+                    source_entity_id=hop.edge_source_id,
+                    target_entity_id=hop.edge_target_id,
                     canonical_relation=hop.relation_class,
                 ),
             )
@@ -1177,6 +1177,18 @@ def build_specialist_prompt(
             "evidence_ids": sorted(visible.evidence),
             "candidate_refs": sorted(visible.candidate_refs),
             "canonical_relations": sorted(context.graph_replay.ontology.relations_by_id),
+            "relation_proposal_edges": sorted(
+                {
+                    (
+                        evidence_id,
+                        binding.source_entity_id,
+                        binding.target_entity_id,
+                        binding.canonical_relation,
+                    )
+                    for evidence_id, bindings in visible.evidence_bindings.items()
+                    for binding in bindings
+                }
+            ),
             "atomic_conflict_sets": {
                 key: sorted(value) for key, value in sorted(visible.conflicts.items())
             },
@@ -1221,10 +1233,42 @@ def _parse_provider_document(raw: str, policy: SpecialistPolicy) -> ProviderProp
         ) from exc
     if not isinstance(body, dict):
         raise SpecialistVerificationError("Provider response must be one JSON object")
+    body = _normalize_provider_document_ordering(body)
     try:
         return ProviderProposalDocument.model_validate_json(_canonical_json(body), strict=True)
     except ValidationError as exc:
         raise SpecialistVerificationError("Provider response violates the strict schema") from exc
+
+
+def _sort_if_string_list(value: Any) -> Any:
+    if isinstance(value, list) and all(isinstance(item, str) for item in value):
+        return sorted(value)
+    return value
+
+
+def _normalize_provider_document_ordering(body: dict[str, Any]) -> dict[str, Any]:
+    """Normalize semantically unordered provider arrays before strict validation.
+
+    The verifier still rejects duplicates, unsupported IDs, wrong endpoints and invalid relation
+    bindings. This only removes avoidable model fragility around list ordering.
+    """
+
+    normalized = dict(body)
+    for key in ("assumptions", "gaps"):
+        normalized[key] = _sort_if_string_list(normalized.get(key))
+    proposals = normalized.get("proposals")
+    if isinstance(proposals, list):
+        normalized_proposals: list[Any] = []
+        for proposal in proposals:
+            if not isinstance(proposal, dict):
+                normalized_proposals.append(proposal)
+                continue
+            item = dict(proposal)
+            for key in ("evidence_ids", "candidate_refs", "assumptions", "gaps"):
+                item[key] = _sort_if_string_list(item.get(key))
+            normalized_proposals.append(item)
+        normalized["proposals"] = normalized_proposals
+    return normalized
 
 
 def _require_output_bounds(document: ProviderProposalDocument, policy: SpecialistPolicy) -> None:

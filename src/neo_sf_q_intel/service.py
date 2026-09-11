@@ -585,7 +585,10 @@ class AssuranceService:
                 },
                 "task": (
                     "Assess replay-verified Salesforce candidate-change impacts from the "
-                    "provided graph context. Produce only source-bound advisory proposals."
+                    "provided graph context. Produce only source-bound advisory proposals. "
+                    "For RELATION proposals, copy evidence_id, subject_entity_id, "
+                    "target_entity_id and canonical_relation exactly from one "
+                    "allowlists.relation_proposal_edges tuple; never reverse an edge."
                 ),
                 "question": (
                     "Which impacted components, tests, automation targets, or governance "

@@ -458,6 +458,35 @@ def test_valid_output_stays_inferred_and_preserves_roots() -> None:
     assert artifact.proposals[0].relationship_state == "INFERRED"
 
 
+def test_unordered_provider_string_arrays_are_normalized() -> None:
+    context = _context()
+    profile = _profile()
+    body = _relation_document(
+        context.pack,
+        assumptions=["z-last", "a-first"],
+        gaps=["z-gap", "a-gap"],
+    )
+    body["proposals"][0]["assumptions"] = ["z-proposal", "a-proposal"]
+    body["proposals"][0]["gaps"] = ["z-gap", "a-gap"]
+
+    artifact, *_ = _run(context=context, profile=profile, outcome=_outcome(profile, body))
+
+    assert artifact.provider_receipt.status == "SUCCESS"
+    assert artifact.assumptions == ("a-first", "z-last")
+    assert artifact.proposals[0].assumptions == ("a-proposal", "z-proposal")
+
+
+def test_provider_order_normalization_still_rejects_duplicates() -> None:
+    context = _context()
+    profile = _profile()
+    body = _relation_document(context.pack, assumptions=["same", "same"])
+
+    artifact, *_ = _run(context=context, profile=profile, outcome=_outcome(profile, body))
+
+    assert artifact.provider_receipt.status == "INVALID_RESPONSE"
+    assert artifact.proposals == ()
+
+
 @pytest.mark.parametrize("field,value", [("release_decision", "GO"), ("approval", True)])
 def test_hallucinated_scope_is_sanitized_to_incomplete(field, value) -> None:
     context = _context()

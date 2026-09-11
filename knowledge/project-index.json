@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "cd7623225a7fe2f92e1e0f733bd1abdda4e04cd052b47e9411c3a97f2b36904b",
+  "sourceSnapshot": "eb852e4fd99725044f223822a068e25d5d75ab0707cb52fe17e3c00bf6014072",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1569,6 +1569,11 @@
       "sha256": "39ae9ddd4f3cef15377ef9aecb0b889a3f50ff168ea5df942029410a75c18a04"
     },
     {
+      "path": "Docs/23-two-hour-live-demo-execution-queue.md",
+      "category": "reference-documentation",
+      "sha256": "5aa72529f1c6f293fb4602b6b04288eb228b682b63657f84d7b4ca7d1a3c2238"
+    },
+    {
       "path": "Docs/README.md",
       "category": "canonical-documentation",
       "sha256": "66f8fe0a05de98b1cea47a3ec3f10cdb203553224d1a076ad8f46698d0601cbc"
@@ -2106,7 +2111,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "c4e56c39bd2bcf18d666281e2759fd4776d1e077679904ef260fd916f812b2fd"
+      "sha256": "65732a76b2fade597575d2aeda333ff0f0fbeec8ed8c0c9fb87a86d81a56b805"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -2431,12 +2436,12 @@
     {
       "path": "src/neo_sf_q_intel/service.py",
       "category": "python-runtime",
-      "sha256": "17bd425581ec2061ec6dcb90ab6f5f2cd416f853d3aaa3940953dbb64cb9a04c"
+      "sha256": "9ae654a6707f6ed306375d641df193aec69ba2c9d300d9c76378df0460fdefd6"
     },
     {
       "path": "src/neo_sf_q_intel/specialist.py",
       "category": "python-runtime",
-      "sha256": "af759e36fce0c8fdf97af70fe2862cb7c70f799db0455340b46cf2dcbc5407ef"
+      "sha256": "867941e6b3047140d12a148468fb38ce55ac4a3328ed0d73f7fa49e0c20fa8cf"
     },
     {
       "path": "src/neo_sf_q_intel/subprocess_environment.py",
@@ -2801,7 +2806,7 @@
     {
       "path": "tests/test_specialist.py",
       "category": "test",
-      "sha256": "dacedf23f592266b782a0a5b339823f5d5062353337f6510017e323b9cee331a"
+      "sha256": "40554a83fd25197f115fa58771aaf2dbc784c3662bc60ff3a54b8aef8e28f091"
     },
     {
       "path": "tests/test_subprocess_environment.py",

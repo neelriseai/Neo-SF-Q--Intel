@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "cd7623225a7fe2f92e1e0f733bd1abdda4e04cd052b47e9411c3a97f2b36904b",
+  "sourceSnapshot": "eb852e4fd99725044f223822a068e25d5d75ab0707cb52fe17e3c00bf6014072",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -418,6 +418,14 @@
       "kind": "file",
       "label": "22-frozen-three-hour-agentic-live-vertical.md",
       "source": "Docs/22-frozen-three-hour-agentic-live-vertical.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/23-two-hour-live-demo-execution-queue.md",
+      "kind": "file",
+      "label": "23-two-hour-live-demo-execution-queue.md",
+      "source": "Docs/23-two-hour-live-demo-execution-queue.md",
       "category": "reference-documentation",
       "authority": "reference-only"
     },

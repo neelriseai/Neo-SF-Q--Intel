@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "candidate-specialist-provider-evidence-2026-09-11",
+  "reviewId": "two-hour-live-demo-llm-salesforce-proof-2026-09-11",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -115,7 +115,8 @@
     "compiler_p1_repairs",
     "live_executor_hardening",
     "astra_locator_probe_review",
-    "checkpoint_documentation_review"
+    "checkpoint_documentation_review",
+    "astra_live_llm_provider_review"
   ],
   "findings": [
     {
@@ -292,6 +293,11 @@
       "code": "DEVELOPMENT_STOP_NON_EXECUTION_BOUNDARY",
       "severity": "P1",
       "resolution": "All implementation agents were stopped on user instruction. No Salesforce metadata mutation, check-only, candidate deploy, healing acceptance or restore operation occurred. The current review status is IN_PROGRESS; interrupted files and live gaps are documented in Docs/21-development-stop-checkpoint-2026-09-11.md."
+    },
+    {
+      "code": "LIVE_LLM_PROVIDER_RELATION_EVIDENCE_ALIGNMENT",
+      "severity": "P1",
+      "resolution": "The public candidate specialist provider now exposes canonical ontology edge orientation to the model, verifies accepted relation proposals against exact evidence tuples, and normalizes benign provider ordering of string arrays before strict validation. Focused tests prove valid unordered responses pass while duplicate, unknown or malformed evidence remains rejected. This produces real model-backed fixture advisory evidence without weakening live Salesforce acceptance boundaries."
     }
   ],
   "statusDowngrades": []
