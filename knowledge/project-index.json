@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "1be932b7b450828c5b4c4b90c44beef9c5788c0ce087fd4f3ebdaef590e1a48c",
+  "sourceSnapshot": "0d5cdcdce481d9d8417f242c1bf36afe280cb8927b9f3311294d91ea0e516898",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1481,7 +1481,7 @@
     {
       "path": "Docs/09-demo-scenarios.md",
       "category": "canonical-documentation",
-      "sha256": "7709b98947521a83be4f162bdbb740eadb6b28c57f5d92330af1d8712cab0bdb"
+      "sha256": "99e07cf421bc3712326bd8d9c658d1d559c8d924cc702a5a1b0bfba3daee983f"
     },
     {
       "path": "Docs/09-tool-mcp-and-agent-security.md",
@@ -1574,9 +1574,14 @@
       "sha256": "d0c9d0bd125d2476f308020c4eb07209434706b361ae1ec68f760c29b7dbabd4"
     },
     {
+      "path": "Docs/24-strategic-deal-change-assurance-demo.md",
+      "category": "reference-documentation",
+      "sha256": "1ed8850584a63de484ac0a12b723f36749afd5b4f2a084a56f28b11b4971179c"
+    },
+    {
       "path": "Docs/README.md",
       "category": "canonical-documentation",
-      "sha256": "66f8fe0a05de98b1cea47a3ec3f10cdb203553224d1a076ad8f46698d0601cbc"
+      "sha256": "15179dc9b8860f097d86116e7b2ef9174c4831693aaa9aa9c1a8afb542f4b58d"
     },
     {
       "path": "Docs/deep-research-report.md",
@@ -2131,7 +2136,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "425d2af6f84612ba0e1cead7800582313b4b9513aa4854cc261dd59848da7b28"
+      "sha256": "789d0ad10ba908ba0683ed769e3def381773694102328d1a76218f04822357dd"
     },
     {
       "path": "scripts/catalog/build_project_index.py",

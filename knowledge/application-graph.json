@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "1be932b7b450828c5b4c4b90c44beef9c5788c0ce087fd4f3ebdaef590e1a48c",
+  "sourceSnapshot": "0d5cdcdce481d9d8417f242c1bf36afe280cb8927b9f3311294d91ea0e516898",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -426,6 +426,14 @@
       "kind": "file",
       "label": "23-two-hour-live-demo-execution-queue.md",
       "source": "Docs/23-two-hour-live-demo-execution-queue.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/24-strategic-deal-change-assurance-demo.md",
+      "kind": "file",
+      "label": "24-strategic-deal-change-assurance-demo.md",
+      "source": "Docs/24-strategic-deal-change-assurance-demo.md",
       "category": "reference-documentation",
       "authority": "reference-only"
     },
@@ -4391,6 +4399,11 @@
       "to": "file:Docs/21-development-stop-checkpoint-2026-09-11.md"
     },
     {
+      "from": "file:Docs/09-demo-scenarios.md",
+      "relation": "references",
+      "to": "file:Docs/24-strategic-deal-change-assurance-demo.md"
+    },
+    {
       "from": "file:Docs/17-solution-readiness-audit.md",
       "relation": "references",
       "to": "file:Docs/21-development-stop-checkpoint-2026-09-11.md"
@@ -4509,6 +4522,11 @@
       "from": "file:Docs/README.md",
       "relation": "references",
       "to": "file:Docs/22-frozen-three-hour-agentic-live-vertical.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/24-strategic-deal-change-assurance-demo.md"
     },
     {
       "from": "file:README.md",

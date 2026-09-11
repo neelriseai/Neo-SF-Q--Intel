@@ -24,6 +24,7 @@ not ingested wholesale.
 16. [Source-operation declarations](20-source-operation-declarations.md)
 17. [Development stop checkpoint — 2026-09-11](21-development-stop-checkpoint-2026-09-11.md)
 18. [Frozen three-hour agentic live vertical](22-frozen-three-hour-agentic-live-vertical.md)
+19. [Strategic Deal Change Assurance Demo](24-strategic-deal-change-assurance-demo.md)
 
 ## Advisory status
 

@@ -22,6 +22,7 @@
     "Docs/21-development-stop-checkpoint-2026-09-11.md",
     "Docs/22-frozen-three-hour-agentic-live-vertical.md",
     "Docs/23-two-hour-live-demo-execution-queue.md",
+    "Docs/24-strategic-deal-change-assurance-demo.md",
     "Docs/README.md",
     "README.md",
     "apps/web/src/app/page.tsx",
@@ -380,6 +381,11 @@
       "code": "FOCUSED_DEVELOPMENT_CONTEXT_COMPRESSION",
       "severity": "P1",
       "resolution": "Astra reviewed the proposed AST/diff-only/minified-handoff development approach and returned GO_WITH_GUARDRAILS. The root project instructions now require smallest coherent targeted patches, graph/index-guided context selection, state-transition test framing and concise structured handoffs, while explicitly treating summaries, signatures and graph edges as navigation aids rather than authoritative substitutes. Correctness, readability, security, evidence integrity and required verification override token reduction. Follow-up anti-bias and intent-compression controls state that historical execution queues, review logs, screenshots, demo runbooks, examples and retrieved summaries are evidence, not active scope; prior demo data, fixture data and repeated historical failures must not narrow implementation into a scenario-specific solution. Condensed matrices, shorthand, schemas and edge lists must preserve scope, conditions, exceptions, verification criteria, provenance and unknowns; omission does not prove absence."
+    },
+    {
+      "code": "STRATEGIC_DEAL_MASTER_DEMO_SCENARIO",
+      "severity": "P1",
+      "resolution": "The master demo scenario now composes business-rule assurance, graph/evidence reasoning, graph-grounded LLM advisory, test selection, governance, live Salesforce evidence, browser worker and locator-healing into one truthful Strategic Deal Change Assurance flow. It preserves current claim levels, marks ChromaDB retrieval, full candidate deployment and live test execution as not yet complete, and keeps full live business-action acceptance blocked until Salesforce success and persistence receipts pass."
     }
   ],
   "statusDowngrades": []

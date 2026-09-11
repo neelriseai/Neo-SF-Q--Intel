@@ -18,6 +18,15 @@ contract but never satisfy a positive live gate. Every live assertion must say w
 candidate analysis is paired only with baseline evidence, the dashboard must say **candidate not
 deployed or validated live**.
 
+## Master unified demo
+
+Use [Strategic Deal Change Assurance Demo](24-strategic-deal-change-assurance-demo.md) as the
+current master narrative when one scenario should showcase graph impact, evidence graph,
+graph-grounded advisory, candidate assurance, test selection, governance, live Salesforce evidence,
+browser worker, locator healing, ChromaDB roadmap posture, candidate deployment boundaries and live
+test-execution gaps together. The master demo does not upgrade any scenario below from
+specification to accepted live evidence; it only composes them into one truthful presentation flow.
+
 ## Scenario A — business-rule change
 
 Input a source/requirement change to a policy threshold. The current foundation can show pinned,
