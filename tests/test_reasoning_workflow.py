@@ -981,7 +981,8 @@ def test_policy_and_result_bounds_are_enforced() -> None:
     many_gaps = run.model_copy(
         update={
             "analysis_gaps": [
-                AnalysisGap(code=f"GAP_{index}", message="Missing evidence") for index in range(33)
+                AnalysisGap(code=f"GAP_{index}", message="Missing evidence")
+                for index in range(129)
             ]
         },
         deep=True,

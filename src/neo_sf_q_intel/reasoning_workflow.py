@@ -323,7 +323,7 @@ class SpecialistStageInput:
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _IDENTIFIER = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
 _UPPER_IDENTIFIER = re.compile(r"^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$")
-DEFAULT_WORKFLOW_POLICY_SHA256 = "f9ed7ac7de73d68ae053d0937cfe82737845502cc49c75a24d56900a5e2233e1"
+DEFAULT_WORKFLOW_POLICY_SHA256 = "50e21a827c0510b6c7478897af38b8828f42733c41d81252dfb30c86066c46e4"
 DEFAULT_GOVERNANCE_POLICY_SHA256 = (
     "288f848e26687b72ba776e2f99ce02eef2e11c32c282d3e32301aeca1614aae8"
 )
@@ -946,6 +946,18 @@ def integrate_reasoning_workflow(
 
     proposals, reconciliation_gaps = _reconcile_proposals(proposals)
     gaps.extend(reconciliation_gaps)
+    gaps = list(
+        {
+            (
+                item.origin,
+                item.specialist_id,
+                item.code,
+                item.artifact_sha256,
+                item.blocking,
+            ): item
+            for item in gaps
+        }.values()
+    )
     if len(proposals) > policy.limits.maximum_total_proposals:
         raise ReasoningWorkflowInputError("Merged proposals exceed workflow bounds")
     if len(gaps) > policy.limits.maximum_total_gaps:

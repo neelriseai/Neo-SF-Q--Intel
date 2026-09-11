@@ -42,6 +42,7 @@
     "config/propagation-policy.json",
     "config/quality-policy.json",
     "config/reasoning-policy.json",
+    "config/reasoning-workflow-policy.json",
     "config/release-input-policy.json",
     "config/requirement-registry.json",
     "config/source-profiles/salesforce-application-graph.json",
@@ -100,6 +101,7 @@
     "src/neo_sf_q_intel/providers.py",
     "src/neo_sf_q_intel/release_input.py",
     "src/neo_sf_q_intel/repository.py",
+    "src/neo_sf_q_intel/reasoning_workflow.py",
     "src/neo_sf_q_intel/salesforce_cli.py",
     "src/neo_sf_q_intel/salesforce_source.py",
     "src/neo_sf_q_intel/service.py",
@@ -310,6 +312,11 @@
       "code": "LIVE_OPERATOR_ADVISORY_BOUNDARY",
       "severity": "P1",
       "resolution": "Astra found that the first live-operator advisory draft dispatched a direct Salesforce CLI diagnostic after only requiring an alias. The implementation now removes that public alias-only shortcut, projects the existing governed live-baseline boundary when available, blocks otherwise, adds a bounded CLI timeout, forbids all caller scope at the endpoint, and requires at least one model-backed specialist advisory capture before HTTP success. The slice remains diagnostic/advisory-only and current real execution is blocked by an empty Salesforce app candidate rather than substituting fixture evidence."
+    },
+    {
+      "code": "REAL_CANDIDATE_LLM_ADVISORY_PATH",
+      "severity": "P1",
+      "resolution": "A real local-Git AUT locator-drift candidate now runs through the candidate assurance path with OpenAI-backed specialist dispatch, producing two side analyses and six specialist captures. The implementation preserves release-ineligible advisory status, adds current source-foundation context gap allowlisting, increases bounded specialist artifact capacity for graph-backed captures, deduplicates equivalent workflow gaps before enforcing finite result limits, and keeps this evidence separate from live Salesforce deployment/browser/restoration gates."
     }
   ],
   "statusDowngrades": []

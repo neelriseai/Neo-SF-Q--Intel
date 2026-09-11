@@ -83,6 +83,15 @@ candidate. This endpoint is useful for operator demonstration once candidate inp
 still does not bind live Salesforce read payload into the same specialist context pack and
 therefore is not the completed evidence-bound live vertical.
 
+A subsequent local-only AUT candidate was introduced to prove the real candidate advisory path
+without deploying or mutating Salesforce. After refreshing the AUT catalog, the actual OpenAI-backed
+candidate advisory run produced two side analyses and six specialist captures over the verified
+local-Git Salesforce app change. The fixes required were foundation-compatible: allow current
+source-foundation gap codes in specialist context, raise bounded specialist artifact output capacity
+for real graph-backed captures, and deduplicate equivalent workflow gaps before enforcing the finite
+result gap limit. This proves real local candidate + real LLM advisory, but still does not satisfy
+deployed-candidate, live read payload binding, browser acceptance, restoration or release gates.
+
 ## Fixed implementation sequence
 
 1. Correct and re-review the browser closed-schema P1 and the source-closed Apex class/method test

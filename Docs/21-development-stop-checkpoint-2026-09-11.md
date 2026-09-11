@@ -236,3 +236,9 @@ blocked by an empty Salesforce app candidate (`CANDIDATE_ADVISORY_UNAVAILABLE`).
 diagnostic/advisory foundation evidence only; it does not dispatch Salesforce mutation, create
 accepted live campaign receipts, run headless acceptance against a deployed candidate, or approve a
 release.
+
+After creating a local-only AUT candidate locator drift and regenerating the AUT catalog, the real
+OpenAI-backed candidate path produced two side analyses and six specialist captures. This validates
+the local-Git candidate + LLM advisory capability for the demo input, while preserving the live
+Salesforce boundary: no deploy, no org mutation, no accepted live campaign receipt and no release
+approval occurred.

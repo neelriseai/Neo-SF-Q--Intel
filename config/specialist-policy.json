@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "policyId": "graph-specialist-proposal",
   "policyVersion": "1.0.0",
-  "sha256": "ae4f7f0ed755827835b5b4deac36e24b7662e4e004785307e4d5313c64f56fa7",
+  "sha256": "abbcb06f10dece5052861b183b88184489d2c7c28eb58347fe77359df55c8937",
   "posture": "ANALYSIS_ONLY",
   "promptTemplateId": "graph-specialist-public-envelope",
   "promptTemplateVersion": "1.0.0",
@@ -28,7 +28,7 @@
     "maximumGaps": 32,
     "maximumIdentifierCharacters": 256,
     "maximumTextCharacters": 4096,
-    "maximumOutputBytes": 16384,
+    "maximumOutputBytes": 65536,
     "providerTimeoutMilliseconds": 60000,
     "providerMaxOutputTokens": 4096,
     "providerMaximumTotalTokens": 32768

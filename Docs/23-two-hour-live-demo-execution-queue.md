@@ -94,3 +94,16 @@ live campaign gates or substitute fixture output for live evidence.
 - Current real-machine blocker: no verified local candidate changes are present in the configured
   Salesforce app repository. This is a data/setup precondition, not a reason to weaken candidate
   validation or substitute fixture output.
+
+## Continuation: real AUT candidate LLM advisory
+
+Selected capability: `assurance.candidate-comparison` plus `reasoning.graph-grounded-agent` over
+the actual configured Salesforce app repository.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Make it run end-to-end | DONE | 3 | Created a local-only AUT candidate locator drift in `strategicDealWorkbench.html`, refreshed the AUT catalog, and ran the current Neo candidate path. The real OpenAI run produced two side analyses and six specialist captures over the verified local-Git candidate |
+| Minimal truthful foundation | DONE | 3 | Fixed the specialist context allowlist for current source-foundation gaps, raised bounded specialist artifact output capacity to handle real graph-backed captures, and deduplicated workflow gaps before enforcing finite result limits |
+| Test it | DONE | 2 | Focused tests passed for specialist gap allowlist, candidate advisory composition, workflow result bounds and Salesforce CLI timeout/failure behavior |
+| Document pass/fail | DONE | 1 | This is real local candidate + real LLM advisory evidence. It is not a deployed-candidate or live Salesforce acceptance receipt, and the AUT change remains local/uncommitted unless a separate deployment/mutation milestone is authorized |
+| Move to next capability | READY | 0 | Next slice should either run the live-operator advisory endpoint with an accepted governed live diagnostic, or bind source-derived live read payload into the same specialist context pack |

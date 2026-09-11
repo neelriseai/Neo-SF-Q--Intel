@@ -101,6 +101,28 @@ def _contracts():
     return ontology, policy, evaluation
 
 
+def test_specialist_context_gap_allowlist_includes_candidate_foundation_gaps() -> None:
+    current_foundation_gaps = {
+        "CANDIDATE_BUILD_NOT_VERIFIED",
+        "CHANGE_SEED_SCOPE_NOT_ATTESTED",
+        "CONFLICT_SCOPE_NOT_ATTESTED",
+        "DEPLOYMENT_NOT_ATTESTED",
+        "GIT_COMMIT_SIGNATURE_NOT_ATTESTED",
+        "GRAPH_EVIDENCE_STATE_INFERRED",
+        "GRAPH_INPUT_TREE_NOT_ATTESTED",
+        "HUMAN_APPROVAL_SCOPE_NOT_ATTESTED",
+        "RELEASE_EVIDENCE_MODEL_INCOMPLETE",
+        "REPOSITORY_ORIGIN_NOT_ATTESTED",
+        "RISK_FACTORS_NOT_ATTESTED",
+        "SEMANTIC_SOURCE_FAMILY_COVERAGE_INCOMPLETE",
+        "TEST_EXECUTION_SCOPE_NOT_ATTESTED",
+        "TEST_OBLIGATION_SCOPE_NOT_ATTESTED",
+        "UPSTREAM_SOURCE_CAPTURE_NOT_ATTESTED",
+    }
+
+    assert current_foundation_gaps.issubset(specialist_module._CONTEXT_GAP_CODES)
+
+
 def _graph_replay() -> GraphContextReplayInputs:
     graph, propagation, compiler, reasoning = context_inputs()
     ontology, propagation_policy, _, _ = context_contracts()
