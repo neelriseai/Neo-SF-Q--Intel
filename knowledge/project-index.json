@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "80b83d0347be8aa55a32d766c49ef8a55779606e6658067d6f9567fc4575e96e",
+  "sourceSnapshot": "498dd489939df45337e40c2c84d6db6dd2ca81569b83327079f47c30fb9cf8ca",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1401,7 +1401,7 @@
     {
       "path": "Docs/04-agent-orchestration.md",
       "category": "canonical-documentation",
-      "sha256": "112668bbf81544964789df0bf1a21f9559c4c77fd865ee0cc6e651f51ba9ab1e"
+      "sha256": "91957174ab4f5ceaa79b778b89d0fbf5d0f86866c9d373445b4ec29c0eeac17f"
     },
     {
       "path": "Docs/04-guardrails-and-policy-enforcement.md",
@@ -1551,7 +1551,7 @@
     {
       "path": "Docs/19-live-integration-8h-sprint.md",
       "category": "reference-documentation",
-      "sha256": "3484516d45ef004a55ca59f857972e802f405e7d2b04fefdd75ceb4a599f55f9"
+      "sha256": "86c7023c2807de6721eab6aa89a6b172e80e78e610b2c9dce58977322477b94f"
     },
     {
       "path": "Docs/20-source-operation-declarations.md",
@@ -1561,17 +1561,17 @@
     {
       "path": "Docs/21-development-stop-checkpoint-2026-09-11.md",
       "category": "reference-documentation",
-      "sha256": "6e9a2374b5b9bdb3421fb35556d8cae8b7916016c2cdbac36145d629454b87ee"
+      "sha256": "ec26a01e94e96eeb0071429f33c58bd5d603a6d458e4b6c098b1d453c5200cea"
     },
     {
       "path": "Docs/22-frozen-three-hour-agentic-live-vertical.md",
       "category": "reference-documentation",
-      "sha256": "d924dc1a0eafcc6b10bc168e50057b616073075c204691c6fe8a4320fe983c85"
+      "sha256": "c5ded7bba3c9707e1b741c45f25f8bbaf530bc0284a9e10e64a8866081b41149"
     },
     {
       "path": "Docs/README.md",
       "category": "canonical-documentation",
-      "sha256": "2b4f18871f00260c4b7a5a0eb5e063a8b7308c93ec5f716c69d2ffb45181bcf0"
+      "sha256": "a51d6c1ed2df4a58ce0c064c2a60d1af95d6cf7f8e6c29cdf1670fde9b145a67"
     },
     {
       "path": "Docs/deep-research-report.md",
@@ -1781,7 +1781,7 @@
     {
       "path": "config/reasoning-workflow-policy.json",
       "category": "policy",
-      "sha256": "c4435d88148c94ee39b1a69670fb628182407181e22ca35e13f7d3837021403a"
+      "sha256": "a22937bca058c87f42ff63bed6444b9142a6589b4f424b35c41692f98d69514b"
     },
     {
       "path": "config/release-input-policy.json",
@@ -1886,7 +1886,7 @@
     {
       "path": "packages/browser/src/healing-probe.ts",
       "category": "browser-runtime",
-      "sha256": "d141ae57352140359d9ec31344acad09d645217fffb9959bbc2df293bb80eca0"
+      "sha256": "91492f3e957cf0770cfcf2d97c72dfe3c989d0730b361fcbfea9239dd57c2308"
     },
     {
       "path": "packages/browser/src/live-smoke-cli.ts",
@@ -1931,7 +1931,7 @@
     {
       "path": "packages/browser/tests/healing-probe.spec.ts",
       "category": "test",
-      "sha256": "058c2d2e741c1b68c026c3a26263214cb8568b6d2b76e3c823170352114654f9"
+      "sha256": "4867d76b9c33839ee645af78ba110d8ac51046c99932d28bda2d0e8cc08c7803"
     },
     {
       "path": "packages/browser/tests/live-campaign-client.spec.ts",
@@ -2381,12 +2381,12 @@
     {
       "path": "src/neo_sf_q_intel/providers.py",
       "category": "python-runtime",
-      "sha256": "07fa8ebb1e89041fff11ee48e3df45c3bfb450c4727af6cf100e9ef04060c2c4"
+      "sha256": "beebe199fad937b32565f6a53ba824a3a3f79667b2f564f5a7f194c6cde6bde8"
     },
     {
       "path": "src/neo_sf_q_intel/reasoning_workflow.py",
       "category": "python-runtime",
-      "sha256": "54bc3d3101820541aab8eefb7706dabf94d87f1c90f9b4e49d5ad98c0f094d1a"
+      "sha256": "37f61556e2f5c3a32d09a2abdb32bf59340890258cb6bf8cafd8563b2711c796"
     },
     {
       "path": "src/neo_sf_q_intel/release_input.py",
@@ -2436,7 +2436,7 @@
     {
       "path": "src/neo_sf_q_intel/specialist.py",
       "category": "python-runtime",
-      "sha256": "9cf6552efaf6d5db293f8b4e1833b7c1c0a636cf8235200ff3c539f157255282"
+      "sha256": "af759e36fce0c8fdf97af70fe2862cb7c70f799db0455340b46cf2dcbc5407ef"
     },
     {
       "path": "src/neo_sf_q_intel/subprocess_environment.py",
@@ -2531,7 +2531,7 @@
     {
       "path": "tests/test_config.py",
       "category": "test",
-      "sha256": "d3ec5d2ce902f02be9d70a4510dabba78117a7bf828aee9c3033736470f95708"
+      "sha256": "4cdffdbe71c290eeb0bcd6a963c27f51a28d5cd4296069084ee46fe1fe0a5b9b"
     },
     {
       "path": "tests/test_context_pack.py",
@@ -2731,7 +2731,7 @@
     {
       "path": "tests/test_reasoning_workflow.py",
       "category": "test",
-      "sha256": "b04ad5bd3e85a0e2a3dd7e4e0b4477c9ce2ff224116c236923594f3657fdddac"
+      "sha256": "9e5e5b482c921ccff85b247e4c9eac07df2e29a5b007dca1cf256970619de2dc"
     },
     {
       "path": "tests/test_release_input.py",
@@ -2801,7 +2801,7 @@
     {
       "path": "tests/test_specialist.py",
       "category": "test",
-      "sha256": "565d8f0c404127c49455dc82cf60219c8460ac444276498ea18bb62db7909baf"
+      "sha256": "dacedf23f592266b782a0a5b339823f5d5062353337f6510017e323b9cee331a"
     },
     {
       "path": "tests/test_subprocess_environment.py",

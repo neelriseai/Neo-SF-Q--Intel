@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "playwright";
 import {
   HealingProbeError,
   runLocatorProbe,
@@ -169,4 +170,110 @@ test("rejects selector injection and action editability claims before DOM access
   await expect(runLocatorProbe(page, actionEditableTarget, "BASELINE")).rejects.toMatchObject({
     code: "PROBE_OBLIGATION_INVALID",
   });
+});
+
+const inaccessiblePage = new Proxy({}, {
+  get() { throw new Error("DOM_ACCESS_MUST_NOT_OCCUR"); },
+}) as Page;
+
+for (const level of ["target", "obligation", "original", "field", "action"] as const) {
+  test(`rejects extra ${level} keys before DOM access`, async () => {
+    const input = structuredClone(target());
+    const selected = level === "target" ? input : level === "obligation" ? input.obligations[0]
+      : level === "original" ? input.obligations[0].originalLocator
+      : input.obligations[level === "field" ? 0 : 1].semanticIdentity;
+    Object.assign(selected, { unexpected: "UNTRUSTED_INPUT_CANARY" });
+    await expect(runLocatorProbe(inaccessiblePage, input, "BASELINE")).rejects.toMatchObject({
+      code: level === "target" ? "PROBE_TARGET_INVALID" : "PROBE_OBLIGATION_INVALID",
+    });
+  });
+}
+
+for (const identity of ["originalLocator", "semanticIdentity"] as const) {
+  test(`rejects duplicate ${identity} even with different unknown nonce properties`, async () => {
+    const original = target().obligations[0];
+    const duplicate = {
+      ...original, obligationId: "field:Second",
+      originalLocator: { ...original.originalLocator, value: "another-hook" },
+      semanticIdentity: { kind: "FIELD", objectApiName: "Opportunity", fieldApiName: "Other" },
+    };
+    Object.assign(duplicate, { [identity]: { ...original[identity], nonce: "different" } });
+    const input = { ...target(), obligations: [original, duplicate] };
+    await expect(runLocatorProbe(inaccessiblePage, input, "BASELINE")).rejects.toMatchObject({
+      code: "PROBE_OBLIGATION_INVALID",
+    });
+    Object.assign(duplicate, { [identity]: { ...original[identity] } });
+    await expect(runLocatorProbe(inaccessiblePage, input, "BASELINE")).rejects.toMatchObject({
+      code: "PROBE_OBLIGATION_SET_INVALID",
+    });
+  });
+}
+
+test("rejects malformed containers, inherited keys, accessors and sparse arrays without evaluation", async () => {
+  let evaluated = false;
+  const accessor = target();
+  Object.defineProperty(accessor, "obligations", { enumerable: true, get() {
+    evaluated = true; throw new Error("UNTRUSTED_INPUT_CANARY");
+  } });
+  const sparse = { ...target(), obligations: new Array(2) };
+  const extraArray = target();
+  Object.assign(extraArray.obligations, { nonce: "untrusted" });
+  const symbol = target();
+  Object.assign(symbol, { [Symbol("nonce")]: "untrusted" });
+  for (const input of [null, undefined, [], {}, Object.create(target()), accessor, sparse, extraArray, symbol]) {
+    await expect(runLocatorProbe(inaccessiblePage, input, "BASELINE")).rejects.toMatchObject({
+      code: "PROBE_TARGET_INVALID",
+    });
+  }
+  for (const item of [null, [], undefined]) {
+    await expect(runLocatorProbe(inaccessiblePage, { ...target(), obligations: [item] }, "BASELINE"))
+      .rejects.toMatchObject({ code: "PROBE_OBLIGATION_INVALID" });
+  }
+  expect(evaluated).toBe(false);
+});
+
+test("uses the same obligation cap and identity tokens as the closed source model", async () => {
+  await expect(runLocatorProbe(inaccessiblePage, {
+    ...target(), obligations: Array.from({ length: 65 }, () => target().obligations[0]),
+  }, "BASELINE")).rejects.toMatchObject({ code: "PROBE_TARGET_INVALID" });
+  for (const token of ["1starts-with-number", "has:colon", "has.dot", "a\n"]) {
+    const item = target().obligations[1];
+    await expect(runLocatorProbe(inaccessiblePage, { ...target(), obligations: [{
+      ...item, semanticIdentity: { ...item.semanticIdentity, action: token },
+    }] }, "BASELINE")).rejects.toMatchObject({ code: "PROBE_OBLIGATION_INVALID" });
+  }
+  await expect(runLocatorProbe(inaccessiblePage, { ...target(), obligations: [{
+    ...target().obligations[0], obligationId: "1invalid",
+  }] }, "BASELINE")).rejects.toMatchObject({ code: "PROBE_OBLIGATION_INVALID" });
+});
+
+test("renamed objects, fields and actions preserve behavior; property order preserves digest", async ({ page }) => {
+  const input = {
+    dataMutation: "FORBIDDEN", obligationPolicy: "COMPLETE_DECLARED_SET",
+    obligations: [{
+      assertions: ["EDITABLE", "ENABLED", "VISIBLE"], obligationId: "field:Metric",
+      semanticIdentity: { fieldApiName: "Metric__c", objectApiName: "Independent__c", kind: "FIELD" },
+      originalLocator: { value: "renamed-field", attribute: "data-testid", kind: "ATTRIBUTE_EQUALS" },
+    }, {
+      assertions: ["ENABLED", "VISIBLE"], obligationId: "probe:reassess",
+      semanticIdentity: { action: "reassess", objectApiName: "Independent__c", kind: "ACTION" },
+      originalLocator: { value: "renamed-action", attribute: "data-testid", kind: "ATTRIBUTE_EQUALS" },
+    }],
+  };
+  await page.setContent(`<section data-object-api="Independent__c">
+    <div data-field-api="Metric__c" data-testid="renamed-field"><input /></div>
+    <button data-action="reassess" data-testid="renamed-action">Act</button></section>`);
+  const report = await runLocatorProbe(page, input, "BASELINE");
+  const reverseKeys = (value: unknown): unknown => Array.isArray(value) ? value.map(reverseKeys)
+    : value !== null && typeof value === "object" ? Object.fromEntries(
+      Object.entries(value).reverse().map(([key, item]) => [key, reverseKeys(item)]),
+    ) : value;
+  expect(report.status).toBe("PASSED");
+  expect((await runLocatorProbe(page, reverseKeys(input), "BASELINE")).targetDigest).toBe(report.targetDigest);
+  expect(JSON.stringify(report)).not.toContain("Independent__c");
+});
+
+test("browser failure cannot return a passing report", async ({ page }) => {
+  await page.close();
+  await expect(runLocatorProbe(page, target(), "BASELINE")).rejects.toThrow();
 });

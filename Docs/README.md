@@ -35,6 +35,10 @@ the state at interruption. The subsequently authorized execution scope is frozen
 [the three-hour agentic live vertical](22-frozen-three-hour-agentic-live-vertical.md); neither
 document grants live authority by itself.
 
+Post-resume evidence proves one real OpenAI specialist invocation through the strict provider
+contract and deterministic verifier. It does not prove live Salesforce acceptance,
+deployed-candidate browser testing, restore, residue reconciliation or release eligibility.
+
 ## Authority and exclusions
 
 - Salesforce behavior and policy authority: sibling `SalesForceAgentApp/strategic-deal-assurance/requirements`, metadata and `contracts/agent-interface.json`.

@@ -25,6 +25,7 @@ from neo_sf_q_intel.specialist import (
     VerifiedAnalysisContext,
     build_specialist_prompt,
     execute_specialist,
+    execute_specialist_capture,
     load_specialist_evaluation_contract,
     load_specialist_policy,
     provider_capture_sha256,
@@ -712,6 +713,37 @@ def test_provider_exception_and_timeout_are_sanitized() -> None:
     )
     assert result.provider_receipt.status == "TIMEOUT"
     assert result.provider_receipt.error_code == "PROVIDER_TIMEOUT"
+
+
+def test_execute_specialist_capture_preserves_replay_inputs() -> None:
+    context = _context()
+    _, policy, evaluation = _contracts()
+    profile = _profile()
+    outcome = _outcome(profile, _relation_document(context.pack))
+    capture = execute_specialist_capture(
+        context,
+        _request(context.pack),
+        policy,
+        evaluation,
+        _ProviderStub(profile, lambda *args, **kwargs: outcome),
+        expected_provider_profile_sha256=profile.profile_sha256,
+    )
+
+    wrapped = execute_specialist(
+        context,
+        _request(context.pack),
+        policy,
+        evaluation,
+        _ProviderStub(profile, lambda *args, **kwargs: outcome),
+        expected_provider_profile_sha256=profile.profile_sha256,
+    )
+    assert wrapped.request_id == capture.artifact.request_id
+    assert wrapped.provider_receipt.status == capture.artifact.provider_receipt.status
+    assert capture.prompt.prompt_sha256 == capture.artifact.prompt_sha256
+    assert capture.outcome.raw_response == outcome.raw_response
+    assert capture.profile == profile
+    assert capture.expected_provider_profile_sha256 == profile.profile_sha256
+    assert len(capture.expected_provider_capture_sha256) == 64
 
 
 def test_provider_port_is_trusted_composition_root_and_host_times_calls() -> None:

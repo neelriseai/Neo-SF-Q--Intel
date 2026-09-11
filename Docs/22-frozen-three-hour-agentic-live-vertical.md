@@ -35,13 +35,37 @@ Azure OpenAI on the org machine; provider-specific values stay in environment co
 provider readiness check, fake provider, fixture response or deterministic substitute is not an LLM
 invocation and earns no agentic acceptance.
 
+## Current evidence update - 2026-09-11
+
+The first provider-backed specialist proof is now complete. A real OpenAI Responses call was
+executed through the provider-neutral specialist port with a strict JSON schema, `store=false`,
+tool use disabled, bounded output tokens, explicit timeout handling and sanitized outcome capture.
+The response was replayed through the deterministic specialist verifier and produced:
+
+- provider status `SUCCESS`;
+- finish reason `STOP`;
+- 4,293 input tokens and 627 output tokens;
+- two advisory proposals;
+- provider profile root `31efb05908a43fc598862dbf01a1c0a7678a078f1ffbc8dbadebff4520e25925`;
+- provider capture root `025565e5545561e6777485ca1f15a2e7071814c2f21d560e194b4f8f5d29532b`;
+- prompt root `40645ead1fafa23f62b755640e528da6337e05028043dfb6d427ae3038fcff81`;
+- artifact root `8be38db754b7d9b8b126c308475036ee585e6f6412630aaf07587380406bc98e`; and
+- degraded advisory status because context freshness, risk-factor and fusion evidence remain
+  incomplete.
+
+This satisfies the isolated real-provider invocation proof for the specialist contract. It does
+not satisfy live Salesforce acceptance, browser dispatch acceptance, deployment/check-only,
+restore, PostgreSQL campaign replay or release eligibility. Those gates remain `NOT_RUN` or
+`INCOMPLETE` until current receipts exist for the same live campaign.
+
 ## Fixed implementation sequence
 
 1. Correct and re-review the browser closed-schema P1 and the source-closed Apex class/method test
    inventory P1. Review or discard interrupted host-factory code.
 2. Complete one non-thin real-provider specialist from graph context compilation through typed
    proposal validation, sanitized trace output and deterministic outage/malformed-response
-   degradation. Exercise it once with the configured OpenAI provider and retain a bounded receipt.
+   degradation. The isolated provider proof is complete; service wiring and durable persistence of
+   the replay bundle remain open.
 3. Complete the source-bound TypeScript dispatcher and signed browser observation bridge.
 4. Regenerate current host-owned enrollment, phase-policy, target and recovery proposals; execute
    read-only classification and preflight. No stale `.runtime` artifact grants authority.

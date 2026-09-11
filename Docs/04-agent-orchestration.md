@@ -23,7 +23,7 @@ around this initial graph and remain scheduled work for the 24-hour implementati
 
 | Stage | Current behavior | Target boundary not yet claimed |
 |---|---|---|
-| Change Analyst | Deterministic lexical/path seed matching over a pinned, normalized analysis graph; abstains on unsupported semantics | Product-consumed, currently replayed trusted paths plus provider-backed semantic proposals fused into assurance evidence |
+| Change Analyst | Deterministic lexical/path seed matching over a pinned, normalized analysis graph; isolated provider-backed specialist invocation is now proven through the replay verifier | Product-consumed provider proposals fused into the public service/API result with durable invocation receipts |
 | Test Intelligence | Projects selections already made by deterministic analysis into a typed stage result; it does not independently select tests today | Independent evidence-bound obligation planning, trusted execution results and provider explanations |
 | UI Healing | Converts eligible impacts into approval-gated metadata/accessibility strategy proposals | Current-DOM capture, candidate ranking, apply and before/after browser evidence |
 | Governance Review | Revalidates evidence, exact metrics, guardrails and deterministic decision truth | Durable tool/model audit and human approval workflow |
@@ -59,11 +59,11 @@ provenance, while distinct multi-target facts remain distinct. A4/A5 explicit co
 force abstention, and A6 does not invent conflict semantics from model prose.
 
 This is deliberately an isolated `FOUNDATION`, not durable workflow completion. The production
-composition still needs a real OpenAI/Azure structured-output adapter with hard cancellation, an
-independent durable invocation/capture registry, host-owned consumption-time receipts, idempotent
-CAS/checkpoint resume, an event outbox and service/API persistence. Until those exist the dashboard
-must not imply that configured profiles are running agents or that advisory results affected the
-deterministic assurance run.
+composition now has a real OpenAI/Azure structured-output adapter and capture-returning specialist
+execution path, but still needs service/API wiring, an independent durable invocation/capture
+registry, host-owned consumption-time receipts, idempotent CAS/checkpoint resume, an event outbox
+and persisted advisory results. Until those exist the dashboard must not imply that configured
+profiles are accepted live agents or that advisory results affected the deterministic assurance run.
 
 ## Graph-grounded specialist contract
 

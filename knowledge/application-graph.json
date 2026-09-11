@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "80b83d0347be8aa55a32d766c49ef8a55779606e6658067d6f9567fc4575e96e",
+  "sourceSnapshot": "498dd489939df45337e40c2c84d6db6dd2ca81569b83327079f47c30fb9cf8ca",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -5691,6 +5691,11 @@
       "to": "file:src/neo_sf_q_intel/config.py"
     },
     {
+      "from": "file:src/neo_sf_q_intel/providers.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
+    },
+    {
       "from": "file:src/neo_sf_q_intel/reasoning_workflow.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/domain.py"
@@ -6294,6 +6299,11 @@
       "from": "file:tests/test_config.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/salesforce_source.py"
+    },
+    {
+      "from": "file:tests/test_config.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "file:tests/test_context_pack.py",

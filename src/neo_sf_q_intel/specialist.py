@@ -382,6 +382,16 @@ class ProviderPort(Protocol):
     ) -> ProviderCallOutcome: ...
 
 
+@dataclass(frozen=True, slots=True)
+class SpecialistExecutionCapture:
+    artifact: SpecialistProposalArtifact
+    prompt: PromptEnvelope
+    outcome: ProviderCallOutcome
+    profile: ProviderProfile
+    expected_provider_profile_sha256: str
+    expected_provider_capture_sha256: str
+
+
 class ProviderInvocationReceipt(SpecialistModel):
     status: ProviderCallStatus
     provider_kind: str
@@ -824,6 +834,12 @@ _CONTEXT_GAP_CODES = frozenset(
         ),
     }
 )
+
+
+def provider_response_schema_document() -> dict[str, Any]:
+    """Return a defensive copy of the pinned provider response schema."""
+
+    return json.loads(_canonical_json(_RESPONSE_SCHEMA_DOCUMENT))
 _FUSION_GAP_CODES = frozenset(
     {
         "CANDIDATE_BUDGET_TRUNCATED",
@@ -1613,7 +1629,7 @@ def verify_specialist_outcome(
     )
 
 
-def execute_specialist(
+def execute_specialist_capture(
     context: VerifiedAnalysisContext,
     request: SpecialistRequest,
     policy: SpecialistPolicy,
@@ -1621,7 +1637,7 @@ def execute_specialist(
     provider: ProviderPort,
     *,
     expected_provider_profile_sha256: str,
-) -> SpecialistProposalArtifact:
+) -> SpecialistExecutionCapture:
     """Run a provider only after trust, secret, identity and budget preflight succeeds."""
 
     profile = provider.profile
@@ -1699,7 +1715,7 @@ def execute_specialist(
             ),
         )
     capture_sha256 = provider_capture_sha256(outcome)
-    return verify_specialist_outcome(
+    artifact = verify_specialist_outcome(
         context,
         request,
         profile,
@@ -1710,6 +1726,33 @@ def execute_specialist(
         expected_provider_profile_sha256=expected_provider_profile_sha256,
         expected_provider_capture_sha256=capture_sha256,
     )
+    return SpecialistExecutionCapture(
+        artifact=artifact,
+        prompt=prompt,
+        outcome=outcome,
+        profile=profile,
+        expected_provider_profile_sha256=expected_provider_profile_sha256,
+        expected_provider_capture_sha256=capture_sha256,
+    )
+
+
+def execute_specialist(
+    context: VerifiedAnalysisContext,
+    request: SpecialistRequest,
+    policy: SpecialistPolicy,
+    evaluation: SpecialistEvaluationContract,
+    provider: ProviderPort,
+    *,
+    expected_provider_profile_sha256: str,
+) -> SpecialistProposalArtifact:
+    return execute_specialist_capture(
+        context,
+        request,
+        policy,
+        evaluation,
+        provider,
+        expected_provider_profile_sha256=expected_provider_profile_sha256,
+    ).artifact
 
 
 def validate_specialist_artifact(

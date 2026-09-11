@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -322,7 +323,7 @@ class SpecialistStageInput:
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _IDENTIFIER = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
 _UPPER_IDENTIFIER = re.compile(r"^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$")
-DEFAULT_WORKFLOW_POLICY_SHA256 = "ec6195956b20f3c2e55b98757a6500bbbb236d8e86ca7ff8c52c10c6b46509a9"
+DEFAULT_WORKFLOW_POLICY_SHA256 = "f9ed7ac7de73d68ae053d0937cfe82737845502cc49c75a24d56900a5e2233e1"
 DEFAULT_GOVERNANCE_POLICY_SHA256 = (
     "288f848e26687b72ba776e2f99ce02eef2e11c32c282d3e32301aeca1614aae8"
 )
@@ -337,6 +338,10 @@ def _canonical_json(value: Any) -> bytes:
 
 def _stable_hash(value: Any) -> str:
     return hashlib.sha256(_canonical_json(value)).hexdigest()
+
+
+def _format_timestamp(value: datetime) -> str:
+    return value.astimezone(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
 def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -787,6 +792,7 @@ def integrate_reasoning_workflow(
     *,
     expected_workflow_policy_sha256: str,
     evaluated_at: str,
+    live_evaluated_at: Callable[[], str] | None = None,
 ) -> ReasoningWorkflowResult:
     """Validate and merge advisory specialist artifacts without mutating ``run``."""
 
@@ -831,6 +837,7 @@ def integrate_reasoning_workflow(
             continue
         try:
             bundle = stage.replay_bundle
+            stage_evaluated_at = evaluated_at
             preflight: VerifiedAnalysisContext | None = None
             if bundle is None:
                 assert stage.port is not None
@@ -887,6 +894,11 @@ def integrate_reasoning_workflow(
                         spec=stage.spec,
                     )
                 )
+                stage_evaluated_at = (
+                    live_evaluated_at()
+                    if live_evaluated_at
+                    else _format_timestamp(datetime.now(UTC))
+                )
             if not isinstance(bundle, SpecialistReplayBundle):
                 raise ReasoningWorkflowInputError("Specialist port returned an invalid bundle")
             if preflight is not None and bundle.context != preflight:
@@ -906,7 +918,7 @@ def integrate_reasoning_workflow(
                 deliverables.append(deliverable)
                 gaps.append(gap)
                 continue
-            artifact = _validate_bundle(run, stage.spec, bundle, policy, evaluated_at)
+            artifact = _validate_bundle(run, stage.spec, bundle, policy, stage_evaluated_at)
             activity, deliverable, stage_proposals, stage_gaps = _successful_stage(
                 stage.spec,
                 artifact,
@@ -1005,6 +1017,7 @@ def validate_reasoning_workflow_result(
         policy,
         expected_workflow_policy_sha256=expected_workflow_policy_sha256,
         evaluated_at=evaluated_at,
+        live_evaluated_at=lambda: evaluated_at,
     )
     if result != expected:
         raise ReasoningWorkflowIntegrityError(

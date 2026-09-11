@@ -3,7 +3,6 @@ import type { Locator, Page } from "playwright";
 import {
   composedStateAllowsInteraction,
   discoverLocatorCandidate,
-  type LocatorIntent,
 } from "./locator-healer.js";
 
 export type ProbeAssertion = "EDITABLE" | "ENABLED" | "VISIBLE";
@@ -86,7 +85,7 @@ export class HealingProbeError extends Error {
  */
 export async function runLocatorProbe(
   page: Page,
-  targetInput: Readonly<LocatorProbeTarget>,
+  targetInput: unknown,
   stage: ProbeStage,
 ): Promise<LocatorProbeReport> {
   if (!["BASELINE", "STALE_AND_DISCOVER", "RERUN"].includes(stage)) {
@@ -258,29 +257,35 @@ function exactAttributeLocator(page: Page, value: ProbeOriginalLocator): Locator
   return page.locator(`[${value.attribute}="${value.value}"]`);
 }
 
-function validateTarget(value: Readonly<LocatorProbeTarget>): LocatorProbeTarget {
+function validateTarget(value: unknown): LocatorProbeTarget {
+  try {
+    return validateClosedTarget(value);
+  } catch (error) {
+    if (error instanceof HealingProbeError) throw error;
+    throw new HealingProbeError("PROBE_TARGET_INVALID");
+  }
+}
+
+function validateClosedTarget(value: unknown): LocatorProbeTarget {
   if (
+    !closedObject(value, ["obligationPolicy", "dataMutation", "obligations"]) ||
     value.obligationPolicy !== "COMPLETE_DECLARED_SET" ||
     value.dataMutation !== "FORBIDDEN" ||
-    !Array.isArray(value.obligations) ||
-    value.obligations.length < 1 ||
-    value.obligations.length > 200
+    !closedArray(value.obligations, 1, 64)
   ) throw new HealingProbeError("PROBE_TARGET_INVALID");
 
   const normalized: LocatorProbeObligation[] = value.obligations.map((item) => {
-    const assertions: readonly unknown[] = item.assertions;
     if (
-      !boundedToken(item.obligationId, /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}$/) ||
-      item.originalLocator?.kind !== "ATTRIBUTE_EQUALS" ||
+      !closedObject(item, ["obligationId", "originalLocator", "semanticIdentity", "assertions"]) ||
+      !boundedToken(item.obligationId, /^[A-Za-z][A-Za-z0-9_.:-]{0,199}$/) ||
+      !closedObject(item.originalLocator, ["kind", "attribute", "value"]) ||
+      item.originalLocator.kind !== "ATTRIBUTE_EQUALS" ||
       !boundedToken(item.originalLocator.attribute, /^data-[a-z][a-z0-9-]{0,63}$/) ||
       !boundedToken(item.originalLocator.value, /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}$/) ||
-      !Array.isArray(assertions) || assertions.length < 1 || assertions.length > 3 ||
-      assertions.some((entry) => typeof entry !== "string" ||
-        !["EDITABLE", "ENABLED", "VISIBLE"].includes(entry)) ||
-      [...assertions].sort().some((entry, index) => entry !== assertions[index]) ||
-      new Set(assertions).size !== assertions.length ||
+      !closedArray(item.assertions, 2, 3) ||
       !validIdentity(item.semanticIdentity)
     ) throw new HealingProbeError("PROBE_OBLIGATION_INVALID");
+    const assertions = item.assertions;
     const expectedAssertions = item.semanticIdentity.kind === "ACTION"
       ? ["ENABLED", "VISIBLE"]
       : ["EDITABLE", "ENABLED", "VISIBLE"];
@@ -292,9 +297,21 @@ function validateTarget(value: Readonly<LocatorProbeTarget>): LocatorProbeTarget
     }
     return Object.freeze({
       obligationId: item.obligationId,
-      originalLocator: Object.freeze({ ...item.originalLocator }),
-      semanticIdentity: Object.freeze({ ...item.semanticIdentity }),
-      assertions: Object.freeze([...item.assertions]),
+      originalLocator: Object.freeze({
+        kind: "ATTRIBUTE_EQUALS" as const,
+        attribute: item.originalLocator.attribute,
+        value: item.originalLocator.value,
+      }),
+      semanticIdentity: Object.freeze(item.semanticIdentity.kind === "FIELD" ? {
+        kind: "FIELD" as const,
+        objectApiName: item.semanticIdentity.objectApiName,
+        fieldApiName: item.semanticIdentity.fieldApiName,
+      } : {
+        kind: "ACTION" as const,
+        objectApiName: item.semanticIdentity.objectApiName,
+        action: item.semanticIdentity.action,
+      }),
+      assertions: Object.freeze([...assertions] as ProbeAssertion[]),
     });
   });
   const ids = normalized.map((item) => item.obligationId);
@@ -313,12 +330,36 @@ function validateTarget(value: Readonly<LocatorProbeTarget>): LocatorProbeTarget
   });
 }
 
-function validIdentity(value: ProbeSemanticIdentity): boolean {
-  if (!value || !boundedToken(value.objectApiName, /^[A-Za-z][A-Za-z0-9_]{0,199}$/)) return false;
-  if (value.kind === "FIELD") {
-    return boundedToken(value.fieldApiName, /^[A-Za-z][A-Za-z0-9_]{0,199}$/);
+function validIdentity(value: unknown): value is ProbeSemanticIdentity {
+  if (closedObject(value, ["kind", "objectApiName", "fieldApiName"]) && value.kind === "FIELD") {
+    return boundedToken(value.objectApiName, /^[A-Za-z][A-Za-z0-9_]{0,199}$/) &&
+      boundedToken(value.fieldApiName, /^[A-Za-z][A-Za-z0-9_]{0,199}$/);
   }
-  return value.kind === "ACTION" && boundedToken(value.action, /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}$/);
+  return closedObject(value, ["kind", "objectApiName", "action"]) && value.kind === "ACTION" &&
+    boundedToken(value.objectApiName, /^[A-Za-z][A-Za-z0-9_]{0,199}$/) &&
+    boundedToken(value.action, /^[A-Za-z][A-Za-z0-9_-]{0,199}$/);
+}
+
+function closedObject(value: unknown, keys: readonly string[]): value is Record<string, unknown> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) return false;
+  const observed = Reflect.ownKeys(value);
+  return observed.length === keys.length && keys.every((key) => {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return descriptor !== undefined && descriptor.enumerable === true && "value" in descriptor;
+  });
+}
+
+function closedArray(value: unknown, minimum: number, maximum: number): value is unknown[] {
+  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype ||
+    value.length < minimum || value.length > maximum ||
+    Reflect.ownKeys(value).length !== value.length + 1) return false;
+  for (let index = 0; index < value.length; index += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+    if (!descriptor || !descriptor.enumerable || !("value" in descriptor)) return false;
+  }
+  return true;
 }
 
 function boundedToken(value: unknown, pattern: RegExp): value is string {

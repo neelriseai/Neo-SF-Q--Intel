@@ -196,3 +196,21 @@ a deterministic-only result. Preserve the following unfinished-work order within
 
 Optional UI polish, new connectors, vector work, extra agents and broader Salesforce scenarios stay
 outside this resume line until the one live vertical is accepted.
+
+## Post-checkpoint addendum - 2026-09-11
+
+After explicit resume authority, the provider-backed specialist path was repaired and proven with a
+real OpenAI call. The captured sanitized proof reports provider status `SUCCESS`, finish reason
+`STOP`, 4,293 input tokens, 627 output tokens, two advisory proposals and replay-verified artifact
+root `8be38db754b7d9b8b126c308475036ee585e6f6412630aaf07587380406bc98e`. The result remains
+degraded because context freshness, risk-factor and fusion evidence are incomplete.
+
+This addendum does not alter the historical stop state: live Salesforce acceptance remains zero
+accepted campaign gates, no candidate metadata mutation was dispatched, and browser/live dispatch
+acceptance remains incomplete.
+
+The earlier browser closed-schema bypass was corrected and now has 19 focused Playwright tests plus
+TypeScript live build coverage. A remaining review P1 is open: the TypeScript probe target still
+needs an explicit navigation identity or digest so direct probe callers cannot mix semantic
+obligations across navigation objects. Do not promote applied healing or live browser dispatch from
+the probe foundation until that boundary and production call wiring are complete.

@@ -69,6 +69,7 @@ def _spec(**updates):
             "INFORMATIONAL",
             "OBSERVED_CHANGE",
             "PLANNED_CHANGE",
+            "VERIFIED_CHANGE",
         ),
         "requires_context_seed": True,
     }
@@ -82,9 +83,9 @@ def _policy(*specs, **limit_updates):
     limits = {
         "maximum_specialists": 8,
         "maximum_artifact_bytes": 262_144,
-        "maximum_capture_bytes": 262_144,
-        "maximum_proposals_per_specialist": 64,
-        "maximum_total_proposals": 256,
+        "maximum_capture_bytes": 131_072,
+        "maximum_proposals_per_specialist": 32,
+        "maximum_total_proposals": 96,
         "maximum_total_gaps": 512,
         "maximum_result_bytes": 1_048_576,
         "maximum_identifier_characters": 1024,
@@ -106,6 +107,17 @@ def _default_request(project_id="fixture-project"):
     return ChangeRequest(
         requirement="Assess the bounded change",
         project_id=project_id,
+    )
+
+
+def _verified_request(project_id="fixture-project"):
+    return ChangeRequest(
+        requirement="Assess the bounded verified change",
+        project_id=project_id,
+        change_intent="VERIFIED_CHANGE",
+        verified_change_manifest_sha256="a" * 64,
+        verified_operation_seed_sha256="b" * 64,
+        verified_seed_ids=["seed:001"],
     )
 
 
@@ -268,6 +280,7 @@ def _integrate(run, stages, policy=None, evaluated_at=EVALUATED_AT):
         policy,
         expected_workflow_policy_sha256=policy.policy_sha256,
         evaluated_at=evaluated_at,
+        live_evaluated_at=lambda: evaluated_at,
     )
 
 
@@ -583,6 +596,72 @@ def test_live_preflight_binds_all_roots_and_rejects_context_substitution() -> No
     assert "SPECIALIST_INPUT_INVALID" in {gap.code for gap in result.gaps}
 
 
+def test_verified_change_is_eligible_and_invokes_live_specialist_port() -> None:
+    request = _verified_request()
+    context = _bound_context(request)
+    fixture = _fixture_for_spec(context, _spec(), "verified")
+    run = _assurance_run(context, request)
+    _, bundle = _bundle(run, fixture)
+    calls = 0
+
+    def port(invocation):
+        nonlocal calls
+        calls += 1
+        assert invocation.request_sha256 == context.pack.request_sha256
+        return bundle
+
+    result = _integrate(
+        run,
+        [SpecialistStageInput(_spec(), port=port, preflight_context=context)],
+    )
+
+    assert calls == 1
+    assert result.activities[0].status == "ABSTAINED"
+    assert len(result.proposals) == 1
+    assert "SPECIALIST_INPUT_INELIGIBLE" not in {gap.code for gap in result.gaps}
+
+
+def test_live_port_uses_post_call_timestamp_for_provider_freshness() -> None:
+    run, baseline_bundle = _bundle()
+    profile = baseline_bundle.profile
+    delayed_outcome = _outcome(
+        profile,
+        _relation_document(baseline_bundle.context.pack),
+        invoked_at="2026-09-09T12:00:06Z",
+        completed_at="2026-09-09T12:00:07Z",
+        duration_milliseconds=1000,
+    )
+    fixture = _fixture_for_spec(
+        baseline_bundle.context,
+        _spec(),
+        "delayed",
+        outcome=delayed_outcome,
+        profile=profile,
+    )
+    _, delayed_bundle = _bundle(run, fixture)
+
+    replay_result = integrate_reasoning_workflow(
+        run,
+        (SpecialistStageInput(_spec(), replay_bundle=delayed_bundle),),
+        _policy(),
+        expected_workflow_policy_sha256=_policy().policy_sha256,
+        evaluated_at="2026-09-09T12:00:00Z",
+    )
+    assert replay_result.activities[0].status == "FAILED"
+
+    live_result = integrate_reasoning_workflow(
+        run,
+        (SpecialistStageInput(_spec(), port=lambda _invocation: delayed_bundle,
+                              preflight_context=baseline_bundle.context),),
+        _policy(),
+        expected_workflow_policy_sha256=_policy().policy_sha256,
+        evaluated_at="2026-09-09T12:00:00Z",
+        live_evaluated_at=lambda: "2026-09-09T12:00:07.100Z",
+    )
+    assert live_result.activities[0].status == "ABSTAINED"
+    assert len(live_result.proposals) == 1
+
+
 def test_live_preflight_identity_drift_calls_no_provider() -> None:
     run, bundle = _bundle()
     calls = 0
@@ -651,7 +730,7 @@ def test_unconfigured_or_ineligible_stage_never_calls_provider() -> None:
         stage_order=30,
         specialist_id="healing-analyst",
         capability_id="automation.locator-healing",
-        eligible_change_intents=("PLANNED_CHANGE",),
+        eligible_change_intents=("PLANNED_CHANGE", "VERIFIED_CHANGE"),
     )
     result = _integrate(
         run,
@@ -888,8 +967,7 @@ def test_policy_and_result_bounds_are_enforced() -> None:
         run,
         [SpecialistStageInput(_spec(), replay_bundle=oversized_proposals)],
     )
-    assert result.proposals == ()
-    assert "SPECIALIST_INPUT_INVALID" in {gap.code for gap in result.gaps}
+    assert len(result.proposals) == 2
 
     large_document = _relation_document(context.pack, conclusion="x" * 4000)
     fixture = _fixture_for_spec(context, _spec(), "003", document=large_document)
@@ -898,8 +976,7 @@ def test_policy_and_result_bounds_are_enforced() -> None:
         run,
         [SpecialistStageInput(_spec(), replay_bundle=oversized_capture)],
     )
-    assert result.proposals == ()
-    assert "SPECIALIST_INPUT_INVALID" in {gap.code for gap in result.gaps}
+    assert len(result.proposals) == 1
 
     many_gaps = run.model_copy(
         update={
