@@ -386,6 +386,11 @@
       "code": "STRATEGIC_DEAL_MASTER_DEMO_SCENARIO",
       "severity": "P1",
       "resolution": "The master demo scenario now composes business-rule assurance, graph/evidence reasoning, graph-grounded LLM advisory, test selection, governance, live Salesforce evidence, browser worker and locator-healing into one truthful Strategic Deal Change Assurance flow. It preserves current claim levels, marks ChromaDB retrieval, full candidate deployment and live test execution as not yet complete, and keeps full live business-action acceptance blocked until Salesforce success and persistence receipts pass."
+    },
+    {
+      "code": "MANDATORY_COMPACT_SLICE_OPERATING_LOOP",
+      "severity": "P1",
+      "resolution": "The root instructions now require each development slice to start with and operate through a compact task matrix: selected objective, capability IDs, acceptance boundary, project-index/graph-selected files, planned tests, wall-clock budget and maximum three retries. Broad history reads, full-file rewrites, broad reviews and foundation expansion are prohibited unless required for the selected objective, safety or evidence integrity; nonblocking broad work is deferred with a gap record."
     }
   ],
   "statusDowngrades": []

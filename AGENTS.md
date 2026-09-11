@@ -146,6 +146,17 @@ Build an evidence-grounded Salesforce change-assurance platform. Deterministic s
 3. P2: breadth, performance, usability and polish that do not invalidate current evidence. Record
    these without displacing P0/P1 work.
 
+- Every development slice must use this operating loop, not merely document it afterward:
+  `one selected demo/capability objective -> compact task matrix -> bounded implementation ->
+  focused verification -> pass/fail/defer record -> move on`. The compact matrix must name the
+  goal, capability IDs, acceptance boundary, selected files/routes from the project index/graph,
+  planned tests, wall-clock budget and maximum three retries. If a retry exposes broad foundation
+  work, old-roadmap pressure or a design concern that does not block the selected objective's safe
+  truthful output, defer it with a gap record instead of expanding the slice.
+- Use compression while doing the work: start with project-index/graph routes, scoped symbol search,
+  targeted patches and state-transition tests. Do not re-read broad history, paste whole files,
+  generate full-file rewrites or invoke broad reviews unless the compact matrix shows why that
+  context is required for the selected objective, safety or evidence integrity.
 - Tie every task to one or more existing capability IDs and an explicit acceptance result before
   coding. If architecture changes, update the canonical document and scope manifest first or in the
   same coherent slice.

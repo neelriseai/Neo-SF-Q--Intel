@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "0d5cdcdce481d9d8417f242c1bf36afe280cb8927b9f3311294d91ea0e516898",
+  "sourceSnapshot": "7b6c89201f58bb28fb9a64a1d708bcbb8eaa8930e464d804751a2edaa3647868",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1336,7 +1336,7 @@
     {
       "path": "AGENTS.md",
       "category": "project-instructions",
-      "sha256": "4749c335f98ef081e3159e177342b2d50583e6f8c4902304e1657d4b089b1eb4"
+      "sha256": "fa41e7551ed48ce72fddb131678aa2312d79369fb7e1fef110988c04704b388b"
     },
     {
       "path": "Docs/00-agentic-ai-assurance-retrofit-master.md",
@@ -2136,7 +2136,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "789d0ad10ba908ba0683ed769e3def381773694102328d1a76218f04822357dd"
+      "sha256": "c8f0866f429cd6a08a6bd3c4fa2e33b9fee63a098e8bde59f1b0bc333fca0c5e"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
