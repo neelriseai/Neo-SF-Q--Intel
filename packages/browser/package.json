@@ -11,8 +11,9 @@
     "test:coordinator": "playwright test tests/salesforce-browser-coordinator.spec.ts --config=playwright.worker.config.ts",
     "test:recovery": "playwright test tests/browser-recovery.spec.ts --config=playwright.worker.config.ts",
     "test:healing-probe": "playwright test tests/healing-probe.spec.ts --config=playwright.worker.config.ts",
-    "test:hour4": "playwright test tests/locator-healer.spec.ts tests/healing-probe.spec.ts tests/browser-worker.spec.ts tests/salesforce-cli-session.spec.ts tests/salesforce-browser-coordinator.spec.ts tests/browser-recovery.spec.ts --config=playwright.worker.config.ts",
+    "test:hour4": "playwright test tests/locator-healer.spec.ts tests/healing-probe.spec.ts tests/browser-worker.spec.ts tests/salesforce-cli-session.spec.ts tests/salesforce-browser-coordinator.spec.ts tests/browser-recovery.spec.ts tests/live-profile-cli.spec.ts --config=playwright.worker.config.ts",
     "build:live": "tsc -p tsconfig.live.json",
+    "live:profile": "npm run build:live && node dist/live-profile-cli.js",
     "live:smoke": "npm run build:live && node dist/live-smoke-cli.js",
     "test:e2e": "playwright test tests/dashboard.spec.ts --config=playwright.e2e.config.ts"
   },

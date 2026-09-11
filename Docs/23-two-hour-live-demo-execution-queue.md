@@ -21,6 +21,9 @@ good-enough capability delivery, not foundation perfection.
 - Patch foundation/architecture only when it blocks the live demo path or creates a false claim.
 - Preserve the truth boundary: fixture, diagnostic live read, accepted live receipt and release
   authority must stay separately labeled.
+- Select work one demo capability at a time: make it run end-to-end with live Salesforce and a
+  real LLM, add only the foundation required for truthful/safe operation, test it, document the
+  pass/fail result, then move to the next capability.
 
 ## Time allocation
 
@@ -53,3 +56,15 @@ good-enough capability delivery, not foundation perfection.
 - 17:32:47+05:30: focused regression and live browser build sweep started after the model-provider and live-read fixes.
 - 17:33:14+05:30: 10 focused Python checks passed, `npm run build:live` passed, `ruff` passed and whitespace diff checks passed. The quality gate required the expected scope-review manifest and knowledge regeneration updates before commit.
 - 17:36:xx+05:30: knowledge graph/index regenerated and freshness/genericity checks passed.
+
+## Continuation: selected demo capability
+
+Selected capability: `automation.browser-worker` live Salesforce browser smoke.
+
+| Step | Status | Attempts | Notes |
+|---|---|---:|---|
+| Make it live end-to-end | DONE | 2 | Added generic `npm run live:profile` host-local profile refresh, generated a fresh ignored runtime profile from current `sf` CLI identity and ran `npm run live:smoke` headless against live Salesforce |
+| Minimal truthful foundation | DONE | 2 | The tool derives hashed org/actor bindings and pinned origins, writes only `.runtime/live-browser-profile.json`, prints only path/digest/expiry, and never prints/stores the frontdoor URL |
+| Test it | DONE | 2 | `npm run build:live` passed; `tests/live-profile-cli.spec.ts` passed 4/4; live smoke returned `status=PASSED`, `diagnosticOnly=true`, `releaseEligible=false`, and cleanup closed both browser context and browser |
+| Document pass/fail | DONE | 1 | This continuation records the live result as diagnostic proof only; it still does not satisfy signed live acceptance receipt gates |
+| Move to next capability | READY | 0 | Next slice should combine live Salesforce read evidence plus real LLM advisory into one operator-visible demo flow |

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "eb852e4fd99725044f223822a068e25d5d75ab0707cb52fe17e3c00bf6014072",
+  "sourceSnapshot": "d9b1f662f8caff95a1a33c32870f908000b618b362645a80abfb75de52ecb244",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1571,7 +1571,7 @@
     {
       "path": "Docs/23-two-hour-live-demo-execution-queue.md",
       "category": "reference-documentation",
-      "sha256": "5aa72529f1c6f293fb4602b6b04288eb228b682b63657f84d7b4ca7d1a3c2238"
+      "sha256": "ff38d5a4b69fc8a6a2ca19dbcce10f3ba1a2156d8b26a26da48ee380f5b1470c"
     },
     {
       "path": "Docs/README.md",
@@ -1861,7 +1861,7 @@
     {
       "path": "packages/browser/package.json",
       "category": "project",
-      "sha256": "964271a93c5888124ed6c3d035a15251143b40792e7877b3e8b217f8ddce1c8e"
+      "sha256": "023f0d87b47c4367a0246a012bf3cf941a495a9c4727c33079156bb4d4d197ea"
     },
     {
       "path": "packages/browser/playwright.config.ts",
@@ -1892,6 +1892,11 @@
       "path": "packages/browser/src/healing-probe.ts",
       "category": "browser-runtime",
       "sha256": "91492f3e957cf0770cfcf2d97c72dfe3c989d0730b361fcbfea9239dd57c2308"
+    },
+    {
+      "path": "packages/browser/src/live-profile-cli.ts",
+      "category": "browser-runtime",
+      "sha256": "d3a141781707869bedf3a86bd738022e1ed49166c9ef3d69728d7aee45198d1d"
     },
     {
       "path": "packages/browser/src/live-smoke-cli.ts",
@@ -1944,6 +1949,11 @@
       "sha256": "16a301b2db8727c37c1728259abb9800bcd04c26ec01edf5225947447a086d90"
     },
     {
+      "path": "packages/browser/tests/live-profile-cli.spec.ts",
+      "category": "test",
+      "sha256": "5ed3a9b29942ba5d663e323f84cbcb9a9ad6eff1f4a912c99c89a8c50eb7ff2f"
+    },
+    {
       "path": "packages/browser/tests/locator-healer.spec.ts",
       "category": "test",
       "sha256": "731f88afbfabe8a2b9c8ac4fd304df7bb04728b42b3ab3447deec62500a771c4"
@@ -1966,7 +1976,7 @@
     {
       "path": "packages/browser/tsconfig.live.json",
       "category": "project",
-      "sha256": "01da15d7cd5632910ff8bc6be442cd89a67235bee91670ec440e929612b17751"
+      "sha256": "08ee4085c9d7be1a5c46f8b9f1e005b255d57f1b487f73eca55314b3dfbf6e1c"
     },
     {
       "path": "pyproject.toml",
@@ -2111,7 +2121,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "65732a76b2fade597575d2aeda333ff0f0fbeec8ed8c0c9fb87a86d81a56b805"
+      "sha256": "81feb3c33b132abfe21289b53f449e9634292a2b9fa0b606a6e7ea6734c64a29"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
