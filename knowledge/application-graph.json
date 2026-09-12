@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "e830fd8fbdbe619047c2d7b0fd779b9907b5fdb07a32e28c348f3ca4fcb1840a",
+  "sourceSnapshot": "8986d657478939fd63d55caa131c9c03d646baaff88dfd531bb4c9850acd37f8",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -1970,6 +1970,14 @@
       "kind": "file",
       "label": "local_validation_runner.py",
       "source": "src/neo_sf_q_intel/local_validation_runner.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/locator_healing_cli.py",
+      "kind": "file",
+      "label": "locator_healing_cli.py",
+      "source": "src/neo_sf_q_intel/locator_healing_cli.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -6136,6 +6144,21 @@
       "from": "file:src/neo_sf_q_intel/local_validation_runner.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/temporal.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/locator_healing_cli.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/locator_healing_cli.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/locator_proposal.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/locator_healing_cli.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/providers.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/locator_proposal.py",

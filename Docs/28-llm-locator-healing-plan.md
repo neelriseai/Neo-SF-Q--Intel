@@ -87,7 +87,7 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
             T-DOM's candidate list; adopt the shape, not the server
 ```
 
-## 7. Built state (as of K-chunk, commit fbdb551)
+## 7. Built state (updated 2026-09-12, LLM bridge slice)
 
 ```
 [DONE] NEO_HEAL_TIERS switch      default metadata · llm tier · abstention · resolvedByTier in projection
@@ -97,10 +97,12 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
 [DONE] T-INTENT                   knowledge_index + knowledge_section(page|module|impact, section) · MCP-exposed
 [DONE] knowledge repo             14 files · pages / modules / impact · operator-authored
 [DONE] deterministic heal proven  live drift -> stale -> metadata rediscovery -> rerun -> exact restore
-[TODO] T-SIG                      D1
-[TODO] T-META                     D2
-[TODO] T-DOM push                 D3
-[TODO] prompt + provider + wiring D4
+[DONE] T-SIG                      element signature store + tests
+[DONE] T-META                     field metadata lookup + tests
+[DONE] T-DOM push                 digest-only candidate payload on deterministic abstention
+[DONE] prompt + provider + wiring provider schema hook + locator-healing Python bridge + browser projection
+[BLOCKED] live provider acceptance OpenAI returned 429 credit_balance_exhausted during the
+          first real locator-proposal smoke; no further retry until account credit is restored
 ```
 
 `[MEAS]` graph full 228,591 ch vs 1-hop 946 ch (99.6% cut) · knowledge heading block 517 ch vs whole page 5,824 ch (91% cut).

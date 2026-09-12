@@ -68,6 +68,35 @@ test("projects dom evidence through when the probe captured it", () => {
   expect(projection.modelDiscoveryRequested).toBe(true);
 });
 
+test("projects model locator proposal when the llm bridge returned one", () => {
+  const proposal = {
+    schemaVersion: "1.0.0",
+    accepted: true,
+    proposal: {
+      candidateOrdinal: 0,
+      confidenceMilli: 820,
+      rationale: "Digest overlap selected candidate zero.",
+      citedRefs: ["cand:0"],
+    },
+    receipt: {
+      status: "SUCCESS",
+      providerProfileSha256: "f".repeat(64),
+      promptSha256: "0".repeat(64),
+    },
+  };
+  const projection = healingProjection(
+    receipt([observation({ domEvidence: evidence })]),
+    "STALE_AND_DISCOVER",
+    ["metadata", "llm"],
+    true,
+    [proposal],
+  );
+  expect(projection.modelDiscoveryAvailable).toBe(true);
+  expect(projection.headedMode).toBe(true);
+  const projected = (projection.observations as readonly Record<string, unknown>[])[0];
+  expect(projected.modelProposal).toEqual(proposal);
+});
+
 test("leaves the metadata-tier projection shape unchanged", () => {
   const projection = healingProjection(
     receipt([observation({})]),

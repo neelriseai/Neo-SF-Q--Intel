@@ -81,10 +81,20 @@ class OpenAIModelProvider:
 class OpenAISpecialistProvider:
     """Synchronous specialist ProviderPort backed by OpenAI Responses."""
 
-    def __init__(self, settings: Settings, *, client: Any | None = None) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        *,
+        client: Any | None = None,
+        response_schema_name: str = "graph_reasoning_proposal",
+        response_schema: dict[str, Any] | None = None,
+        reasoning_profile: str = "bounded-graph-specialist-v1",
+    ) -> None:
         if settings.provider_calls_blocked:
             raise ProviderConfigurationBlockedError(PROVIDER_CREDENTIAL_SOURCE_CONFLICT)
         self.settings = settings
+        self.response_schema_name = response_schema_name
+        self.response_schema = response_schema or provider_response_schema_document()
         if settings.ai_provider is AIProvider.AZURE_OPENAI:
             _require_azure_strict_schema_api_version(settings.azure_openai_api_version)
             self.client = client or AzureOpenAI(
@@ -116,7 +126,7 @@ class OpenAISpecialistProvider:
             "response_format": "STRICT_JSON_SCHEMA",
             "temperature_milli": 0,
             "top_p_milli": 1000,
-            "reasoning_profile": "bounded-graph-specialist-v1",
+            "reasoning_profile": reasoning_profile,
             "tools_enabled": False,
         }
         self._profile = ProviderProfile(**body, profile_sha256=_stable_hash(body))
@@ -149,8 +159,8 @@ class OpenAISpecialistProvider:
                 text={
                     "format": {
                         "type": "json_schema",
-                        "name": "graph_reasoning_proposal",
-                        "schema": provider_response_schema_document(),
+                        "name": self.response_schema_name,
+                        "schema": self.response_schema,
                         "strict": True,
                     }
                 },

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { BrowserWorker, type BrowserWorkerReceipt } from "./browser-worker.js";
 import type { ProbeStage } from "./healing-probe.js";
@@ -14,6 +15,7 @@ import {
 
 type Environment = Readonly<Record<string, string | undefined>>;
 type OutputWriter = (value: string) => void;
+type ModelProposal = Readonly<Record<string, unknown>>;
 
 const STAGES: readonly string[] = ["BASELINE", "STALE_AND_DISCOVER", "RERUN"];
 const TIERS: readonly string[] = ["metadata", "llm"];
@@ -90,7 +92,16 @@ export async function runLiveHealingCli(
       probe,
       captureLimit: profile.execution.captureLimit,
     });
-    const projection = healingProjection(receipt, stage as ProbeStage, tiers, headedMode);
+    const modelProposals = tiers.includes("llm")
+      ? await requestModelProposals(target, receipt, environment)
+      : [];
+    const projection = healingProjection(
+      receipt,
+      stage as ProbeStage,
+      tiers,
+      headedMode,
+      modelProposals,
+    );
     write(`${JSON.stringify(projection)}\n`);
     return receipt.status === "PASSED" ? 0 : 2;
   } catch (error) {
@@ -112,6 +123,7 @@ export function healingProjection(
   stage: ProbeStage,
   tiers: readonly string[],
   headedMode: boolean,
+  modelProposals: readonly (ModelProposal | null)[] = [],
 ): Record<string, unknown> {
   const report = receipt.probeReport;
   return {
@@ -128,11 +140,11 @@ export function healingProjection(
     healTiers: tiers,
     deterministicDiscoveryEnabled: tiers.includes("metadata"),
     modelDiscoveryRequested: tiers.includes("llm"),
-    modelDiscoveryAvailable: false,
+    modelDiscoveryAvailable: modelProposals.some((item) => item !== null),
     headedMode,
     obligationCount: report?.obligationCount ?? 0,
     targetDigest: report?.targetDigest ?? null,
-    observations: (report?.observations ?? []).map((item) => ({
+    observations: (report?.observations ?? []).map((item, index) => ({
       obligationIdDigest: item.obligationIdDigest,
       outcome: item.outcome,
       staleOriginal: item.staleOriginal,
@@ -143,11 +155,201 @@ export function healingProjection(
       editable: item.editable ?? null,
       // Present only when the deterministic tier abstained and candidate capture was requested.
       ...(item.domEvidence ? { domEvidence: item.domEvidence } : {}),
+      ...(modelProposals[index] ? { modelProposal: modelProposals[index] } : {}),
     })),
     cleanup: receipt.cleanup,
     executionIdDigest: digest(receipt.executionId),
     inputDigest: receipt.inputDigest,
   };
+}
+
+async function requestModelProposals(
+  target: unknown,
+  receipt: BrowserWorkerReceipt,
+  environment: Environment,
+): Promise<readonly (ModelProposal | null)[]> {
+  const obligations = targetObligations(target);
+  const observations = receipt.probeReport?.observations ?? [];
+  const results: (ModelProposal | null)[] = [];
+  for (let index = 0; index < observations.length; index += 1) {
+    const observation = observations[index];
+    const obligation = obligations[index];
+    if (!obligation || !observation?.domEvidence || obligation.semanticIdentity.kind !== "FIELD") {
+      results.push(null);
+      continue;
+    }
+    results.push(await requestModelProposal({
+      schemaVersion: "1.0.0",
+      obligationId: obligation.obligationId,
+      objectApiName: obligation.semanticIdentity.objectApiName,
+      fieldApiName: obligation.semanticIdentity.fieldApiName,
+      domEvidence: observation.domEvidence,
+    }, environment));
+  }
+  return Object.freeze(results);
+}
+
+async function requestModelProposal(
+  payload: Record<string, unknown>,
+  environment: Environment,
+): Promise<ModelProposal> {
+  const python = environment.NEO_LOCATOR_HEALING_PYTHON || environment.PYTHON || "python";
+  const timeout = Math.min(
+    Math.max(Number.parseInt(environment.NEO_LOCATOR_HEALING_TIMEOUT_MS ?? "45000", 10) || 45000, 1000),
+    120000,
+  );
+  try {
+    const stdout = await runPythonBridge(
+      python,
+      ["-m", "neo_sf_q_intel.locator_healing_cli"],
+      JSON.stringify(payload),
+      {
+        timeout,
+        env: locatorBridgeEnvironment(environment),
+      },
+    );
+    return parseModelProposal(stdout);
+  } catch {
+    return Object.freeze({
+      schemaVersion: "1.0.0",
+      accepted: false,
+      rejectionCode: "LOCATOR_HEALING_BRIDGE_FAILED",
+    });
+  }
+}
+
+function locatorBridgeEnvironment(environment: Environment): NodeJS.ProcessEnv {
+  const merged: NodeJS.ProcessEnv = { ...process.env, ...environment };
+  if ((environment.NEO_LOCATOR_HEALING_PROVIDER_SOURCE ?? "dotenv").toLowerCase() === "process") {
+    return merged;
+  }
+  for (const name of [
+    "AI_PROVIDER",
+    "OPENAI_API_KEY",
+    "OPENAI_CHAT_MODEL",
+    "OPENAI_EMBEDDING_MODEL",
+    "AZURE_OPENAI_API_KEY",
+    "AZURE_OPENAI_ENDPOINT",
+    "AZURE_OPENAI_API_VERSION",
+    "AZURE_OPENAI_CHAT_DEPLOYMENT",
+    "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
+  ]) {
+    delete merged[name];
+  }
+  return merged;
+}
+
+function runPythonBridge(
+  command: string,
+  args: readonly string[],
+  input: string,
+  options: { timeout: number; env: NodeJS.ProcessEnv },
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      env: options.env,
+      stdio: ["pipe", "pipe", "ignore"],
+      windowsHide: true,
+    });
+    const chunks: Buffer[] = [];
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      child.kill();
+      reject(new Error("LOCATOR_HEALING_BRIDGE_TIMEOUT"));
+    }, options.timeout);
+    child.stdout.on("data", (chunk: Buffer) => {
+      if (chunks.reduce((total, item) => total + item.length, 0) + chunk.length <= 256 * 1024) {
+        chunks.push(chunk);
+      }
+    });
+    child.on("error", (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on("close", (code) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (code !== 0) {
+        reject(new Error("LOCATOR_HEALING_BRIDGE_EXITED"));
+        return;
+      }
+      resolve(Buffer.concat(chunks).toString("utf8"));
+    });
+    child.stdin.end(input);
+  });
+}
+
+function parseModelProposal(stdout: string): ModelProposal {
+  try {
+    const body = JSON.parse(stdout.trim());
+    if (body !== null && typeof body === "object" && !Array.isArray(body)) {
+      return Object.freeze(body as Record<string, unknown>);
+    }
+  } catch {
+    // Fall through to the safe blocked record.
+  }
+  return Object.freeze({
+    schemaVersion: "1.0.0",
+    accepted: false,
+    rejectionCode: "LOCATOR_HEALING_BRIDGE_RESPONSE_INVALID",
+  });
+}
+
+type TargetObligation = Readonly<{
+  obligationId: string;
+  semanticIdentity:
+    | Readonly<{ kind: "FIELD"; objectApiName: string; fieldApiName: string }>
+    | Readonly<{ kind: "ACTION"; objectApiName: string; action: string }>;
+}>;
+
+function targetObligations(value: unknown): readonly TargetObligation[] {
+  if (value === null || typeof value !== "object") return [];
+  const obligations = (value as { obligations?: unknown }).obligations;
+  if (!Array.isArray(obligations)) return [];
+  return obligations.flatMap((item): TargetObligation[] => {
+    if (item === null || typeof item !== "object") return [];
+    const body = item as {
+      obligationId?: unknown;
+      semanticIdentity?: unknown;
+    };
+    if (typeof body.obligationId !== "string" || !body.semanticIdentity) return [];
+    const identity = body.semanticIdentity as {
+      kind?: unknown;
+      objectApiName?: unknown;
+      fieldApiName?: unknown;
+      action?: unknown;
+    };
+    if (identity.kind === "FIELD" &&
+      typeof identity.objectApiName === "string" &&
+      typeof identity.fieldApiName === "string") {
+      return [{
+        obligationId: body.obligationId,
+        semanticIdentity: {
+          kind: "FIELD",
+          objectApiName: identity.objectApiName,
+          fieldApiName: identity.fieldApiName,
+        },
+      }];
+    }
+    if (identity.kind === "ACTION" &&
+      typeof identity.objectApiName === "string" &&
+      typeof identity.action === "string") {
+      return [{
+        obligationId: body.obligationId,
+        semanticIdentity: {
+          kind: "ACTION",
+          objectApiName: identity.objectApiName,
+          action: identity.action,
+        },
+      }];
+    }
+    return [];
+  });
 }
 
 function parseTiers(value: string | undefined): readonly string[] {
