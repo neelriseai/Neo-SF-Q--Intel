@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "3172113a8af88bdbe47b30233c97648ad92144fdfa7b34eaa69a662c10f5d2f8",
+  "sourceSnapshot": "e830fd8fbdbe619047c2d7b0fd779b9907b5fdb07a32e28c348f3ca4fcb1840a",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -52,6 +52,14 @@
       "source": "AGENTS.md",
       "category": "project-instructions",
       "authority": "governing-instructions"
+    },
+    {
+      "id": "file:CLAUDE.md",
+      "kind": "file",
+      "label": "CLAUDE.md",
+      "source": "CLAUDE.md",
+      "category": "project",
+      "authority": "supporting"
     },
     {
       "id": "file:Development AI communication approch.md",
@@ -474,6 +482,14 @@
       "kind": "file",
       "label": "28-llm-locator-healing-plan.md",
       "source": "Docs/28-llm-locator-healing-plan.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/29-d-series-requirement-test-matrix.md",
+      "kind": "file",
+      "label": "29-d-series-requirement-test-matrix.md",
+      "source": "Docs/29-d-series-requirement-test-matrix.md",
       "category": "reference-documentation",
       "authority": "reference-only"
     },
@@ -1030,6 +1046,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:migrations/004_element_signature.sql",
+      "kind": "file",
+      "label": "004_element_signature.sql",
+      "source": "migrations/004_element_signature.sql",
+      "category": "persistence",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:package-lock.json",
       "kind": "file",
       "label": "package-lock.json",
@@ -1210,6 +1234,14 @@
       "kind": "file",
       "label": "live-campaign-client.spec.ts",
       "source": "packages/browser/tests/live-campaign-client.spec.ts",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:packages/browser/tests/live-healing-cli.spec.ts",
+      "kind": "file",
+      "label": "live-healing-cli.spec.ts",
+      "source": "packages/browser/tests/live-healing-cli.spec.ts",
       "category": "test",
       "authority": "verification"
     },
@@ -1486,6 +1518,94 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/agent-exchanges/G1-brief.md",
+      "kind": "file",
+      "label": "G1-brief.md",
+      "source": "quality/reviews/agent-exchanges/G1-brief.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/G1-return.md",
+      "kind": "file",
+      "label": "G1-return.md",
+      "source": "quality/reviews/agent-exchanges/G1-return.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/G2-brief.md",
+      "kind": "file",
+      "label": "G2-brief.md",
+      "source": "quality/reviews/agent-exchanges/G2-brief.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/G2-return.md",
+      "kind": "file",
+      "label": "G2-return.md",
+      "source": "quality/reviews/agent-exchanges/G2-return.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/G3-brief.md",
+      "kind": "file",
+      "label": "G3-brief.md",
+      "source": "quality/reviews/agent-exchanges/G3-brief.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/G3-return.md",
+      "kind": "file",
+      "label": "G3-return.md",
+      "source": "quality/reviews/agent-exchanges/G3-return.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/G4-brief.md",
+      "kind": "file",
+      "label": "G4-brief.md",
+      "source": "quality/reviews/agent-exchanges/G4-brief.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/G4-return.md",
+      "kind": "file",
+      "label": "G4-return.md",
+      "source": "quality/reviews/agent-exchanges/G4-return.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/R0-spike-brief.md",
+      "kind": "file",
+      "label": "R0-spike-brief.md",
+      "source": "quality/reviews/agent-exchanges/R0-spike-brief.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/R0-spike-return.md",
+      "kind": "file",
+      "label": "R0-spike-return.md",
+      "source": "quality/reviews/agent-exchanges/R0-spike-return.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/agent-exchanges/VERIFY-return.md",
+      "kind": "file",
+      "label": "VERIFY-return.md",
+      "source": "quality/reviews/agent-exchanges/VERIFY-return.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/ai-communication-compliance-log.md",
       "kind": "file",
       "label": "ai-communication-compliance-log.md",
@@ -1686,6 +1806,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/element_signature.py",
+      "kind": "file",
+      "label": "element_signature.py",
+      "source": "src/neo_sf_q_intel/element_signature.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/execution_assertions.py",
       "kind": "file",
       "label": "execution_assertions.py",
@@ -1842,6 +1970,14 @@
       "kind": "file",
       "label": "local_validation_runner.py",
       "source": "src/neo_sf_q_intel/local_validation_runner.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/locator_proposal.py",
+      "kind": "file",
+      "label": "locator_proposal.py",
+      "source": "src/neo_sf_q_intel/locator_proposal.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -2230,6 +2366,22 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_element_signature.py",
+      "kind": "file",
+      "label": "test_element_signature.py",
+      "source": "tests/test_element_signature.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_element_signature_functional.py",
+      "kind": "file",
+      "label": "test_element_signature_functional.py",
+      "source": "tests/test_element_signature_functional.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_execution_assertions.py",
       "kind": "file",
       "label": "test_execution_assertions.py",
@@ -2414,6 +2566,30 @@
       "authority": "verification"
     },
     {
+      "id": "file:tests/test_locator_healing_bridge.py",
+      "kind": "file",
+      "label": "test_locator_healing_bridge.py",
+      "source": "tests/test_locator_healing_bridge.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_locator_healing_bridge_functional.py",
+      "kind": "file",
+      "label": "test_locator_healing_bridge_functional.py",
+      "source": "tests/test_locator_healing_bridge_functional.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_locator_proposal.py",
+      "kind": "file",
+      "label": "test_locator_proposal.py",
+      "source": "tests/test_locator_proposal.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
       "id": "file:tests/test_locator_rebind_contract.py",
       "kind": "file",
       "label": "test_locator_rebind_contract.py",
@@ -2426,6 +2602,14 @@
       "kind": "file",
       "label": "test_mcp_server.py",
       "source": "tests/test_mcp_server.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_metadata_lookup.py",
+      "kind": "file",
+      "label": "test_metadata_lookup.py",
+      "source": "tests/test_metadata_lookup.py",
       "category": "test",
       "authority": "verification"
     },
@@ -5054,6 +5238,21 @@
       "to": "file:apps/web/src/lib/live-campaign-client.ts"
     },
     {
+      "from": "file:packages/browser/tests/live-healing-cli.spec.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/browser-worker.ts"
+    },
+    {
+      "from": "file:packages/browser/tests/live-healing-cli.spec.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/healing-probe.ts"
+    },
+    {
+      "from": "file:packages/browser/tests/live-healing-cli.spec.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/live-healing-cli.ts"
+    },
+    {
       "from": "file:packages/browser/tests/live-profile-cli.spec.ts",
       "relation": "imports",
       "to": "file:packages/browser/src/live-profile-cli.ts"
@@ -5937,6 +6136,21 @@
       "from": "file:src/neo_sf_q_intel/local_validation_runner.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/temporal.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/locator_proposal.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_feeds.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/locator_proposal.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/element_signature.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/locator_proposal.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/mcp_server.py",
@@ -6844,6 +7058,21 @@
       "to": "file:src/neo_sf_q_intel/propagation.py"
     },
     {
+      "from": "file:tests/test_element_signature.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/element_signature.py"
+    },
+    {
+      "from": "file:tests/test_element_signature_functional.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_element_signature_functional.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/element_signature.py"
+    },
+    {
       "from": "file:tests/test_execution_assertions.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/candidate_target_compiler.py"
@@ -7364,6 +7593,51 @@
       "to": "file:src/neo_sf_q_intel/local_validation_runner.py"
     },
     {
+      "from": "file:tests/test_locator_healing_bridge.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_feeds.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_bridge.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/element_signature.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_bridge.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/locator_proposal.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_bridge_functional.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_bridge_functional.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_feeds.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_bridge_functional.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/element_signature.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_bridge_functional.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/locator_proposal.py"
+    },
+    {
+      "from": "file:tests/test_locator_proposal.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/locator_proposal.py"
+    },
+    {
+      "from": "file:tests/test_locator_proposal.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
+    },
+    {
       "from": "file:tests/test_locator_rebind_contract.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/candidate_target_compiler.py"
@@ -7387,6 +7661,21 @@
       "from": "file:tests/test_mcp_server.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_metadata_lookup.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:tests/test_metadata_lookup.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_feeds.py"
+    },
+    {
+      "from": "file:tests/test_metadata_lookup.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/salesforce_cli.py"
     },
     {
       "from": "file:tests/test_metadata_recovery.py",

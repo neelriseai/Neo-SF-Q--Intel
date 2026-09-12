@@ -149,6 +149,21 @@ def build_mcp(
             raise ToolError(f"{error.code}") from None
         return result.model_dump(by_alias=True, mode="json")
 
+    @server.tool()
+    def metadata_lookup(object_api_name: str, field_api_name: str) -> dict:
+        """Return one Salesforce field declaration from the configured source project."""
+        try:
+            result = context_feeds.metadata_lookup(
+                settings.resolved_salesforce_root(root),
+                object_api_name,
+                field_api_name,
+            )
+        except ValueError:
+            raise ToolError("SALESFORCE_ROOT_UNAVAILABLE") from None
+        except ContextFeedError as error:
+            raise ToolError(f"{error.code}") from None
+        return result.model_dump(by_alias=True, mode="json")
+
     return server
 
 

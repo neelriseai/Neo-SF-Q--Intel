@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "3172113a8af88bdbe47b30233c97648ad92144fdfa7b34eaa69a662c10f5d2f8",
+  "sourceSnapshot": "e830fd8fbdbe619047c2d7b0fd779b9907b5fdb07a32e28c348f3ca4fcb1840a",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1339,6 +1339,11 @@
       "sha256": "fa41e7551ed48ce72fddb131678aa2312d79369fb7e1fef110988c04704b388b"
     },
     {
+      "path": "CLAUDE.md",
+      "category": "project",
+      "sha256": "042f20357dc7bbd1e08e76e7cfa776bbd7e71bcb4ac1008cc8c8912917bbd4d3"
+    },
+    {
       "path": "Development AI communication approch.md",
       "category": "project",
       "sha256": "d3ecdf0f27aebda3d59d1ee799edcb7a2b0d1cce0226bb2dcce5fb4354c75f6c"
@@ -1601,7 +1606,12 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "4bc685bb5aaadb98837afd2bfff3faf4a992870d1466806d277ccf1381dc7eeb"
+      "sha256": "020dee0781eda1b577eaa04f682290228a3e1bd3f218060b539862cce18dbc45"
+    },
+    {
+      "path": "Docs/29-d-series-requirement-test-matrix.md",
+      "category": "reference-documentation",
+      "sha256": "e45f4c4d563bc7272aba22e0b698d06521fb072d5bb126df0d0bd2a8d9c5b9e7"
     },
     {
       "path": "Docs/README.md",
@@ -1949,6 +1959,11 @@
       "sha256": "121fb4f069c4cf8db1d53c81d2e73be016cd239e81931437005a8632ab711810"
     },
     {
+      "path": "migrations/004_element_signature.sql",
+      "category": "persistence",
+      "sha256": "6e988351a237b31ab51261f6c0f99feab358767172779dd17b6919d56d8c436d"
+    },
+    {
       "path": "package-lock.json",
       "category": "project",
       "sha256": "dd4f269d02ab09a4258c0bacdd9256d8a9700272d8e53b5a8790dcabc98f07be"
@@ -1961,7 +1976,7 @@
     {
       "path": "packages/browser/package.json",
       "category": "project",
-      "sha256": "68177166a8bcd5e6e595d800930485f080c7c4774dcd0c5cc1d8c5313c78f03c"
+      "sha256": "c91d85bbde16a1a0b2d156d023089514985be2dd343cdfbe99e85577eaa030c5"
     },
     {
       "path": "packages/browser/playwright.config.ts",
@@ -1986,12 +2001,12 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "5043664bad47c9d8d9d50122dfbe0413cd10e8057a8467a1b77d95783cb8c513"
+      "sha256": "35375802ae8a766274b493a62cc88405c181f15938fc5f26bfc74d49d4e2dbb4"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
       "category": "browser-runtime",
-      "sha256": "91492f3e957cf0770cfcf2d97c72dfe3c989d0730b361fcbfea9239dd57c2308"
+      "sha256": "39ca36857bf968f1c6204095b2aae16d321095e17a6b8c5237f198752a811891"
     },
     {
       "path": "packages/browser/src/live-business-action-cli.ts",
@@ -2006,7 +2021,7 @@
     {
       "path": "packages/browser/src/live-healing-cli.ts",
       "category": "browser-runtime",
-      "sha256": "63d46e2aa24213d65ee5e2a2e1ff805173ddd9b15e2a526d98571d59432d0b21"
+      "sha256": "ce65649b96a85c92aee2c856c59842a23f18bbaf7edbda080acb1b30940404bd"
     },
     {
       "path": "packages/browser/src/live-profile-cli.ts",
@@ -2041,7 +2056,7 @@
     {
       "path": "packages/browser/tests/browser-worker.spec.ts",
       "category": "test",
-      "sha256": "d9a94c18ff8e22cf1ba9a11ebb1b3888884c3f24a9410ff866426dba8e49e923"
+      "sha256": "42450aabf94dcb662dade5fc7af981b2d67ac615527c06011010a4b005f32751"
     },
     {
       "path": "packages/browser/tests/candidate-client.spec.ts",
@@ -2056,12 +2071,17 @@
     {
       "path": "packages/browser/tests/healing-probe.spec.ts",
       "category": "test",
-      "sha256": "4867d76b9c33839ee645af78ba110d8ac51046c99932d28bda2d0e8cc08c7803"
+      "sha256": "27201e687fee010f310836aa4fdb4462c4a3b6586cc871c3e840fbc672580f00"
     },
     {
       "path": "packages/browser/tests/live-campaign-client.spec.ts",
       "category": "test",
       "sha256": "16a301b2db8727c37c1728259abb9800bcd04c26ec01edf5225947447a086d90"
+    },
+    {
+      "path": "packages/browser/tests/live-healing-cli.spec.ts",
+      "category": "test",
+      "sha256": "67f35ef161206facc087ec526e685ce6ee7bb848bd2dd0164879f7051a4979f7"
     },
     {
       "path": "packages/browser/tests/live-profile-cli.spec.ts",
@@ -2234,14 +2254,69 @@
       "sha256": "26a01eef91031e74adf1ac165a5c532f1f0f53ba9027ecd27399e164cf5117d6"
     },
     {
+      "path": "quality/reviews/agent-exchanges/G1-brief.md",
+      "category": "project",
+      "sha256": "85c22afc6d279e9fdfec1834c96a55e4bc9ed7bff0f77f75c19b25b5d9d6bef9"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/G1-return.md",
+      "category": "project",
+      "sha256": "d5da31629e876f2b552556bff4ea55127fa672b76d4ee14c7b5a36afc8c7be7c"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/G2-brief.md",
+      "category": "project",
+      "sha256": "50f36ffdf3f9a7e2c9376f06b23a034ad450e6fc5e6803af871294ed6cb0ee40"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/G2-return.md",
+      "category": "project",
+      "sha256": "ca1c961c2d98db6b0cb464b35f242bd6c815030ff7de9acda1b5e3919e956b30"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/G3-brief.md",
+      "category": "project",
+      "sha256": "f4d559600cb4960e69470de4eeda7d35728c356bf83818060f190fbb9f8adc12"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/G3-return.md",
+      "category": "project",
+      "sha256": "36451fd918f9ada25a79b7ed4d6c4404d2f5590eb7fc0444f85731f4561b12e0"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/G4-brief.md",
+      "category": "project",
+      "sha256": "b27dcdcda68eace1bfe01172ecf9aa8886cb1b24ef65bf420959277c377d8040"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/G4-return.md",
+      "category": "project",
+      "sha256": "5e8960f20cda04ed41670892fd9645357d0f5d8c8d7fe432716d2e460726ff87"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/R0-spike-brief.md",
+      "category": "project",
+      "sha256": "b8cabee9fb4b929a8e67fd07d5d1ddbb9ee1f76386de6cd676f721f860754860"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/R0-spike-return.md",
+      "category": "project",
+      "sha256": "3aa4ace9c97841f969dabca9dba645a6d5fdde566f79a561a9b193b060138111"
+    },
+    {
+      "path": "quality/reviews/agent-exchanges/VERIFY-return.md",
+      "category": "project",
+      "sha256": "eaa680fd680db74557efab5abb4ee1f8c5d99167f14462e12f2ddb03ec14efc4"
+    },
+    {
       "path": "quality/reviews/ai-communication-compliance-log.md",
       "category": "project",
-      "sha256": "af5dfbe07ae280e8dfe8231656fabafdc1ca3723089a996d137290322bd9321c"
+      "sha256": "b3e7e9465b83cbb232b9b8550198031819f8b636e5888847f2e6f78f5b4c0091"
     },
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "48d9dc590017a4f656ec4129ad5d4dcfde0b9c96305103ab1380a4acc488e58e"
+      "sha256": "90b6bd537a83c6c663c9517f7636d19368b7fec29a10f20578beb05963c909a1"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
@@ -2336,7 +2411,7 @@
     {
       "path": "src/neo_sf_q_intel/context_feeds.py",
       "category": "python-runtime",
-      "sha256": "1655902ce2620459bafbe2484a369dfb46205a0bd7b986bd488f0678b21703d6"
+      "sha256": "d19007243726100b9be38923180fa13cb97c11517dfdb58b154bc946f801335c"
     },
     {
       "path": "src/neo_sf_q_intel/context_pack.py",
@@ -2357,6 +2432,11 @@
       "path": "src/neo_sf_q_intel/edge_extractors.py",
       "category": "python-runtime",
       "sha256": "02d5afa252049f8cc8b66f30be7ff995f2311bec9b36392503567fc7421e05b4"
+    },
+    {
+      "path": "src/neo_sf_q_intel/element_signature.py",
+      "category": "python-runtime",
+      "sha256": "c3e17de8aed299b2a71ebb0661c4a97041ce409104f1697f5a9cbf6c0dbc2544"
     },
     {
       "path": "src/neo_sf_q_intel/execution_assertions.py",
@@ -2459,9 +2539,14 @@
       "sha256": "de582c9216c1cc8aeec3ef019bf824a5bdd36aae6f51929b4bcdc53a28f710d7"
     },
     {
+      "path": "src/neo_sf_q_intel/locator_proposal.py",
+      "category": "python-runtime",
+      "sha256": "588d9f01772453404fcc10cfbc9be3aa60b31f278675569f1974e0ba398c0394"
+    },
+    {
       "path": "src/neo_sf_q_intel/mcp_server.py",
       "category": "python-runtime",
-      "sha256": "31f6a376dcf7c57890f088d2753a69827ed671897c4939ad5d16442657feeb52"
+      "sha256": "c0b39eeb6bdb0029f7939fc252f9c91f359bbaa5840fce13f3e2691c5c55aae4"
     },
     {
       "path": "src/neo_sf_q_intel/metadata_recovery.py",
@@ -2699,6 +2784,16 @@
       "sha256": "dce75ec50b9ee654f70e6bc928a999c763e0966ae736d1d3a99785d49947472a"
     },
     {
+      "path": "tests/test_element_signature.py",
+      "category": "test",
+      "sha256": "43c607b0b48fcf3ea1099a7401abebeab6d2e309fdf6cc3d4de0cf494a3b1070"
+    },
+    {
+      "path": "tests/test_element_signature_functional.py",
+      "category": "test",
+      "sha256": "62d2f72c62f28906ec8779c80b936df19306de57b7d50fe036ba1d9ddfe5c553"
+    },
+    {
       "path": "tests/test_execution_assertions.py",
       "category": "test",
       "sha256": "6f8a28c57bd2b867625eba60342d1d6d0ddc919fd23254217dbf0d77ca7602bf"
@@ -2814,6 +2909,21 @@
       "sha256": "3219c3c64b7bf6804d242b4aea9fb24c436b367e298a52cccda5171441205bbf"
     },
     {
+      "path": "tests/test_locator_healing_bridge.py",
+      "category": "test",
+      "sha256": "4d83d04406d4fa2aa5d431bd0afd637b8d9423ebb69a21f578d795cbafd85b4f"
+    },
+    {
+      "path": "tests/test_locator_healing_bridge_functional.py",
+      "category": "test",
+      "sha256": "3be5735a57942465353c4aabe814dbcf33221ab8911f4c1141386b49d0eede0b"
+    },
+    {
+      "path": "tests/test_locator_proposal.py",
+      "category": "test",
+      "sha256": "f94e477516d1cf6b7bb996c17db5122a461dc71499cdbec4b92f87047b9de291"
+    },
+    {
       "path": "tests/test_locator_rebind_contract.py",
       "category": "test",
       "sha256": "5ee97e34d128c2ba4fea8db110954d0dbee136b84031e4c8422f398e954006f6"
@@ -2821,7 +2931,12 @@
     {
       "path": "tests/test_mcp_server.py",
       "category": "test",
-      "sha256": "a1eb9e31f8e34795ccd9574edca8fff0487734d0a7f9410c345ea3e3dd13b843"
+      "sha256": "e287813bf4bb931917ec34016ffb972149913bf114c16fb814cab3bd0dd8a570"
+    },
+    {
+      "path": "tests/test_metadata_lookup.py",
+      "category": "test",
+      "sha256": "b4fa74ca7cd5bbda4995b8c145bd58a899c5046c126f2d5dfdc91f182512a758"
     },
     {
       "path": "tests/test_metadata_recovery.py",

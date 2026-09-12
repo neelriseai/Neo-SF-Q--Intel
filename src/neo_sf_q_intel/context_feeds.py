@@ -4,6 +4,7 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from xml.etree import ElementTree
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -16,6 +17,12 @@ HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(\S.*?)\s*$")
 MAXIMUM_SECTION_CHARACTERS = 8000
 MAXIMUM_GRAPH_EDGES = 500
 DEFAULT_RELATION = "related"
+API_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]{0,199}$")
+NAMESPACE_SUFFIX = "}"
+MAXIMUM_FIELD_METADATA_BYTES = 262_144
+MAXIMUM_PICKLIST_VALUES = 200
+FIELD_METADATA_SUFFIX = ".field-meta.xml"
+FIELD_METADATA_SEGMENTS = ("force-app", "main", "default", "objects")
 
 
 class ContextFeedError(RuntimeError):
@@ -57,6 +64,34 @@ class GraphNeighborhood(ContextFeedModel):
     edges: list[str] = Field(default_factory=list)
     edge_count: int = Field(alias="edgeCount")
     truncated: bool
+
+
+class PicklistValue(ContextFeedModel):
+    value: str
+    label: str
+    default: bool = False
+
+
+class FieldMetadata(ContextFeedModel):
+    """Declared identity of one custom field, read from the versioned source project.
+
+    The label is carried in the clear on purpose. It is schema authored in our own repository,
+    not org record data, and the healing model needs it because the label is what the rendered
+    page actually shows. Record values stay out of this feed entirely.
+    """
+
+    object_api_name: str = Field(alias="objectApiName")
+    field_api_name: str = Field(alias="fieldApiName")
+    field_type: str | None = Field(default=None, alias="type")
+    label: str | None = None
+    required: bool = False
+    reference_to: list[str] = Field(default_factory=list, alias="referenceTo")
+    relationship_name: str | None = Field(default=None, alias="relationshipName")
+    picklist_values: list[PicklistValue] = Field(default_factory=list, alias="picklistValues")
+    picklist_truncated: bool = Field(default=False, alias="picklistTruncated")
+    restricted_picklist: bool | None = Field(default=None, alias="restrictedPicklist")
+    value_set_name: str | None = Field(default=None, alias="valueSetName")
+    source_path: str = Field(alias="sourcePath")
 
 
 def knowledge_index(repo_root: Path) -> KnowledgeIndex:
@@ -154,6 +189,57 @@ def graph_neighborhood(
     )
 
 
+def metadata_lookup(
+    salesforce_root: Path,
+    object_api_name: str,
+    field_api_name: str,
+) -> FieldMetadata:
+    """Read one field declaration from the configured Salesforce source project.
+
+    Source of truth is the versioned metadata, never a live describe call: the healing path runs
+    inside an ephemeral browser session, and reaching back to the org from here would widen that
+    session scope. A field the project does not declare is reported absent so that the caller
+    abstains rather than guessing.
+    """
+    if not API_NAME_PATTERN.fullmatch(object_api_name):
+        raise ContextFeedError("OBJECT_NAME_INVALID")
+    if not API_NAME_PATTERN.fullmatch(field_api_name):
+        raise ContextFeedError("FIELD_NAME_INVALID")
+    root = Path(salesforce_root)
+    if not root.is_dir():
+        raise ContextFeedError("SALESFORCE_ROOT_UNAVAILABLE")
+    root = root.resolve()
+    path = root.joinpath(
+        *FIELD_METADATA_SEGMENTS,
+        object_api_name,
+        "fields",
+        f"{field_api_name}{FIELD_METADATA_SUFFIX}",
+    )
+    if not path.is_file():
+        raise ContextFeedError("FIELD_METADATA_NOT_FOUND")
+    resolved = path.resolve()
+    # The API name grammar already excludes separators; this also refuses a symlinked escape.
+    if not resolved.is_relative_to(root):
+        raise ContextFeedError("FIELD_METADATA_NOT_FOUND")
+    element = _field_metadata_root(resolved, field_api_name)
+    value_set = _child(element, "valueSet")
+    values, truncated = _picklist_values(value_set)
+    return FieldMetadata(
+        objectApiName=object_api_name,
+        fieldApiName=field_api_name,
+        type=_child_text(element, "type"),
+        label=_child_text(element, "label"),
+        required=_child_text(element, "required") == "true",
+        referenceTo=_reference_targets(element),
+        relationshipName=_child_text(element, "relationshipName"),
+        picklistValues=values,
+        picklistTruncated=truncated,
+        restrictedPicklist=_optional_flag(_child_text(value_set, "restricted")),
+        valueSetName=_child_text(value_set, "valueSetName"),
+        sourcePath=_relative_posix(root, resolved),
+    )
+
+
 def _repo_root(repo_root: Path) -> Path:
     return Path(repo_root).resolve()
 
@@ -237,3 +323,82 @@ def _normalised_edges(raw: Any) -> list[tuple[str, str, str]]:
             relation = DEFAULT_RELATION
         normalised.append((left, relation, right))
     return normalised
+
+
+def _field_metadata_root(path: Path, field_api_name: str) -> ElementTree.Element:
+    try:
+        content = path.read_bytes()
+    except OSError as error:
+        raise ContextFeedError("FIELD_METADATA_UNREADABLE") from error
+    if len(content) > MAXIMUM_FIELD_METADATA_BYTES:
+        raise ContextFeedError("FIELD_METADATA_TOO_LARGE")
+    try:
+        element = ElementTree.fromstring(content)
+    except ElementTree.ParseError as error:
+        raise ContextFeedError("FIELD_METADATA_UNREADABLE") from error
+    if _local_name(element.tag) != "CustomField":
+        raise ContextFeedError("FIELD_METADATA_INVALID")
+    # A file whose declared fullName disagrees with its own path is not trustworthy identity.
+    if _child_text(element, "fullName") != field_api_name:
+        raise ContextFeedError("FIELD_METADATA_INVALID")
+    return element
+
+
+def _local_name(tag: str) -> str:
+    return tag.rpartition(NAMESPACE_SUFFIX)[2]
+
+
+def _children(parent: ElementTree.Element | None, name: str) -> list[ElementTree.Element]:
+    if parent is None:
+        return []
+    return [child for child in parent if _local_name(child.tag) == name]
+
+
+def _child(parent: ElementTree.Element | None, name: str) -> ElementTree.Element | None:
+    found = _children(parent, name)
+    return found[0] if found else None
+
+
+def _child_text(parent: ElementTree.Element | None, name: str) -> str | None:
+    child = _child(parent, name)
+    if child is None or child.text is None:
+        return None
+    text = child.text.strip()
+    return text or None
+
+
+def _optional_flag(value: str | None) -> bool | None:
+    if value is None:
+        return None
+    return value == "true"
+
+
+def _reference_targets(element: ElementTree.Element) -> list[str]:
+    targets: list[str] = []
+    for child in _children(element, "referenceTo"):
+        target = (child.text or "").strip()
+        if not API_NAME_PATTERN.fullmatch(target):
+            raise ContextFeedError("FIELD_METADATA_INVALID")
+        targets.append(target)
+    return targets
+
+
+def _picklist_values(
+    value_set: ElementTree.Element | None,
+) -> tuple[list[PicklistValue], bool]:
+    definition = _child(value_set, "valueSetDefinition")
+    entries = _children(definition, "value")
+    truncated = len(entries) > MAXIMUM_PICKLIST_VALUES
+    values: list[PicklistValue] = []
+    for entry in entries[:MAXIMUM_PICKLIST_VALUES]:
+        name = _child_text(entry, "fullName")
+        if name is None:
+            raise ContextFeedError("FIELD_METADATA_INVALID")
+        values.append(
+            PicklistValue(
+                value=name,
+                label=_child_text(entry, "label") or name,
+                default=_child_text(entry, "default") == "true",
+            )
+        )
+    return values, truncated

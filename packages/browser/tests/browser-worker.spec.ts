@@ -605,3 +605,203 @@ test("uses a nonpersistent context and reports cleanup failure without leaking t
   expect(receipt.cleanup).toEqual({ contextClosed: false, browserClosed: true });
   expectNoLeak(receipt, canary);
 });
+
+// Regression: captureCandidates reached the CLI but was dropped by the worker, so every probe
+// test passed while the live path could never produce DOM evidence. These exercise the worker.
+const RECORD_ID = "005fj00000N5t8IAAR";
+const PERSON_NAME = "Synthetic Regional VP";
+const RECORD_ID_DIGEST = "b167df2522f2e65b";
+
+const PROBE_HTML = `
+  <div data-object-api="Opportunity">
+    <input role="combobox" title="${PERSON_NAME}" data-value="${RECORD_ID}" />
+    <button aria-label="Save">Save</button>
+  </div>`;
+
+function probeTarget() {
+  return {
+    obligationPolicy: "COMPLETE_DECLARED_SET",
+    dataMutation: "FORBIDDEN",
+    obligations: [
+      {
+        obligationId: "ob-amount",
+        originalLocator: {
+          kind: "ATTRIBUTE_EQUALS",
+          attribute: "data-testid",
+          value: "deal-amount",
+        },
+        semanticIdentity: {
+          kind: "FIELD",
+          objectApiName: "Opportunity",
+          fieldApiName: "Amount",
+        },
+        assertions: ["EDITABLE", "ENABLED", "VISIBLE"],
+      },
+    ],
+  };
+}
+
+async function runProbe(canary: string, captureCandidates?: boolean) {
+  const worker = makeWorker(PROBE_HTML);
+  const session = await handoff(worker, canary, { permittedModes: ["LOCATOR_PROBE"] });
+  return worker.execute({
+    handoff: session,
+    mode: "LOCATOR_PROBE",
+    startPath: "/lightning/o/Opportunity/list",
+    probe: { target: probeTarget(), stage: "BASELINE", captureCandidates },
+  });
+}
+
+test("locator probe pushes DOM evidence when the worker is asked to capture candidates", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+
+  const receipt = await runProbe(canary, true);
+
+  expect({ status: receipt.status, error: receipt.error }).toEqual({
+    status: "FAILED",
+    error: undefined,
+  });
+  const observation = receipt.probeReport?.observations[0];
+  expect(observation?.outcome).toBe("LOCATOR_NOT_FOUND");
+  expect(observation?.domEvidence).toBeDefined();
+  expect(observation?.domEvidence?.candidates.length).toBeGreaterThan(0);
+  expectNoLeak(receipt, canary);
+});
+
+test("locator probe withholds DOM evidence when candidate capture is not requested", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+
+  const receipt = await runProbe(canary);
+
+  expect(receipt.probeReport?.observations[0]?.domEvidence).toBeUndefined();
+});
+
+test("pushed DOM evidence carries digests, never the record value or the person name", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+
+  const receipt = await runProbe(canary, true);
+
+  const projection = JSON.stringify(receipt);
+  expect(projection).not.toContain(RECORD_ID);
+  expect(projection).not.toContain(PERSON_NAME);
+  // Pins the cross-language digest contract: the Python signature store must agree byte for byte,
+  // otherwise stored signatures and pushed candidates can never be compared.
+  expect(projection).toContain(RECORD_ID_DIGEST);
+});
+
+// REQ-HEAL-14: the llm tier is gated — candidate capture fires ONLY when the deterministic tier
+// abstains. Previously proven only at the CLI projection level against stubbed reports. These four
+// drive a real Playwright page through both sides of the gate.
+//
+// ANTI-VACUOUS: an earlier version of the evidence tests passed while probeReport was undefined,
+// which makes "evidence withheld" and "the probe never ran" indistinguishable. Every assertion that
+// evidence is ABSENT below is preceded by a liveness assertion that the probe actually ran.
+
+// The declared original locator resolves to exactly one element, and that same element carries the
+// metadata identity from probeTarget(), so the deterministic tier discovers it without the llm tier.
+const RESOLVABLE_PROBE_HTML = `
+  <div data-object-api="Opportunity">
+    <input data-field-api="Amount" data-testid="deal-amount" />
+    <button aria-label="Save">Save</button>
+  </div>`;
+
+// Two controls carry the same Opportunity.Amount identity, so metadata discovery cannot pick one.
+const AMBIGUOUS_PROBE_HTML = `
+  <div data-object-api="Opportunity">
+    <input data-field-api="Amount" data-testid="deal-amount" />
+    <input data-field-api="Amount" />
+    <button aria-label="Save">Save</button>
+  </div>`;
+
+async function runProbeOn(html: string, canary: string, captureCandidates?: boolean) {
+  const worker = makeWorker(html);
+  const session = await handoff(worker, canary, { permittedModes: ["LOCATOR_PROBE"] });
+  return worker.execute({
+    handoff: session,
+    mode: "LOCATOR_PROBE",
+    startPath: "/lightning/o/Opportunity/list",
+    probe: { target: probeTarget(), stage: "BASELINE", captureCandidates },
+  });
+}
+
+test("gate open: deterministic abstention on a missing element pushes DOM evidence", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+
+  // PROBE_HTML has no [data-testid="deal-amount"], so the declared locator cannot resolve.
+  const receipt = await runProbe(canary, true);
+
+  // Liveness first: the probe ran and produced exactly one observation.
+  expect(receipt.error).toBeUndefined();
+  expect(receipt.probeReport).toBeDefined();
+  expect(receipt.probeReport?.observations.length).toBe(1);
+
+  const observation = receipt.probeReport!.observations[0]!;
+  expect(observation.outcome).toBe("LOCATOR_NOT_FOUND");
+  expect(observation.domEvidence).toBeDefined();
+  expect(observation.domEvidence?.capturedForOutcome).toBe("LOCATOR_NOT_FOUND");
+  expect(observation.domEvidence!.candidates.length).toBeGreaterThan(0);
+});
+
+test("gate shut: the deterministic tier resolving the element withholds DOM evidence", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+
+  const receipt = await runProbeOn(RESOLVABLE_PROBE_HTML, canary, true);
+
+  // Liveness first. Without this, a probe that never ran would satisfy every assertion below.
+  expect(receipt.error).toBeUndefined();
+  expect(receipt.probeReport).toBeDefined();
+  expect(receipt.probeReport?.observations.length).toBe(1);
+
+  const observation = receipt.probeReport!.observations[0]!;
+  // The deterministic tier genuinely resolved the element: it asserted against a real control.
+  expect(observation.outcome).toBe("PASSED");
+  expect({
+    visible: observation.visible,
+    enabled: observation.enabled,
+    editable: observation.editable,
+  }).toEqual({ visible: true, enabled: true, editable: true });
+  expect(observation.candidateEvidenceDigest).toBeDefined();
+  expect(receipt.status).toBe("PASSED");
+  expect(receipt.probeReport?.status).toBe("PASSED");
+
+  // REQ-HEAL-14 core: capture was requested, the deterministic tier succeeded, so the llm tier
+  // must not fire and no DOM must be pushed.
+  expect(observation.domEvidence).toBeUndefined();
+  expectNoLeak(receipt, canary);
+});
+
+test("gate shut: a resolved element with capture disabled still withholds DOM evidence", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+
+  const receipt = await runProbeOn(RESOLVABLE_PROBE_HTML, canary, false);
+
+  expect(receipt.error).toBeUndefined();
+  expect(receipt.probeReport).toBeDefined();
+  expect(receipt.probeReport?.observations.length).toBe(1);
+
+  const observation = receipt.probeReport!.observations[0]!;
+  expect(observation.outcome).toBe("PASSED");
+  expect(receipt.status).toBe("PASSED");
+  expect(observation.domEvidence).toBeUndefined();
+});
+
+test("gate open: an ambiguous semantic identity abstains and pushes DOM evidence", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+
+  const receipt = await runProbeOn(AMBIGUOUS_PROBE_HTML, canary, true);
+
+  expect(receipt.error).toBeUndefined();
+  expect(receipt.probeReport).toBeDefined();
+  expect(receipt.probeReport?.observations.length).toBe(1);
+
+  const observation = receipt.probeReport!.observations[0]!;
+  // The declared locator still resolves to one element, so this is the semantic tier abstaining,
+  // not a missing-element path.
+  expect(observation.outcome).toBe("CANDIDATE_AMBIGUOUS");
+  expect(observation.staleOriginal).toBe(false);
+  expect(observation.candidateCount).toBeGreaterThan(1);
+  expect(observation.domEvidence).toBeDefined();
+  expect(observation.domEvidence?.capturedForOutcome).toBe("CANDIDATE_AMBIGUOUS");
+  expect(observation.domEvidence!.candidates.length).toBeGreaterThan(0);
+  expect(receipt.status).toBe("FAILED");
+});

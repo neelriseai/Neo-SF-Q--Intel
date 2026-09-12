@@ -76,11 +76,18 @@ export async function runLiveHealingCli(
     const broker = new SalesforceCliSessionBroker(profile.sessionBroker, worker);
     const enrollment = await worker.enroll(profile.enrollment);
     const handoff = await broker.acquire(enrollment);
+    // The model tier only ever receives a sanitized, digested candidate list, and only when the
+    // deterministic tier abstains. Requesting it never relaxes deterministic verification.
+    const probe = {
+      target,
+      stage: stage as ProbeStage,
+      captureCandidates: tiers.includes("llm"),
+    };
     const receipt = await worker.execute({
       handoff,
       mode: "LOCATOR_PROBE",
       startPath,
-      probe: { target, stage: stage as ProbeStage },
+      probe,
       captureLimit: profile.execution.captureLimit,
     });
     const projection = healingProjection(receipt, stage as ProbeStage, tiers, headedMode);
@@ -134,6 +141,8 @@ export function healingProjection(
       visible: item.visible ?? null,
       enabled: item.enabled ?? null,
       editable: item.editable ?? null,
+      // Present only when the deterministic tier abstained and candidate capture was requested.
+      ...(item.domEvidence ? { domEvidence: item.domEvidence } : {}),
     })),
     cleanup: receipt.cleanup,
     executionIdDigest: digest(receipt.executionId),

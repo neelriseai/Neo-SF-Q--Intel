@@ -70,7 +70,7 @@ export interface BrowserWorkerRequest {
   candidate?: CandidateIntent;
   businessAction?: BusinessActionIntent;
   // Read-only staged locator probe. It never clicks, fills, submits or saves.
-  probe?: { target: unknown; stage: ProbeStage };
+  probe?: { target: unknown; stage: ProbeStage; captureCandidates?: boolean };
   captureLimit?: number;
 }
 
@@ -673,7 +673,9 @@ export class BrowserWorker {
         .first()
         .waitFor({ state: "attached", timeout: this.#operationTimeoutMs })
         .catch(() => undefined);
-      const report = await runLocatorProbe(page, probe.target, probe.stage);
+      const report = await runLocatorProbe(page, probe.target, probe.stage, {
+        captureCandidates: probe.captureCandidates === true,
+      });
       return {
         ...base,
         status: report.status === "PASSED" ? "PASSED" : "FAILED",

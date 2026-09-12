@@ -138,3 +138,101 @@ Playwright MCP: dev-time inspector only, never in the product path (§6).
 Value: would have replaced five blind iterations on the lookup selector.
 Install as a local dev dependency; no product code may import or depend on it.
 ```
+
+## 12. Rev 3 — evidence graph corrects the healing input model (R0 spike, 2026-09-12)
+
+Rev 2 (§§1-11 above) is not deleted. Where Rev 3 conflicts with it, Rev 2 is superseded and the
+conflict is called out explicitly below; everything else in §§1-11 stands.
+
+```
+[INPUT_MODEL] corrected. The healing agent receives:
+  · knowledge repo (intent)                        — unchanged from §7 T-INTENT
+  · failed-step log (step + element + action)       — unchanged
+  · change delta from the EVIDENCE graph (git-diff derived) — NEW, replaces §1 T-GRAPH's source
+  · app metadata                                    — unchanged from §2/§7 T-META
+  · signature store (if history exists)             — unchanged from §7 T-SIG
+  · live DOM candidates fetched on the fly          — unchanged from §1/§3 T-DOM
+  · sf CLI/API as optional escalation                — NEW, not in Rev 2
+```
+
+```
+[RETIRED] the Salesforce app knowledge graph (knowledge/application-graph.json) as a healing
+input. SUPERSEDES §7's `[DONE] T-GRAPH  graph_neighborhood(entity, hops, cap) -> edge list` line:
+that tool's rendering mechanism (bounded edge-list neighborhood, sorted, deduplicated,
+truncation-aware — src/neo_sf_q_intel/context_feeds.py::graph_neighborhood) is reusable, but the
+graph it was pointed at (knowledge/application-graph.json) is not the healing-time source going
+forward. The evidence graph supersedes it: the evidence graph is already derived from git diff
+over the app, so it does not need a second, separately-maintained knowledge graph to tell healing
+what changed.
+```
+
+```
+[TRUTH_GATE] change_delta(entity) DELETE -> DO NOT HEAL, the failure is correct — the element is
+             supposed to be gone; healing over that would hide a real regression.
+             MODIFY     -> heal, but declare the result as an intended-change heal, not a drift heal.
+             none       -> no delta for this entity -> this is drift -> heal as today.
+```
+
+```
+[R0_MEASURED] (source: R0 spike, quality/reviews/agent-exchanges/R0-spike-return.md)
+  Persistence today: the evidence graph (GraphProductionArtifact) is persisted ONLY nested inside
+    candidate_assurance_bundles.bundle_document, keyed by bundle_sha256 (a digest of the whole
+    bundle) — there is no per-entity index. The live host SQLite store is missing the
+    candidate_assurance_bundles table entirely, so zero persisted copies exist on this host today.
+  Cost:      capture (cold) 18,535 ms · verify_current is a FULL re-capture, so capture+verify is
+             ~38 s total. Two warm in-process repeats: 18,427 ms and 19,139 ms — cold vs warm is
+             not the lever here, tree size is.
+  Shape:     388 BASE nodes · 402 CANDIDATE nodes · 17 delta entries.
+  Node id grammar CONFIRMED: field:{ObjectApiName}.{FieldApiName} (e.g.
+             field:Opportunity.Regional_VP_Approver__c), object:{Name}, apex:{ClassName}, and
+             other kind:{identity} forms. Edge ids are edge:{32 hex}, NOT human-readable — an
+             edge cannot be recognised or diffed by eye, only by id.
+  Per-entity lookup impossible without a full tree walk: a node's owner paths and digests are
+             only well-defined after merging across every file that owns it (attributes and
+             owner_paths accumulate, evidence_state can be promoted INFERRED -> CONFIRMED across
+             that merge), so there is no cheap way to ask about one entity in isolation without
+             having already produced the whole artifact.
+```
+
+```
+[DECISION] Access path = option B: produce the evidence-graph artifact once per healing run,
+  cache it in-process keyed on (repository_identity_sha256, verified_change_manifest_sha256),
+  hard-expire at the artifact's valid_until, and fail closed with an explicit reason code on
+  expiry or a key mismatch — never serve a stale answer silently.
+  Options C (persist to candidate_assurance_bundles and read that) and D (a new indexed table)
+  were REJECTED: the live SQLite store lacks candidate_assurance_bundles outright (would need a
+  migration before working at all), and both add a second authority for derived evidence that can
+  drift from delta_sha256/receipt_sha256 with no re-validation on read.
+  REFINEMENT: produce the graph BEFORE the browser session is acquired, never lazily inside it. A
+  ~19 s stall inside a one-shot ephemeral frontdoor session (SF-L06 session containment, §1 ARCH)
+  eats directly into that session's window — the production cost must be paid outside the clock
+  that the browser session is running against.
+```
+
+```
+[DECISION] change_neighborhood defaults to side=CANDIDATE (the live org reflects the candidate
+  tree, i.e. what the current source project actually declares now); BASE is selectable
+  explicitly for callers that need the pre-change side.
+```
+
+```
+[OPEN] Does the healing accessor need the full verify_current path (~38 s, capture + re-capture
+  verification) or may it serve off a capture whose digests self-validate on construction alone
+  (~19 s, capture only)? UNRESOLVED. The existing convention on the analyze path
+  (service.analyze_current_candidate) is capture+verify; choosing capture-only for the healing
+  accessor would be a deliberate, documented relaxation of that convention, not a silent one.
+  Must be decided before R1 writes the accessor, since it changes both the cache key contract and
+  the per-run cost the [DECISION] above is paying for.
+```
+
+```
+[RESLOT] R1 (the change_delta / change_neighborhood accessor and its two MCP tools) was
+  estimated 30m by opus-5, before the access path was known. R0 measured the real access path at
+  90m (range 75-110m): a synthetic fixture git repo for functional tests (20-30m of that), bounded
+  hop traversal with deterministic ordering and a new response model, ~10 test cases across two
+  tools to satisfy AGENTS.md's five verification-case classes, and a fail-closed test per cache
+  invalidation path (expiry, manifest-digest change, pipeline unavailable). Recorded explicitly as
+  an estimation lesson: a chunk estimated without knowing its access path can miss by 3x, and the
+  fix is not "pad the estimate" but "spike the access path before sizing the chunk" — which is
+  what R0 was for.
+```

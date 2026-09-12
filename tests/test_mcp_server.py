@@ -25,6 +25,7 @@ async def test_mcp_2_server_registers_and_executes_shared_services() -> None:
         "inspect_salesforce",
         "knowledge_index",
         "knowledge_section",
+        "metadata_lookup",
         "run_live_salesforce_baseline",
         "search_evidence",
     }
@@ -161,6 +162,88 @@ async def test_context_feed_error_code_surfaces_without_any_path_text(
     assert "knowledge-repo" not in message
 
 
+FIELD_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Regional_VP_Approver__c</fullName>
+    <referenceTo>User</referenceTo>
+    <required>false</required>
+    <type>Lookup</type>
+    <label>Regional VP Approver</label>
+</CustomField>
+"""
+
+
+def _source_project(root: Path) -> Path:
+    fields = root / "force-app" / "main" / "default" / "objects" / "Opportunity" / "fields"
+    fields.mkdir(parents=True, exist_ok=True)
+    (fields / "Regional_VP_Approver__c.field-meta.xml").write_bytes(FIELD_XML.encode("utf-8"))
+    return root
+
+
+async def test_metadata_lookup_tool_reads_the_configured_source_project(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    settings = Settings(
+        _env_file=None,
+        allow_llm=False,
+        salesforce_app_root=_source_project(tmp_path),
+    )
+    server = build_mcp(settings, AssuranceService(source()))
+
+    result = await server.call_tool(
+        "metadata_lookup",
+        {"object_api_name": "Opportunity", "field_api_name": "Regional_VP_Approver__c"},
+    )
+
+    assert not result.is_error
+    body = json.loads(result.content[0].text)
+    assert body["type"] == "Lookup"
+    assert body["label"] == "Regional VP Approver"
+    assert body["referenceTo"] == ["User"]
+    assert body["picklistValues"] == []
+
+
+async def test_metadata_lookup_tool_reports_codes_without_leaking_any_path(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    settings = Settings(
+        _env_file=None,
+        allow_llm=False,
+        salesforce_app_root=_source_project(tmp_path),
+    )
+    server = build_mcp(settings, AssuranceService(source()))
+
+    with pytest.raises(ToolError) as error:
+        await server.call_tool(
+            "metadata_lookup",
+            {"object_api_name": "../escape", "field_api_name": "Regional_VP_Approver__c"},
+        )
+
+    message = str(error.value)
+    assert message.endswith("OBJECT_NAME_INVALID")
+    assert "/" not in message
+    assert "\\" not in message
+    assert tmp_path.name not in message
+
+
+async def test_metadata_lookup_tool_reports_an_unconfigured_source_project(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    settings = Settings(_env_file=None, allow_llm=False, salesforce_app_root=None)
+    server = build_mcp(settings, AssuranceService(source()))
+
+    with pytest.raises(ToolError) as error:
+        await server.call_tool(
+            "metadata_lookup",
+            {"object_api_name": "Opportunity", "field_api_name": "Regional_VP_Approver__c"},
+        )
+
+    assert str(error.value).endswith("SALESFORCE_ROOT_UNAVAILABLE")
+
+
 async def test_graph_neighborhood_tool_reads_the_configured_salesforce_application_graph(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -200,3 +283,60 @@ async def test_graph_neighborhood_tool_returns_no_edges_for_an_unknown_entity(
     assert body["edges"] == []
     assert body["edgeCount"] == 0
     assert body["truncated"] is False
+
+
+def _forbid_org_transports(monkeypatch) -> None:
+    """Fail the test outright if a tool call reaches a live org instead of the source project."""
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("The metadata_lookup tool must not invoke a live Salesforce transport")
+
+    monkeypatch.setattr("subprocess.run", forbidden)
+    monkeypatch.setattr("neo_sf_q_intel.salesforce_cli.SalesforceCLI.org_status", forbidden)
+    monkeypatch.setattr("neo_sf_q_intel.salesforce_cli.SalesforceCLI.rest_get", forbidden)
+
+
+async def test_metadata_lookup_tool_answers_without_invoking_any_org_transport(
+    tmp_path: Path, monkeypatch
+) -> None:
+    _forbid_org_transports(monkeypatch)
+    monkeypatch.chdir(tmp_path)
+    settings = Settings(
+        _env_file=None,
+        allow_llm=False,
+        salesforce_app_root=_source_project(tmp_path),
+    )
+    server = build_mcp(settings, AssuranceService(source()))
+
+    result = await server.call_tool(
+        "metadata_lookup",
+        {"object_api_name": "Opportunity", "field_api_name": "Regional_VP_Approver__c"},
+    )
+
+    assert not result.is_error
+    body = json.loads(result.content[0].text)
+    assert body["type"] == "Lookup"
+    assert body["label"] == "Regional VP Approver"
+    assert body["referenceTo"] == ["User"]
+
+
+async def test_metadata_lookup_tool_reports_an_absent_field_without_describing_the_org(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """An undeclared standard field must be reported absent, never resolved by an org describe."""
+    _forbid_org_transports(monkeypatch)
+    monkeypatch.chdir(tmp_path)
+    settings = Settings(
+        _env_file=None,
+        allow_llm=False,
+        salesforce_app_root=_source_project(tmp_path),
+    )
+    server = build_mcp(settings, AssuranceService(source()))
+
+    with pytest.raises(ToolError) as error:
+        await server.call_tool(
+            "metadata_lookup",
+            {"object_api_name": "Opportunity", "field_api_name": "Amount"},
+        )
+
+    assert str(error.value).endswith("FIELD_METADATA_NOT_FOUND")
