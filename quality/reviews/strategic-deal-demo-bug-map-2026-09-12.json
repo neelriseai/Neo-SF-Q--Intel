@@ -22,7 +22,9 @@
         "api-candidate-analysis.json",
         "direct-service-candidate-analysis.json"
       ],
-      "status": "OPEN"
+      "status": "FIXED",
+      "confirmedRootCause": "Two independent faults, not one. (a) PROVIDER_CREDENTIAL_SOURCE_CONFLICT came from an OPENAI_API_KEY exported in the parent shell that differed from .env; the launcher now sanitizes the child environment instead of weakening the guard. (b) FOUNDATION_PIPELINE_UNAVAILABLE was a separate precondition: the configured Salesforce app repository had no candidate changes (VERIFIED_CHANGE_CAPTURE FAILED with NO_CANDIDATE_CHANGES), so the demo candidate was reintroduced and the AUT catalog rebuilt.",
+      "verificationEvidence": "POST /api/v1/assurance-runs/analyze-current-candidate returns HTTP 200 with 2 side analyses and 6 model-backed specialist captures; release_eligible stays false and evidence stays INCOMPLETE."
     },
     {
       "id": "DEMO-LIVE-BASELINE-001",
@@ -40,7 +42,9 @@
         "api-live-salesforce-baseline.json",
         "api-live-operator-advisory.json"
       ],
-      "status": "OPEN"
+      "status": "PARTIAL",
+      "confirmedRootCause": "Not one bug but four layers. (a) The machine-local phase policy had expired (15-minute validity) and was regenerated and re-pinned. (b) The baseline enrollment had expired a day earlier (21-minute validity) and was regenerated from a fresh live six-step classification (caip-dev, DEVELOPER_EDITION, v67.0). (c) Authorized target digests are candidate-specific and must be recomputed whenever the candidate changes. (d) The remaining blocker is a product defect, not stale configuration: three APEX_TEST derivations are UNSUPPORTED, and any unsupported derivation blocks plan composition with no partial-subset fallback.",
+      "verificationEvidence": "Blocker advanced from LOCAL_VALIDATION_PHASE_POLICY_INVALID to CLASSIFICATION_AUTHORITY_INVALID to LIVE_BASELINE_TARGET_POLICY_DENIED to LIVE_BASELINE_PLAN_BLOCKED. Read-only baseline still returns BLOCKED."
     },
     {
       "id": "DEMO-LIVE-BA-001",
@@ -57,7 +61,9 @@
       "evidenceFiles": [
         "live-business-action.jsonl"
       ],
-      "status": "OPEN"
+      "status": "FIXED",
+      "confirmedRootCause": "The original hypothesis (incomplete Salesforce save contract or payload) was disproved: the identical record saved through the API. Four distinct defects were found. (1) CloseDate was supplied as ISO 2026-12-15 while the org UI requires MMM d, yyyy, so lightning-record-edit-form blocked submission client-side and never dispatched onsubmit. (2) Strategic_Deal__c is a Boolean rendered as a checkbox; every fill strategy excluded checkboxes and the fallback assigned the string \"true\", so LDS rejected the save. (3) On Windows the CLI launches through cmd.exe, where resolveLaunch requires every argument to match ^[A-Za-z0-9._-]+$; a SOQL string can never satisfy it, so persistence verification always failed. (4) The submit click targeted the lightning-button host rather than its interactive descendant.",
+      "verificationEvidence": "Live headed run status PASSED: success text matched, record persisted in caip-dev, StageName and Discount__c asserted true, context and browser closed."
     },
     {
       "id": "DEMO-BROWSER-001",
@@ -73,7 +79,9 @@
       "evidenceFiles": [
         "playwright-browser-hour4.log"
       ],
-      "status": "OPEN"
+      "status": "FIXED",
+      "confirmedRootCause": "The production coordinator no longer hardcodes the mutation flag; it reads the host profile and refuses mutation unless the trusted enrollment permits BUSINESS_ACTION. The stale source-literal assertion was replaced by an assertion on that gate, with the behavioural proof (PROFILE_BINDING_MISMATCH) already covered in salesforce-browser-coordinator.spec.ts.",
+      "verificationEvidence": "159/159 Playwright browser contract tests pass; TypeScript compiles clean."
     },
     {
       "id": "DEMO-BOOT-001",
@@ -90,7 +98,9 @@
         "platform-health.json",
         "platform-health-after-api-console.json"
       ],
-      "status": "OPEN"
+      "status": "FIXED",
+      "confirmedRootCause": "scripts/run/start-platform.ps1 starts the neo-api console entrypoint and the dashboard on port 3100 after clearing inherited provider variables.",
+      "verificationEvidence": "API and dashboard reachable; health reports ready."
     },
     {
       "id": "DEMO-BROWSER-UI-001",
@@ -105,7 +115,37 @@
       "evidenceFiles": [
         "live-profile.jsonl"
       ],
-      "status": "OPEN"
+      "status": "FIXED",
+      "confirmedRootCause": "Added an operator-only visible-browser mode. The trusted profile still pins headless: true; NEO_BROWSER_HEADED=true changes only the local launch surface and is reported as headedMode in the projection. NEO_BROWSER_SLOW_MO_MS adds bounded pacing for a watched run.",
+      "verificationEvidence": "Live headed run executed against caip-dev with headedMode=true and clean context/browser closure."
+    },
+    {
+      "id": "DEMO-TRUTH-001",
+      "scenarioStep": "Business-action browser acceptance reporting",
+      "capabilityIds": [
+        "automation.browser-worker",
+        "observability.agent-trace"
+      ],
+      "symptom": "businessAction.submitted reported true on runs where the form was never submitted.",
+      "confirmedRootCause": "submitted is derived from lifecycle.includes(\"CANDIDATE_DISCOVERED\"), which only proves a submit candidate was located, not that a submission occurred.",
+      "severity": "P2",
+      "priority": 7,
+      "status": "OPEN",
+      "nextAction": "Derive submitted from the actual click plus an observed post-submit state transition, or rename the field to submitCandidateFound."
+    },
+    {
+      "id": "DEMO-APEX-001",
+      "scenarioStep": "Live baseline target plan composition",
+      "capabilityIds": [
+        "runtime.salesforce-target-planning",
+        "quality.live-test-execution"
+      ],
+      "symptom": "Three APEX_TEST derivations are UNSUPPORTED, blocking LIVE_BASELINE plan composition (LIVE_BASELINE_PLAN_BLOCKED).",
+      "confirmedRootCause": "Source-closed Apex class/method obligation inventory is incomplete; unsupported derivations block plan composition by design, with no class-wide or partial-subset fallback.",
+      "severity": "P1",
+      "priority": 8,
+      "status": "OPEN",
+      "nextAction": "Close the source-derived Apex method inventory so each obligation derives a supported target, then recompute authorized target digests and rerun the read-only baseline."
     }
   ],
   "fixPlanMinutes": [
@@ -133,5 +173,11 @@
       "window": "115-120",
       "bugId": "Retest/report"
     }
-  ]
+  ],
+  "fixWindow": {
+    "startedAt": "2026-09-12T05:32:26+05:30",
+    "hardStopAt": "2026-09-12T07:32:26+05:30",
+    "evidenceDirectory": ".runtime/demo-evidence/fixwindow-20260912-053226",
+    "operatingRule": "Timeboxed test-driven fixes; unfixed items keep an exact next action."
+  }
 }

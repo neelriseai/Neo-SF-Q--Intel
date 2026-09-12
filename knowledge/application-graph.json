@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "5a557e938555ceae396455bbec0966028f6c814d1b3e507b4f6b22f40aaaa8f9",
+  "sourceSnapshot": "d130a1a1e9cabc55941468f53b1f8c67fc5dfe022670ae09e75d29a65855ecaa",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -442,6 +442,14 @@
       "kind": "file",
       "label": "25-strategic-deal-demo-test-pass-2026-09-12.md",
       "source": "Docs/25-strategic-deal-demo-test-pass-2026-09-12.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
+      "kind": "file",
+      "label": "26-strategic-deal-demo-fix-window-2026-09-12.md",
+      "source": "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
       "category": "reference-documentation",
       "authority": "reference-only"
     },
@@ -1386,6 +1394,14 @@
       "kind": "file",
       "label": "check_governance_policy.py",
       "source": "scripts/quality/check_governance_policy.py",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:scripts/run/start-platform.ps1",
+      "kind": "file",
+      "label": "start-platform.ps1",
+      "source": "scripts/run/start-platform.ps1",
       "category": "project",
       "authority": "supporting"
     },
@@ -4450,6 +4466,16 @@
       "to": "file:Docs/24-strategic-deal-change-assurance-demo.md"
     },
     {
+      "from": "file:Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
+      "relation": "references",
+      "to": "file:Docs/24-strategic-deal-change-assurance-demo.md"
+    },
+    {
+      "from": "file:Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
+      "relation": "references",
+      "to": "file:Docs/25-strategic-deal-demo-test-pass-2026-09-12.md"
+    },
+    {
       "from": "file:Docs/README.md",
       "relation": "references",
       "to": "file:Docs/00-product-scope.md"
@@ -4553,6 +4579,11 @@
       "from": "file:Docs/README.md",
       "relation": "references",
       "to": "file:Docs/25-strategic-deal-demo-test-pass-2026-09-12.md"
+    },
+    {
+      "from": "file:Docs/README.md",
+      "relation": "references",
+      "to": "file:Docs/26-strategic-deal-demo-fix-window-2026-09-12.md"
     },
     {
       "from": "file:README.md",

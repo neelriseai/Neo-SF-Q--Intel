@@ -375,7 +375,10 @@ test("production coordinator source remains read-only and cannot dispatch recove
     fs.readFile(new URL("../src/salesforce-browser-coordinator.ts", import.meta.url), "utf8"),
   );
   expect(source).toContain('mode: "READ_ONLY_DOM_CAPTURE"');
-  expect(source).toContain("mutationActionsEnabled: false");
+  // The coordinator no longer hardcodes the mutation flag: it reads the host profile and refuses
+  // mutation unless the trusted enrollment itself permits BUSINESS_ACTION. The behavioral proof of
+  // that gate (PROFILE_BINDING_MISMATCH) lives in salesforce-browser-coordinator.spec.ts.
+  expect(source).toContain('enrollment.permittedModes.includes("BUSINESS_ACTION")');
   expect(source).not.toContain("BrowserRecoveryExecutor");
   expect(source).not.toContain("CLICK_REVERSIBLE_TOGGLE");
 });

@@ -26,6 +26,7 @@ not ingested wholesale.
 18. [Frozen three-hour agentic live vertical](22-frozen-three-hour-agentic-live-vertical.md)
 19. [Strategic Deal Change Assurance Demo](24-strategic-deal-change-assurance-demo.md)
 20. [Strategic Deal demo test pass and bug map — 2026-09-12](25-strategic-deal-demo-test-pass-2026-09-12.md)
+21. [Strategic Deal demo fix window — 2026-09-12](26-strategic-deal-demo-fix-window-2026-09-12.md)
 
 ## Advisory status
 

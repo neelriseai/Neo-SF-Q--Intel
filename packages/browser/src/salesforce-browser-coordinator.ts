@@ -42,13 +42,14 @@ export interface ProductionBrowserFactory {
 
 export class PlaywrightChromiumBrowserFactory implements ProductionBrowserFactory {
   constructor(
-    private readonly options: { headless: true; launchTimeoutMs: number },
+    private readonly options: { headless: boolean; launchTimeoutMs: number; slowMoMs?: number },
   ) {}
 
   launch(): Promise<Browser> {
     return chromium.launch({
       headless: this.options.headless,
       timeout: this.options.launchTimeoutMs,
+      slowMo: this.options.slowMoMs,
     });
   }
 }

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "5a557e938555ceae396455bbec0966028f6c814d1b3e507b4f6b22f40aaaa8f9",
+  "sourceSnapshot": "d130a1a1e9cabc55941468f53b1f8c67fc5dfe022670ae09e75d29a65855ecaa",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1584,9 +1584,14 @@
       "sha256": "dbfa23ee4f028f4790f1a8f9a5e340cdf3cdadd4a2ec17bbc9cb19c80bcef6cf"
     },
     {
+      "path": "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
+      "category": "reference-documentation",
+      "sha256": "19cd420cf02fd4f4e3b7d462941ec4b46fa012e6dfe6dbe718db7d1aa80c1d3b"
+    },
+    {
       "path": "Docs/README.md",
       "category": "canonical-documentation",
-      "sha256": "745f69687e1602aa3d4b6d874c2259f5d38693a02c3bbfe48f44b9944dc67a86"
+      "sha256": "8c615f0426288a932e29e7e77dcbf845af18347bbc6d17f688763463dd22c4f6"
     },
     {
       "path": "Docs/deep-research-report.md",
@@ -1896,7 +1901,7 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "2b10a92bfca3708553b1dcf37b4bfd67114dbef893c8f71b494bad1702936633"
+      "sha256": "94ede0a7b741ad363b46a8592e212f66c2770fe61ef9bb8deb17b042ae8e13e5"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
@@ -1906,12 +1911,12 @@
     {
       "path": "packages/browser/src/live-business-action-cli.ts",
       "category": "browser-runtime",
-      "sha256": "5d8eeac85142a256edadb8a148e3247ac51dd7df682869eb2dab824fe6557b30"
+      "sha256": "1b71cea2eded095a4729a8eb72b9b91149c08897036b28b7fe01427725c00c6a"
     },
     {
       "path": "packages/browser/src/live-candidate-readback-cli.ts",
       "category": "browser-runtime",
-      "sha256": "a7dcc0142a60aa99c2d62476deeb178838d87216d4614a9faf2bc72011223a40"
+      "sha256": "e4a5d22902f8de70dd778e3783a4608f001dda0e02c7dd48020b4e4fd693344a"
     },
     {
       "path": "packages/browser/src/live-profile-cli.ts",
@@ -1931,7 +1936,7 @@
     {
       "path": "packages/browser/src/salesforce-browser-coordinator.ts",
       "category": "browser-runtime",
-      "sha256": "78ac7f31fd2ff1bfcb07eed8d8d86ebeb0800026fdf832527907822852e0098e"
+      "sha256": "1881ff3348ef6a97cec21e513c31243c816979ad817b7de52a91ecb7d8c41bf4"
     },
     {
       "path": "packages/browser/src/salesforce-cli-session.ts",
@@ -1941,7 +1946,7 @@
     {
       "path": "packages/browser/tests/browser-recovery.spec.ts",
       "category": "test",
-      "sha256": "b0e0e0e565acf52ec421056917f570eb8b20b468f6df6b6b9083f5f689be7c31"
+      "sha256": "63694ae140349825a747334bebc7730d3721271995ecd0f69b757571c61b284f"
     },
     {
       "path": "packages/browser/tests/browser-worker.spec.ts",
@@ -2141,12 +2146,12 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "a123af71a25ec7e9fcd3fd915b0c030ea10e7aa36cdfeece3a77cd9e094bd07e"
+      "sha256": "510d44ff8ec9884d89dbf89206bdaf4f1226f8137eec8ad0fba15f4a8b0b6de7"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
       "category": "project",
-      "sha256": "b94867ae404e8b01539d44ce6278bc9187c0373cee8f3974e92173a571cb4f49"
+      "sha256": "c4253c2e88705396065327069322c3776701bba4bd01e593b3072b03a5a8de3e"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -2172,6 +2177,11 @@
       "path": "scripts/quality/check_governance_policy.py",
       "category": "project",
       "sha256": "cb71873ca43c4217febfce976f296f8fb4899b81e93d2bf63e1f7a3b7c0c63f4"
+    },
+    {
+      "path": "scripts/run/start-platform.ps1",
+      "category": "project",
+      "sha256": "70c25198a896cdb5e5c187af0088c8f1daffd3619c830222a8339fbbc9101fea"
     },
     {
       "path": "src/neo_sf_q_intel/__init__.py",

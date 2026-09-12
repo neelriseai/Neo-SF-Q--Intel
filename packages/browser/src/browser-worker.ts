@@ -107,6 +107,14 @@ export interface BrowserWorkerReceipt {
     abstainedFieldCount?: number;
     strategies?: readonly string[];
   };
+  postSubmit?: {
+    alertPresent: boolean;
+    alertTextDigest?: string;
+    alertTextLength?: number;
+    statusPresent: boolean;
+    statusTextDigest?: string;
+    statusTextLength?: number;
+  };
   cleanup: {
     contextClosed: boolean;
     browserClosed: boolean;
@@ -752,7 +760,14 @@ export class BrowserWorker {
       }
       lifecycle.push("CANDIDATE_DISCOVERED");
       try {
-        await submitLocator.click({ timeout: this.#operationTimeoutMs });
+        // Salesforce base components expose the real control inside the custom element. Clicking the
+        // host can land outside the interactive child, so prefer that child when it is present.
+        const interactive = submitLocator
+          .first()
+          .locator('button,input[type="submit"],[role="button"]')
+          .first();
+        const clickTarget = (await interactive.count()) > 0 ? interactive : submitLocator.first();
+        await clickTarget.click({ timeout: this.#operationTimeoutMs });
         await page.getByRole("status").filter({ hasText: action.successText }).first().waitFor({
           state: "visible",
           timeout: this.#operationTimeoutMs,
@@ -772,6 +787,7 @@ export class BrowserWorker {
             abstainedFieldCount,
             strategies,
           },
+          postSubmit: await capturePostSubmitSignal(page, this.#operationTimeoutMs),
           error: { class: "CAPTURE_FAILED", code: "BUSINESS_ACTION_ASSERTION_FAILED" },
         };
       }
@@ -978,6 +994,21 @@ async function fillBusinessField(
     // Continue to scoped descendants and Salesforce base-component fallbacks.
   }
 
+  // Salesforce Boolean fields render a real checkbox, which cannot be filled with text. Set the
+  // checked state from the declared value so LDS receives a Boolean rather than a string.
+  const checkbox = scope.locator('input[type="checkbox"]').first();
+  try {
+    if (await checkbox.count()) {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === "true" || normalized === "false") {
+        await checkbox.setChecked(normalized === "true", { timeout: timeoutMs });
+        return "salesforce-checkbox-field";
+      }
+    }
+  } catch {
+    // Continue to the remaining strategies.
+  }
+
   const native = scope.locator(
     'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),textarea,[role="textbox"],[role="spinbutton"],[role="combobox"]',
   ).first();
@@ -1022,6 +1053,36 @@ async function fillBusinessField(
     return applied ? "salesforce-lightning-input-field" : undefined;
   } catch {
     return undefined;
+  }
+}
+
+async function capturePostSubmitSignal(
+  page: Page,
+  timeoutMs: number,
+): Promise<BrowserWorkerReceipt["postSubmit"]> {
+  const read = async (role: "alert" | "status") => {
+    try {
+      const locator = page.getByRole(role).first();
+      if ((await locator.count()) === 0) return undefined;
+      const text = ((await locator.textContent({ timeout: timeoutMs })) ?? "").trim();
+      return text.length > 0 ? { digest: digest(text), length: text.length } : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  try {
+    const alert = await read("alert");
+    const status = await read("status");
+    return {
+      alertPresent: alert !== undefined,
+      alertTextDigest: alert?.digest,
+      alertTextLength: alert?.length,
+      statusPresent: status !== undefined,
+      statusTextDigest: status?.digest,
+      statusTextLength: status?.length,
+    };
+  } catch {
+    return { alertPresent: false, statusPresent: false };
   }
 }
 

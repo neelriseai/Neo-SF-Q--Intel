@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "two-hour-operator-demo-scope-freeze-2026-09-11",
+  "reviewId": "strategic-deal-demo-fix-window-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -24,6 +24,7 @@
     "Docs/23-two-hour-live-demo-execution-queue.md",
     "Docs/24-strategic-deal-change-assurance-demo.md",
     "Docs/25-strategic-deal-demo-test-pass-2026-09-12.md",
+    "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
     "Docs/README.md",
     "README.md",
     "apps/web/src/app/page.tsx",
@@ -57,6 +58,7 @@
     "migrations/001_assurance_runs.sql",
     "migrations/002_remove_postgres_embeddings.sql",
     "migrations/003_outcome_memory.sql",
+    "packages/browser/package.json",
     "packages/browser/src/browser-recovery.ts",
     "packages/browser/src/browser-worker.ts",
     "packages/browser/src/healing-probe.ts",
@@ -67,18 +69,23 @@
     "packages/browser/src/locator-healer.ts",
     "packages/browser/src/salesforce-browser-coordinator.ts",
     "packages/browser/src/salesforce-cli-session.ts",
-    "packages/browser/package.json",
+    "packages/browser/tests/browser-recovery.spec.ts",
+    "packages/browser/tests/browser-worker.spec.ts",
+    "packages/browser/tests/live-profile-cli.spec.ts",
+    "packages/browser/tests/salesforce-browser-coordinator.spec.ts",
     "packages/browser/tsconfig.live.json",
+    "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
     "scripts/catalog/build_project_index.py",
     "scripts/quality/check_genericity.py",
+    "scripts/run/start-platform.ps1",
     "src/neo_sf_q_intel/analysis.py",
     "src/neo_sf_q_intel/api.py",
     "src/neo_sf_q_intel/candidate_assurance.py",
     "src/neo_sf_q_intel/candidate_live_targets.py",
     "src/neo_sf_q_intel/candidate_target_compiler.py",
-    "src/neo_sf_q_intel/classification_bootstrap.py",
     "src/neo_sf_q_intel/change_seed.py",
     "src/neo_sf_q_intel/change_verification.py",
+    "src/neo_sf_q_intel/classification_bootstrap.py",
     "src/neo_sf_q_intel/config.py",
     "src/neo_sf_q_intel/domain.py",
     "src/neo_sf_q_intel/execution_assertions.py",
@@ -96,9 +103,9 @@
     "src/neo_sf_q_intel/local_validation.py",
     "src/neo_sf_q_intel/local_validation_phase.py",
     "src/neo_sf_q_intel/local_validation_runner.py",
+    "src/neo_sf_q_intel/mcp_server.py",
     "src/neo_sf_q_intel/metadata_recovery.py",
     "src/neo_sf_q_intel/metadata_recovery_host.py",
-    "src/neo_sf_q_intel/mcp_server.py",
     "src/neo_sf_q_intel/operation_seed.py",
     "src/neo_sf_q_intel/outcome_repository.py",
     "src/neo_sf_q_intel/path_replay.py",
@@ -107,19 +114,16 @@
     "src/neo_sf_q_intel/preflight.py",
     "src/neo_sf_q_intel/propagation.py",
     "src/neo_sf_q_intel/providers.py",
+    "src/neo_sf_q_intel/reasoning_workflow.py",
     "src/neo_sf_q_intel/release_input.py",
     "src/neo_sf_q_intel/repository.py",
-    "src/neo_sf_q_intel/reasoning_workflow.py",
     "src/neo_sf_q_intel/salesforce_cli.py",
     "src/neo_sf_q_intel/salesforce_source.py",
     "src/neo_sf_q_intel/service.py",
     "src/neo_sf_q_intel/specialist.py",
     "src/neo_sf_q_intel/subprocess_environment.py",
     "tests/test_candidate_assurance.py",
-    "tests/test_live_campaign_status.py",
-    "packages/browser/tests/browser-worker.spec.ts",
-    "packages/browser/tests/live-profile-cli.spec.ts",
-    "packages/browser/tests/salesforce-browser-coordinator.spec.ts"
+    "tests/test_live_campaign_status.py"
   ],
   "reviewers": [
     "astra_final_solution_review",
@@ -135,7 +139,8 @@
     "astra_live_llm_provider_review",
     "live_browser_profile_diagnostic_review",
     "two_hour_operator_demo_scope_review",
-    "astra_live_vertical_review"
+    "astra_live_vertical_review",
+    "opus5_demo_fix_window_review"
   ],
   "findings": [
     {
@@ -397,6 +402,11 @@
       "code": "STRATEGIC_DEAL_DEMO_TEST_PASS_BUG_MAP",
       "severity": "P1",
       "resolution": "The 2026-09-12 test-first Strategic Deal demo pass records sanitized evidence locations, pass/fail results, six scenario-mapped bugs, RCA hypotheses, cross-dependencies, severity/priority and a two-hour fix allocation. It preserves the live claim boundary: API LLM advisory, live baseline, full business action acceptance, visible live browser mode and production readiness remain unclaimed until retested evidence passes."
+    },
+    {
+      "code": "DEMO_FIX_WINDOW_LIVE_BUSINESS_ACTION",
+      "severity": "P1",
+      "resolution": "Five demo bugs closed in a timeboxed pass. The provider guard was not weakened: the new launcher clears inherited provider variables so .env stays the single source. The browser mutation invariant was not weakened: the trusted profile still pins headless true and mutation still requires BUSINESS_ACTION in the trusted enrollment, while an operator-only headed mode and bounded slow motion affect only the local launch surface. The Windows cmd.exe argument allowlist was preserved by moving SOQL into a query file rather than relaxing the guard. A digest-only post-submit signal was added; it reports presence, length and digest and never raw DOM text. The live business action reached PASSED with the record persisted and independently verified, which is browser and persistence evidence only and remains release-ineligible with no signed campaign gate. Remaining blockers are recorded as DEMO-APEX-001 (UNSUPPORTED APEX_TEST derivations block baseline plan composition) and DEMO-TRUTH-001 (submitted can report true without a submission)."
     }
   ],
   "statusDowngrades": []

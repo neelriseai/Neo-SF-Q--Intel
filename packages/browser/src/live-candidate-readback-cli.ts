@@ -64,6 +64,9 @@ export async function runLiveCandidateReadbackCli(
     const expectedDigest = environment.NEO_BROWSER_PROFILE_SHA256;
     if (!expectedDigest) throw new BrowserCoordinatorError("PROFILE_NOT_TRUSTED");
     const profile = loadTrustedLiveBrowserProfile(raw, expectedDigest);
+    // Operator-only visible-browser mode. The trusted profile still pins headless: true;
+    // this opt-in changes only the local launch surface and is reported in the projection.
+    const headedMode = environment.NEO_BROWSER_HEADED === "true";
     const request = candidateReadbackRequest(environment);
     const expectedEnrollment = canonicalJson(profile.enrollment);
     const worker = new BrowserWorker({
@@ -76,7 +79,7 @@ export async function runLiveCandidateReadbackCli(
       operationTimeoutMs: profile.browser.operationTimeoutMs,
       launchBrowser: () =>
         new PlaywrightChromiumBrowserFactory({
-          headless: true,
+          headless: !headedMode,
           launchTimeoutMs: profile.browser.launchTimeoutMs,
         }).launch(),
     });
@@ -104,7 +107,7 @@ export async function runLiveCandidateReadbackCli(
       receipts,
       candidateStepContext(request),
     );
-    write(`${JSON.stringify(projection)}\n`);
+    write(`${JSON.stringify({ ...projection, headedMode })}\n`);
     return projection.status === "PASSED" ? 0 : 2;
   } catch (error) {
     const code = safeErrorCode(error);

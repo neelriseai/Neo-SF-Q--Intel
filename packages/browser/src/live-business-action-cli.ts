@@ -1,5 +1,5 @@
-import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { createHash, randomBytes } from "node:crypto";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import {
   BrowserWorker,
   type BrowserWorkerReceipt,
@@ -61,6 +61,14 @@ export async function runLiveBusinessActionCli(
     const expectedDigest = environment.NEO_BROWSER_PROFILE_SHA256;
     if (!expectedDigest) throw new BrowserCoordinatorError("PROFILE_NOT_TRUSTED");
     const profile = loadTrustedLiveBrowserProfile(raw, expectedDigest);
+    // Operator-only visible-browser mode. The trusted profile still pins headless: true;
+    // this opt-in changes only the local launch surface and is reported in the projection.
+    const headedMode = environment.NEO_BROWSER_HEADED === "true";
+    // Operator-only pacing for a watched demo run; bounded so it cannot stall an automated run.
+    const slowMoMs = Math.min(
+      Math.max(Number.parseInt(environment.NEO_BROWSER_SLOW_MO_MS ?? "0", 10) || 0, 0),
+      2000,
+    );
     if (!profile.execution.mutationActionsEnabled) {
       throw new BrowserCoordinatorError("BUSINESS_ACTION_NOT_AUTHORIZED");
     }
@@ -76,8 +84,9 @@ export async function runLiveBusinessActionCli(
       operationTimeoutMs: profile.browser.operationTimeoutMs,
       launchBrowser: () =>
         new PlaywrightChromiumBrowserFactory({
-          headless: true,
+          headless: !headedMode,
           launchTimeoutMs: profile.browser.launchTimeoutMs,
+          slowMoMs: slowMoMs,
         }).launch(),
     });
     const broker = new SalesforceCliSessionBroker(profile.sessionBroker, worker);
@@ -95,7 +104,7 @@ export async function runLiveBusinessActionCli(
         ? await verifyPersistence(request.persistence, profile.sessionBroker)
         : persistenceNotRun(request.persistence, "BROWSER_ACTION_NOT_PASSED");
     const projection = liveBusinessActionProjection(receipt, request, persistence);
-    write(`${JSON.stringify(projection)}\n`);
+    write(`${JSON.stringify({ ...projection, headedMode, postSubmit: receipt.postSubmit })}\n`);
     return projection.status === "PASSED" ? 0 : 2;
   } catch (error) {
     write(`${JSON.stringify({
@@ -269,10 +278,15 @@ async function verifyPersistence(
   const fields = [...new Set(["Id", request.matchField, ...request.assertions.map((item) => item.fieldApiName)])];
   const soql = `SELECT ${fields.join(",")} FROM ${request.objectApiName} WHERE ${request.matchField} = '${soqlString(request.matchValue)}' ORDER BY LastModifiedDate DESC LIMIT 1`;
   const runner = new NodeSalesforceCliProcessRunner();
+  // On Windows the CLI launches through cmd.exe, where every argument must stay inside a strict
+  // token allowlist to prevent interpreter injection. A SOQL string can never satisfy it, so the
+  // query travels in a file with an allowlist-safe bare name instead of weakening that guard.
+  const queryFileName = `neo-soql-${randomBytes(8).toString("hex")}.txt`;
   try {
+    await writeFile(queryFileName, soql, { encoding: "utf8" });
     const result = await runner.run({
       executable: broker.salesforceExecutable ?? (process.platform === "win32" ? "sf.cmd" : "sf"),
-      arguments: ["data", "query", "--target-org", broker.targetOrgAlias, "--query", soql, "--json"],
+      arguments: ["data", "query", "--target-org", broker.targetOrgAlias, "--file", queryFileName, "--json"],
       timeoutMs: 60_000,
       maximumOutputBytes: 128 * 1024,
       environment: { SF_AUTOUPDATE_DISABLE: "true", SF_DISABLE_TELEMETRY: "true" },
@@ -300,6 +314,8 @@ async function verifyPersistence(
     };
   } catch {
     return persistenceNotRun(request, "PERSISTENCE_QUERY_FAILED");
+  } finally {
+    await rm(queryFileName, { force: true }).catch(() => undefined);
   }
 }
 
