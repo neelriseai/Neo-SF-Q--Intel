@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "f2dfeda52db114be737b9d3bcd48229622696687002991ad190dd52bfae4ff48",
+  "sourceSnapshot": "cfbb14177dcb8200f649f17b12449b104927c0f59649ce502a03a1d0b70127b2",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1606,7 +1606,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "90d780dbed62a43dffa55ab1ab235f946abcd48dc99bb7959b8343859fc9a25c"
+      "sha256": "2bfd7f37fd1280c22e4e8a6eac8f53591714c079abd2b458f5eaaa12fef8cb2a"
     },
     {
       "path": "Docs/29-d-series-requirement-test-matrix.md",
@@ -2021,7 +2021,7 @@
     {
       "path": "packages/browser/src/live-healing-cli.ts",
       "category": "browser-runtime",
-      "sha256": "2cb64118dee2f6114943b591fdbe956781ab9eaa50621d13c0a5fd17208606ce"
+      "sha256": "a2d9428d80e680d969fe6576cf052991ab6892b9cede67f3214e06c7c2722b77"
     },
     {
       "path": "packages/browser/src/live-profile-cli.ts",
@@ -2081,7 +2081,7 @@
     {
       "path": "packages/browser/tests/live-healing-cli.spec.ts",
       "category": "test",
-      "sha256": "7c3413c459c4b54e363516594fbf66d93586424d122a47ebd079d9453f34cdd5"
+      "sha256": "d4fac4a671b91110c3218b0f7e1750aa0fd04609b302211f85e443f7b841c5ef"
     },
     {
       "path": "packages/browser/tests/live-profile-cli.spec.ts",
@@ -2316,7 +2316,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "c9a458d7c10bddc3109fa9b38763f5f52a1e94fa6556d2483b79e576def91404"
+      "sha256": "c9f9db4497c6687027019c4316f17406099a8e159878a3617ca4c70a8b3e055c"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",

@@ -126,6 +126,23 @@ export function healingProjection(
   modelProposals: readonly (ModelProposal | null)[] = [],
 ): Record<string, unknown> {
   const report = receipt.probeReport;
+  const observations = report?.observations ?? [];
+  const projectedObservations = observations.map((item, index) => {
+    const proposal = modelProposalForObservation(item, modelProposals[index] ?? null);
+    return {
+      obligationIdDigest: item.obligationIdDigest,
+      outcome: item.outcome,
+      staleOriginal: item.staleOriginal,
+      candidateCount: item.candidateCount,
+      resolvedByTier: item.outcome === "PASSED" && stage !== "BASELINE" ? "metadata" : null,
+      visible: item.visible ?? null,
+      enabled: item.enabled ?? null,
+      editable: item.editable ?? null,
+      // Present only when the deterministic tier abstained and candidate capture was requested.
+      ...(item.domEvidence ? { domEvidence: item.domEvidence } : {}),
+      ...(proposal ? { modelProposal: proposal } : {}),
+    };
+  });
   return {
     schemaVersion: "1.0.0",
     evidencePhase: "LIVE_LOCATOR_HEALING_PROBE",
@@ -140,27 +157,25 @@ export function healingProjection(
     healTiers: tiers,
     deterministicDiscoveryEnabled: tiers.includes("metadata"),
     modelDiscoveryRequested: tiers.includes("llm"),
-    modelDiscoveryAvailable: modelProposals.some((item) => item !== null),
+    modelDiscoveryAvailable: projectedObservations.some((item) => "modelProposal" in item),
     headedMode,
     obligationCount: report?.obligationCount ?? 0,
     targetDigest: report?.targetDigest ?? null,
-    observations: (report?.observations ?? []).map((item, index) => ({
-      obligationIdDigest: item.obligationIdDigest,
-      outcome: item.outcome,
-      staleOriginal: item.staleOriginal,
-      candidateCount: item.candidateCount,
-      resolvedByTier: item.outcome === "PASSED" && stage !== "BASELINE" ? "metadata" : null,
-      visible: item.visible ?? null,
-      enabled: item.enabled ?? null,
-      editable: item.editable ?? null,
-      // Present only when the deterministic tier abstained and candidate capture was requested.
-      ...(item.domEvidence ? { domEvidence: item.domEvidence } : {}),
-      ...(modelProposals[index] ? { modelProposal: modelProposals[index] } : {}),
-    })),
+    observations: projectedObservations,
     cleanup: receipt.cleanup,
     executionIdDigest: digest(receipt.executionId),
     inputDigest: receipt.inputDigest,
   };
+}
+
+function modelProposalForObservation(
+  observation: { outcome: string; domEvidence?: unknown },
+  proposal: ModelProposal | null,
+): ModelProposal | null {
+  if (!proposal || !observation.domEvidence) return null;
+  return observation.outcome === "LOCATOR_NOT_FOUND" || observation.outcome === "CANDIDATE_AMBIGUOUS"
+    ? proposal
+    : null;
 }
 
 async function requestModelProposals(

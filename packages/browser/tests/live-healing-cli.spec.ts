@@ -97,6 +97,40 @@ test("projects model locator proposal when the llm bridge returned one", () => {
   expect(projected.modelProposal).toEqual(proposal);
 });
 
+test("does not attach model proposal to deterministic metadata recovery", () => {
+  const proposal = {
+    schemaVersion: "1.0.0",
+    accepted: true,
+    proposal: {
+      candidateOrdinal: 0,
+      confidenceMilli: 950,
+      rationale: "Would be unsafe if attached to a deterministic pass.",
+      citedRefs: ["cand:0"],
+    },
+  };
+  const projection = healingProjection(
+    receipt([
+      observation({
+        outcome: "PASSED",
+        staleOriginal: true,
+        candidateCount: 1,
+        visible: true,
+        enabled: true,
+        editable: true,
+      }),
+    ]),
+    "STALE_AND_DISCOVER",
+    ["metadata", "llm"],
+    false,
+    [proposal],
+  );
+  expect(projection.modelDiscoveryAvailable).toBe(false);
+  const projected = (projection.observations as readonly Record<string, unknown>[])[0];
+  expect(projected.resolvedByTier).toBe("metadata");
+  expect(projected.modelProposal).toBeUndefined();
+  expect(projected.domEvidence).toBeUndefined();
+});
+
 test("leaves the metadata-tier projection shape unchanged", () => {
   const projection = healingProjection(
     receipt([observation({})]),

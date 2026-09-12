@@ -103,6 +103,8 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
 [DONE] prompt + provider + wiring provider schema hook + locator-healing Python bridge + browser projection
 [DONE] live provider acceptance   real OpenAI locator-proposal smoke accepted candidateOrdinal=0
           with confidenceMilli=986 after fixing sealed-envelope rendering and explicit allowedRefs
+[DONE] evidence isolation         projection refuses to attach modelProposal or advertise
+          modelDiscoveryAvailable for deterministic metadata PASS observations
 ```
 
 `[MEAS]` graph full 228,591 ch vs 1-hop 946 ch (99.6% cut) · knowledge heading block 517 ch vs whole page 5,824 ch (91% cut).
