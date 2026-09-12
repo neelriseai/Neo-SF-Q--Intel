@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "8986d657478939fd63d55caa131c9c03d646baaff88dfd531bb4c9850acd37f8",
+  "sourceSnapshot": "f2dfeda52db114be737b9d3bcd48229622696687002991ad190dd52bfae4ff48",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1606,7 +1606,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "8f4f544b02f48a968f7272768de095f7eff4051ab42fefedf77b12175651cd58"
+      "sha256": "90d780dbed62a43dffa55ab1ab235f946abcd48dc99bb7959b8343859fc9a25c"
     },
     {
       "path": "Docs/29-d-series-requirement-test-matrix.md",
@@ -2316,7 +2316,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "1eac0f460d071f59a237144a15d12ad852cedd914c2553f79f95ebeadc859919"
+      "sha256": "c9a458d7c10bddc3109fa9b38763f5f52a1e94fa6556d2483b79e576def91404"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
@@ -2546,7 +2546,7 @@
     {
       "path": "src/neo_sf_q_intel/locator_proposal.py",
       "category": "python-runtime",
-      "sha256": "588d9f01772453404fcc10cfbc9be3aa60b31f278675569f1974e0ba398c0394"
+      "sha256": "ed1924b2d30c5f1a511d5e4067174883ea465aab6ac49119e96c4bd876ba5e15"
     },
     {
       "path": "src/neo_sf_q_intel/mcp_server.py",
@@ -2926,7 +2926,7 @@
     {
       "path": "tests/test_locator_proposal.py",
       "category": "test",
-      "sha256": "f94e477516d1cf6b7bb996c17db5122a461dc71499cdbec4b92f87047b9de291"
+      "sha256": "4c0f9a40d094b2f146f90764b9cd6db675f8709985b03562826c92708c1c8620"
     },
     {
       "path": "tests/test_locator_rebind_contract.py",

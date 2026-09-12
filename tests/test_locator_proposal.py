@@ -19,8 +19,10 @@ from neo_sf_q_intel.locator_proposal import (
     build_locator_prompt,
     parse_locator_proposal,
     propose_locator,
+    render_prompt,
 )
 from neo_sf_q_intel.specialist import (
+    PromptEnvelope,
     ProviderCallOutcome,
     ProviderCallStatus,
     ProviderErrorCode,
@@ -146,6 +148,9 @@ def test_prompt_envelope_carries_no_record_value_or_person_name() -> None:
     assert RECORD_ID not in serialized
     assert PERSON_NAME not in serialized
     assert _short(RECORD_ID) in serialized
+    assert "allowedRefs" in envelope.untrusted_payload
+    assert "cand:0" in envelope.untrusted_payload["allowedRefs"]
+    assert "meta:Opportunity.Regional_VP_Approver__c" in envelope.untrusted_payload["allowedRefs"]
 
 
 def test_prompt_envelope_digest_is_deterministic_for_an_identical_context() -> None:
@@ -153,6 +158,25 @@ def test_prompt_envelope_digest_is_deterministic_for_an_identical_context() -> N
     second = build_locator_prompt(_context())
 
     assert first.prompt_sha256 == second.prompt_sha256
+
+
+def test_rendered_prompt_is_the_sealed_provider_envelope() -> None:
+    envelope = build_locator_prompt(_context())
+
+    rendered = render_prompt(envelope)
+
+    parsed = PromptEnvelope.model_validate_json(rendered)
+    assert parsed.prompt_sha256 == envelope.prompt_sha256
+    assert parsed.untrusted_payload["allowedRefs"] == sorted(
+        {
+            "cand:0",
+            "cand:1",
+            "edge:0",
+            "intent:ob-vp-approver",
+            "meta:Opportunity.Regional_VP_Approver__c",
+            "sig:Opportunity.Regional_VP_Approver__c",
+        }
+    )
 
 
 def test_prompt_envelope_changes_when_the_candidate_set_changes() -> None:
