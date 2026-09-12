@@ -44,7 +44,8 @@
       ],
       "status": "PARTIAL",
       "confirmedRootCause": "Not one bug but four layers. (a) The machine-local phase policy had expired (15-minute validity) and was regenerated and re-pinned. (b) The baseline enrollment had expired a day earlier (21-minute validity) and was regenerated from a fresh live six-step classification (caip-dev, DEVELOPER_EDITION, v67.0). (c) Authorized target digests are candidate-specific and must be recomputed whenever the candidate changes. (d) The remaining blocker is a product defect, not stale configuration: three APEX_TEST derivations are UNSUPPORTED, and any unsupported derivation blocks plan composition with no partial-subset fallback.",
-      "verificationEvidence": "Advanced one further layer. Remaining single gap is UNSUPPORTED_TARGET on BROWSER_INTENT; the expired-authority and missing-partition causes are resolved."
+      "verificationEvidence": "The baseline now reaches live execution: classification, plan composition, dataset resolution and standard REST all proceed, and the campaign stops inside CUSTOM_REST_EXECUTION with LIVE_READ_RESPONSE_INVALID. That is the known org/source schema drift, not a plan or authority defect: the deployed org serves contract 1.0.0 while the current source contract requires 1.1.0.",
+      "nextAction": "Deploy the app API 1.1.0 candidate to the enrolled org under separate mutation authority, then rerun the read-only baseline to mint the first SF-L03, SF-L04 and SF-L05 receipts. Do not weaken the source oracle to make the baseline pass."
     },
     {
       "id": "DEMO-LIVE-BA-001",
@@ -145,11 +146,11 @@
       "confirmedRootCause": "Not an incomplete Apex inventory. The compiler has only an Apex partition for selected tests, so a UI candidate whose selected tests are LWC Jest tests yields three NON_APEX_TEST_OBLIGATION derivations, while an Apex-only candidate yields no APEX_TEST targets at all. Host policy lists APEX_TEST in requiredPartitions, so live_target_plan _validate raises MISSING_PARTITION when the partition is empty and UNSUPPORTED_TARGET when it is non-Apex. Either way the read-only baseline plan is blocked by a partition whose gate (SF-L08) is not in the fixed read-only gate set (SF-L03, SF-L04, SF-L05).",
       "severity": "P1",
       "priority": 8,
-      "status": "PARTIAL",
+      "status": "FIXED",
       "nextAction": "Decide whether an out-of-phase target that host policy does not authorize should block a phase that cannot execute it, or be reported as out-of-phase without blocking. That is a governance semantics decision and needs review plus tests; it was not taken unilaterally.",
       "fixDesign": "Scope the required-partition check to partitions whose mapped gate is executable in the plan phase. LiveTargetPlan already carries phase_read_only_gate_ids (READ_ONLY_BASELINE_GATES) when a phase policy applies; thread that gate set into LiveTargetPlanProducer._validate (src/neo_sf_q_intel/live_target_plan.py around line 887) and require only partitions whose gate is in it. Targets that do derive must still be validated and authorized exactly as today, and SF-L06 to SF-L09 must stay non-passing. Needs positive, negative and phase scenario-independence tests before it may be accepted.",
       "deferredReason": "Stopped inside a 45-minute timebox rather than half-changing a governance boundary. Two plan producers exist and the gate set is not currently threaded into the validator.",
-      "verificationEvidence": "The required-partition half is fixed in product code: HostOwnedLiveTargetPlanProducer now accepts an executable gate set and skips required partitions whose gate is outside it, and compose_candidate_live_plan passes READ_ONLY_BASELINE_GATES when a phase policy applies. MISSING_PARTITION for APEX_TEST is gone. 87 compiler and 19 plan tests pass. The remaining gap is UNSUPPORTED_TARGET on BROWSER_INTENT, whose actionClass or applicationIntent is not in the reviewed host policy allowlists; SF-L07 is likewise outside the read-only gate set."
+      "verificationEvidence": "Phase-scoped required partitions plus operator authorization of the declared FlexiPage drift family cleared every plan gap. The read-only baseline now composes a plan and executes live reads instead of blocking."
     }
   ],
   "fixPlanMinutes": [

@@ -169,3 +169,17 @@ The remaining single gap is `UNSUPPORTED_TARGET` on `BROWSER_INTENT`: its action
 application intent is not in the reviewed host policy allowlists, and `SF-L07` is also outside the
 read-only gate set. Whether an unauthorized out-of-phase target should block a phase that cannot
 execute it is a governance semantics decision; it was left open rather than decided unilaterally.
+
+### Baseline now reaches live execution
+
+After the partition fix, the operator authorized the one missing allowlist entry: the source
+contract's declared locator-rebind drift targets a `FlexiPage` member, which was absent from the
+reviewed policy's `allowedMetadataTypes`. Action class and application intent were already allowed.
+
+With that entry added, every plan gap cleared. The read-only baseline composes a plan and performs
+real live reads, stopping inside `CUSTOM_REST_EXECUTION` with `LIVE_READ_RESPONSE_INVALID`. That is
+the previously recorded org/source schema drift: the deployed org serves contract `1.0.0` while the
+current source contract requires `1.1.0`. No oracle was weakened and no receipt was minted.
+
+`DEMO-APEX-001` is closed. `DEMO-LIVE-BASELINE-001` remains PARTIAL, now blocked only on deploying
+the app's API 1.1.0 candidate under separate mutation authority.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "771719cd39193f710a99300f2f3cd843002e1450e64faf09ffd97ae985c1cc7b",
+  "sourceSnapshot": "af57f5f909b2898d803b954395d044ba65f97e5d253f47b77b397cb4e377340c",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
