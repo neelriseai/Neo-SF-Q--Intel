@@ -2,11 +2,11 @@
   "schemaVersion": "1.0.0",
   "policyId": "verified-tree-graph-production",
   "policyVersion": "1.0.1",
-  "sha256": "d3d5f6a7efc7a636b477c83b6609b08427dcc24b762d63b2b6cf3dab3e2bc290",
+  "sha256": "5d231dc07e81d8d0da78a64485cf122878ea0cac1ad815a48d3ad3f53f90028e",
   "verifiedChangePolicy": {
     "contractId": "verified-local-git-change",
     "contractVersion": "1.1.0",
-    "contractSha256": "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175"
+    "contractSha256": "86fb6c6c02a277869ec21a0953389077c83d5e4bc627c62f14445e8153bcf4cd"
   },
   "ontology": {
     "contractId": "change-evidence-core",
@@ -56,5 +56,5 @@
   "maximumReceiptBytes": 67108864,
   "gitTimeoutSeconds": 20,
   "maximumGitOutputBytes": 67108864,
-  "freshnessSeconds": 900
+  "freshnessSeconds": 3600
 }

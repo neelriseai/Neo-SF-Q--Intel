@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "af57f5f909b2898d803b954395d044ba65f97e5d253f47b77b397cb4e377340c",
+  "sourceSnapshot": "dc2b71e11280122e32820d16b97a4b3480a3f557986ed0ded4f8e5662a0dc4ad",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1721,7 +1721,7 @@
     {
       "path": "config/change-seed-policy.json",
       "category": "policy",
-      "sha256": "63cee2402fb17dd9fe64813f488938ce3e282f9cee352fe2a572c9102b5f3433"
+      "sha256": "4482063b7519a7ab6335760be16ccf6761ec59eb70e21883469dcc8a306f151a"
     },
     {
       "path": "config/complete-path-replay-policy.json",
@@ -1741,7 +1741,7 @@
     {
       "path": "config/foundation-pipeline-policy.json",
       "category": "policy",
-      "sha256": "ba11034092c0fe7e00609183c170d13633162c7e1c5fe5cea5af865f1ff52ddd"
+      "sha256": "97d4b3ed377f4b209e662567a8a07ac48abc11d38ab3c824a5f04d5b4e842a36"
     },
     {
       "path": "config/fusion-policy.json",
@@ -1756,7 +1756,7 @@
     {
       "path": "config/graph-producer-policy.json",
       "category": "policy",
-      "sha256": "f50c574a9432dc89dffdaf328bfb44b9ddca1080b74f709f98e123961455babc"
+      "sha256": "fd85fb0d700db3ab55b0dc7f7ed76b2c11dea9b47bec1444cd8ea6884fa4e612"
     },
     {
       "path": "config/live-salesforce-acceptance-profile.json",
@@ -1776,7 +1776,7 @@
     {
       "path": "config/operation-seed-policy.json",
       "category": "policy",
-      "sha256": "2b1c02684268f49a34c467069173b1fc7c8a871dab3711b8394ddeb42a4a540e"
+      "sha256": "b5c9d61656e8de3b40c72af88f307e44fb6a16008c8a6e54942576d3a2f638d1"
     },
     {
       "path": "config/outcome-memory-policy.json",
@@ -1841,7 +1841,7 @@
     {
       "path": "config/verified-change-policy.json",
       "category": "policy",
-      "sha256": "bf9b4788956f67f445d77d2ed4ac165019da7c5f41a0da1e51900acb5cc375a6"
+      "sha256": "be8e8cbc4ded01c16e163277ad8a0e48bc242bec16191920f5274ad0b5ae8eeb"
     },
     {
       "path": "knowledge/README.md",
@@ -2146,7 +2146,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "b97e03fa9d2653f923a753f414098710349f4cd77fdd39e7e59b61eb32f037c1"
+      "sha256": "c745e5df70af7ca9b5738fdbac5f0ac911397b6f1d810f4b3749086e2684e6fb"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
@@ -2221,12 +2221,12 @@
     {
       "path": "src/neo_sf_q_intel/change_seed.py",
       "category": "python-runtime",
-      "sha256": "f69dbc35be33250340abe887374a9bd21c5fb56deb140434891304558c2a1646"
+      "sha256": "d3f6a04a80be8965fbe2cffcf0a20bd5271c4175684bf9fb59bbf2fe8b177915"
     },
     {
       "path": "src/neo_sf_q_intel/change_verification.py",
       "category": "python-runtime",
-      "sha256": "a810b412ec5e146b7cedbe6f48910a9bbd49dd5a9999163b1ddbc5da523e840e"
+      "sha256": "4a46edd3595c6faefa1d04d06e02801ce382eff9f09d7dd1a4f688803b9f3ea9"
     },
     {
       "path": "src/neo_sf_q_intel/classification_bootstrap.py",
@@ -2266,7 +2266,7 @@
     {
       "path": "src/neo_sf_q_intel/foundation_pipeline.py",
       "category": "python-runtime",
-      "sha256": "517cccc3d19967179442b49b7c5380e9338cc7dacf8958cc1cf979d457d973a1"
+      "sha256": "f3f49adf8714ab3d67ada862cc4ee5d44409e73df930183e934bc1307f4bb059"
     },
     {
       "path": "src/neo_sf_q_intel/fusion.py",
@@ -2291,7 +2291,7 @@
     {
       "path": "src/neo_sf_q_intel/graph_production.py",
       "category": "python-runtime",
-      "sha256": "a21cf5b3aaba05375e9c51ff308ebd87b9fbfbcf96549fb46ab502dbd3b5e4e5"
+      "sha256": "969a0cc5adba12875a232bd507242ee0bc221951460b3249a50e95fe64f23ae1"
     },
     {
       "path": "src/neo_sf_q_intel/healing.py",
@@ -2386,7 +2386,7 @@
     {
       "path": "src/neo_sf_q_intel/operation_seed.py",
       "category": "python-runtime",
-      "sha256": "28b9ee6e40e13ea24b31cfcca8ac03ee8a3cccf1147d730efd908aaa6c41bc6a"
+      "sha256": "7bcd2619280948621d6ac73382154379f0f979c2ff5e3f5cb4c0f9a7225636d5"
     },
     {
       "path": "src/neo_sf_q_intel/outcome_repository.py",
@@ -2406,7 +2406,7 @@
     {
       "path": "src/neo_sf_q_intel/phase_policy_proposal.py",
       "category": "python-runtime",
-      "sha256": "571865b9cbe0463ae481df21a3ea416124c6887a550d574fb0c04eee720f986d"
+      "sha256": "05befbd0bb492b9148f341546c82fe4fb78a6509b4c2cde18a8137932bd544a5"
     },
     {
       "path": "src/neo_sf_q_intel/policy.py",
@@ -2736,7 +2736,7 @@
     {
       "path": "tests/test_operation_seed.py",
       "category": "test",
-      "sha256": "d08fff24410c8b6c3354dc0b60c4982e0cd6ea3cf1b4903610b147e262cf7036"
+      "sha256": "018dfd6065074ff30d1fd4d9c8947e43c3b8c9788a201889369cdec3a8fd6786"
     },
     {
       "path": "tests/test_outcome_repository.py",
@@ -2756,7 +2756,7 @@
     {
       "path": "tests/test_phase_policy_proposal.py",
       "category": "test",
-      "sha256": "9a8317ce93b610e430446b9ab8126265c3184b9ab96a27eab05fd92de408e097"
+      "sha256": "0c06e951f9019c522737a283ba05203ad39a7f0ca223b2dd8c4611d840e9f642"
     },
     {
       "path": "tests/test_postgres_schema.py",

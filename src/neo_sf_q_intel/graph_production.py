@@ -536,7 +536,7 @@ class GraphProductionEvaluation(_Model):
 
 
 DEFAULT_GRAPH_PRODUCER_POLICY_SHA256 = (
-    "d3d5f6a7efc7a636b477c83b6609b08427dcc24b762d63b2b6cf3dab3e2bc290"
+    "5d231dc07e81d8d0da78a64485cf122878ea0cac1ad815a48d3ad3f53f90028e"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")

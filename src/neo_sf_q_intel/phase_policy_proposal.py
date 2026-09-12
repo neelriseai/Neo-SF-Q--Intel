@@ -52,7 +52,7 @@ def propose_local_validation_phase_policy(
     *,
     observed_at: datetime,
     policy_id: str = "reviewed-read-only-baseline-local-applicability",
-    maximum_validity_seconds: int = 900,
+    maximum_validity_seconds: int = 3600,
 ) -> LocalPhasePolicyProposal:
     """Read the fixed host capture callback; return draft data with no external writes.
 
@@ -61,7 +61,7 @@ def propose_local_validation_phase_policy(
     Independent review and a separate local file/SHA installation are still required.
     """
     observed_at = aware_utc(observed_at)
-    if type(maximum_validity_seconds) is not int or not 1 <= maximum_validity_seconds <= 900:
+    if type(maximum_validity_seconds) is not int or not 1 <= maximum_validity_seconds <= 3600:
         raise ValueError("LOCAL_PHASE_PROPOSAL_VALIDITY_INVALID")
     compilation = capture_compilation()
     compilation = CandidateTargetCompilation.model_validate(compilation.model_dump(mode="python"))

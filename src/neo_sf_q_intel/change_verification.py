@@ -465,7 +465,7 @@ class ChangeVerificationEvaluation(_Model):
 
 
 DEFAULT_VERIFIED_CHANGE_POLICY_SHA256 = (
-    "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175"
+    "86fb6c6c02a277869ec21a0953389077c83d5e4bc627c62f14445e8153bcf4cd"
 )
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")

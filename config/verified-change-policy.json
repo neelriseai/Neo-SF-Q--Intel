@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "policyId": "verified-local-git-change",
   "policyVersion": "1.1.0",
-  "sha256": "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175",
+  "sha256": "86fb6c6c02a277869ec21a0953389077c83d5e4bc627c62f14445e8153bcf4cd",
   "captureScope": "FULL_TRACKED_AND_NONIGNORED_UNTRACKED_TREE",
   "baseRevision": "HEAD",
   "renameDetection": "DISABLED_DELETE_ADD",
@@ -12,7 +12,10 @@
     "implementationLocator": "src/neo_sf_q_intel/change_verification.py",
     "implementationSha256": "cf844ef0ae2f17282e954f4fbdb6205c2374cc2345b05c47750d235be293a68e"
   },
-  "allowedRegularModes": ["100644", "100755"],
+  "allowedRegularModes": [
+    "100644",
+    "100755"
+  ],
   "sensitivePathGlobs": [
     "**/*.key",
     "**/*.p12",
@@ -59,5 +62,5 @@
   "maximumTotalBytes": 536870912,
   "maximumManifestBytes": 33554432,
   "maximumPathBytes": 1024,
-  "freshnessSeconds": 900
+  "freshnessSeconds": 3600
 }

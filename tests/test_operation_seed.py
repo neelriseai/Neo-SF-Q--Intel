@@ -323,7 +323,7 @@ def test_time_authority_historical_root_and_later_refresh_fail_closed(
     assert future.artifact is None
     assert OperationSeedGapCode.ARTIFACT_FROM_FUTURE in _codes(future)
 
-    monkeypatch.setattr(operation_seed, "_utc_now", lambda: T0 + timedelta(minutes=16))
+    monkeypatch.setattr(operation_seed, "_utc_now", lambda: T0 + timedelta(minutes=61))
     expired = compiler.verify(artifact, inputs)
     assert expired.artifact is None
     assert OperationSeedGapCode.ARTIFACT_EXPIRED in _codes(expired)

@@ -2,16 +2,16 @@
   "schemaVersion": "1.0.0",
   "policyId": "operation-aware-semantic-seed-mapping",
   "policyVersion": "1.0.1",
-  "sha256": "4bb0620706ad2b54bc90e0a76488ccb18be2a0f2dcc4ce07457cfed117aeadf7",
+  "sha256": "0afecccfa60dec60a3470307a0b270813b0a8ec87a893b8bf64640bd8b3fe189",
   "verifiedChangePolicy": {
     "contractId": "verified-local-git-change",
     "contractVersion": "1.1.0",
-    "contractSha256": "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175"
+    "contractSha256": "86fb6c6c02a277869ec21a0953389077c83d5e4bc627c62f14445e8153bcf4cd"
   },
   "graphProducerPolicy": {
     "contractId": "verified-tree-graph-production",
     "contractVersion": "1.0.1",
-    "contractSha256": "d3d5f6a7efc7a636b477c83b6609b08427dcc24b762d63b2b6cf3dab3e2bc290"
+    "contractSha256": "5d231dc07e81d8d0da78a64485cf122878ea0cac1ad815a48d3ad3f53f90028e"
   },
   "compiler": {
     "implementationId": "operation-aware-semantic-seed-compiler",
@@ -22,7 +22,10 @@
   "mappingScope": "SUPPORTED_FAMILY_OPERATION_SEEDS",
   "addSide": "CANDIDATE",
   "deleteSide": "BASE",
-  "modifySides": ["BASE", "CANDIDATE"],
+  "modifySides": [
+    "BASE",
+    "CANDIDATE"
+  ],
   "maximumChanges": 5000,
   "maximumGraphDeltas": 400000,
   "maximumTombstones": 200000,

@@ -83,7 +83,7 @@ class _Model(BaseModel):
 Sha256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 
 DEFAULT_FOUNDATION_PIPELINE_POLICY_SHA256 = (
-    "7beb2e9bb6a2fc9cca647bac29046ea2138045ca1dcc10242873e021be1f24c5"
+    "20968e3bff00cb3647d32fffb007c67d257420c6d71a8e9cebebd09dab72df41"
 )
 
 

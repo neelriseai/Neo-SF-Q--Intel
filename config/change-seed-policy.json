@@ -2,11 +2,11 @@
   "schemaVersion": "1.0.0",
   "policyId": "canonical-change-seed-mapping",
   "policyVersion": "1.0.0",
-  "sha256": "0425dd77b55b90178902b61ac893bd6f800aee2f019386a1efb5836e46c9a8d3",
+  "sha256": "5dd3639de4d0fac24f00f8fca371b59ec79a4d1f0f99aed7384ede72188c4d24",
   "verifiedChangePolicy": {
     "contractId": "verified-local-git-change",
     "contractVersion": "1.1.0",
-    "contractSha256": "071d99e7a95f229d8550cb3183955cb6c6f02ebfcd661b2e018a359149e44175"
+    "contractSha256": "86fb6c6c02a277869ec21a0953389077c83d5e4bc627c62f14445e8153bcf4cd"
   },
   "ontology": {
     "contractId": "change-evidence-core",

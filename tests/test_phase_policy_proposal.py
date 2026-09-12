@@ -52,7 +52,7 @@ def test_proposal_is_offline_non_authorizing_and_never_installs_configuration(
         HostLocalValidationPhasePolicy.model_validate(proposal.model_dump(mode="python"))
 
 
-@pytest.mark.parametrize("seconds", [0, -1, 901, True, 1.5])
+@pytest.mark.parametrize("seconds", [0, -1, 3601, True, 1.5])
 def test_proposal_requires_bounded_explicit_validity_before_capture(candidate, seconds):
     def no_capture():
         pytest.fail("Invalid proposal bounds reached source capture")

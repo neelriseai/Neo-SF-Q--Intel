@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "strategic-deal-demo-baseline-reaches-live-execution-2026-09-12",
+  "reviewId": "demo-authority-window-one-hour-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -123,7 +123,9 @@
     "src/neo_sf_q_intel/specialist.py",
     "src/neo_sf_q_intel/subprocess_environment.py",
     "tests/test_candidate_assurance.py",
-    "tests/test_live_campaign_status.py"
+    "tests/test_live_campaign_status.py",
+    "tests/test_operation_seed.py",
+    "tests/test_phase_policy_proposal.py"
   ],
   "reviewers": [
     "astra_final_solution_review",
@@ -141,7 +143,8 @@
     "two_hour_operator_demo_scope_review",
     "astra_live_vertical_review",
     "opus5_demo_fix_window_review",
-    "opus5_second_fix_window_review"
+    "opus5_second_fix_window_review",
+    "opus5_authority_window_migration"
   ],
   "findings": [
     {
@@ -423,6 +426,11 @@
       "code": "BASELINE_PLAN_COMPOSES_AND_EXECUTES",
       "severity": "P1",
       "resolution": "With phase-scoped required partitions and operator authorization of the declared FlexiPage drift family, the read-only baseline composes a plan and performs live reads. It now stops at LIVE_READ_RESPONSE_INVALID inside CUSTOM_REST_EXECUTION because the deployed org serves contract 1.0.0 while the source requires 1.1.0. The oracle was not weakened and no gate receipt was minted."
+    },
+    {
+      "code": "DEMO_AUTHORITY_WINDOW_EXTENDED_TO_ONE_HOUR",
+      "severity": "P2",
+      "resolution": "For MVP demo operability the candidate-scope freshness and the phase-policy validity cap were raised from 900 to 3600 seconds. Because each policy is self-hashed and its digest is pinned by consumer modules and dependent policies, this was performed as one atomic identity migration rotated to a fixpoint across verified-change, graph-producer, change-seed, operation-seed and foundation-pipeline policies and their pinning modules. Producer implementation pins are normalized against the circular policy constant and were preserved; an intermediate CRLF conversion that invalidated them was detected and reverted to the repository LF convention. Two tests encoding the old boundary were updated to the new bound rather than relaxed, and the per-campaign runtime cap of 900 seconds is unchanged. Live reads still execute and the campaign still stops at the unrelated org/source schema drift, so no oracle was weakened."
     }
   ],
   "statusDowngrades": []
