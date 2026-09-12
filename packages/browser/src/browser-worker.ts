@@ -759,6 +759,8 @@ export class BrowserWorker {
         };
       }
       lifecycle.push("CANDIDATE_DISCOVERED");
+      // Locating a submit candidate is not a submission. Only a completed click may report submitted.
+      let submitDispatched = false;
       try {
         // Salesforce base components expose the real control inside the custom element. Clicking the
         // host can land outside the interactive child, so prefer that child when it is present.
@@ -768,6 +770,7 @@ export class BrowserWorker {
           .first();
         const clickTarget = (await interactive.count()) > 0 ? interactive : submitLocator.first();
         await clickTarget.click({ timeout: this.#operationTimeoutMs });
+        submitDispatched = true;
         await page.getByRole("status").filter({ hasText: action.successText }).first().waitFor({
           state: "visible",
           timeout: this.#operationTimeoutMs,
@@ -781,7 +784,7 @@ export class BrowserWorker {
           candidateCount: 1,
           businessAction: {
             fieldCount: action.fields.length,
-            submitted: lifecycle.includes("CANDIDATE_DISCOVERED"),
+            submitted: submitDispatched,
             successTextMatched: false,
             healedFieldCount,
             abstainedFieldCount,

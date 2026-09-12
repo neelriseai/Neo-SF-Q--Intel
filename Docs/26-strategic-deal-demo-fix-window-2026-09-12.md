@@ -108,3 +108,51 @@ variables are restricted to an allowlist of boolean flags, so injecting `PATH` m
 3. Add a regression test for the checkbox fill strategy and the file-based persistence query.
 4. Consider a host-owned demo runbook that regenerates both short-lived authorities immediately
    before a live run.
+
+## Second fix window — 45 minutes, 2026-09-12T06:33:35+05:30
+
+Scope: `DEMO-TRUTH-001`, `DEMO-APEX-001`, `DEMO-LIVE-BASELINE-001`.
+
+| Bug | Status | Outcome |
+|---|---|---|
+| `DEMO-TRUTH-001` | FIXED | `submitted` now derives from a completed click dispatch, not from locating a candidate. 159/159 browser contract tests pass |
+| `DEMO-APEX-001` | OPEN | Root cause proven and fix designed; implementation deliberately stopped inside the timebox |
+| `DEMO-LIVE-BASELINE-001` | PARTIAL | Still `LIVE_BASELINE_PLAN_BLOCKED`, now proven to be the required-partition rule rather than expired authority |
+
+### `DEMO-APEX-001` is a missing partition, not a broken inventory
+
+The earlier description was wrong. Measured behaviour:
+
+- With the LWC presentation candidate, the three selected tests are LWC Jest tests. The compiler
+  has only an Apex partition for selected tests, so all three derive as
+  `NON_APEX_TEST_OBLIGATION` and `UNSUPPORTED`.
+- With an Apex-only candidate, no `APEX_TEST` targets derive at all.
+
+Host policy lists `APEX_TEST` in `requiredPartitions`, so `LiveTargetPlanProducer._validate` raises
+`MISSING_PARTITION` when the partition is empty and `UNSUPPORTED_TARGET` when it is non-Apex. Either
+way the read-only baseline is blocked by a partition whose gate, `SF-L08`, is not in the fixed
+read-only gate set `SF-L03`, `SF-L04`, `SF-L05`.
+
+Designed fix, not yet implemented: `LiveTargetPlan` already carries `phase_read_only_gate_ids` when a
+phase policy applies. Thread that gate set into `_validate`
+(`src/neo_sf_q_intel/live_target_plan.py`, around the required-partition loop) and require only
+partitions whose mapped gate is executable in the plan phase. Targets that do derive must still be
+validated and authorized exactly as today, and `SF-L06` through `SF-L09` must remain non-passing.
+This needs positive, negative and phase scenario-independence tests before acceptance.
+
+It was stopped deliberately: two plan producers exist, the gate set is not currently threaded into
+the validator, and a half-finished change to a governance boundary is worse than an open bug with a
+precise design.
+
+### Candidate state
+
+The working candidate in the Salesforce app repository is now the discount policy boundary change
+(`>` to `>=` in `StrategicDiscountPolicy.cls`, Doc 24 theme one), not the LWC presentation change.
+The machine-local phase policy was regenerated for that candidate. Both remain uncommitted in the
+app repository by design.
+
+### Rejected shortcut
+
+Removing `APEX_TEST` from `requiredPartitions` in the machine-local reviewed target policy would
+unblock the baseline in one line, but it hides the missing partition behind operator configuration
+instead of fixing the producer. The product-code fix above was chosen instead and remains open.

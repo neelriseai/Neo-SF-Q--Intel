@@ -44,7 +44,7 @@
       ],
       "status": "PARTIAL",
       "confirmedRootCause": "Not one bug but four layers. (a) The machine-local phase policy had expired (15-minute validity) and was regenerated and re-pinned. (b) The baseline enrollment had expired a day earlier (21-minute validity) and was regenerated from a fresh live six-step classification (caip-dev, DEVELOPER_EDITION, v67.0). (c) Authorized target digests are candidate-specific and must be recomputed whenever the candidate changes. (d) The remaining blocker is a product defect, not stale configuration: three APEX_TEST derivations are UNSUPPORTED, and any unsupported derivation blocks plan composition with no partial-subset fallback.",
-      "verificationEvidence": "Blocker advanced from LOCAL_VALIDATION_PHASE_POLICY_INVALID to CLASSIFICATION_AUTHORITY_INVALID to LIVE_BASELINE_TARGET_POLICY_DENIED to LIVE_BASELINE_PLAN_BLOCKED. Read-only baseline still returns BLOCKED."
+      "verificationEvidence": "Second window: phase policy and enrollment regenerated again for the swapped candidate and the baseline rerun. Result remains BLOCKED with LIVE_BASELINE_PLAN_BLOCKED, now proven to come from the required-partition rule rather than expired authority. Fully unblocking it depends on DEMO-APEX-001."
     },
     {
       "id": "DEMO-LIVE-BA-001",
@@ -127,11 +127,12 @@
         "observability.agent-trace"
       ],
       "symptom": "businessAction.submitted reported true on runs where the form was never submitted.",
-      "confirmedRootCause": "submitted is derived from lifecycle.includes(\"CANDIDATE_DISCOVERED\"), which only proves a submit candidate was located, not that a submission occurred.",
+      "confirmedRootCause": "submitted was derived from lifecycle.includes(\"CANDIDATE_DISCOVERED\"), which only proves a submit candidate was located. It now derives from a completed click dispatch.",
       "severity": "P2",
       "priority": 7,
-      "status": "OPEN",
-      "nextAction": "Derive submitted from the actual click plus an observed post-submit state transition, or rename the field to submitCandidateFound."
+      "status": "FIXED",
+      "nextAction": "Derive submitted from the actual click plus an observed post-submit state transition, or rename the field to submitCandidateFound.",
+      "verificationEvidence": "159/159 browser contract tests pass; TypeScript compiles clean."
     },
     {
       "id": "DEMO-APEX-001",
@@ -141,11 +142,13 @@
         "quality.live-test-execution"
       ],
       "symptom": "Three APEX_TEST derivations are UNSUPPORTED, blocking LIVE_BASELINE plan composition (LIVE_BASELINE_PLAN_BLOCKED).",
-      "confirmedRootCause": "Source-closed Apex class/method obligation inventory is incomplete; unsupported derivations block plan composition by design, with no class-wide or partial-subset fallback.",
+      "confirmedRootCause": "Not an incomplete Apex inventory. The compiler has only an Apex partition for selected tests, so a UI candidate whose selected tests are LWC Jest tests yields three NON_APEX_TEST_OBLIGATION derivations, while an Apex-only candidate yields no APEX_TEST targets at all. Host policy lists APEX_TEST in requiredPartitions, so live_target_plan _validate raises MISSING_PARTITION when the partition is empty and UNSUPPORTED_TARGET when it is non-Apex. Either way the read-only baseline plan is blocked by a partition whose gate (SF-L08) is not in the fixed read-only gate set (SF-L03, SF-L04, SF-L05).",
       "severity": "P1",
       "priority": 8,
       "status": "OPEN",
-      "nextAction": "Close the source-derived Apex method inventory so each obligation derives a supported target, then recompute authorized target digests and rerun the read-only baseline."
+      "nextAction": "Close the source-derived Apex method inventory so each obligation derives a supported target, then recompute authorized target digests and rerun the read-only baseline.",
+      "fixDesign": "Scope the required-partition check to partitions whose mapped gate is executable in the plan phase. LiveTargetPlan already carries phase_read_only_gate_ids (READ_ONLY_BASELINE_GATES) when a phase policy applies; thread that gate set into LiveTargetPlanProducer._validate (src/neo_sf_q_intel/live_target_plan.py around line 887) and require only partitions whose gate is in it. Targets that do derive must still be validated and authorized exactly as today, and SF-L06 to SF-L09 must stay non-passing. Needs positive, negative and phase scenario-independence tests before it may be accepted.",
+      "deferredReason": "Stopped inside a 45-minute timebox rather than half-changing a governance boundary. Two plan producers exist and the gate set is not currently threaded into the validator."
     }
   ],
   "fixPlanMinutes": [
@@ -179,5 +182,14 @@
     "hardStopAt": "2026-09-12T07:32:26+05:30",
     "evidenceDirectory": ".runtime/demo-evidence/fixwindow-20260912-053226",
     "operatingRule": "Timeboxed test-driven fixes; unfixed items keep an exact next action."
+  },
+  "secondFixWindow": {
+    "startedAt": "2026-09-12T06:33:35+05:30",
+    "allocatedMinutes": 45,
+    "scope": [
+      "DEMO-TRUTH-001",
+      "DEMO-APEX-001",
+      "DEMO-LIVE-BASELINE-001"
+    ]
   }
 }

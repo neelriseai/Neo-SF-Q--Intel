@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "strategic-deal-demo-fix-window-2026-09-12",
+  "reviewId": "strategic-deal-demo-second-fix-window-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -140,7 +140,8 @@
     "live_browser_profile_diagnostic_review",
     "two_hour_operator_demo_scope_review",
     "astra_live_vertical_review",
-    "opus5_demo_fix_window_review"
+    "opus5_demo_fix_window_review",
+    "opus5_second_fix_window_review"
   ],
   "findings": [
     {
@@ -407,6 +408,11 @@
       "code": "DEMO_FIX_WINDOW_LIVE_BUSINESS_ACTION",
       "severity": "P1",
       "resolution": "Five demo bugs closed in a timeboxed pass. The provider guard was not weakened: the new launcher clears inherited provider variables so .env stays the single source. The browser mutation invariant was not weakened: the trusted profile still pins headless true and mutation still requires BUSINESS_ACTION in the trusted enrollment, while an operator-only headed mode and bounded slow motion affect only the local launch surface. The Windows cmd.exe argument allowlist was preserved by moving SOQL into a query file rather than relaxing the guard. A digest-only post-submit signal was added; it reports presence, length and digest and never raw DOM text. The live business action reached PASSED with the record persisted and independently verified, which is browser and persistence evidence only and remains release-ineligible with no signed campaign gate. Remaining blockers are recorded as DEMO-APEX-001 (UNSUPPORTED APEX_TEST derivations block baseline plan composition) and DEMO-TRUTH-001 (submitted can report true without a submission)."
+    },
+    {
+      "code": "DEMO_SUBMITTED_FLAG_TRUTHFULNESS",
+      "severity": "P2",
+      "resolution": "businessAction.submitted previously reported true whenever a submit candidate was located, which misreported every failed run in the 2026-09-12 test pass. It now derives from a completed click dispatch. The required-partition blocker behind DEMO-APEX-001 was diagnosed and designed but deliberately left unimplemented inside the timebox rather than partially changing a governance boundary; the machine-local policy shortcut was rejected."
     }
   ],
   "statusDowngrades": []
