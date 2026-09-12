@@ -160,7 +160,7 @@ class HostBaselineConfiguration(_Model):
     issued_at: datetime
     valid_until: datetime
     live_read: HostLiveReadConfig
-    maximum_campaign_seconds: int = Field(ge=1, le=900)
+    maximum_campaign_seconds: int = Field(ge=1, le=3600)
     maximum_bootstrap_bytes: int = Field(ge=1024, le=1048576)
     local_validation_phase_policy: HostLocalValidationPhasePolicy | None = Field(
         default=None, exclude_if=lambda value: value is None

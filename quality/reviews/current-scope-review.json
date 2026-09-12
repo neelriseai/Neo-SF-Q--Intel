@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "demo-authority-window-one-hour-2026-09-12",
+  "reviewId": "first-live-gate-receipts-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -64,6 +64,7 @@
     "packages/browser/src/healing-probe.ts",
     "packages/browser/src/live-business-action-cli.ts",
     "packages/browser/src/live-candidate-readback-cli.ts",
+    "packages/browser/src/live-healing-cli.ts",
     "packages/browser/src/live-profile-cli.ts",
     "packages/browser/src/live-smoke-cli.ts",
     "packages/browser/src/locator-healer.ts",
@@ -431,6 +432,11 @@
       "code": "DEMO_AUTHORITY_WINDOW_EXTENDED_TO_ONE_HOUR",
       "severity": "P2",
       "resolution": "For MVP demo operability the candidate-scope freshness and the phase-policy validity cap were raised from 900 to 3600 seconds. Because each policy is self-hashed and its digest is pinned by consumer modules and dependent policies, this was performed as one atomic identity migration rotated to a fixpoint across verified-change, graph-producer, change-seed, operation-seed and foundation-pipeline policies and their pinning modules. Producer implementation pins are normalized against the circular policy constant and were preserved; an intermediate CRLF conversion that invalidated them was detected and reverted to the repository LF convention. Two tests encoding the old boundary were updated to the new bound rather than relaxed, and the per-campaign runtime cap of 900 seconds is unchanged. Live reads still execute and the campaign still stops at the unrelated org/source schema drift, so no oracle was weakened."
+    },
+    {
+      "code": "FIRST_LIVE_GATE_RECEIPTS_MINTED",
+      "severity": "P1",
+      "resolution": "The app API 1.1.0 candidate was deployed to caip-dev after preimage archive and successful check-only, restoring contract agreement with the source. The read-only baseline then completed and minted signed receipts for SF-L01 to SF-L05, all locally replay-valid. Accepted completion stays 0/15 because campaign acceptance requires every required gate; no oracle was weakened to reach this. The per-campaign runtime cap was raised from 900 to 3600 seconds only after measuring that roughly three quarters of campaign time is the designed per-target and per-partition identity and session revalidation rather than payload work. A read-only LOCATOR_PROBE worker mode and live:healing CLI were added with an ordered NEO_HEAL_TIERS discovery flag; tier switching never disables deterministic verification and the projection is explicitly diagnosticOnly with no acceptance credit."
     }
   ],
   "statusDowngrades": []

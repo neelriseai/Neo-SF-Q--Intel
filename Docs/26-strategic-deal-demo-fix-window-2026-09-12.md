@@ -183,3 +183,39 @@ current source contract requires `1.1.0`. No oracle was weakened and no receipt 
 
 `DEMO-APEX-001` is closed. `DEMO-LIVE-BASELINE-001` remains PARTIAL, now blocked only on deploying
 the app's API 1.1.0 candidate under separate mutation authority.
+
+## First live gate receipts — API 1.1.0 deploy
+
+The org served custom API contract `1.0.0` while the source required `1.1.0`, which had blocked
+`SF-L04` since the first test pass. The candidate class was deployed under archive cover:
+
+1. Preimage retrieved into `artifacts/restore-archives/api110-20260912T090340Z/` with a sanitized
+   manifest carrying preimage and candidate digests.
+2. Check-only validation `Succeeded` for the single `ApexClass:StrategicDealAgentApi` component.
+3. Deploy `Succeeded`; the live endpoint now returns `schemaVersion: 1.1.0` and every history item
+   carries its parent `opportunityId`.
+
+The first baseline run after the deploy still failed, with `LIVE_READ_AUTHORITY_INVALID` at 16
+minutes. Measurement rather than assumption identified why: roughly three quarters of campaign time
+is the designed revalidation — `sf org display` twice per target and the full six-step classification
+twice per partition — against about 85 seconds of actual REST and metadata payload work. The 900
+second cap predated that much revalidation, so it was raised to 3600.
+
+The next run reached **`STATE=COMPLETED`** with three live observations and minted signed receipts
+for **`SF-L01` through `SF-L05`**, all reported locally replay-valid by the validator.
+
+Accepted completion deliberately remains `0/15`: campaign acceptance requires the complete required
+gate set, and locally valid gates never become release authority on their own. The honest claim is
+five gates with signed, replay-validated receipts — not five accepted gates.
+
+## Locator healing scaffolding
+
+A read-only `LOCATOR_PROBE` worker mode now hands the page to the existing staged probe
+(`BASELINE`, `STALE_AND_DISCOVER`, `RERUN`), and `npm run live:healing` drives it against the
+enrolled org. `NEO_HEAL_TIERS` is an ordered discovery list (`metadata`, `llm`, or both): switching
+tiers changes only which tier *discovers* a candidate, never whether the deterministic verifier runs.
+The projection is explicitly `diagnosticOnly` with no acceptance credit, and records
+`deterministicDiscoveryEnabled`, `modelDiscoveryRequested` and per-obligation `resolvedByTier`.
+
+The live drift run itself still requires the declared FlexiPage `locatorVariant` mutation and its
+exact preimage restore.

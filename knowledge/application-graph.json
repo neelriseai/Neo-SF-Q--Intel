@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "dc2b71e11280122e32820d16b97a4b3480a3f557986ed0ded4f8e5662a0dc4ad",
+  "sourceSnapshot": "65d4c86654b96cc8295208ab899032d9dc432c724844581fa4677e47cfed6426",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -978,6 +978,14 @@
       "kind": "file",
       "label": "live-candidate-readback-cli.ts",
       "source": "packages/browser/src/live-candidate-readback-cli.ts",
+      "category": "browser-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:packages/browser/src/live-healing-cli.ts",
+      "kind": "file",
+      "label": "live-healing-cli.ts",
+      "source": "packages/browser/src/live-healing-cli.ts",
       "category": "browser-runtime",
       "authority": "authoritative-source"
     },
@@ -4668,6 +4676,11 @@
     {
       "from": "file:packages/browser/src/browser-worker.ts",
       "relation": "imports",
+      "to": "file:packages/browser/src/healing-probe.ts"
+    },
+    {
+      "from": "file:packages/browser/src/browser-worker.ts",
+      "relation": "imports",
       "to": "file:packages/browser/src/locator-healer.ts"
     },
     {
@@ -4702,6 +4715,26 @@
     },
     {
       "from": "file:packages/browser/src/live-candidate-readback-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/salesforce-cli-session.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-healing-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/browser-worker.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-healing-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/healing-probe.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-healing-cli.ts",
+      "relation": "imports",
+      "to": "file:packages/browser/src/salesforce-browser-coordinator.ts"
+    },
+    {
+      "from": "file:packages/browser/src/live-healing-cli.ts",
       "relation": "imports",
       "to": "file:packages/browser/src/salesforce-cli-session.ts"
     },

@@ -138,8 +138,13 @@ type LiveBrowserProfileDocument = {
     issuedAt: string;
     expiresAt: string;
     permittedModes:
-      | readonly ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"]
-      | readonly ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"];
+      | readonly ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "LOCATOR_PROBE"]
+      | readonly [
+          "READ_ONLY_DOM_CAPTURE",
+          "CANDIDATE_READBACK",
+          "LOCATOR_PROBE",
+          "BUSINESS_ACTION",
+        ];
   };
   sessionBroker: Record<string, unknown>;
   browser: Record<string, unknown>;
@@ -173,8 +178,13 @@ export function buildProfile(input: ProfileInput): LiveBrowserProfileDocument {
   const orgBinding = digest(`salesforce-org:${orgId}`);
   const mutationActionsEnabled = input.mutationActionsEnabled === true;
   const permittedModes = mutationActionsEnabled
-    ? (["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"] as const)
-    : (["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK"] as const);
+    ? ([
+        "READ_ONLY_DOM_CAPTURE",
+        "CANDIDATE_READBACK",
+        "LOCATOR_PROBE",
+        "BUSINESS_ACTION",
+      ] as const)
+    : (["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "LOCATOR_PROBE"] as const);
   const policyDigest = digest(
     canonicalJson({
       mode: "READ_ONLY_DOM_CAPTURE",

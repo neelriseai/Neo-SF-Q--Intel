@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "dc2b71e11280122e32820d16b97a4b3480a3f557986ed0ded4f8e5662a0dc4ad",
+  "sourceSnapshot": "65d4c86654b96cc8295208ab899032d9dc432c724844581fa4677e47cfed6426",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1586,7 +1586,7 @@
     {
       "path": "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
       "category": "reference-documentation",
-      "sha256": "e96ebb5118f0ee28f49c26f2571dff4fd834d1639a3ce7a9cceee784c463dd3b"
+      "sha256": "8e38bfd6f67f3858cbd11eea03a0d1b0eb37809aa5dd30895226ca45b1967b45"
     },
     {
       "path": "Docs/README.md",
@@ -1636,7 +1636,7 @@
     {
       "path": "apps/web/next-env.d.ts",
       "category": "project",
-      "sha256": "0f70629890b72a0a82e91972cc032c04b658b26c265373cb711cf576bfbf8fcc"
+      "sha256": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b"
     },
     {
       "path": "apps/web/next.config.ts",
@@ -1876,7 +1876,7 @@
     {
       "path": "packages/browser/package.json",
       "category": "project",
-      "sha256": "021a7a039796918e0336be502dc8d4dd0477597a5a7f281d0404a3fb7151949b"
+      "sha256": "68177166a8bcd5e6e595d800930485f080c7c4774dcd0c5cc1d8c5313c78f03c"
     },
     {
       "path": "packages/browser/playwright.config.ts",
@@ -1901,7 +1901,7 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "3e94aed1162666fe964515f327afae3895f84bb564bf6848ea97915da2322dd6"
+      "sha256": "1c9edd4e56600659ac1c8bc641b8b9452d713b9bfbc1449ac347daa3ec9cba2c"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
@@ -1919,9 +1919,14 @@
       "sha256": "e4a5d22902f8de70dd778e3783a4608f001dda0e02c7dd48020b4e4fd693344a"
     },
     {
+      "path": "packages/browser/src/live-healing-cli.ts",
+      "category": "browser-runtime",
+      "sha256": "63d46e2aa24213d65ee5e2a2e1ff805173ddd9b15e2a526d98571d59432d0b21"
+    },
+    {
       "path": "packages/browser/src/live-profile-cli.ts",
       "category": "browser-runtime",
-      "sha256": "993e97a87c1c28eebb065b8bc701d09bef7c6d7a406dcf1ae9fb2a3e276713e6"
+      "sha256": "43f58546de6b6ff6bf54684df25b350a7338451a3155b7641e93d708b89bbc9f"
     },
     {
       "path": "packages/browser/src/live-smoke-cli.ts",
@@ -1936,7 +1941,7 @@
     {
       "path": "packages/browser/src/salesforce-browser-coordinator.ts",
       "category": "browser-runtime",
-      "sha256": "1881ff3348ef6a97cec21e513c31243c816979ad817b7de52a91ecb7d8c41bf4"
+      "sha256": "c1167f0fe7a06b4bb88b7f459faf8b98135a344f2d03b7f8047f306620b7f9ca"
     },
     {
       "path": "packages/browser/src/salesforce-cli-session.ts",
@@ -1976,7 +1981,7 @@
     {
       "path": "packages/browser/tests/live-profile-cli.spec.ts",
       "category": "test",
-      "sha256": "07d5f6b791d9c8b46827241a882075ca56bb31450149eb93be88306472db862d"
+      "sha256": "78b6e85064e15bfe60d565b25d1d5c75779d17ee9ee4fbfa331a05083a64dd1e"
     },
     {
       "path": "packages/browser/tests/locator-healer.spec.ts",
@@ -2146,12 +2151,12 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "c745e5df70af7ca9b5738fdbac5f0ac911397b6f1d810f4b3749086e2684e6fb"
+      "sha256": "2a834352143643c397a011d70d78012d8e6f2d915ffa324c94cd3896f2594c34"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
       "category": "project",
-      "sha256": "92af81be2a277bce367b172e6f5be00d3dff11fa084c20877899839dc04ed30e"
+      "sha256": "9b8fa0c5fd835ef79abe0c591243b0ae0c127f05f4c591fe77581b4e45908948"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -2301,7 +2306,7 @@
     {
       "path": "src/neo_sf_q_intel/live_baseline.py",
       "category": "python-runtime",
-      "sha256": "d9320bd1ed9f3eae67759f5c5b4a9ce7c3bc28d5fee3ba4ee1923add884b67a6"
+      "sha256": "1ad52054bdcbcaf388687f88170056d7cb099b1b047453fc6c812c1d4d9663e1"
     },
     {
       "path": "src/neo_sf_q_intel/live_campaign_status.py",

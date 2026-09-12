@@ -260,7 +260,8 @@ function validateEnrollment(value: unknown): TrustedEnrollmentAssertion {
       (mode) =>
         mode !== "READ_ONLY_DOM_CAPTURE" &&
         mode !== "CANDIDATE_READBACK" &&
-        mode !== "BUSINESS_ACTION",
+        mode !== "BUSINESS_ACTION" &&
+        mode !== "LOCATOR_PROBE",
     )
   ) {
     throw new BrowserCoordinatorError("PROFILE_INVALID");

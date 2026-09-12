@@ -42,10 +42,10 @@
         "api-live-salesforce-baseline.json",
         "api-live-operator-advisory.json"
       ],
-      "status": "PARTIAL",
+      "status": "FIXED",
       "confirmedRootCause": "Not one bug but four layers. (a) The machine-local phase policy had expired (15-minute validity) and was regenerated and re-pinned. (b) The baseline enrollment had expired a day earlier (21-minute validity) and was regenerated from a fresh live six-step classification (caip-dev, DEVELOPER_EDITION, v67.0). (c) Authorized target digests are candidate-specific and must be recomputed whenever the candidate changes. (d) The remaining blocker is a product defect, not stale configuration: three APEX_TEST derivations are UNSUPPORTED, and any unsupported derivation blocks plan composition with no partial-subset fallback.",
-      "verificationEvidence": "The baseline now reaches live execution: classification, plan composition, dataset resolution and standard REST all proceed, and the campaign stops inside CUSTOM_REST_EXECUTION with LIVE_READ_RESPONSE_INVALID. That is the known org/source schema drift, not a plan or authority defect: the deployed org serves contract 1.0.0 while the current source contract requires 1.1.0.",
-      "nextAction": "Deploy the app API 1.1.0 candidate to the enrolled org under separate mutation authority, then rerun the read-only baseline to mint the first SF-L03, SF-L04 and SF-L05 receipts. Do not weaken the source oracle to make the baseline pass."
+      "verificationEvidence": "The read-only baseline now reaches STATE=COMPLETED with three live observations after the app API 1.1.0 candidate was deployed to caip-dev under archive/restore cover. Signed gate receipts were minted for SF-L01 through SF-L05 and the validator reports all five as locally replay-valid. Accepted completion remains 0/15 by design: campaign acceptance requires the complete required-gate set, and locally valid gates never become release authority on their own.",
+      "nextAction": "Remaining gates need the signed browser observation bridge (SF-L06/L07/L09), a live Apex runner (SF-L08) and the candidate deployment campaign (SF-C01 to SF-C06)."
     },
     {
       "id": "DEMO-LIVE-BA-001",

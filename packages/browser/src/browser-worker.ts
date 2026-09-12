@@ -2,7 +2,13 @@ import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { chromium, type Browser, type BrowserContext, type Locator, type Page } from "playwright";
 import { discoverLocatorCandidate } from "./locator-healer.js";
 
-export type WorkerMode = "READ_ONLY_DOM_CAPTURE" | "CANDIDATE_READBACK" | "BUSINESS_ACTION";
+import { runLocatorProbe, type LocatorProbeReport, type ProbeStage } from "./healing-probe.js";
+
+export type WorkerMode =
+  | "READ_ONLY_DOM_CAPTURE"
+  | "CANDIDATE_READBACK"
+  | "BUSINESS_ACTION"
+  | "LOCATOR_PROBE";
 export type WorkerStatus = "PASSED" | "FAILED" | "BLOCKED";
 
 export interface TrustedEnrollmentAssertion {
@@ -60,6 +66,8 @@ export interface BrowserWorkerRequest {
   startPath?: string;
   candidate?: CandidateIntent;
   businessAction?: BusinessActionIntent;
+  // Read-only staged locator probe. It never clicks, fills, submits or saves.
+  probe?: { target: unknown; stage: ProbeStage };
   captureLimit?: number;
 }
 
@@ -107,6 +115,7 @@ export interface BrowserWorkerReceipt {
     abstainedFieldCount?: number;
     strategies?: readonly string[];
   };
+  probeReport?: LocatorProbeReport;
   postSubmit?: {
     alertPresent: boolean;
     alertTextDigest?: string;
@@ -651,6 +660,20 @@ export class BrowserWorker {
       };
     }
 
+    if (request.mode === "LOCATOR_PROBE") {
+      const probe = request.probe!;
+      const report = await runLocatorProbe(page, probe.target, probe.stage);
+      return {
+        ...base,
+        status: report.status === "PASSED" ? "PASSED" : "FAILED",
+        lifecycle: report.status === "PASSED"
+          ? ["CAPTURED", "READBACK_VERIFIED"]
+          : ["CAPTURED"],
+        candidateCount: report.obligationCount,
+        probeReport: report,
+      };
+    }
+
     if (request.mode === "BUSINESS_ACTION") {
       const action = request.businessAction!;
       const lifecycle: CandidateLifecycleState[] = ["CAPTURED"];
@@ -934,6 +957,16 @@ function validateRequest(request: BrowserWorkerRequest): void {
   } else if (request.mode === "BUSINESS_ACTION") {
     if (!request.businessAction || !hasValidBusinessAction(request.businessAction)) {
       throw new BrowserWorkerError("BUSINESS_ACTION_INVALID");
+    }
+  } else if (request.mode === "LOCATOR_PROBE") {
+    const stage = (request.probe as { stage?: unknown } | undefined)?.stage;
+    if (
+      !request.probe ||
+      typeof request.probe !== "object" ||
+      typeof stage !== "string" ||
+      !["BASELINE", "STALE_AND_DISCOVER", "RERUN"].includes(stage)
+    ) {
+      throw new BrowserWorkerError("PROBE_REQUEST_INVALID");
     }
   } else if (request.candidate || request.businessAction) {
     throw new BrowserWorkerError("CANDIDATE_NOT_ALLOWED_FOR_CAPTURE");
