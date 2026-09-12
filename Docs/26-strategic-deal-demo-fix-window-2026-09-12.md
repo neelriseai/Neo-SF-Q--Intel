@@ -269,3 +269,41 @@ Remaining limitation: the Workbench cannot yet reach `Pending Regional VP` throu
 because Salesforce lookup fields need type, dropdown wait and option selection, which the worker's
 fill strategies do not implement. The record was seeded through the API for this run, and the browser
 proved the authorization boundary on it.
+
+## Salesforce lookup fields — partial, with ruled-out hypotheses
+
+A declared lookup strategy was added so the Workbench can be driven entirely through the browser.
+The field contract gains an optional `kind`, defaulting to text; lookups are declared rather than
+inferred, because Salesforce renders picklists as comboboxes too and guessing would change existing
+picklist behaviour.
+
+Status: the contract, the strategy dispatch and the abstention path all work and are reported in
+evidence as `salesforce-lookup-field`. The selection does **not** commit, so a form containing a
+lookup still fails client-side validation and never submits. Non-lookup fields are unaffected and
+continue to pass.
+
+Ruled out by live experiment, recorded so they are not repeated:
+
+1. `fill()` assigns a value without per-key events, so the debounced lookup search never runs.
+2. Typing key by key does run the search, but no matching option is then found inside the
+   `[data-field-api]` wrapper.
+3. Following the ARIA `aria-controls` reference to the owned listbox at page scope does not find the
+   option rows either.
+4. A shorter search term does not change the outcome.
+
+The observed option markup is `span.slds-listbox__option-text_entity` carrying a `title`, with names
+rendered lowercase; comparison is already case-insensitive, so casing is not the cause. The open
+question is whether the option rows are unreachable from both scopes, or whether the lookup search
+simply does not return the intended user in that context, which a manual check in the admin session
+would settle. The strategy abstains rather than selecting a wrong record, which is the correct
+failure mode.
+
+## Persona test split
+
+Operator guidance established the correct decomposition, and evidence should follow it:
+
+- **Setup / deal-owner tests** run as the admin persona and own field fill, lookup mechanics and
+  Save and Evaluate.
+- **Governance tests** run as the Regional VP persona and must never exercise the lookup. The VP
+  session does not render editable Workbench inputs at all and reports a save error, which is itself
+  a second persona boundary alongside the approve and reject control separation.

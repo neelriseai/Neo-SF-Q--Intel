@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "8651989e7f17c1a1353fc5f58d13bf029e116efaec2f605e1ffad3438b891ae2",
+  "sourceSnapshot": "c621a8c949db9870874ec5703420cab270da0bdbcb202ab0b96edfc6875e8028",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1586,7 +1586,7 @@
     {
       "path": "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
       "category": "reference-documentation",
-      "sha256": "28200fca06b1ec60878cd03db209f9a60cece22c4dde28df8f318efe66609e5d"
+      "sha256": "050b65cb1ed881493ab854b7112a5fe53222e9fa98821bf15c6ac583e3c8632a"
     },
     {
       "path": "Docs/README.md",
@@ -1901,7 +1901,7 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "b558d3c73582325ec0e35a9ef21f72a97945be0135310272f1945c152871ca6e"
+      "sha256": "a379af18e41512599c2b277cd87747c9b02fd4c9b5e2173981af86561223e98b"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
@@ -1911,7 +1911,7 @@
     {
       "path": "packages/browser/src/live-business-action-cli.ts",
       "category": "browser-runtime",
-      "sha256": "1b71cea2eded095a4729a8eb72b9b91149c08897036b28b7fe01427725c00c6a"
+      "sha256": "7417e9b4e1cda850a2795ac3db6ea4aa3d0a8de177edaa38ec8f8e1c9a9abf90"
     },
     {
       "path": "packages/browser/src/live-candidate-readback-cli.ts",
@@ -2151,7 +2151,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "457cb8823a55574b4342c52b21e6a2a5f1af8e5b3906659a19bbb798c9cdc321"
+      "sha256": "bdd83509ba97179ad19eacc9741cea19c3b7e18c2922cac719b4ab140ebd585b"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",

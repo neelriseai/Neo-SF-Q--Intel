@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "live-healing-and-persona-governance-2026-09-12",
+  "reviewId": "salesforce-lookup-partial-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -443,6 +443,11 @@
       "code": "LIVE_HEALING_AND_PERSONA_BOUNDARY_PROVEN",
       "severity": "P1",
       "resolution": "The staged locator heal ran live: baseline passed, a FlexiPage locatorVariant drift was deployed, all obligations went stale and were rediscovered one to one by object and field metadata identity, the rerun passed and the exact preimage was restored and verified by a fresh probe. A first restore attempt pointed at the archive directory instead of the expanded metadata and left the org drifted until the probe detected it, which argues for restoration being verified product code. The persona boundary was then proven on a real pending approval: the admin persona sees zero Approve and Reject controls while the assigned VP persona sees one of each on the same record, the VP decision was taken under its own identity through the approval API, and history records submitter and approver separately. Evidence remains diagnostic with no acceptance credit; lookup fields are a known browser fill limitation and the record was seeded through the API."
+    },
+    {
+      "code": "SALESFORCE_LOOKUP_FILL_PARTIAL",
+      "severity": "P2",
+      "resolution": "A declared lookup fill strategy was added behind an optional field kind so picklist and text behaviour is unchanged and lookups are never inferred. The strategy dispatches and abstains correctly but does not commit the selection, so forms containing a lookup still fail client side validation. Four hypotheses were ruled out live: value assignment skipping the debounced search, keystroke typing with no matching option inside the field wrapper, the ARIA aria-controls listbox at page scope, and a shorter search term. Abstention rather than selecting a wrong record remains the failure mode. The persona split is recorded: setup and field fill belong to the deal-owner persona, while the Regional VP persona tests decision controls only and does not render editable Workbench inputs at all."
     }
   ],
   "statusDowngrades": []

@@ -204,7 +204,9 @@ function parseFields(raw: string | undefined): BusinessActionIntent["fields"] {
       !item ||
       typeof item !== "object" ||
       Array.isArray(item) ||
-      Object.keys(item).sort().join(",") !== "fieldApiName,value"
+      !["fieldApiName,value", "fieldApiName,kind,value"].includes(
+        Object.keys(item).sort().join(","),
+      )
     ) {
       throw new BrowserCoordinatorError("BUSINESS_FIELDS_INVALID");
     }
@@ -212,7 +214,14 @@ function parseFields(raw: string | undefined): BusinessActionIntent["fields"] {
     if (typeof value.fieldApiName !== "string" || typeof value.value !== "string") {
       throw new BrowserCoordinatorError("BUSINESS_FIELDS_INVALID");
     }
-    return { fieldApiName: value.fieldApiName, value: value.value };
+    if (value.kind !== undefined && value.kind !== "TEXT" && value.kind !== "LOOKUP") {
+      throw new BrowserCoordinatorError("BUSINESS_FIELDS_INVALID");
+    }
+    return {
+      fieldApiName: value.fieldApiName,
+      value: value.value,
+      ...(value.kind === undefined ? {} : { kind: value.kind as "TEXT" | "LOOKUP" }),
+    };
   });
 }
 

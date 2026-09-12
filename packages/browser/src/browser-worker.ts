@@ -51,6 +51,9 @@ export interface BusinessActionIntent {
   fields: readonly {
     fieldApiName: string;
     value: string;
+    // Salesforce lookups need type, dropdown wait and option selection. Declared, never inferred,
+    // because picklists render as comboboxes too.
+    kind?: "TEXT" | "LOOKUP";
   }[];
   submit: {
     tag: "lightning-button" | "button";
@@ -696,7 +699,12 @@ export class BrowserWorker {
         let filled = false;
         let fieldStrategy: string | undefined;
         if (wrapperCount === 1) {
-          fieldStrategy = await fillBusinessField(wrapper, field.value, this.#operationTimeoutMs);
+          fieldStrategy = await fillBusinessField(
+            wrapper,
+            field.value,
+            this.#operationTimeoutMs,
+            field.kind,
+          );
           if (fieldStrategy) {
             strategies.push(fieldStrategy);
             filled = true;
@@ -1010,6 +1018,7 @@ function hasValidBusinessAction(action: BusinessActionIntent): boolean {
         typeof field.value === "string" &&
         field.value.length >= 1 &&
         field.value.length <= 160 &&
+        (field.kind === undefined || field.kind === "TEXT" || field.kind === "LOOKUP") &&
         !containsSensitiveText(field.value),
     ) &&
     (action.submit.tag === "button" || action.submit.tag === "lightning-button") &&
@@ -1030,7 +1039,11 @@ async function fillBusinessField(
   scope: Locator,
   value: string,
   timeoutMs: number,
+  kind?: "TEXT" | "LOOKUP",
 ): Promise<string | undefined> {
+  if (kind === "LOOKUP") {
+    return fillSalesforceLookup(scope, value, timeoutMs);
+  }
   try {
     await scope.fill(value, { timeout: timeoutMs });
     return "direct-data-field-api";
@@ -1127,6 +1140,68 @@ async function capturePostSubmitSignal(
     };
   } catch {
     return { alertPresent: false, statusPresent: false };
+  }
+}
+
+/**
+ * Fill a Salesforce lookup by typing the record name, waiting for the listbox and selecting the one
+ * exact match. Zero or multiple exact matches abstain rather than guessing a record.
+ */
+async function fillSalesforceLookup(
+  scope: Locator,
+  value: string,
+  timeoutMs: number,
+): Promise<string | undefined> {
+  try {
+    const input = scope
+      .locator('input[role="combobox"],input.slds-combobox__input,input[type="text"]')
+      .first();
+    if ((await input.count()) === 0) return undefined;
+    await input.click({ timeout: timeoutMs });
+    // fill() assigns the value without per-key events, so a debounced lookup search never runs.
+    // Type the term key by key, then let the matching-option wait below absorb the debounce.
+    await input.fill("", { timeout: timeoutMs }).catch(() => undefined);
+    await input.pressSequentially(value, { delay: 60, timeout: timeoutMs });
+    // Salesforce may render the listbox in an overlay outside the field wrapper. Follow the ARIA
+    // combobox contract to the owned listbox, falling back to options inside the wrapper.
+    const controls = await input.getAttribute("aria-controls").catch(() => null);
+    const page = scope.page();
+    const options =
+      controls && /^[A-Za-z][A-Za-z0-9_:.-]{0,128}$/.test(controls)
+        ? page.locator(`#${cssString(controls)} [role="option"], #${cssString(controls)}[role="option"]`)
+        : scope.locator('[role="option"]');
+    // Clicking a lookup opens a recent-items list before the search runs, so waiting for "any
+    // option" reads a stale list. Wait for an option that actually matches, which absorbs the
+    // search debounce, then still require exactly one match.
+    await options
+      .filter({ hasText: value })
+      .first()
+      .waitFor({ state: "visible", timeout: timeoutMs })
+      .catch(() => undefined);
+    const total = await options.count();
+    // Lookup options concatenate primary and secondary text, so compare on normalized containment
+    // while still requiring exactly one candidate. Ambiguity abstains rather than guessing.
+    const wanted = value.replace(/\s+/g, " ").trim().toLowerCase();
+    let matches = 0;
+    let matchIndex = -1;
+    for (let index = 0; index < total; index += 1) {
+      const raw = ((await options.nth(index).textContent()) ?? "").replace(/\s+/g, " ").trim();
+      if (raw.toLowerCase().includes(wanted)) {
+        matches += 1;
+        matchIndex = index;
+      }
+    }
+    if (matches !== 1 || matchIndex < 0) return undefined;
+    await options.nth(matchIndex).click({ timeout: timeoutMs });
+    const committed = (await input.inputValue().catch(() => "")).replace(/\s+/g, " ").trim();
+    const pills = await scope
+      .locator('[role="option"][aria-selected="true"],.slds-pill,[data-item-id]')
+      .count()
+      .catch(() => 0);
+    if (!committed.toLowerCase().includes(wanted) && pills === 0) return undefined;
+    return "salesforce-lookup-field";
+  } catch {
+    return undefined;
   }
 }
 
