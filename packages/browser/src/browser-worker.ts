@@ -1158,47 +1158,55 @@ async function fillSalesforceLookup(
       .first();
     if ((await input.count()) === 0) return undefined;
     await input.click({ timeout: timeoutMs });
-    // fill() assigns the value without per-key events, so a debounced lookup search never runs.
-    // Type the term key by key, then let the matching-option wait below absorb the debounce.
+    // fill() assigns the value without per-key events, so the debounced search never runs.
     await input.fill("", { timeout: timeoutMs }).catch(() => undefined);
     await input.pressSequentially(value, { delay: 60, timeout: timeoutMs });
-    // Salesforce may render the listbox in an overlay outside the field wrapper. Follow the ARIA
-    // combobox contract to the owned listbox, falling back to options inside the wrapper.
-    const controls = await input.getAttribute("aria-controls").catch(() => null);
+
+    // Salesforce renders each result as a combobox item whose clean label lives in a title
+    // attribute; the visible text is split by search highlighting. Match on the title, at page
+    // scope because the listbox is not always inside the field wrapper.
     const page = scope.page();
-    const options =
-      controls && /^[A-Za-z][A-Za-z0-9_:.-]{0,128}$/.test(controls)
-        ? page.locator(`#${cssString(controls)} [role="option"], #${cssString(controls)}[role="option"]`)
-        : scope.locator('[role="option"]');
-    // Clicking a lookup opens a recent-items list before the search runs, so waiting for "any
-    // option" reads a stale list. Wait for an option that actually matches, which absorbs the
-    // search debounce, then still require exactly one match.
-    await options
-      .filter({ hasText: value })
+    const options = page.locator(
+      'lightning-base-combobox-item[role="option"],[role="option"]',
+    );
+    const wanted = value.replace(/\s+/g, " ").trim().toLowerCase();
+    const matching = options.filter({ has: page.locator(`[title="${cssString(value)}"]`) });
+    await matching
       .first()
       .waitFor({ state: "visible", timeout: timeoutMs })
       .catch(() => undefined);
-    const total = await options.count();
-    // Lookup options concatenate primary and secondary text, so compare on normalized containment
-    // while still requiring exactly one candidate. Ambiguity abstains rather than guessing.
-    const wanted = value.replace(/\s+/g, " ").trim().toLowerCase();
-    let matches = 0;
-    let matchIndex = -1;
-    for (let index = 0; index < total; index += 1) {
-      const raw = ((await options.nth(index).textContent()) ?? "").replace(/\s+/g, " ").trim();
-      if (raw.toLowerCase().includes(wanted)) {
-        matches += 1;
-        matchIndex = index;
+
+    let candidates = await matching.count();
+    let chosen = matching.first();
+    if (candidates === 0) {
+      // Fall back to normalized text containment, still requiring a single candidate.
+      const total = await options.count();
+      let index = -1;
+      for (let position = 0; position < total; position += 1) {
+        const text = ((await options.nth(position).textContent()) ?? "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase();
+        if (text.includes(wanted)) {
+          candidates += 1;
+          index = position;
+        }
       }
+      if (candidates !== 1 || index < 0) return undefined;
+      chosen = options.nth(index);
+    } else if (candidates !== 1) {
+      return undefined;
     }
-    if (matches !== 1 || matchIndex < 0) return undefined;
-    await options.nth(matchIndex).click({ timeout: timeoutMs });
+
+    // The chosen row carries the record id, which is the commit we actually want.
+    const recordId = await chosen.getAttribute("data-value").catch(() => null);
+    await chosen.click({ timeout: timeoutMs });
     const committed = (await input.inputValue().catch(() => "")).replace(/\s+/g, " ").trim();
-    const pills = await scope
-      .locator('[role="option"][aria-selected="true"],.slds-pill,[data-item-id]')
+    const selected = await scope
+      .locator("[data-value],.slds-pill")
       .count()
       .catch(() => 0);
-    if (!committed.toLowerCase().includes(wanted) && pills === 0) return undefined;
+    if (!committed.toLowerCase().includes(wanted) && selected === 0 && !recordId) return undefined;
     return "salesforce-lookup-field";
   } catch {
     return undefined;

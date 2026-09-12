@@ -277,12 +277,20 @@ The field contract gains an optional `kind`, defaulting to text; lookups are dec
 inferred, because Salesforce renders picklists as comboboxes too and guessing would change existing
 picklist behaviour.
 
-Status: the contract, the strategy dispatch and the abstention path all work and are reported in
-evidence as `salesforce-lookup-field`. The selection does **not** commit, so a form containing a
-lookup still fails client-side validation and never submits. Non-lookup fields are unaffected and
-continue to pass.
+**Resolved.** The full Workbench flow now completes through the browser alone, including the
+lookup: `status=PASSED`, success text matched, record persisted, and
+`Approval_Status__c = Pending Regional VP` with the approver set. The strategy reports as
+`salesforce-lookup-field` rather than falling back.
 
-Ruled out by live experiment, recorded so they are not repeated:
+The fix came from the real option markup. Each result is a `lightning-base-combobox-item` carrying
+`role="option"` and `data-value` with the record id, and its clean label lives in a `title`
+attribute on a descendant `lightning-base-combobox-formatted-text`; the visible text is split by
+search highlighting (`<strong>Syn</strong>thetic Regional VP`), which is why text comparison was
+unreliable. The option rows are also not always inside the field wrapper, and the element named by
+`aria-controls` does not contain them. Matching on the `title` descendant at page scope, after
+typing key by key, selects the record and commits it.
+
+Ruled out on the way, recorded so they are not repeated:
 
 1. `fill()` assigns a value without per-key events, so the debounced lookup search never runs.
 2. Typing key by key does run the search, but no matching option is then found inside the
@@ -291,12 +299,9 @@ Ruled out by live experiment, recorded so they are not repeated:
    option rows either.
 4. A shorter search term does not change the outcome.
 
-The observed option markup is `span.slds-listbox__option-text_entity` carrying a `title`, with names
-rendered lowercase; comparison is already case-insensitive, so casing is not the cause. The open
-question is whether the option rows are unreachable from both scopes, or whether the lookup search
-simply does not return the intended user in that context, which a manual check in the admin session
-would settle. The strategy abstains rather than selecting a wrong record, which is the correct
-failure mode.
+Ambiguity still abstains rather than selecting a wrong record, which remains the correct failure
+mode. Operator-supplied DOM evidence from the admin session resolved this in one step after four
+blind attempts had failed, which is a useful lesson for the next browser-contract problem.
 
 ## Persona test split
 

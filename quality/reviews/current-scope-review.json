@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "salesforce-lookup-partial-2026-09-12",
+  "reviewId": "salesforce-lookup-resolved-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -448,6 +448,11 @@
       "code": "SALESFORCE_LOOKUP_FILL_PARTIAL",
       "severity": "P2",
       "resolution": "A declared lookup fill strategy was added behind an optional field kind so picklist and text behaviour is unchanged and lookups are never inferred. The strategy dispatches and abstains correctly but does not commit the selection, so forms containing a lookup still fail client side validation. Four hypotheses were ruled out live: value assignment skipping the debounced search, keystroke typing with no matching option inside the field wrapper, the ARIA aria-controls listbox at page scope, and a shorter search term. Abstention rather than selecting a wrong record remains the failure mode. The persona split is recorded: setup and field fill belong to the deal-owner persona, while the Regional VP persona tests decision controls only and does not render editable Workbench inputs at all."
+    },
+    {
+      "code": "SALESFORCE_LOOKUP_FILL_RESOLVED",
+      "severity": "P2",
+      "resolution": "The declared lookup strategy now selects and commits the record, so the full Workbench flow completes through the browser alone and reaches Pending Regional VP with the approver set. Matching uses the title attribute on the descendant formatted-text element at page scope, because search highlighting splits the visible text and the option rows are not always inside the field wrapper nor under the element named by aria-controls. Ambiguity still abstains."
     }
   ],
   "statusDowngrades": []
