@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "strategic-deal-demo-second-fix-window-2026-09-12",
+  "reviewId": "strategic-deal-demo-phase-scoped-partitions-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -413,6 +413,11 @@
       "code": "DEMO_SUBMITTED_FLAG_TRUTHFULNESS",
       "severity": "P2",
       "resolution": "businessAction.submitted previously reported true whenever a submit candidate was located, which misreported every failed run in the 2026-09-12 test pass. It now derives from a completed click dispatch. The required-partition blocker behind DEMO-APEX-001 was diagnosed and designed but deliberately left unimplemented inside the timebox rather than partially changing a governance boundary; the machine-local policy shortcut was rejected."
+    },
+    {
+      "code": "PHASE_SCOPED_REQUIRED_PARTITIONS",
+      "severity": "P1",
+      "resolution": "A phase-scoped plan was blocked by required partitions whose gates it can never execute. The producer now takes an explicit executable gate set and skips only those out-of-phase requirements; every derived target is still validated and authorized exactly as before, and SF-L06 through SF-L09 remain non-passing. The machine-local policy shortcut was rejected in favour of this producer change. The repo default-deny policy producer pin was refreshed."
     }
   ],
   "statusDowngrades": []

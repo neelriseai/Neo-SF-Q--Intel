@@ -722,6 +722,15 @@ class LiveTargetPlanEvaluation(_Model):
         return self
 
 
+_PARTITION_GATE_IDS: dict[str, str] = {
+    "STANDARD_REST": "SF-L03",
+    "CUSTOM_REST": "SF-L04",
+    "METADATA": "SF-L05",
+    "BROWSER_INTENT": "SF-L07",
+    "APEX_TEST": "SF-L08",
+}
+
+
 class HostOwnedLiveTargetPlanProducer:
     """Compile a complete plan from host-captured inputs; callers cannot supply targets."""
 
@@ -731,9 +740,11 @@ class HostOwnedLiveTargetPlanProducer:
         policy: LiveTargetPolicy,
         *,
         clock: Callable[[], datetime] | None = None,
+        executable_gate_ids: tuple[str, ...] = (),
     ) -> None:
         self._input_port = input_port
         self._policy = policy
+        self._executable_gate_ids = executable_gate_ids
         self._clock = clock or (lambda: datetime.now(UTC))
         if policy.producer_implementation_sha256 != _producer_implementation_sha256():
             raise LiveTargetContractError("Live-target producer implementation pin mismatch")
@@ -885,6 +896,13 @@ class HostOwnedLiveTargetPlanProducer:
             add(LiveTargetGapCode.DUPLICATE_TARGET, duplicate)
         partitions = {item.partition.value for item in targets}
         for required in self._policy.required_partitions:
+            # A phase-scoped plan may execute only its own gate set. Requiring the presence of a
+            # partition whose gate is outside that set blocks the phase on work it can never run.
+            # Targets that do derive are still validated and authorized exactly as before.
+            if self._executable_gate_ids:
+                gate = _PARTITION_GATE_IDS.get(required)
+                if gate is not None and gate not in self._executable_gate_ids:
+                    continue
             if required not in partitions:
                 add(LiveTargetGapCode.MISSING_PARTITION, required)
 

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "4f13888af9873e16798fe019d164ed2093ba23b52695edfa932394ed4660d48e",
+  "sourceSnapshot": "771719cd39193f710a99300f2f3cd843002e1450e64faf09ffd97ae985c1cc7b",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1586,7 +1586,7 @@
     {
       "path": "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
       "category": "reference-documentation",
-      "sha256": "c243e8b2ea6512a416cafbeeba676754553e96ac555c77ca70e13ff0d8ea1a3c"
+      "sha256": "a8686c60191498237d4a396b47fdd979d9da2ee8a6f90bf6a7ccefd07bb94895"
     },
     {
       "path": "Docs/README.md",
@@ -1766,7 +1766,7 @@
     {
       "path": "config/live-target-policy.json",
       "category": "policy",
-      "sha256": "bf19388be3d7cc6afba92a4b647ea6d6625ac39d379c42cbdea2036e28af8b27"
+      "sha256": "5ac01bca9005923a4c0594ffb1565774df473b010962b9b6d3967cee4e8d8f9c"
     },
     {
       "path": "config/ontology/canonical-ontology.json",
@@ -2146,12 +2146,12 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "ad21dde9876b25319d4945124bc1fb753fe8d76474395395497dc2122c8a32bc"
+      "sha256": "e32ac6520e8578cb63b6d69dcfa984294f6623945c31c784f76da4f1c7b9a140"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
       "category": "project",
-      "sha256": "74d193dc64d89113d03785ad48ab1efdd128e7b0e032feb1ba0480ee045e7476"
+      "sha256": "4fd73d907422c5a3e1f9f238f8a93094ecc16485149cc9ae80636e40ad7ed0e9"
     },
     {
       "path": "scripts/catalog/build_project_index.py",
@@ -2216,7 +2216,7 @@
     {
       "path": "src/neo_sf_q_intel/candidate_target_compiler.py",
       "category": "python-runtime",
-      "sha256": "c54b9977ea6d10b60ba0acbaf29aaf24bbbe71d5d1ff066399421d957530b77b"
+      "sha256": "8ed78d41b3c40d3d8167edc3fedd7f25ec0a43943974acab377fdb88de6c3a68"
     },
     {
       "path": "src/neo_sf_q_intel/change_seed.py",
@@ -2341,7 +2341,7 @@
     {
       "path": "src/neo_sf_q_intel/live_target_plan.py",
       "category": "python-runtime",
-      "sha256": "4bb210d3662de4dc14e42252ff9cab102ce0bd57dc63455fe4db6b9abfc87123"
+      "sha256": "16db8796cf72eccab022abd5161339be94d3aa3a9fb2d7bc13c76d097a45e075"
     },
     {
       "path": "src/neo_sf_q_intel/local_validation.py",

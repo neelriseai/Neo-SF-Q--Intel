@@ -156,3 +156,16 @@ app repository by design.
 Removing `APEX_TEST` from `requiredPartitions` in the machine-local reviewed target policy would
 unblock the baseline in one line, but it hides the missing partition behind operator configuration
 instead of fixing the producer. The product-code fix above was chosen instead and remains open.
+
+### Second window addendum — partition fix landed
+
+`DEMO-APEX-001` moved from OPEN to PARTIAL. `HostOwnedLiveTargetPlanProducer` now accepts an
+explicit executable gate set, and `compose_candidate_live_plan` passes `READ_ONLY_BASELINE_GATES`
+when a phase policy applies, so a read-only baseline is no longer blocked by a partition whose gate
+it cannot execute. `MISSING_PARTITION` for `APEX_TEST` is gone and the repository default-deny
+policy's producer pin was refreshed.
+
+The remaining single gap is `UNSUPPORTED_TARGET` on `BROWSER_INTENT`: its action class or
+application intent is not in the reviewed host policy allowlists, and `SF-L07` is also outside the
+read-only gate set. Whether an unauthorized out-of-phase target should block a phase that cannot
+execute it is a governance semantics decision; it was left open rather than decided unilaterally.

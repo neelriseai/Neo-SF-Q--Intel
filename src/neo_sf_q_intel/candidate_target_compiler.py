@@ -1475,7 +1475,14 @@ def compose_candidate_live_plan(
                 organizationReceiptValidUntil=classification.valid_until,
             )
 
-    evaluation = HostOwnedLiveTargetPlanProducer(_Port(), policy, clock=clock).produce()
+    evaluation = HostOwnedLiveTargetPlanProducer(
+        _Port(),
+        policy,
+        clock=clock,
+        executable_gate_ids=(
+            READ_ONLY_BASELINE_GATES if local_validation_phase_policy is not None else ()
+        ),
+    ).produce()
     unsupported = tuple(
         item for item in compilation.derivations if item.state is TargetDerivationState.UNSUPPORTED
     )
