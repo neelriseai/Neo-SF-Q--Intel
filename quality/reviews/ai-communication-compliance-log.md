@@ -94,3 +94,37 @@ test would have caught it — it needed a human-level convention check.
 tests alongside, 27 then 13 more) · delegation per policy FOLLOWED (opus coded, Opus 5 designed and
 reviewed) · one deviation: this log entry written directly rather than by a `sonnet` subagent,
 because the numbers were already in the main context and a cold start would have cost more.
+
+### Consolidation checkpoint — Docs/28 rev 2
+
+Swept the conversation for anything discussed and not captured. Now recorded in `Docs/28`:
+tier switch, probe mode, healing CLI, T-GRAPH, T-INTENT, knowledge repo, deterministic heal proof,
+T-SIG/T-META/T-DOM/prompt as remaining, agent-evidence fields including **rejected proposals**,
+deferred items (screenshots, dashboard panel, report agent), Playwright MCP as dev-time only,
+and the two decisions blocking D1.
+
+**Timebox compliance to date**
+
+| Rule | Status | Evidence |
+|---|---|---|
+| Size and split before coding | FOLLOWED | C0-C7 and D0-D7 both sized before any code |
+| Test first | FOLLOWED | K-chunk: 27 then 13 tests written with the code, all green before commit |
+| Collect all issues before fixing | NOT YET EXERCISED | K-chunk produced one review finding, not a batch; D6 is the first real triage |
+| Severity then priority | NOT YET EXERCISED | D6 |
+| Skip overruns, record next action | FOLLOWED | lookup work stopped after 4 hypotheses; recorded, not extended |
+| Delegate by model | FOLLOWED | 2 opus subagents coded; Opus 5 designed and reviewed |
+| Chunk came in under box | FOLLOWED | K: ~50m used of 75m |
+
+**Benefit to date**
+
+| Measure | Value | Class |
+|---|---:|---|
+| Graph edge list vs full graph | 99.6% smaller | MEAS |
+| Knowledge heading vs whole page | 91% smaller | MEAS |
+| Signature block vs source file | 98.8% smaller | MEAS |
+| Subagent replies, prose vs JSON | 451 / 522 ch, no prose | MEAS |
+| Delegation token cost | 163,105 subagent tokens | MEAS — context relief, NOT a token saving |
+| Defects caught by review that tests missed | 1 (`Path.cwd()` wiring) | MEAS |
+
+**Honest gaps unchanged:** techniques 3 (state-transition prompting) and the full batch-triage loop
+still have no applied evidence. Both land in D3-D6.

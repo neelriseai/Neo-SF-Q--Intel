@@ -47,21 +47,20 @@ State_Verify: unique + visible + enabled + metadata-scoped + full assertion set
  -> PASS: heal, resolvedByTier=llm    FAIL: abstain, record rejected proposal
 ```
 
-## 4. Chunks (150m)
+## 4. Chunks (150m, revised after K-chunk delivery)
 
 ```
-D0 000-020  contracts: 4 tool sigs + signature schema + prompt          me/opus5
-D1 020-070  T-SIG store + capture-on-success, tests first               opus
-D2 070-110  T-GRAPH / T-INTENT / T-META lookups (data already exists)   opus
-D3 110-140  T-DOM push payload from worker at failure                   opus
-D4 140-170  prompt + provider call + proposal -> verifier wiring        opus
-D5 170-200  live run on the real drift scenario, NEO_HEAL_TIERS=llm     me + opus
-D6 200-230  triage all issues -> severity -> priority -> fix            me/opus5
-D7 230-250  docs, knowledge, compliance log, commit                     sonnet
+D1 000-045  T-SIG store + capture-on-success, tests first          opus     [BLOCKED on §8]
+D2 045-060  T-META lookup only (T-GRAPH + T-INTENT already built)  opus
+D3 060-090  T-DOM push payload from worker at failure              opus
+D4 090-115  prompt + provider call + proposal -> verifier wiring   opus
+D5 115-135  live run on the real drift scenario, HEAL_TIERS=llm    me + opus
+D6 135-145  triage all issues -> severity -> priority -> fix       me/opus5
+D7 145-150  docs, knowledge, compliance log, commit                sonnet
 ```
 
-`[RISK]`: the static knowledge repo behind `T-INTENT` (pages, rules, expected state) is content,
-not code. Operator-supplied keeps the window; authored here adds ~45m.
+`[SAVED]` ~40m against the original estimate: the K-chunk delivered T-GRAPH and T-INTENT early.
+`[KNOWLEDGE]` operator-supplied (14 files, 38KB) — the +45m authoring risk is retired.
 
 ## 5. Pollution guards
 
@@ -86,4 +85,56 @@ not code. Operator-supplied keeps the window; authored here adds ~45m.
             five blind iterations on the lookup selector)
  shape      its accessibility-snapshot representation (role + name + ref) is a good model for
             T-DOM's candidate list; adopt the shape, not the server
+```
+
+## 7. Built state (as of K-chunk, commit fbdb551)
+
+```
+[DONE] NEO_HEAL_TIERS switch      default metadata · llm tier · abstention · resolvedByTier in projection
+[DONE] LOCATOR_PROBE worker mode  staged BASELINE / STALE_AND_DISCOVER / RERUN against a live session
+[DONE] live:healing CLI           headed + slow-mo, diagnosticOnly projection
+[DONE] T-GRAPH                    graph_neighborhood(entity, hops, cap) -> edge list · MCP-exposed
+[DONE] T-INTENT                   knowledge_index + knowledge_section(page|module|impact, section) · MCP-exposed
+[DONE] knowledge repo             14 files · pages / modules / impact · operator-authored
+[DONE] deterministic heal proven  live drift -> stale -> metadata rediscovery -> rerun -> exact restore
+[TODO] T-SIG                      D1
+[TODO] T-META                     D2
+[TODO] T-DOM push                 D3
+[TODO] prompt + provider + wiring D4
+```
+
+`[MEAS]` graph full 228,591 ch vs 1-hop 946 ch (99.6% cut) · knowledge heading block 517 ch vs whole page 5,824 ch (91% cut).
+
+## 8. Open decisions blocking D1
+
+```
+[D-KEY]  element key must survive a locator rename, so it cannot be the locator.
+         proposed: semantic identity (object + field API name + page key), obligationId as secondary index
+[D-TIER] storage ladder. repo convention degrades postgres -> sqlite -> json -> cache.
+         proposed for MVP: postgres only, explicit unavailable, no silent degradation
+```
+
+## 9. Agent evidence (carried from discussion, scheduled D4)
+
+```
+reuse ProviderInvocationReceipt (digest-only: model, prompt/response sha, tokens, timing)
+add   observationDigest · proposedCandidateDigest · verifierVerdict · resolvedByTier
+RULE  rejected proposals are recorded too — the verifier catching a wrong guess is the
+      strongest evidence the architecture produces, and today it is invisible
+```
+
+## 10. Deferred, explicitly not in this slice
+
+```
+screenshots / SikuliX / OpenCV   attribute envelope was the decisive signal, not vision
+dashboard "healed by model" panel ~2h: artifact ingest -> campaign status -> panel
+assurance report agent (Docs/27)  parked behind this slice
+```
+
+## 11. Development-time tooling
+
+```
+Playwright MCP: dev-time inspector only, never in the product path (§6).
+Value: would have replaced five blind iterations on the lookup selector.
+Install as a local dev dependency; no product code may import or depend on it.
 ```

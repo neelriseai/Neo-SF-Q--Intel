@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "437382fe5e961fc212d73f1d24b30614bf8f8e8b26f71bb9cfeca45e488f9dc3",
+  "sourceSnapshot": "3172113a8af88bdbe47b30233c97648ad92144fdfa7b34eaa69a662c10f5d2f8",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1601,7 +1601,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "1524b213cef50c7d029db8a468a2e80259a76812817298118e1f3b7662079e9c"
+      "sha256": "4bc685bb5aaadb98837afd2bfff3faf4a992870d1466806d277ccf1381dc7eeb"
     },
     {
       "path": "Docs/README.md",
@@ -2236,7 +2236,7 @@
     {
       "path": "quality/reviews/ai-communication-compliance-log.md",
       "category": "project",
-      "sha256": "7b2170926d9abf86f7b47cf69bbf5b22cecdbe0ff0eb44081ef13372e603b50a"
+      "sha256": "af5dfbe07ae280e8dfe8231656fabafdc1ca3723089a996d137290322bd9321c"
     },
     {
       "path": "quality/reviews/current-scope-review.json",
