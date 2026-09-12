@@ -493,7 +493,8 @@ export class BrowserWorker {
         (mode) =>
           mode !== "READ_ONLY_DOM_CAPTURE" &&
           mode !== "CANDIDATE_READBACK" &&
-          mode !== "BUSINESS_ACTION",
+          mode !== "BUSINESS_ACTION" &&
+          mode !== "LOCATOR_PROBE",
       )
     ) {
       throw new BrowserWorkerError("ENROLLMENT_INVALID");
@@ -662,6 +663,13 @@ export class BrowserWorker {
 
     if (request.mode === "LOCATOR_PROBE") {
       const probe = request.probe!;
+      // Lightning renders asynchronously. Wait for a metadata-identified object surface to attach
+      // before probing, otherwise every obligation reports LOCATOR_NOT_FOUND against an empty page.
+      await page
+        .locator("[data-object-api]")
+        .first()
+        .waitFor({ state: "attached", timeout: this.#operationTimeoutMs })
+        .catch(() => undefined);
       const report = await runLocatorProbe(page, probe.target, probe.stage);
       return {
         ...base,

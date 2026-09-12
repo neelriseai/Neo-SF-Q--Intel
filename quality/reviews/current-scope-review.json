@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "first-live-gate-receipts-2026-09-12",
+  "reviewId": "live-healing-and-persona-governance-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -145,7 +145,8 @@
     "astra_live_vertical_review",
     "opus5_demo_fix_window_review",
     "opus5_second_fix_window_review",
-    "opus5_authority_window_migration"
+    "opus5_authority_window_migration",
+    "opus5_persona_governance_run"
   ],
   "findings": [
     {
@@ -437,6 +438,11 @@
       "code": "FIRST_LIVE_GATE_RECEIPTS_MINTED",
       "severity": "P1",
       "resolution": "The app API 1.1.0 candidate was deployed to caip-dev after preimage archive and successful check-only, restoring contract agreement with the source. The read-only baseline then completed and minted signed receipts for SF-L01 to SF-L05, all locally replay-valid. Accepted completion stays 0/15 because campaign acceptance requires every required gate; no oracle was weakened to reach this. The per-campaign runtime cap was raised from 900 to 3600 seconds only after measuring that roughly three quarters of campaign time is the designed per-target and per-partition identity and session revalidation rather than payload work. A read-only LOCATOR_PROBE worker mode and live:healing CLI were added with an ordered NEO_HEAL_TIERS discovery flag; tier switching never disables deterministic verification and the projection is explicitly diagnosticOnly with no acceptance credit."
+    },
+    {
+      "code": "LIVE_HEALING_AND_PERSONA_BOUNDARY_PROVEN",
+      "severity": "P1",
+      "resolution": "The staged locator heal ran live: baseline passed, a FlexiPage locatorVariant drift was deployed, all obligations went stale and were rediscovered one to one by object and field metadata identity, the rerun passed and the exact preimage was restored and verified by a fresh probe. A first restore attempt pointed at the archive directory instead of the expanded metadata and left the org drifted until the probe detected it, which argues for restoration being verified product code. The persona boundary was then proven on a real pending approval: the admin persona sees zero Approve and Reject controls while the assigned VP persona sees one of each on the same record, the VP decision was taken under its own identity through the approval API, and history records submitter and approver separately. Evidence remains diagnostic with no acceptance credit; lookup fields are a known browser fill limitation and the record was seeded through the API."
     }
   ],
   "statusDowngrades": []

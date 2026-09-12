@@ -9,11 +9,12 @@
   },
   "include": [
     "src/browser-worker.ts",
-    "src/salesforce-cli-session.ts",
-    "src/salesforce-browser-coordinator.ts",
+    "src/live-business-action-cli.ts",
+    "src/live-candidate-readback-cli.ts",
+    "src/live-healing-cli.ts",
     "src/live-profile-cli.ts",
     "src/live-smoke-cli.ts",
-    "src/live-candidate-readback-cli.ts",
-    "src/live-business-action-cli.ts"
+    "src/salesforce-browser-coordinator.ts",
+    "src/salesforce-cli-session.ts"
   ]
 }

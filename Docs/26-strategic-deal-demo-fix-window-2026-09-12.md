@@ -219,3 +219,53 @@ The projection is explicitly `diagnosticOnly` with no acceptance credit, and rec
 
 The live drift run itself still requires the declared FlexiPage `locatorVariant` mutation and its
 exact preimage restore.
+
+## Live locator healing — executed
+
+The full staged heal ran against the enrolled org on the Opportunity record page
+(`Strategic_Deal_Record_Page`, component instance `dealWorkbench`):
+
+| Stage | Result |
+|---|---|
+| `BASELINE` | PASSED, three obligations, one candidate each |
+| Drift deploy | FlexiPage `locatorVariant` `baseline` to `reordered`; check-only and deploy both Succeeded |
+| `STALE_AND_DISCOVER` | PASSED, `staleOriginal=true` on all three, exactly one candidate rediscovered per obligation by object/field metadata identity, `resolvedByTier=metadata` |
+| `RERUN` | PASSED, every declared assertion holds on the healed locators |
+| Restore | Preimage redeployed from `.runtime/restore-archives/heal-*/preimage` |
+| Post-restore `BASELINE` | PASSED with `staleOriginal=false`, original hooks back |
+
+Three defects were found and fixed during that run: `LOCATOR_PROBE` was missing from the worker's
+own enrollment allowlist, the CLI was absent from the live build include list, and most importantly
+the probe never waited for Lightning to attach, so every obligation reported `LOCATOR_NOT_FOUND`
+against an empty page. The probe now waits for a metadata-identified object surface first.
+
+The first restore attempt failed because the deploy was pointed at the directory holding the
+retrieved archive rather than the expanded metadata. The org sat in the drifted state until the
+post-restore probe reported `LOCATOR_NOT_FOUND`, the path was corrected and restoration verified.
+This argues for restoration being product code with its own verification rather than an operator
+command.
+
+## Persona and Regional VP governance — executed
+
+The highest-value unproven capability now has live evidence. Using the operator-supplied tester
+flow, a synthetic strategic deal was created with `Amount` 60000000, `Discount__c` 15.01,
+`Strategic_Deal__c` true and a Regional VP approver distinct from the owner.
+
+| Check | Evidence |
+|---|---|
+| Policy fires at thresholds | `Approval_Status__c = Pending Regional VP` with a reason citing the exact amount and discount boundaries |
+| Documented negative case | The same values with no approver evaluate to `Configuration Error` |
+| Admin cannot approve | Browser readback on the record page: `data-action=Approve` and `Reject` return zero candidates for the admin persona |
+| Admin may submit and recall | `Submit` returns one candidate before submission, `Recall` one candidate after |
+| VP can approve | Same record and control under the `caip-vp` profile: `Approve` and `Reject` return one candidate each, `Submit` zero |
+| VP decides | Standard approval API under the VP identity returns `instanceStatus: Approved` |
+| Outcome recorded | `Approval_Status__c = Approved`; process history records the admin as submitter and the VP as approver |
+
+The platform also refused anonymous Apex for the VP user with a security exception, which is the
+correct shape: a business approver holds approval rights, not code execution rights. VP approval
+therefore belongs in the UI or the approval API, never the Apex controller path.
+
+Remaining limitation: the Workbench cannot yet reach `Pending Regional VP` through the browser alone
+because Salesforce lookup fields need type, dropdown wait and option selection, which the worker's
+fill strategies do not implement. The record was seeded through the API for this run, and the browser
+proved the authorization boundary on it.

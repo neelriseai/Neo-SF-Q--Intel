@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "65d4c86654b96cc8295208ab899032d9dc432c724844581fa4677e47cfed6426",
+  "sourceSnapshot": "8651989e7f17c1a1353fc5f58d13bf029e116efaec2f605e1ffad3438b891ae2",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1586,7 +1586,7 @@
     {
       "path": "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
       "category": "reference-documentation",
-      "sha256": "8e38bfd6f67f3858cbd11eea03a0d1b0eb37809aa5dd30895226ca45b1967b45"
+      "sha256": "28200fca06b1ec60878cd03db209f9a60cece22c4dde28df8f318efe66609e5d"
     },
     {
       "path": "Docs/README.md",
@@ -1901,7 +1901,7 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "1c9edd4e56600659ac1c8bc641b8b9452d713b9bfbc1449ac347daa3ec9cba2c"
+      "sha256": "b558d3c73582325ec0e35a9ef21f72a97945be0135310272f1945c152871ca6e"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
@@ -2006,7 +2006,7 @@
     {
       "path": "packages/browser/tsconfig.live.json",
       "category": "project",
-      "sha256": "a45a1d512ba956ed9c193a827f5cef0c056fa38bc70a7fa4e4caedb3427957b3"
+      "sha256": "0f8f7ebe65f30f612ecb02b5aecc0d9ccf74be1bfeab736b6aeb87ff08cea93a"
     },
     {
       "path": "pyproject.toml",
@@ -2151,7 +2151,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "2a834352143643c397a011d70d78012d8e6f2d915ffa324c94cd3896f2594c34"
+      "sha256": "457cb8823a55574b4342c52b21e6a2a5f1af8e5b3906659a19bbb798c9cdc321"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
