@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "950e190a71c806a310d56428670703f93927824279bfa062f3e02d8cfe29418c",
+  "sourceSnapshot": "437382fe5e961fc212d73f1d24b30614bf8f8e8b26f71bb9cfeca45e488f9dc3",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -52,6 +52,14 @@
       "source": "AGENTS.md",
       "category": "project-instructions",
       "authority": "governing-instructions"
+    },
+    {
+      "id": "file:Development AI communication approch.md",
+      "kind": "file",
+      "label": "Development AI communication approch.md",
+      "source": "Development AI communication approch.md",
+      "category": "project",
+      "authority": "supporting"
     },
     {
       "id": "file:Docs/00-agentic-ai-assurance-retrofit-master.md",
@@ -450,6 +458,22 @@
       "kind": "file",
       "label": "26-strategic-deal-demo-fix-window-2026-09-12.md",
       "source": "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/27-assurance-report-agent-contracts.md",
+      "kind": "file",
+      "label": "27-assurance-report-agent-contracts.md",
+      "source": "Docs/27-assurance-report-agent-contracts.md",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
+      "id": "file:Docs/28-llm-locator-healing-plan.md",
+      "kind": "file",
+      "label": "28-llm-locator-healing-plan.md",
+      "source": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
       "authority": "reference-only"
     },
@@ -860,6 +884,118 @@
       "source": "config/verified-change-policy.json",
       "category": "policy",
       "authority": "authoritative-source"
+    },
+    {
+      "id": "file:knowledge-repo/00-knowledge-map.md",
+      "kind": "file",
+      "label": "00-knowledge-map.md",
+      "source": "knowledge-repo/00-knowledge-map.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/README.md",
+      "kind": "file",
+      "label": "README.md",
+      "source": "knowledge-repo/README.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/impact/e2e-scenario-matrix.md",
+      "kind": "file",
+      "label": "e2e-scenario-matrix.md",
+      "source": "knowledge-repo/impact/e2e-scenario-matrix.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/impact/field-impact-matrix.md",
+      "kind": "file",
+      "label": "field-impact-matrix.md",
+      "source": "knowledge-repo/impact/field-impact-matrix.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/impact/page-dependency-map.md",
+      "kind": "file",
+      "label": "page-dependency-map.md",
+      "source": "knowledge-repo/impact/page-dependency-map.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/modules/configurable-cross-module-rules.md",
+      "kind": "file",
+      "label": "configurable-cross-module-rules.md",
+      "source": "knowledge-repo/modules/configurable-cross-module-rules.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/modules/demo-data-and-examples.md",
+      "kind": "file",
+      "label": "demo-data-and-examples.md",
+      "source": "knowledge-repo/modules/demo-data-and-examples.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/modules/persona-permission-journeys.md",
+      "kind": "file",
+      "label": "persona-permission-journeys.md",
+      "source": "knowledge-repo/modules/persona-permission-journeys.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/modules/strategic-deal-policy-and-approval.md",
+      "kind": "file",
+      "label": "strategic-deal-policy-and-approval.md",
+      "source": "knowledge-repo/modules/strategic-deal-policy-and-approval.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/pages/accounts-home.md",
+      "kind": "file",
+      "label": "accounts-home.md",
+      "source": "knowledge-repo/pages/accounts-home.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/pages/crm-native-pages.md",
+      "kind": "file",
+      "label": "crm-native-pages.md",
+      "source": "knowledge-repo/pages/crm-native-pages.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/pages/opportunities-home.md",
+      "kind": "file",
+      "label": "opportunities-home.md",
+      "source": "knowledge-repo/pages/opportunities-home.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/pages/opportunity-record-page.md",
+      "kind": "file",
+      "label": "opportunity-record-page.md",
+      "source": "knowledge-repo/pages/opportunity-record-page.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:knowledge-repo/pages/strategic-deal-workbench.md",
+      "kind": "file",
+      "label": "strategic-deal-workbench.md",
+      "source": "knowledge-repo/pages/strategic-deal-workbench.md",
+      "category": "project",
+      "authority": "supporting"
     },
     {
       "id": "file:knowledge/README.md",
@@ -1350,6 +1486,14 @@
       "authority": "supporting"
     },
     {
+      "id": "file:quality/reviews/ai-communication-compliance-log.md",
+      "kind": "file",
+      "label": "ai-communication-compliance-log.md",
+      "source": "quality/reviews/ai-communication-compliance-log.md",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
       "id": "file:quality/reviews/current-scope-review.json",
       "kind": "file",
       "label": "current-scope-review.json",
@@ -1498,6 +1642,14 @@
       "kind": "file",
       "label": "config.py",
       "source": "src/neo_sf_q_intel/config.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:src/neo_sf_q_intel/context_feeds.py",
+      "kind": "file",
+      "label": "context_feeds.py",
+      "source": "src/neo_sf_q_intel/context_feeds.py",
       "category": "python-runtime",
       "authority": "authoritative-source"
     },
@@ -2050,6 +2202,14 @@
       "kind": "file",
       "label": "test_config.py",
       "source": "tests/test_config.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_context_feeds.py",
+      "kind": "file",
+      "label": "test_context_feeds.py",
+      "source": "tests/test_context_feeds.py",
       "category": "test",
       "authority": "verification"
     },
@@ -4669,6 +4829,86 @@
       "to": "file:apps/web/src/lib/types.ts"
     },
     {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/modules/configurable-cross-module-rules.md"
+    },
+    {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/modules/demo-data-and-examples.md"
+    },
+    {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/modules/persona-permission-journeys.md"
+    },
+    {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/modules/strategic-deal-policy-and-approval.md"
+    },
+    {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/pages/accounts-home.md"
+    },
+    {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/pages/crm-native-pages.md"
+    },
+    {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/pages/opportunities-home.md"
+    },
+    {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/pages/opportunity-record-page.md"
+    },
+    {
+      "from": "file:knowledge-repo/00-knowledge-map.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/pages/strategic-deal-workbench.md"
+    },
+    {
+      "from": "file:knowledge-repo/README.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/00-knowledge-map.md"
+    },
+    {
+      "from": "file:knowledge-repo/README.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/impact/e2e-scenario-matrix.md"
+    },
+    {
+      "from": "file:knowledge-repo/README.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/impact/field-impact-matrix.md"
+    },
+    {
+      "from": "file:knowledge-repo/README.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/modules/persona-permission-journeys.md"
+    },
+    {
+      "from": "file:knowledge-repo/README.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/modules/strategic-deal-policy-and-approval.md"
+    },
+    {
+      "from": "file:knowledge-repo/README.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/pages/opportunity-record-page.md"
+    },
+    {
+      "from": "file:knowledge-repo/README.md",
+      "relation": "references",
+      "to": "file:knowledge-repo/pages/strategic-deal-workbench.md"
+    },
+    {
       "from": "file:packages/browser/src/browser-recovery.ts",
       "relation": "imports",
       "to": "file:packages/browser/src/browser-worker.ts"
@@ -5701,7 +5941,17 @@
     {
       "from": "file:src/neo_sf_q_intel/mcp_server.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/__init__.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/mcp_server.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/config.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/mcp_server.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_feeds.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/mcp_server.py",
@@ -6552,6 +6802,11 @@
       "from": "file:tests/test_config.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/specialist.py"
+    },
+    {
+      "from": "file:tests/test_context_feeds.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/context_feeds.py"
     },
     {
       "from": "file:tests/test_context_pack.py",

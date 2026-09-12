@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "950e190a71c806a310d56428670703f93927824279bfa062f3e02d8cfe29418c",
+  "sourceSnapshot": "437382fe5e961fc212d73f1d24b30614bf8f8e8b26f71bb9cfeca45e488f9dc3",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1339,6 +1339,11 @@
       "sha256": "fa41e7551ed48ce72fddb131678aa2312d79369fb7e1fef110988c04704b388b"
     },
     {
+      "path": "Development AI communication approch.md",
+      "category": "project",
+      "sha256": "d3ecdf0f27aebda3d59d1ee799edcb7a2b0d1cce0226bb2dcce5fb4354c75f6c"
+    },
+    {
       "path": "Docs/00-agentic-ai-assurance-retrofit-master.md",
       "category": "reference-documentation",
       "sha256": "13bea871419f215e66e3824aac62298f14eb6ba40cb6a75a981403c0c1667c2a"
@@ -1587,6 +1592,16 @@
       "path": "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
       "category": "reference-documentation",
       "sha256": "5b6a7c1c2f1d8e0a3f00c2e9b1d135d0e2fbde48ed86d21a37b6a9214857f9e5"
+    },
+    {
+      "path": "Docs/27-assurance-report-agent-contracts.md",
+      "category": "reference-documentation",
+      "sha256": "2c154f769e21fa62f72a83d40106fb720a9a1cb29f6f16323e8957ce446d3639"
+    },
+    {
+      "path": "Docs/28-llm-locator-healing-plan.md",
+      "category": "reference-documentation",
+      "sha256": "1524b213cef50c7d029db8a468a2e80259a76812817298118e1f3b7662079e9c"
     },
     {
       "path": "Docs/README.md",
@@ -1842,6 +1857,76 @@
       "path": "config/verified-change-policy.json",
       "category": "policy",
       "sha256": "be8e8cbc4ded01c16e163277ad8a0e48bc242bec16191920f5274ad0b5ae8eeb"
+    },
+    {
+      "path": "knowledge-repo/00-knowledge-map.md",
+      "category": "project",
+      "sha256": "bbd20fe9ff23b9a69daf57906d880601a65d76b68deb277581b7c5695ff4d4a7"
+    },
+    {
+      "path": "knowledge-repo/README.md",
+      "category": "project",
+      "sha256": "7e12d711fb55ae16d6fed0f78242321ceb990e828f31bb4ec46adb1f453a0d09"
+    },
+    {
+      "path": "knowledge-repo/impact/e2e-scenario-matrix.md",
+      "category": "project",
+      "sha256": "e3054187f11f805bf4dd0dd844f3b6ba28eef99741b52fe982ed7a5db5a2056e"
+    },
+    {
+      "path": "knowledge-repo/impact/field-impact-matrix.md",
+      "category": "project",
+      "sha256": "f5a87593713280eb4d02e36c94e02ec01c1d7517c507baf736093dfd349f15e0"
+    },
+    {
+      "path": "knowledge-repo/impact/page-dependency-map.md",
+      "category": "project",
+      "sha256": "a647578a1c1c5b8f15145c18a73afdf2b3fe904cb59da6a8a28f3637eb481b04"
+    },
+    {
+      "path": "knowledge-repo/modules/configurable-cross-module-rules.md",
+      "category": "project",
+      "sha256": "d4a1f73646e061b88a750b987201d1a6877dc4db31e81d3120353bbb44c16ac8"
+    },
+    {
+      "path": "knowledge-repo/modules/demo-data-and-examples.md",
+      "category": "project",
+      "sha256": "689624a3aa6fc835dec2ff1257148346603ee4061ec8e18c93d1cbcdb24de06c"
+    },
+    {
+      "path": "knowledge-repo/modules/persona-permission-journeys.md",
+      "category": "project",
+      "sha256": "7d45210580d158f9f32d65dcd92e11c0afb8bcbd87a34fd87bdc1fd9cf078564"
+    },
+    {
+      "path": "knowledge-repo/modules/strategic-deal-policy-and-approval.md",
+      "category": "project",
+      "sha256": "fdb64885d5ff53390301f6516677e6744292203b11ae727ca132c62b2a90c208"
+    },
+    {
+      "path": "knowledge-repo/pages/accounts-home.md",
+      "category": "project",
+      "sha256": "d573522942624ea43b54beacd5752736dff9675883d5472bceb93cf876a21054"
+    },
+    {
+      "path": "knowledge-repo/pages/crm-native-pages.md",
+      "category": "project",
+      "sha256": "4a54ef482c0fa965c297411bade164c9bcc660f0c31249587bd7e64393598f0b"
+    },
+    {
+      "path": "knowledge-repo/pages/opportunities-home.md",
+      "category": "project",
+      "sha256": "790324cf8604afd7b06d9f3488847947d8f6afcf0c70dd9e5770af28f15bbe4c"
+    },
+    {
+      "path": "knowledge-repo/pages/opportunity-record-page.md",
+      "category": "project",
+      "sha256": "f54f63686013d85832f25dd5172da647d2add5c4839901c12b6df186fc2e515e"
+    },
+    {
+      "path": "knowledge-repo/pages/strategic-deal-workbench.md",
+      "category": "project",
+      "sha256": "c955939ec51dafd19d379bcd62b034d333e800fd9c68a729f30a81989c9c92c8"
     },
     {
       "path": "knowledge/README.md",
@@ -2149,9 +2234,14 @@
       "sha256": "26a01eef91031e74adf1ac165a5c532f1f0f53ba9027ecd27399e164cf5117d6"
     },
     {
+      "path": "quality/reviews/ai-communication-compliance-log.md",
+      "category": "project",
+      "sha256": "7b2170926d9abf86f7b47cf69bbf5b22cecdbe0ff0eb44081ef13372e603b50a"
+    },
+    {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "ee77a6dba3b921467325c86bd66971c7efa59d04e4676d0966898cc42d4fbc32"
+      "sha256": "48d9dc590017a4f656ec4129ad5d4dcfde0b9c96305103ab1380a4acc488e58e"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
@@ -2242,6 +2332,11 @@
       "path": "src/neo_sf_q_intel/config.py",
       "category": "python-runtime",
       "sha256": "ad1ae7bb6898399a78981adbf90c4d5d9cb705a65a157aaeda06e614ee011427"
+    },
+    {
+      "path": "src/neo_sf_q_intel/context_feeds.py",
+      "category": "python-runtime",
+      "sha256": "1655902ce2620459bafbe2484a369dfb46205a0bd7b986bd488f0678b21703d6"
     },
     {
       "path": "src/neo_sf_q_intel/context_pack.py",
@@ -2366,7 +2461,7 @@
     {
       "path": "src/neo_sf_q_intel/mcp_server.py",
       "category": "python-runtime",
-      "sha256": "f2d75aec381b00f8862c57f1f5fa70c2e114856c8954e72b2161e6802a0490fe"
+      "sha256": "31f6a376dcf7c57890f088d2753a69827ed671897c4939ad5d16442657feeb52"
     },
     {
       "path": "src/neo_sf_q_intel/metadata_recovery.py",
@@ -2589,6 +2684,11 @@
       "sha256": "ae783f61db0f922b816ff08425ca6df693b3017959659f348429326fb08696cf"
     },
     {
+      "path": "tests/test_context_feeds.py",
+      "category": "test",
+      "sha256": "4cbb494e5f3db97736ee37968b57f14c10b3e8d300f0ccccd8237f7e4eaf454c"
+    },
+    {
       "path": "tests/test_context_pack.py",
       "category": "test",
       "sha256": "38e0a4207254734f356e325b1dfb63509af0bd7471403a0e8483e880b3936aa2"
@@ -2721,7 +2821,7 @@
     {
       "path": "tests/test_mcp_server.py",
       "category": "test",
-      "sha256": "4439e816be63c1804181758d3900e58f244a1536c48effd5ca480dfb4f0a2551"
+      "sha256": "a1eb9e31f8e34795ccd9574edca8fff0487734d0a7f9410c345ea3e3dd13b843"
     },
     {
       "path": "tests/test_metadata_recovery.py",

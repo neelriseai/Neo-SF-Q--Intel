@@ -6,7 +6,9 @@ from typing import Any
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 
+from neo_sf_q_intel import context_feeds
 from neo_sf_q_intel.config import Settings
+from neo_sf_q_intel.context_feeds import ContextFeedError
 from neo_sf_q_intel.domain import ChangeIntent, ChangeRequest
 from neo_sf_q_intel.service import AssuranceService, create_service
 
@@ -30,8 +32,11 @@ class _NeoMCPServer(MCPServer):
 def build_mcp(
     settings: Settings,
     service: AssuranceService,
+    repository_root: Path | None = None,
 ) -> MCPServer:
     server = _NeoMCPServer("Neo SF Q-Intel")
+    # Match the API composition root: injectable, resolved once, cwd only as the fallback.
+    root = repository_root or Path.cwd()
 
     @server.tool()
     def analyze_change(
@@ -98,10 +103,57 @@ def build_mcp(
             "release_eligible": False,
         }
 
+    @server.tool()
+    def knowledge_index() -> dict:
+        """Index every knowledge-repo document grouped by folder with its headings."""
+        try:
+            index = context_feeds.knowledge_index(root)
+        except ContextFeedError as error:
+            raise ToolError(f"{error.code}") from None
+        return index.model_dump(by_alias=True, mode="json")
+
+    @server.tool()
+    def knowledge_section(
+        page: str | None = None,
+        module: str | None = None,
+        impact: str | None = None,
+        section: str | None = None,
+    ) -> dict:
+        """Return one knowledge document body, or a single heading block inside it."""
+        try:
+            result = context_feeds.knowledge_section(
+                root,
+                page=page,
+                module=module,
+                impact=impact,
+                section=section,
+            )
+        except ContextFeedError as error:
+            raise ToolError(f"{error.code}") from None
+        return result.model_dump(by_alias=True, mode="json")
+
+    @server.tool()
+    def graph_neighborhood(entity_id: str, hops: int = 1, maximum_edges: int = 120) -> dict:
+        """Render the deterministic edge neighborhood around one application graph entity."""
+        graph_path = (
+            settings.resolved_salesforce_root(root) / "knowledge" / "application-graph.json"
+        )
+        try:
+            result = context_feeds.graph_neighborhood(
+                graph_path,
+                entity_id,
+                hops=hops,
+                maximum_edges=maximum_edges,
+            )
+        except ContextFeedError as error:
+            raise ToolError(f"{error.code}") from None
+        return result.model_dump(by_alias=True, mode="json")
+
     return server
 
 
 def run() -> None:
     settings = Settings()
-    service = create_service(settings, Path.cwd())
-    build_mcp(settings, service).run(transport="stdio")
+    root = Path.cwd()
+    service = create_service(settings, root)
+    build_mcp(settings, service, root).run(transport="stdio")

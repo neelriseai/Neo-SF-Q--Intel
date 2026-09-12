@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "salesforce-lookup-resolved-2026-09-12",
+  "reviewId": "context-feeds-mcp-2026-09-12",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -25,6 +25,8 @@
     "Docs/24-strategic-deal-change-assurance-demo.md",
     "Docs/25-strategic-deal-demo-test-pass-2026-09-12.md",
     "Docs/26-strategic-deal-demo-fix-window-2026-09-12.md",
+    "Docs/27-assurance-report-agent-contracts.md",
+    "Docs/28-llm-locator-healing-plan.md",
     "Docs/README.md",
     "README.md",
     "apps/web/src/app/page.tsx",
@@ -88,6 +90,7 @@
     "src/neo_sf_q_intel/change_verification.py",
     "src/neo_sf_q_intel/classification_bootstrap.py",
     "src/neo_sf_q_intel/config.py",
+    "src/neo_sf_q_intel/context_feeds.py",
     "src/neo_sf_q_intel/domain.py",
     "src/neo_sf_q_intel/execution_assertions.py",
     "src/neo_sf_q_intel/foundation_pipeline.py",
@@ -124,6 +127,7 @@
     "src/neo_sf_q_intel/specialist.py",
     "src/neo_sf_q_intel/subprocess_environment.py",
     "tests/test_candidate_assurance.py",
+    "tests/test_context_feeds.py",
     "tests/test_live_campaign_status.py",
     "tests/test_operation_seed.py",
     "tests/test_phase_policy_proposal.py"
@@ -146,7 +150,8 @@
     "opus5_demo_fix_window_review",
     "opus5_second_fix_window_review",
     "opus5_authority_window_migration",
-    "opus5_persona_governance_run"
+    "opus5_persona_governance_run",
+    "opus5_context_feed_review"
   ],
   "findings": [
     {
@@ -453,6 +458,11 @@
       "code": "SALESFORCE_LOOKUP_FILL_RESOLVED",
       "severity": "P2",
       "resolution": "The declared lookup strategy now selects and commits the record, so the full Workbench flow completes through the browser alone and reaches Pending Regional VP with the approver set. Matching uses the title attribute on the descendant formatted-text element at page scope, because search highlighting splits the visible text and the option rows are not always inside the field wrapper nor under the element named by aria-controls. Ambiguity still abstains."
+    },
+    {
+      "code": "SCOPED_CONTEXT_FEEDS",
+      "severity": "P2",
+      "resolution": "Three read-only feeds expose the knowledge repo and application graph in slices rather than whole documents: an index, a single document or heading block bounded at 8000 characters and confined to the repo with traversal rejected, and a one or two hop edge list around a seed entity, deterministic and capped. Exposed as MCP tools that surface only the typed error code, never a path or stack. No caller supplies a filesystem path. Review corrected the composition root: the tools initially called Path.cwd() inline at each site, against the API convention of an injectable repository_root with cwd as fallback only; build_mcp now takes that root, resolves it once, and run() threads the same value into create_service and build_mcp."
     }
   ],
   "statusDowngrades": []
