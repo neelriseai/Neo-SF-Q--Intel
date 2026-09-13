@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "3c3ae997973f6c4bd7fc55342141fe4d8bd1c5a73e971a52232d2eb0d70ace08",
+  "sourceSnapshot": "e0b0dc486eebebec580756d850b3f7689658b2337e8ba056f0a6398db30a791f",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -518,6 +518,14 @@
       "authority": "reference-only"
     },
     {
+      "id": "file:Docs/demo-evidence/live-llm-healing-report.html",
+      "kind": "file",
+      "label": "live-llm-healing-report.html",
+      "source": "Docs/demo-evidence/live-llm-healing-report.html",
+      "category": "reference-documentation",
+      "authority": "reference-only"
+    },
+    {
       "id": "file:Docs/demo-evidence/live-llm-healing-report.md",
       "kind": "file",
       "label": "live-llm-healing-report.md",
@@ -642,6 +650,14 @@
       "kind": "file",
       "label": "foundation-evidence-panel.tsx",
       "source": "apps/web/src/components/foundation-evidence-panel.tsx",
+      "category": "web-runtime",
+      "authority": "authoritative-source"
+    },
+    {
+      "id": "file:apps/web/src/data/live-llm-healing-summary.json",
+      "kind": "file",
+      "label": "live-llm-healing-summary.json",
+      "source": "apps/web/src/data/live-llm-healing-summary.json",
       "category": "web-runtime",
       "authority": "authoritative-source"
     },
@@ -1766,6 +1782,14 @@
       "authority": "authoritative-source"
     },
     {
+      "id": "file:src/neo_sf_q_intel/automation_report.py",
+      "kind": "file",
+      "label": "automation_report.py",
+      "source": "src/neo_sf_q_intel/automation_report.py",
+      "category": "python-runtime",
+      "authority": "authoritative-source"
+    },
+    {
       "id": "file:src/neo_sf_q_intel/baseline_enrollment_proposal.py",
       "kind": "file",
       "label": "baseline_enrollment_proposal.py",
@@ -2338,6 +2362,14 @@
       "kind": "file",
       "label": "test_aut_source_operations_integration.py",
       "source": "tests/test_aut_source_operations_integration.py",
+      "category": "test",
+      "authority": "verification"
+    },
+    {
+      "id": "file:tests/test_automation_report.py",
+      "kind": "file",
+      "label": "test_automation_report.py",
+      "source": "tests/test_automation_report.py",
       "category": "test",
       "authority": "verification"
     },
@@ -5040,6 +5072,11 @@
     {
       "from": "file:apps/web/src/app/page.tsx",
       "relation": "imports",
+      "to": "file:apps/web/src/data/live-llm-healing-summary.json"
+    },
+    {
+      "from": "file:apps/web/src/app/page.tsx",
+      "relation": "imports",
       "to": "file:apps/web/src/lib/candidate-client.ts"
     },
     {
@@ -5391,6 +5428,11 @@
       "from": "file:scripts/quality/check_governance_policy.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/governance_policy.py"
+    },
+    {
+      "from": "file:scripts/run/publish_live_llm_healing_report.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/automation_report.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/analysis.py",
@@ -6901,6 +6943,11 @@
       "from": "file:tests/test_aut_source_operations_integration.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/service.py"
+    },
+    {
+      "from": "file:tests/test_automation_report.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/automation_report.py"
     },
     {
       "from": "file:tests/test_baseline_enrollment_proposal.py",

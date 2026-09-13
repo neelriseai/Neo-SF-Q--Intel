@@ -1,6 +1,16 @@
 # Live LLM locator-healing showcase report
 
-Published UTC: `2026-09-13T05:29:39+00:00`
+Published UTC: `2026-09-13T05:50:37+00:00`
+
+## Suite result
+
+| Metric | Value |
+|---|---|
+| Suite | `live-llm-business-healing` |
+| Suite status | `PASSED` |
+| Tests | `1/1 passed` |
+| Diagnostic only | `True` |
+| Release eligible | `False` |
 
 ## Executive result
 
@@ -21,7 +31,7 @@ Published UTC: `2026-09-13T05:29:39+00:00`
 
 ## What this proves
 
-Live Salesforce browser/provider proof that forced stale locators for three Workbench fields were healed by the LLM ordinal-ranking path and then verified by deterministic browser action and Salesforce persistence readback.
+Live Salesforce browser/provider proof that forced stale locators for the Strategic Deal Workbench fields were healed by the LLM ordinal-ranking path and then verified by deterministic browser action and Salesforce persistence readback.
 
 ## What this does not claim
 
@@ -30,13 +40,23 @@ Live Salesforce browser/provider proof that forced stale locators for three Work
 - proof that a deployed metadata/UI mutation caused the drift
 - raw DOM or raw Salesforce record values
 
-## Field-level LLM healing evidence
+## Step log
 
-| Field | Ordinal | DOM candidates | Context plans | Intent cited | Intent fit | Missing context | Confidence | Signature found | Signature saved |
-|---|---:|---:|---:|---|---|---|---:|---|---|
-| Name | 0 | 1 | 2 | True | SUFFICIENT | NONE | 865 | True | True |
-| Strategic_Deal__c | 1 | 2 | 2 | True | SUFFICIENT | NONE | 996 | True | True |
-| StageName | 1 | 2 | 2 | True | SUFFICIENT | NONE | 957 | True | True |
+| Step | Status | Detail |
+|---|---|---|
+| profile-and-session | PASSED | Trusted profile and one-shot session handoff completed before action. |
+| heal-Name | PASSED | LLM_ORDINAL selected ordinal 0 from 1 candidate(s). |
+| heal-Strategic_Deal__c | PASSED | LLM_ORDINAL selected ordinal 1 from 2 candidate(s). |
+| heal-StageName | PASSED | LLM_ORDINAL selected ordinal 1 from 2 candidate(s). |
+| submit-and-persist | PASSED | Configured success text and independent Salesforce persistence matched. |
+
+## Field-level healing evidence
+
+| Field | Tier | Ordinal | DOM candidates | Context plans | Intent cited | Intent fit | Missing context | Confidence | Signature found | Signature saved |
+|---|---|---:|---:|---:|---|---|---|---:|---|---|
+| Name | LLM_ORDINAL | 0 | 1 | 2 | True | SUFFICIENT | NONE | 865 | True | True |
+| Strategic_Deal__c | LLM_ORDINAL | 1 | 2 | 2 | True | SUFFICIENT | NONE | 996 | True | True |
+| StageName | LLM_ORDINAL | 1 | 2 | 2 | True | SUFFICIENT | NONE | 957 | True | True |
 
 ## Signature memory
 
@@ -52,6 +72,7 @@ Refreshed stripped signatures: `AccountId, Amount, CloseDate, Discount__c, Name,
 | Execution digest | `d08840e01b510128163b4a86805fab6e970b5d22b79de46fbdb5ac2afaacf9cd` |
 | Runtime receipt | `.runtime/live-llm-business-healing/live-business-action-llm.json` |
 | Structured log | `Docs/demo-evidence/live-llm-healing-log.jsonl` |
+| HTML report | `Docs/demo-evidence/live-llm-healing-report.html` |
 
 ## Sanitization boundary
 

@@ -1,6 +1,6 @@
 {
   "claimBoundary": {
-    "claim": "Live Salesforce browser/provider proof that forced stale locators for the Strategic Deal Workbench fields were healed by the LLM ordinal-ranking path and then verified by deterministic browser action and Salesforce persistence readback.",
+    "claim": "Live browser/provider proof that forced stale locators for selected business fields were healed by the LLM ordinal-ranking path and then verified by deterministic browser action and persistence readback.",
     "notClaimed": [
       "full live campaign acceptance",
       "release eligibility",
@@ -14,7 +14,7 @@
       "confidenceMilli": 865,
       "contextPlanCount": 2,
       "domCandidateCount": 1,
-      "fieldApiName": "Name",
+      "fieldApiName": "field-01",
       "healingTier": "LLM_ORDINAL",
       "intentCited": true,
       "intentFit": "SUFFICIENT",
@@ -28,7 +28,7 @@
       "confidenceMilli": 996,
       "contextPlanCount": 2,
       "domCandidateCount": 2,
-      "fieldApiName": "Strategic_Deal__c",
+      "fieldApiName": "field-02",
       "healingTier": "LLM_ORDINAL",
       "intentCited": true,
       "intentFit": "SUFFICIENT",
@@ -42,7 +42,7 @@
       "confidenceMilli": 957,
       "contextPlanCount": 2,
       "domCandidateCount": 2,
-      "fieldApiName": "StageName",
+      "fieldApiName": "field-03",
       "healingTier": "LLM_ORDINAL",
       "intentCited": true,
       "intentFit": "SUFFICIENT",
@@ -70,14 +70,14 @@
     "successTextMatched": true
   },
   "savedSignatureFields": [
-    "AccountId",
-    "Amount",
-    "CloseDate",
-    "Discount__c",
-    "Name",
-    "Regional_VP_Approver__c",
-    "StageName",
-    "Strategic_Deal__c"
+    "signature-01",
+    "signature-02",
+    "signature-03",
+    "signature-04",
+    "field-01",
+    "signature-06",
+    "field-03",
+    "field-02"
   ],
   "schemaVersion": "1.0.0",
   "source": {
@@ -96,21 +96,21 @@
     },
     {
       "detail": "LLM_ORDINAL selected ordinal 0 from 1 candidate(s).",
-      "name": "Heal Name",
+      "name": "Heal field-01",
       "status": "PASSED",
-      "stepId": "heal-Name"
+      "stepId": "heal-field-01"
     },
     {
       "detail": "LLM_ORDINAL selected ordinal 1 from 2 candidate(s).",
-      "name": "Heal Strategic_Deal__c",
+      "name": "Heal field-02",
       "status": "PASSED",
-      "stepId": "heal-Strategic_Deal__c"
+      "stepId": "heal-field-02"
     },
     {
       "detail": "LLM_ORDINAL selected ordinal 1 from 2 candidate(s).",
-      "name": "Heal StageName",
+      "name": "Heal Stagefield-01",
       "status": "PASSED",
-      "stepId": "heal-StageName"
+      "stepId": "heal-Stagefield-01"
     },
     {
       "detail": "Configured success text and independent Salesforce persistence matched.",
@@ -132,10 +132,10 @@
         "deterministicHealedElementCount": 0,
         "healedElementCount": 3,
         "llmHealedElementCount": 3,
-        "name": "Live Workbench forced three-field LLM locator healing",
+        "name": "Live forced-field LLM locator healing",
         "status": "PASSED",
         "stepCount": 5,
-        "testId": "live-workbench-forced-three-field-llm-healing"
+        "testId": "live-forced-field-llm-healing"
       }
     ]
   }

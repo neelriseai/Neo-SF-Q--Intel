@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "3c3ae997973f6c4bd7fc55342141fe4d8bd1c5a73e971a52232d2eb0d70ace08",
+  "sourceSnapshot": "e0b0dc486eebebec580756d850b3f7689658b2337e8ba056f0a6398db30a791f",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1586,7 +1586,7 @@
     {
       "path": "Docs/24-strategic-deal-change-assurance-demo.md",
       "category": "reference-documentation",
-      "sha256": "50033943521b4947de476020d3a26ddd88a8916967f9fd7d400668f72246a7cd"
+      "sha256": "120bfcd4f9910af52e5dc2ce14e8e4fa84f1c4403a5401ecdb650b72e4a542e6"
     },
     {
       "path": "Docs/25-strategic-deal-demo-test-pass-2026-09-12.md",
@@ -1626,17 +1626,22 @@
     {
       "path": "Docs/demo-evidence/live-llm-healing-log.jsonl",
       "category": "reference-documentation",
-      "sha256": "7cd30dfe2d3a6f52e5601f4190def5ee9e42c6a510b67ed23545add287ec7204"
+      "sha256": "9296ea42009cb594d14985c5c162a0e3d779aaa797a37735263bcdb176066266"
+    },
+    {
+      "path": "Docs/demo-evidence/live-llm-healing-report.html",
+      "category": "reference-documentation",
+      "sha256": "aa850d220f2df07d0006a1240fb599506de792fc4159cba350d9e37668962cbe"
     },
     {
       "path": "Docs/demo-evidence/live-llm-healing-report.md",
       "category": "reference-documentation",
-      "sha256": "62772b512a499df1cc7c30ac938431766ab291b58f17e84e461b07f810d80820"
+      "sha256": "1c60a38c812485fc22bbf4d0dd6533e9c4d64d38f7c0f4a4f53e1e27a01e9bb1"
     },
     {
       "path": "Docs/demo-evidence/live-llm-healing-summary.json",
       "category": "reference-documentation",
-      "sha256": "21c7072c59a53cf48452a4687a64a790e7ff3fbe32f5bee471fa130ba3e38421"
+      "sha256": "a1853a661911ce7f5199b71bb6e59350f5a802258e789453b62f23cc1ef10bca"
     },
     {
       "path": "Docs/salesforce-change-assurance-production-solution-design (1).md",
@@ -1696,17 +1701,22 @@
     {
       "path": "apps/web/src/app/page.tsx",
       "category": "web-runtime",
-      "sha256": "35fbcb9322112f8f550d36a2c51a374a3d3e66ebf6ddb6525aeace924cb9ca1d"
+      "sha256": "9d7833dde5ee07c00c4193ca24a1a1b42bb812ab166e5bfe2e6e8fe7a0cd23df"
     },
     {
       "path": "apps/web/src/app/styles.css",
       "category": "web-runtime",
-      "sha256": "4abbe2449242bb7d83502ed92a4b9d7db6b0503e2760831bf9778f997cd0be1d"
+      "sha256": "10c75ccf1d1cb490442abf485a4a870d4c92cfbbfd7ed7b6f34ab25b8954c6ba"
     },
     {
       "path": "apps/web/src/components/foundation-evidence-panel.tsx",
       "category": "web-runtime",
       "sha256": "bd4b10367289d9d647593f3be99dbbd5071379bc5d63950470ca8024e14b9793"
+    },
+    {
+      "path": "apps/web/src/data/live-llm-healing-summary.json",
+      "category": "web-runtime",
+      "sha256": "bd720acc643a12908030b25c59489162c600babea9dee254a66fe2e6a5a7d4e8"
     },
     {
       "path": "apps/web/src/lib/candidate-client.ts",
@@ -2331,7 +2341,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "7a6e79171a196870f178301322c6844504bc4ae3e9895fc48aeefaa8bc07ee7e"
+      "sha256": "b7838827349e2efe9f848cd0f91e43efa74fd49db6f1ab18cc943e2add2b41a5"
     },
     {
       "path": "quality/reviews/locator-healing-context-comparison-2026-09-13.json",
@@ -2371,7 +2381,7 @@
     {
       "path": "scripts/run/publish_live_llm_healing_report.py",
       "category": "project",
-      "sha256": "7587cd339ce5c0435d948453f07dd6484e46d6e71aa505f4b4cc47585ab5da1b"
+      "sha256": "1e3016fb5a2d41b6b55e53d34fb5b25f40321b82b35cd63077bd49c207a60b84"
     },
     {
       "path": "scripts/run/run-live-llm-business-healing.ps1",
@@ -2407,6 +2417,11 @@
       "path": "src/neo_sf_q_intel/api.py",
       "category": "python-runtime",
       "sha256": "02b02bcbdf36abb41002b4316d39e9196ab540f650cccb853fd38e215f91155d"
+    },
+    {
+      "path": "src/neo_sf_q_intel/automation_report.py",
+      "category": "python-runtime",
+      "sha256": "fdcc0f7e4dfb72305a425997ed89423725d7e95a43c02d9db85825eea17625f9"
     },
     {
       "path": "src/neo_sf_q_intel/baseline_enrollment_proposal.py",
@@ -2767,6 +2782,11 @@
       "path": "tests/test_aut_source_operations_integration.py",
       "category": "test",
       "sha256": "22483351b71c3574b605e568f09f9992361dba2dbbff4d7beb176c531880302b"
+    },
+    {
+      "path": "tests/test_automation_report.py",
+      "category": "test",
+      "sha256": "00cefa64eb201ea01ab123f68cffa2064b25b8f22a1917118ea999c9fca0fe84"
     },
     {
       "path": "tests/test_baseline_enrollment_proposal.py",

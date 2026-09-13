@@ -188,6 +188,28 @@ code { font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; ove
 .resultCard > p { color: var(--muted); font-size: .82rem; line-height: 1.5; }
 .secondaryCopy { font-style: italic; }
 .receiptNote { background: #edf2ed; padding: 10px; border-radius: 8px 3px; }
+.healingReportPanel { display: grid; gap: 12px; }
+.liveHealingReport { border-top: 4px solid var(--teal); background: linear-gradient(180deg, #fbfefd, #fff); }
+.healingMetrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+.healingMetrics span { border: 1px solid var(--line); border-radius: 12px 4px; background: #f7fbf9; padding: 12px; }
+.healingMetrics strong, .healingMetrics small { display: block; }
+.healingMetrics strong { font-family: Georgia, serif; font-size: 1.45rem; color: var(--teal-dark); }
+.healingMetrics small { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+.healingFieldGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.healingFieldCard { border: 1px solid var(--line); border-radius: 12px 4px; padding: 12px; background: #f8faf7; }
+.healingFieldCard > div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.healingFieldCard strong { font-size: .86rem; overflow-wrap: anywhere; }
+.healingFieldCard span { color: var(--blue); font-size: .68rem; font-weight: 800; }
+.healingFieldCard p { color: var(--ink-soft); font-size: .76rem; line-height: 1.45; margin: 9px 0 5px; }
+.healingFieldCard small { color: var(--muted); font-size: .7rem; }
+.healingLogDetails { margin: 12px 0; border: 1px solid var(--line); border-radius: 10px 3px; padding: 10px 12px; background: #fff; }
+.healingLogDetails summary { cursor: pointer; color: var(--teal); font-size: .8rem; font-weight: 800; }
+.healingLogDetails ul { margin: 10px 0 0; padding-left: 18px; display: grid; gap: 8px; }
+.healingLogDetails li { color: var(--ink-soft); font-size: .78rem; line-height: 1.45; }
+.healingLogDetails span { color: var(--muted); }
+.claimBoundary { border: 1px solid var(--line); border-left: 4px solid var(--amber); border-radius: 10px 3px; background: #fbf7eb; padding: 14px; }
+.claimBoundary h3 { margin-top: 0; font-family: Georgia, serif; font-weight: 500; }
+.claimBoundary li, .claimBoundary p { color: var(--ink-soft); font-size: .8rem; line-height: 1.5; }
 .governanceGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
 .gauge { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .gauge > div:first-child { display: flex; justify-content: space-between; gap: 12px; text-transform: capitalize; font-size: .82rem; }

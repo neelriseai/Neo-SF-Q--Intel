@@ -1,4 +1,75 @@
-{
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neo live LLM healing report</title>
+  <style>
+    body {
+      font-family: Inter, Arial, sans-serif;
+      margin: 0;
+      color: #20302d;
+      background: #f6f8f5;
+    }
+    main { max-width: 1120px; margin: 0 auto; padding: 32px; }
+    .hero, .card {
+      background: #fff;
+      border: 1px solid #dce4de;
+      border-radius: 18px 6px;
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+    h1, h2 { font-family: Georgia, serif; margin: 0 0 12px; }
+    .metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .metric { background: #eef7f3; border-radius: 14px 4px; padding: 14px; }
+    .metric span { display: block; color: #63726d; font-size: 12px; text-transform: uppercase; }
+    .metric strong { font-size: 28px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      border-bottom: 1px solid #dce4de;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th { color: #63726d; font-size: 12px; text-transform: uppercase; }
+    .pass { color: #087f70; font-weight: 800; }
+    .note { color: #63726d; }
+    code { background: #edf2ed; padding: 2px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <h1>Live LLM locator-healing showcase</h1>
+    <p id="claim"></p>
+    <div class="metrics" id="metrics"></div>
+  </section>
+  <section class="card">
+    <h2>Field-level healing</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Field</th><th>Tier</th><th>Ordinal</th><th>Candidates</th>
+          <th>Intent</th><th>Missing</th><th>Confidence</th><th>Signature</th>
+        </tr>
+      </thead>
+      <tbody id="fields"></tbody>
+    </table>
+  </section>
+  <section class="card">
+    <h2>Step log</h2>
+    <table>
+      <thead><tr><th>Step</th><th>Status</th><th>Detail</th></tr></thead>
+      <tbody id="steps"></tbody>
+    </table>
+  </section>
+  <section class="card note">
+    <h2>Claim boundary</h2>
+    <ul id="not-claimed"></ul>
+    <p id="sanitization"></p>
+  </section>
+</main>
+<script id="report-data" type="application/json">{
   "claimBoundary": {
     "claim": "Live Salesforce browser/provider proof that forced stale locators for the Strategic Deal Workbench fields were healed by the LLM ordinal-ranking path and then verified by deterministic browser action and Salesforce persistence readback.",
     "notClaimed": [
@@ -139,4 +210,38 @@
       }
     ]
   }
-}
+}</script>
+<script>
+const report = JSON.parse(document.getElementById("report-data").textContent);
+document.getElementById("claim").textContent = report.claimBoundary.claim;
+
+const metrics = [
+  ["Suite", report.suite.status],
+  ["Model applied", report.runResult.modelAppliedFieldCount],
+  ["Healed", report.runResult.healedFieldCount],
+  ["Submitted", report.runResult.submitted],
+  ["Persisted", report.runResult.persistenceMatched],
+];
+document.getElementById("metrics").innerHTML = metrics.map(([label, value]) =>
+  `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`
+).join("");
+document.getElementById("fields").innerHTML = report.fieldEvidence.map((field) =>
+  `<tr><td>${field.fieldApiName}</td><td>${field.healingTier}</td>` +
+  `<td>${field.modelOrdinal}</td><td>${field.domCandidateCount}</td>` +
+  `<td>${field.intentFit}</td><td>${field.missingContext}</td>` +
+  `<td>${field.confidenceMilli}</td>` +
+  `<td>${field.signatureFound ? "found" : "missing"}</td></tr>`
+).join("");
+document.getElementById("steps").innerHTML = report.steps.map((step) =>
+  `<tr><td>${step.stepId}</td>` +
+  `<td class="${step.status === "PASSED" ? "pass" : ""}">${step.status}</td>` +
+  `<td>${step.detail}</td></tr>`
+).join("");
+document.getElementById("not-claimed").innerHTML = report.claimBoundary.notClaimed.map((item) =>
+  `<li>${item}</li>`
+).join("");
+
+document.getElementById("sanitization").textContent = report.claimBoundary.sanitization;
+</script>
+</body>
+</html>

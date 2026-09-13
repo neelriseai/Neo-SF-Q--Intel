@@ -28,10 +28,12 @@
     "Docs/27-assurance-report-agent-contracts.md",
     "Docs/28-llm-locator-healing-plan.md",
     "Docs/README.md",
+    "Docs/demo-evidence/live-llm-healing-report.html",
     "README.md",
     "apps/web/src/app/page.tsx",
     "apps/web/src/app/styles.css",
     "apps/web/src/components/foundation-evidence-panel.tsx",
+    "apps/web/src/data/live-llm-healing-summary.json",
     "apps/web/src/lib/candidate-client.ts",
     "apps/web/src/lib/foundation-contract.ts",
     "apps/web/src/lib/live-campaign-client.ts",
@@ -83,10 +85,12 @@
     "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
     "scripts/catalog/build_project_index.py",
     "scripts/quality/check_genericity.py",
+    "scripts/run/publish_live_llm_healing_report.py",
     "scripts/run/run-live-llm-business-healing.ps1",
     "scripts/run/start-platform.ps1",
     "src/neo_sf_q_intel/analysis.py",
     "src/neo_sf_q_intel/api.py",
+    "src/neo_sf_q_intel/automation_report.py",
     "src/neo_sf_q_intel/candidate_assurance.py",
     "src/neo_sf_q_intel/candidate_live_targets.py",
     "src/neo_sf_q_intel/candidate_target_compiler.py",
@@ -112,6 +116,8 @@
     "src/neo_sf_q_intel/local_validation.py",
     "src/neo_sf_q_intel/local_validation_phase.py",
     "src/neo_sf_q_intel/local_validation_runner.py",
+    "src/neo_sf_q_intel/locator_healing_cli.py",
+    "src/neo_sf_q_intel/locator_proposal.py",
     "src/neo_sf_q_intel/mcp_server.py",
     "src/neo_sf_q_intel/metadata_recovery.py",
     "src/neo_sf_q_intel/metadata_recovery_host.py",
@@ -121,8 +127,6 @@
     "src/neo_sf_q_intel/phase_policy_proposal.py",
     "src/neo_sf_q_intel/postgres_schema.py",
     "src/neo_sf_q_intel/preflight.py",
-    "src/neo_sf_q_intel/locator_healing_cli.py",
-    "src/neo_sf_q_intel/locator_proposal.py",
     "src/neo_sf_q_intel/propagation.py",
     "src/neo_sf_q_intel/providers.py",
     "src/neo_sf_q_intel/reasoning_workflow.py",
@@ -133,6 +137,7 @@
     "src/neo_sf_q_intel/service.py",
     "src/neo_sf_q_intel/specialist.py",
     "src/neo_sf_q_intel/subprocess_environment.py",
+    "tests/test_automation_report.py",
     "tests/test_candidate_assurance.py",
     "tests/test_context_feeds.py",
     "tests/test_live_campaign_status.py",
@@ -158,10 +163,10 @@
     "opus5_second_fix_window_review",
     "opus5_authority_window_migration",
     "opus5_persona_governance_run",
-    "opus5_context_feed_review"
-    ,
+    "opus5_context_feed_review",
     "live_llm_browser_healing_review",
-    "live_dropdown_context_signature_review"
+    "live_dropdown_context_signature_review",
+    "automation_report_integration_review"
   ],
   "findings": [
     {
@@ -498,6 +503,11 @@
       "code": "SCOPED_CONTEXT_FEEDS",
       "severity": "P2",
       "resolution": "Three read-only feeds expose the knowledge repo and application graph in slices rather than whole documents: an index, a single document or heading block bounded at 8000 characters and confined to the repo with traversal rejected, and a one or two hop edge list around a seed entity, deterministic and capped. Exposed as MCP tools that surface only the typed error code, never a path or stack. No caller supplies a filesystem path. Review corrected the composition root: the tools initially called Path.cwd() inline at each site, against the API convention of an injectable repository_root with cwd as fallback only; build_mcp now takes that root, resolves it once, and run() threads the same value into create_service and build_mcp."
+    },
+    {
+      "code": "AUTOMATION_HEALING_REPORTING_DASHBOARD",
+      "severity": "P1",
+      "resolution": "Live LLM healing evidence is now published through a reusable sanitized automation report contract: suite summary JSON, step and element JSONL, standalone HTML report, Markdown report and a runtime-dashboard-safe projection. The dashboard projection strips scenario literals from app-ingested data while Docs retain the detailed demo evidence."
     }
   ],
   "statusDowngrades": []

@@ -187,6 +187,16 @@ Current proven live sub-results:
   historical stripped signature lookup, LLM ordinal ranking, deterministic browser action,
   signature refresh, submit, success readback and persisted Salesforce outcome proof.
 
+Published healing report artifacts:
+
+- `Docs/demo-evidence/live-llm-healing-summary.json` — suite-level result plus per-element healing
+  detail for dashboard ingestion.
+- `Docs/demo-evidence/live-llm-healing-log.jsonl` — step and element events for replay/audit.
+- `Docs/demo-evidence/live-llm-healing-report.html` — standalone report loaded from the JSON
+  payload.
+- Neo dashboard Healing tab — loads `apps/web/src/data/live-llm-healing-summary.json` and renders
+  the suite result, field-level healing evidence, step log and claim boundary.
+
 ### 8. Show governed release posture
 
 Neo renders a truthful status instead of forcing a green demo.

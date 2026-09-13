@@ -2,6 +2,7 @@
 
 import { FormEvent, KeyboardEvent, useMemo, useState } from "react";
 import { FoundationEvidencePanel } from "@/components/foundation-evidence-panel";
+import liveHealingSummary from "@/data/live-llm-healing-summary.json";
 import { analyzeCurrentCandidate, getCandidateRun } from "@/lib/candidate-client";
 import { getLiveCampaignStatus } from "@/lib/live-campaign-client";
 import { buildRunViewModel, metricValue, type EvidenceLane } from "@/lib/run-view-model";
@@ -16,6 +17,41 @@ const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 type ChangeIntent = "INFORMATIONAL" | "PLANNED_CHANGE" | "OBSERVED_CHANGE";
 type ResultTab = "evidence" | "tests" | "healing" | "governance";
+type AutomationHealingFieldEvidence = {
+  fieldApiName: string;
+  healingTier: string;
+  modelOrdinal: number | null;
+  domCandidateCount: number | null;
+  contextPlanCount: number | null;
+  intentFit: string | null;
+  missingContext: string | null;
+  confidenceMilli: number | null;
+  signatureFound: boolean;
+  signatureSaved: boolean;
+};
+type AutomationHealingSummary = {
+  suite: {
+    suiteId: string;
+    status: string;
+    testCount: number;
+    passedCount: number;
+    failedCount: number;
+    diagnosticOnly: boolean;
+    releaseEligible: boolean;
+  };
+  runResult: {
+    modelAppliedFieldCount: number | null;
+    healedFieldCount: number | null;
+    abstainedFieldCount: number | null;
+    submitted: boolean | null;
+    successTextMatched: boolean | null;
+    persistenceMatched: boolean | null;
+  };
+  claimBoundary: { claim: string; notClaimed: string[]; sanitization: string };
+  fieldEvidence: AutomationHealingFieldEvidence[];
+  steps: Array<{ stepId: string; name: string; status: string; detail: string }>;
+  source: { inputDigest: string | null; executionIdDigest: string | null; evidencePhase: string | null; capabilityId: string | null };
+};
 type WorkspaceView = {
   title: string;
   role: string;
@@ -41,6 +77,8 @@ const workspaceViews: WorkspaceView[] = [
   { title: "Locator Healing", role: "Healing specialist", description: "Shows governed repair proposals without implying they were applied.", target: "result-heading", tab: "healing", symbol: "H" },
   { title: "Governance Review", role: "Governance reviewer", description: "Shows measurements, guardrails, gaps, and authority boundaries together.", target: "result-heading", tab: "governance", symbol: "G" },
 ];
+
+const publishedHealingReport = liveHealingSummary as AutomationHealingSummary;
 
 function words(value: string) {
   return value.replaceAll("_", " ").toLowerCase();
@@ -329,7 +367,44 @@ export default function Dashboard() {
             return <article className="resultCard" key={`${item.test_id}-${index}`}><div className="resultCardTitle"><div><span className="category">{item.classification}</span><h3>{item.label}</h3></div><span className={`statusTag ${receipts.length === 1 ? "reported" : receipts.length > 1 ? "failed" : "idle"}`}>{receipts.length === 1 ? "RECEIPT REPORTED" : receipts.length > 1 ? "AMBIGUOUS RECEIPTS" : "NO EXECUTION RECEIPT"}</span></div><p>{item.reason}</p><EvidenceIdList ids={item.evidence_ids} />{receipts.length === 1 && <p className="receiptNote">Reported outcome: <strong>{receipts[0].outcome}</strong>. Governance, not this view, determines whether the receipt can satisfy a gate.</p>}</article>;
           }) : <div className="emptyState"><span aria-hidden="true">□</span><p>No validation has been selected by this run.</p></div>}</div></div>
 
-          <div role="tabpanel" id="panel-healing" aria-labelledby="tab-healing" tabIndex={0} hidden={activeTab !== "healing"}><div className="cardsList">{run?.healing_proposals.length ? run.healing_proposals.map((item, index) => <article className="resultCard" key={`${item.target_id}-${index}`}><div className="resultCardTitle"><div><span className="category">Strategy proposal</span><h3>{item.target_id}</h3></div><span className="statusTag abstained">NOT APPLIED</span></div><p>{item.strategy}</p><p className="secondaryCopy">{item.rationale}</p><EvidenceIdList ids={item.evidence_ids} /><p className="receiptNote">{item.requires_human_approval ? "Human approval required" : "No human-approval requirement is recorded"} · browser execution is not recorded by this run.</p></article>) : <div className="emptyState"><span aria-hidden="true">◇</span><p>No healing proposal is attached. Browser execution is not implied.</p></div>}</div></div>
+          <div role="tabpanel" id="panel-healing" aria-labelledby="tab-healing" tabIndex={0} hidden={activeTab !== "healing"}>
+            <div className="healingReportPanel">
+              <article className="resultCard liveHealingReport">
+                <div className="resultCardTitle">
+                  <div><span className="category">Published automation report</span><h3>Live LLM locator healing</h3></div>
+                  <span className={`statusTag ${publishedHealingReport.suite.status === "PASSED" ? "reported" : "failed"}`}>{publishedHealingReport.suite.status}</span>
+                </div>
+                <p>{publishedHealingReport.claimBoundary.claim}</p>
+                <div className="healingMetrics" aria-label="Published healing suite metrics">
+                  <span><strong>{publishedHealingReport.suite.passedCount}/{publishedHealingReport.suite.testCount}</strong><small>tests passed</small></span>
+                  <span><strong>{publishedHealingReport.runResult.modelAppliedFieldCount ?? "—"}</strong><small>LLM-applied fields</small></span>
+                  <span><strong>{publishedHealingReport.runResult.healedFieldCount ?? "—"}</strong><small>healed fields</small></span>
+                  <span><strong>{publishedHealingReport.runResult.persistenceMatched ? "yes" : "no"}</strong><small>persistence matched</small></span>
+                </div>
+                <div className="healingFieldGrid">
+                  {publishedHealingReport.fieldEvidence.map((field) => <div className="healingFieldCard" key={field.fieldApiName}>
+                    <div><strong>{field.fieldApiName}</strong><span>{field.healingTier}</span></div>
+                    <p>Ordinal {field.modelOrdinal} from {field.domCandidateCount} candidate{field.domCandidateCount === 1 ? "" : "s"} · confidence {field.confidenceMilli}</p>
+                    <small>{field.intentFit} · missing context {field.missingContext} · signature {field.signatureFound ? "found" : "missing"}</small>
+                  </div>)}
+                </div>
+                <details className="healingLogDetails">
+                  <summary>Step-level log</summary>
+                  <ul>
+                    {publishedHealingReport.steps.map((step) => <li key={step.stepId}><strong>{step.status}</strong> · {step.name}<br /><span>{step.detail}</span></li>)}
+                  </ul>
+                </details>
+                <p className="receiptNote">Diagnostic-only report · releaseEligible={String(publishedHealingReport.suite.releaseEligible)} · evidence phase {publishedHealingReport.source.evidencePhase}</p>
+                <p className="receiptNote">Artifacts: <code>Docs/demo-evidence/live-llm-healing-summary.json</code>, <code>live-llm-healing-log.jsonl</code>, <code>live-llm-healing-report.html</code>.</p>
+              </article>
+              <div className="cardsList">{run?.healing_proposals.length ? run.healing_proposals.map((item, index) => <article className="resultCard" key={`${item.target_id}-${index}`}><div className="resultCardTitle"><div><span className="category">Strategy proposal</span><h3>{item.target_id}</h3></div><span className="statusTag abstained">NOT APPLIED</span></div><p>{item.strategy}</p><p className="secondaryCopy">{item.rationale}</p><EvidenceIdList ids={item.evidence_ids} /><p className="receiptNote">{item.requires_human_approval ? "Human approval required" : "No human-approval requirement is recorded"} · browser execution is not recorded by this run.</p></article>) : <div className="emptyState"><span aria-hidden="true">◇</span><p>No run-specific healing proposal is attached. The published automation report above is loaded from the latest sanitized suite artifact.</p></div>}</div>
+              <aside className="claimBoundary">
+                <h3>Claim boundary</h3>
+                <ul>{publishedHealingReport.claimBoundary.notClaimed.map((item) => <li key={item}>{item}</li>)}</ul>
+                <p>{publishedHealingReport.claimBoundary.sanitization}</p>
+              </aside>
+            </div>
+          </div>
 
           <div role="tabpanel" id="panel-governance" aria-labelledby="tab-governance" tabIndex={0} hidden={activeTab !== "governance"}><div className="governanceGrid">
             <div><h3>Measured controls</h3>{run?.governance?.metrics.length ? run.governance.metrics.map((metric) => { const value = metricValue(metric); return <article className="gauge" key={metric.metric}><div><span>{words(metric.metric)}</span><strong>{metric.status === "NOT_APPLICABLE" ? "N/A" : metric.status === "INSUFFICIENT_SAMPLE" ? "Insufficient sample" : formatPercent(value)}</strong></div><div className="track" aria-hidden="true"><i style={{ width: `${Math.max(0, Math.min(100, (value ?? 0) * 100))}%` }} /></div><small>{metric.numerator}/{metric.denominator} · target {metric.comparator === "AT_LEAST" ? "≥" : "≤"} {Math.round(metric.target * 100)}% · {metric.status}</small></article>; }) : <div className="emptyState"><span aria-hidden="true">◎</span><p>No governance measurement is attached.</p></div>}</div>
