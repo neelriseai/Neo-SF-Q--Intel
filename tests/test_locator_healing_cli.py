@@ -6,10 +6,14 @@ import pytest
 
 from neo_sf_q_intel.context_feeds import ContextFeedError, FieldMetadata, KnowledgeSection
 from neo_sf_q_intel.locator_healing_cli import (
+    _combined_intent_sections,
     _context_feeds_for_request,
     _field_metadata_for,
+    _ranking_context_is_adequate,
+    _ranking_summary,
+    _section_summary,
 )
-from neo_sf_q_intel.locator_proposal import ContextToolPlanRecord
+from neo_sf_q_intel.locator_proposal import ContextToolPlanRecord, LocatorProposalRecord
 from neo_sf_q_intel.specialist import ProviderCallStatus, ProviderInvocationReceipt
 
 
@@ -154,6 +158,20 @@ def test_context_feeds_keep_caller_supplied_bounded_context_over_lookup() -> Non
     )
 
 
+def test_context_feeds_use_preloaded_incremental_intent_before_lookup() -> None:
+    def knowledge_lookup(root: Path, **kwargs: object) -> KnowledgeSection:
+        raise AssertionError("incremental context already resolved the bounded section")
+
+    result = _context_feeds_for_request(
+        {"intentLookup": {"page": "strategic-deal-workbench", "section": "Page elements"}},
+        repository_root=Path("repo"),
+        preloaded_intent_section="incremental field-level section",
+        knowledge_lookup=knowledge_lookup,
+    )
+
+    assert result.intent_section == "incremental field-level section"
+
+
 def test_context_feeds_execute_planned_knowledge_section_when_no_explicit_context() -> None:
     calls: list[dict[str, object]] = []
 
@@ -226,6 +244,56 @@ def test_context_feeds_ignore_planned_whole_document_to_avoid_noisy_context() ->
 
     assert result.intent_section is None
     assert result.graph_edges == ()
+
+
+def test_incremental_context_summary_and_combination_are_bounded() -> None:
+    section = "\n".join(
+        [
+            "knowledge-repo/pages/strategic-deal-workbench.md#Field behavior",
+            "Regional VP Approver uses lookup suggestion selection.",
+            "Approval status changes after submission.",
+            "extra",
+        ]
+    )
+
+    summary = _section_summary(section)
+    combined = _combined_intent_sections([section, "second section"])
+
+    assert "Regional VP Approver" in summary
+    assert len(summary) <= 512
+    assert combined is not None
+    assert "[intent_context_1]" in combined
+    assert "second section" in combined
+
+
+def test_incremental_context_requires_intent_citation_when_context_was_fetched() -> None:
+    without_intent = _proposal_record(cited_refs=["cand:0"], confidence_milli=990)
+    with_intent = _proposal_record(
+        cited_refs=["cand:0", "intent:L08.regional-vp-approver.lookup"],
+        confidence_milli=900,
+    )
+
+    assert _ranking_context_is_adequate(without_intent, False) is True
+    assert _ranking_context_is_adequate(without_intent, True) is False
+    assert _ranking_context_is_adequate(with_intent, True) is True
+
+
+def test_incremental_ranking_summary_is_safe_and_compact() -> None:
+    record = _proposal_record(
+        cited_refs=["cand:0", "intent:L08.regional-vp-approver.lookup"],
+        confidence_milli=875,
+    )
+
+    summary = _ranking_summary(record)
+
+    assert summary == {
+        "accepted": True,
+        "rejectionCode": None,
+        "candidateOrdinal": 0,
+        "confidenceMilli": 875,
+        "citedRefs": ["cand:0", "intent:L08.regional-vp-approver.lookup"],
+        "intentCited": True,
+    }
 
 
 def test_context_feeds_can_use_injected_evidence_graph_lookup_without_static_app_graph() -> None:
@@ -310,4 +378,25 @@ def _receipt() -> ProviderInvocationReceipt:
         timeout_milliseconds=30000,
         maximum_output_tokens=500,
         maximum_total_tokens=16000,
+    )
+
+
+def _proposal_record(
+    *, cited_refs: list[str], confidence_milli: int, accepted: bool = True
+) -> LocatorProposalRecord:
+    return LocatorProposalRecord(
+        obligationId="L08.regional-vp-approver.lookup",
+        accepted=accepted,
+        promptSha256="0" * 64,
+        receipt=_receipt(),
+        proposal=(
+            {
+                "candidateOrdinal": 0,
+                "confidenceMilli": confidence_milli,
+                "rationale": "Candidate matches bounded intent and DOM evidence.",
+                "citedRefs": cited_refs,
+            }
+            if accepted
+            else None
+        ),
     )

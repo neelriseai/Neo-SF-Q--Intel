@@ -102,6 +102,11 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
           knowledge_section tool plan over the compact knowledge index; Neo executes the bounded
           section fetch locally, ignores broad whole-document requests, and falls back to base
           metadata+DOM ranking when planning fails
+[DONE] incremental context loop   the planner starts with one named field/page heading; if the
+          final ranking is accepted but weak or does not cite the fetched intent, Neo passes a
+          compact prior-context summary plus previous ranking back to the planner and permits one
+          additional named-section fetch. Repeated sections, whole documents and malformed plans
+          are ignored; the model still chooses only an existing candidate ordinal.
 [DONE] knowledge repo             14 files · pages / modules / impact · operator-authored
 [DONE] deterministic heal proven  live drift -> stale -> metadata rediscovery -> rerun -> exact restore
 [DONE] T-SIG                      element signature store + tests
@@ -121,6 +126,10 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
           selected the correct lookup candidate; the first planner draft chose noisy persona
           context, so instructions and execution guard were tightened to require a named
           page/impact field-behavior section before intent context is admitted
+[BLOCKED] incremental provider smoke  attempted on 2026-09-13, but provider dispatch stopped
+          before a model call with PROVIDER_CREDENTIAL_SOURCE_CONFLICT. Unit and browser-path
+          contract tests cover the loop; this is not claimed as new live LLM evidence until
+          credential source policy is clean.
 ```
 
 `[MEAS]` graph full 228,591 ch vs 1-hop 946 ch (99.6% cut) · knowledge heading block 517 ch vs whole page 5,824 ch (91% cut).

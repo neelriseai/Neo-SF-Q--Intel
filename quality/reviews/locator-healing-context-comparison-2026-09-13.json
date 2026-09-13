@@ -7,7 +7,7 @@
   "decision": {
     "kept": "MCP-style context planner as the primary LLM-context path for locator healing",
     "fallback": "If context planning fails, returns no section, requests malformed input, or selects a whole document, Neo falls back to base metadata + DOM ranking.",
-    "reason": "The corrected planner selected a bounded page section directly about field behavior, added citable intent evidence, preserved the same candidate choice, and did not widen the model's selectable candidates. Broad context was proven risky and is now ignored unless a named section is selected."
+    "reason": "The corrected planner selected a bounded page section directly about field behavior, added citable intent evidence, preserved the same candidate choice, and did not widen the model's selectable candidates. Broad context was proven risky and is now ignored unless a named section is selected. The planner is now incremental: if the first bounded section does not produce an intent-cited, high-confidence final ranking, Neo provides compact prior-context and previous-ranking summaries to request one additional named section before stopping."
   },
   "runs": [
     {
@@ -71,6 +71,13 @@
       "finalInputTokens": 838,
       "finalOutputTokens": 136,
       "assessment": "Correct candidate with relevant bounded page-behavior context and citable intent evidence. Confidence is slightly lower than base on this simple case, but robustness and traceability improve without changing candidate choice."
+    },
+    {
+      "id": "planned-incremental-v1-blocked",
+      "contextPlanning": true,
+      "accepted": false,
+      "rejectionCode": "PROVIDER_CREDENTIAL_SOURCE_CONFLICT",
+      "assessment": "Attempted a new real provider smoke after adding incremental planning. Dispatch was blocked before any model call by credential-source policy, so this run is retained as a blocked configuration receipt rather than live LLM evidence for the new loop."
     }
   ],
   "guardrails": [
@@ -79,11 +86,13 @@
     "knowledge_section arguments must include page, module, impact and section keys; exactly one selector is a string and section must name a heading for planner-originated context.",
     "Whole-document planner requests are ignored to avoid adding broad or noisy context.",
     "If planning fails, final ranking still runs on metadata plus DOM candidates.",
-    "Final model output can still choose only an existing candidate ordinal; context never grants selector-writing authority."
+    "Final model output can still choose only an existing candidate ordinal; context never grants selector-writing authority.",
+    "Incremental expansion is capped at two planner attempts and sends only compact prior-context and previous-ranking summaries; it never repeats a fetched section or escalates to whole-document context."
   ],
   "evidenceFiles": [
     ".runtime/locator-healing-comparison/base-v2.json",
     ".runtime/locator-healing-comparison/planned-v2.json",
-    ".runtime/locator-healing-comparison/planned-v3.json"
+    ".runtime/locator-healing-comparison/planned-v3.json",
+    ".runtime/locator-healing-incremental/planned-incremental-v1.json"
   ]
 }

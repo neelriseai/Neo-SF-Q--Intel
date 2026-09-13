@@ -223,6 +223,54 @@ def test_context_plan_prompt_offers_only_bounded_mcp_style_tools() -> None:
     assert "candidateStructures" in payload
 
 
+def test_context_plan_prompt_carries_prior_context_and_previous_ranking() -> None:
+    envelope = build_context_plan_prompt(
+        _context(graphEdges=[], intentSection=None),
+        knowledge_documents=[
+            KnowledgeDocumentView(
+                key="strategic-deal-workbench",
+                group="pages",
+                headings=["Field behavior in plain English", "Page elements"],
+            )
+        ],
+        prior_context=[
+            "knowledge-repo/pages/strategic-deal-workbench.md#Field behavior in plain English"
+        ],
+        previous_ranking={
+            "accepted": True,
+            "candidateOrdinal": 0,
+            "confidenceMilli": 780,
+            "citedRefs": ["cand:0"],
+            "intentCited": False,
+        },
+    )
+
+    payload = envelope.untrusted_payload
+
+    assert payload["priorContext"] == [
+        "knowledge-repo/pages/strategic-deal-workbench.md#Field behavior in plain English"
+    ]
+    assert payload["previousRanking"]["confidenceMilli"] == 780
+    assert payload["previousRanking"]["intentCited"] is False
+
+
+def test_context_plan_prompt_bounds_prior_context_summaries() -> None:
+    with pytest.raises(LocatorProposalError) as error:
+        build_context_plan_prompt(
+            _context(graphEdges=[], intentSection=None),
+            knowledge_documents=[
+                KnowledgeDocumentView(
+                    key="strategic-deal-workbench",
+                    group="pages",
+                    headings=["Field behavior in plain English"],
+                )
+            ],
+            prior_context=["x" * 513],
+        )
+
+    assert error.value.code == "CONTEXT_PLAN_PRIOR_BOUND_EXCEEDED"
+
+
 def test_context_tool_plan_selects_one_knowledge_section() -> None:
     plan = parse_context_tool_plan(
         json.dumps(
