@@ -15,7 +15,7 @@ import {
   NodeSalesforceCliProcessRunner,
   SalesforceCliSessionBroker,
 } from "./salesforce-cli-session.js";
-import { requestModelProposal } from "./live-healing-cli.js";
+import { requestModelProposal, saveElementSignature } from "./live-healing-cli.js";
 
 type Environment = Readonly<Record<string, string | undefined>>;
 type OutputWriter = (value: string) => void;
@@ -77,6 +77,8 @@ export async function runLiveBusinessActionCli(
     const forceModelHealingFields = parseForcedModelFields(
       environment.NEO_BROWSER_BUSINESS_FORCE_MODEL_FIELDS,
     );
+    const signatureScope = parseSignatureScope(environment);
+    const knowledgeIntentFallback = parseKnowledgeIntentFallback(environment);
     const expectedEnrollment = canonicalJson(profile.enrollment);
     const worker = new BrowserWorker({
       verifyEnrollment: (assertion) => constantTimeEqual(canonicalJson(assertion), expectedEnrollment),
@@ -94,6 +96,10 @@ export async function runLiveBusinessActionCli(
         }).launch(),
       proposeBusinessLocator: (payload) =>
         requestModelProposal({ ...payload }, environment),
+      recordBusinessSignature: (payload) =>
+        saveElementSignature({ ...payload }, environment),
+      ...(signatureScope ? { signatureScope } : {}),
+      ...(knowledgeIntentFallback ? { knowledgeIntentFallback } : {}),
       forceModelHealingFields,
     });
     const broker = new SalesforceCliSessionBroker(profile.sessionBroker, worker);
@@ -183,6 +189,40 @@ function parseForcedModelFields(raw: string | undefined): readonly string[] {
     throw new BrowserCoordinatorError("BUSINESS_FORCE_MODEL_FIELDS_INVALID");
   }
   return Object.freeze(fields);
+}
+
+function parseSignatureScope(
+  environment: Environment,
+): { readonly projectId: string; readonly pageKey: string } | undefined {
+  const projectId = environment.NEO_BROWSER_SIGNATURE_PROJECT_ID;
+  const pageKey = environment.NEO_BROWSER_SIGNATURE_PAGE_KEY;
+  if (!projectId && !pageKey) return undefined;
+  if (!isSafeToken(projectId) || !isSafeToken(pageKey)) {
+    throw new BrowserCoordinatorError("BUSINESS_SIGNATURE_SCOPE_INVALID");
+  }
+  return { projectId, pageKey };
+}
+
+function parseKnowledgeIntentFallback(
+  environment: Environment,
+): { readonly page: string; readonly section: string } | undefined {
+  const page = environment.NEO_BROWSER_INTENT_FALLBACK_PAGE;
+  const section = environment.NEO_BROWSER_INTENT_FALLBACK_SECTION;
+  if (!page && !section) return undefined;
+  if (!isSafeToken(page) || !isSafeSection(section)) {
+    throw new BrowserCoordinatorError("BUSINESS_INTENT_FALLBACK_INVALID");
+  }
+  return { page, section };
+}
+
+function isSafeToken(value: string | undefined): value is string {
+  return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(value);
+}
+
+function isSafeSection(value: string | undefined): value is string {
+  return typeof value === "string" &&
+    /^[A-Za-z0-9][A-Za-z0-9 .:_/()-]{0,127}$/.test(value) &&
+    !/[\\]/.test(value);
 }
 
 function businessActionRequest(environment: Environment): BusinessActionRequest {

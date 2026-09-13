@@ -42,6 +42,37 @@ Boundary:
 - Runtime receipts are ignored evidence artifacts, not committed source. The committed source is
   the runner, browser-worker LLM wiring and tests.
 
+`[DONE]` A follow-up live Salesforce dropdown proof wired the full intended context path for
+`Opportunity.StageName`:
+
+```
+field failure -> bounded knowledge-repo intent planning -> prior stripped signature lookup
+ -> LLM ordinal ranking -> deterministic browser action -> save refreshed signature
+```
+
+Latest sanitized summary:
+
+```
+status: PASSED
+forcedModelFieldCount: 1
+modelAttemptFields: [StageName]
+modelCandidateOrdinals: [1]
+modelDomCandidateCounts: [2]
+modelContextPlanCounts: [2]
+modelIntentCitedFields: [StageName]
+signatureLookupFoundFields: [StageName]
+signatureSavedFields: [Name, Strategic_Deal__c, StageName, AccountId, CloseDate, Amount, Discount__c, Regional_VP_Approver__c]
+submitted: true
+successTextMatched: true
+persistenceMatched: true
+```
+
+The first dropdown pass seeded stripped signatures; the second pass proved `StageName` found its
+historical signature and cited knowledge-repo intent. A simultaneous all-three forced run now
+reveals a real generic-field gap: `Name` can still return `PROPOSAL_CONTEXT_INSUFFICIENT` when
+forced through the LLM path. That is a useful hardening item, not a reason to weaken the verifier
+or restore inline prompt prose.
+
 Reuses the shipped `NEO_HEAL_TIERS` switch: default `metadata`, `llm` fires only when the
 deterministic tier abstains.
 

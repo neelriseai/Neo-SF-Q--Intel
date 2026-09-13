@@ -199,6 +199,11 @@ test("executes an explicitly authorized business action and verifies success rea
     modelCandidateOrdinals: [],
     modelDomCandidateCounts: [],
     modelAttemptFields: [],
+    modelContextPlanCounts: [],
+    modelIntentCitedFields: [],
+    signatureLookupFoundFields: [],
+    signatureSavedFields: [],
+    signatureSaveErrorCodes: [],
     strategies: ["direct-data-field-api", "direct-data-field-api"],
   });
   expect(JSON.stringify(receipt)).not.toContain("SYN-Widget Renewal");
@@ -273,6 +278,7 @@ test("self-heals business submit locators through stable action identity before 
 test("uses a host-owned LLM ordinal proposal when business field locators are stale", async () => {
   const canary = `session-${randomBytes(12).toString("hex")}`;
   const proposals: unknown[] = [];
+  const savedSignatures: unknown[] = [];
   const worker = makeWorker(`
     <form data-object-api="Opportunity"
       onsubmit="event.preventDefault();
@@ -287,10 +293,17 @@ test("uses a host-owned LLM ordinal proposal when business field locators are st
     </form>
   `, {
     forceModelHealingFields: ["Name"],
+    signatureScope: { projectId: "neo-sf-q-intel", pageKey: "strategic-deal-workbench" },
+    knowledgeIntentFallback: {
+      page: "strategic-deal-workbench",
+      section: "Field behavior in plain English",
+    },
     proposeBusinessLocator: async (payload) => {
       proposals.push(payload);
       return {
         schemaVersion: "1.0.0",
+        signatureLookup: { found: true },
+        contextPlans: [{ toolCalls: [] }],
         accepted: false,
         rejectionCode: "PROPOSAL_CONFIDENCE_BELOW_FLOOR",
         proposal: {
@@ -298,6 +311,10 @@ test("uses a host-owned LLM ordinal proposal when business field locators are st
           confidenceMilli: 820,
         },
       };
+    },
+    recordBusinessSignature: async (payload) => {
+      savedSignatures.push(payload);
+      return { schemaVersion: "1.0.0", saved: true, status: "SAVED" };
     },
   });
   const session = await handoff(worker, canary, {
@@ -321,7 +338,34 @@ test("uses a host-owned LLM ordinal proposal when business field locators are st
     schemaVersion: "1.0.0",
     objectApiName: "Opportunity",
     fieldApiName: "Name",
+    contextPlanning: true,
+    fallbackIntentLookup: {
+      page: "strategic-deal-workbench",
+      section: "Field behavior in plain English",
+    },
+    signatureLookup: {
+      projectId: "neo-sf-q-intel",
+      pageKey: "strategic-deal-workbench",
+    },
   });
+  expect(JSON.stringify(proposals[0])).not.toContain("intentSection");
+  expect(savedSignatures).toHaveLength(1);
+  expect(savedSignatures[0]).toMatchObject({
+    schemaVersion: "1.0.0",
+    operation: "SAVE_SIGNATURE",
+    projectId: "neo-sf-q-intel",
+    pageKey: "strategic-deal-workbench",
+    objectApiName: "Opportunity",
+    fieldApiName: "Name",
+    capturedAtUtc: "2030-01-01T00:00:00Z",
+    candidate: {
+      structure: expect.stringContaining("input"),
+      attrNames: ["aria-label"],
+      nearby: expect.any(Array),
+    },
+  });
+  expect((savedSignatures[0] as { candidate: { attrHashes: Record<string, string> } }).candidate.attrHashes["aria-label"])
+    .toMatch(/^[a-f0-9]{16}$/);
   expect(receipt.businessAction).toMatchObject({
     fieldCount: 1,
     submitted: true,
@@ -330,6 +374,9 @@ test("uses a host-owned LLM ordinal proposal when business field locators are st
     abstainedFieldCount: 0,
     modelProposalCount: 1,
     modelAppliedFieldCount: 1,
+    modelContextPlanCounts: [1],
+    signatureLookupFoundFields: ["Name"],
+    signatureSavedFields: ["Name"],
   });
   expect(receipt.businessAction?.strategies?.[0]).toContain("llm-ordinal-0");
   expect(JSON.stringify(receipt)).not.toContain("SYN-LLM-Healed");

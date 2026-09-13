@@ -234,6 +234,38 @@ export async function requestModelProposal(
   }
 }
 
+export async function saveElementSignature(
+  payload: Record<string, unknown>,
+  environment: Environment,
+): Promise<ModelProposal> {
+  const python = environment.NEO_LOCATOR_HEALING_PYTHON || environment.PYTHON || "python";
+  const timeout = Math.min(
+    Math.max(Number.parseInt(environment.NEO_LOCATOR_HEALING_TIMEOUT_MS ?? "45000", 10) || 45000, 1000),
+    120000,
+  );
+  try {
+    const stdout = await runPythonBridge(
+      python,
+      ["-m", "neo_sf_q_intel.locator_healing_cli"],
+      JSON.stringify(payload),
+      {
+        timeout,
+        env: locatorBridgeEnvironment(environment),
+        cwd: environment.NEO_LOCATOR_HEALING_CWD,
+      },
+    );
+    return parseModelProposal(stdout);
+  } catch {
+    return Object.freeze({
+      schemaVersion: "1.0.0",
+      operation: "SAVE_SIGNATURE",
+      saved: false,
+      status: "BRIDGE_FAILED",
+      errorCode: "SIGNATURE_SAVE_BRIDGE_FAILED",
+    });
+  }
+}
+
 function locatorBridgeEnvironment(environment: Environment): NodeJS.ProcessEnv {
   const merged: NodeJS.ProcessEnv = { ...process.env, ...environment };
   if ((environment.NEO_LOCATOR_HEALING_PROVIDER_SOURCE ?? "dotenv").toLowerCase() === "process") {

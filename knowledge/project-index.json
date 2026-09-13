@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "b8455931342cbe3dd8b38e2ee4c6106cf6ce9560af61d8e58641ff93df405939",
+  "sourceSnapshot": "d9fc187a2e8b44c31e35951c7c0a7bc5172eefaea3800283743ad16965880477",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1586,7 +1586,7 @@
     {
       "path": "Docs/24-strategic-deal-change-assurance-demo.md",
       "category": "reference-documentation",
-      "sha256": "1bdbbe8678d3c1d00560ea25c18ca4821a84ce9844a7b8fa87a456a28048cc65"
+      "sha256": "50033943521b4947de476020d3a26ddd88a8916967f9fd7d400668f72246a7cd"
     },
     {
       "path": "Docs/25-strategic-deal-demo-test-pass-2026-09-12.md",
@@ -1606,7 +1606,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "5e93388b0bb756dc4877a42699f708c91440ae1cb928eb2f5b20dc26c78650e7"
+      "sha256": "89773334cdd553367b70bd6e398f5f82058990f90b2e20766294299db16c84ea"
     },
     {
       "path": "Docs/29-d-series-requirement-test-matrix.md",
@@ -2001,7 +2001,7 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "f1cf546ec1ef9b63ecc233e230d43a1c0bcc362a5a31bbbaa269193c3976af78"
+      "sha256": "25323e3653122e333d569b0dfb58f0aef5240e7ef14fe892a406f8fa5b1ae989"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
@@ -2011,7 +2011,7 @@
     {
       "path": "packages/browser/src/live-business-action-cli.ts",
       "category": "browser-runtime",
-      "sha256": "ea643f2bb16c7d4330e13c26d4cc5e61ef7a889aaa02cc5d15792e4574864877"
+      "sha256": "355e97c3e97d1c5c76b1490627394b46891194dd4e135e76eb02ee826c1ab936"
     },
     {
       "path": "packages/browser/src/live-candidate-readback-cli.ts",
@@ -2021,7 +2021,7 @@
     {
       "path": "packages/browser/src/live-healing-cli.ts",
       "category": "browser-runtime",
-      "sha256": "fcbe2f1f3f6f59eb5ca2a9d9175fb51593a8354b58e98ed04b00897d415b8b56"
+      "sha256": "9d7fb480b8ce32d343c567d8ece0aa8c091e2a4047c8f98036d821e0af2f3186"
     },
     {
       "path": "packages/browser/src/live-profile-cli.ts",
@@ -2056,7 +2056,7 @@
     {
       "path": "packages/browser/tests/browser-worker.spec.ts",
       "category": "test",
-      "sha256": "3c5f4df2050f35b033f19e7d1f1289439b515595c08a626967928a6f2328e0bb"
+      "sha256": "7b1b1775f86ba71577f83ae130be9375ec3d93cafb5aa702db4aef97336d34bd"
     },
     {
       "path": "packages/browser/tests/candidate-client.spec.ts",
@@ -2316,7 +2316,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "eedf6eda65c913f06c694c8c33762fb64ae71c7796b4bcae2afebe2a99964534"
+      "sha256": "7c128cfce1507570428ea1230bbff8cd676aac2b46bfd42a8b4b6bb6419dcabb"
     },
     {
       "path": "quality/reviews/locator-healing-context-comparison-2026-09-13.json",
@@ -2356,7 +2356,7 @@
     {
       "path": "scripts/run/run-live-llm-business-healing.ps1",
       "category": "project",
-      "sha256": "37771678cf264885fe4a0c67617228ba85c0e3383817015cd7f4ff499e793fe0"
+      "sha256": "a4b60463b07ea6236eb7a7f857806e8e5d46b13d71a33b7c0cd7323ad288b377"
     },
     {
       "path": "scripts/run/run-locator-healing-smoke.ps1",
@@ -2456,7 +2456,7 @@
     {
       "path": "src/neo_sf_q_intel/element_signature.py",
       "category": "python-runtime",
-      "sha256": "c3e17de8aed299b2a71ebb0661c4a97041ce409104f1697f5a9cbf6c0dbc2544"
+      "sha256": "588f9e920a41ec16456b2dddd7811adec17924a1215a8259280893a06e0259f1"
     },
     {
       "path": "src/neo_sf_q_intel/execution_assertions.py",
@@ -2561,7 +2561,7 @@
     {
       "path": "src/neo_sf_q_intel/locator_healing_cli.py",
       "category": "python-runtime",
-      "sha256": "f5761273ad72342946cc42f9e19180f872124776e19a034c769ad491db813076"
+      "sha256": "e98ff6b403899ed5e6d8beecea636c40336c6787f399fcb313cd1b784256e32d"
     },
     {
       "path": "src/neo_sf_q_intel/locator_proposal.py",
@@ -2946,7 +2946,7 @@
     {
       "path": "tests/test_locator_healing_cli.py",
       "category": "test",
-      "sha256": "408586f1c78e930e3a39a16f15aded01f702f112bb0a1d50a9309636fa6f2773"
+      "sha256": "702bd2acab25e2a8ace4a95de4d72dc0ba2a901debd5ba5c4d1008728dd236c3"
     },
     {
       "path": "tests/test_locator_proposal.py",

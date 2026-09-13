@@ -6,6 +6,8 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+import psycopg
+
 from neo_sf_q_intel.config import Settings
 from neo_sf_q_intel.context_feeds import (
     ContextFeedError,
@@ -14,6 +16,13 @@ from neo_sf_q_intel.context_feeds import (
     knowledge_index,
     knowledge_section,
     metadata_lookup,
+)
+from neo_sf_q_intel.element_signature import (
+    ElementSignature,
+    ElementSignatureError,
+    ElementSignatureRepository,
+    SignatureCorrupt,
+    build_signature_from_digests,
 )
 from neo_sf_q_intel.locator_proposal import (
     CONTEXT_PLAN_RESPONSE_SCHEMA,
@@ -27,6 +36,7 @@ from neo_sf_q_intel.locator_proposal import (
     propose_context_tool_plan,
     propose_locator,
 )
+from neo_sf_q_intel.postgres_schema import scoped_connection_string
 from neo_sf_q_intel.providers import (
     OpenAISpecialistProvider,
     ProviderConfigurationBlockedError,
@@ -37,11 +47,17 @@ def main() -> int:
     try:
         request = _read_request(sys.stdin.read())
         settings = Settings()
+        if request.get("operation") == "SAVE_SIGNATURE":
+            body = _save_signature_request(request, settings)
+            sys.stdout.write(json.dumps(body, sort_keys=True, separators=(",", ":")))
+            sys.stdout.write("\n")
+            return 0
         field_metadata = _field_metadata_for(
             settings,
             object_api_name=request["objectApiName"],
             field_api_name=request["fieldApiName"],
         )
+        signature, signature_state = _signature_for_request(settings, request)
         repository_root = Path.cwd()
         base_context = build_healing_context(
             obligation_id=request["obligationId"],
@@ -49,6 +65,7 @@ def main() -> int:
             field_api_name=request["fieldApiName"],
             dom_evidence=request["domEvidence"],
             field_metadata=field_metadata,
+            signature=signature,
         )
         if not settings.allow_llm:
             return _write_blocked("LLM_DISABLED")
@@ -71,8 +88,11 @@ def main() -> int:
             context_provider,
             repository_root=repository_root,
             field_metadata=field_metadata,
+            signature=signature,
         )
         body = record.model_dump(by_alias=True, mode="json", exclude_none=True)
+        if signature_state is not None:
+            body["signatureLookup"] = signature_state
         if context_plans:
             body["contextPlans"] = [
                 item.model_dump(by_alias=True, mode="json", exclude_none=True)
@@ -97,6 +117,8 @@ def _read_request(raw: str) -> dict[str, Any]:
         raise ValueError("REQUEST_NOT_JSON") from error
     if not isinstance(body, dict):
         raise ValueError("REQUEST_NOT_JSON")
+    if body.get("operation") == "SAVE_SIGNATURE":
+        return body
     required = ("obligationId", "objectApiName", "fieldApiName", "domEvidence")
     if any(key not in body for key in required):
         raise ValueError("REQUEST_SCHEMA_INVALID")
@@ -118,10 +140,16 @@ def _propose_with_incremental_context(
     *,
     repository_root: Path,
     field_metadata: FieldMetadata | None,
+    signature: ElementSignature | None = None,
 ) -> tuple[LocatorProposalRecord, tuple[ContextToolPlanRecord, ...]]:
     if _explicit_context_request(request):
         feeds = _context_feeds_for_request(request, repository_root=repository_root)
-        context = _context_from_feeds(request, field_metadata=field_metadata, feeds=feeds)
+        context = _context_from_feeds(
+            request,
+            field_metadata=field_metadata,
+            signature=signature,
+            feeds=feeds,
+        )
         return propose_locator(provider, context), ()
 
     try:
@@ -130,7 +158,12 @@ def _propose_with_incremental_context(
         documents = ()
     if request.get("contextPlanning") is False or not documents:
         feeds = _context_feeds_for_request(request, repository_root=repository_root)
-        context = _context_from_feeds(request, field_metadata=field_metadata, feeds=feeds)
+        context = _context_from_feeds(
+            request,
+            field_metadata=field_metadata,
+            signature=signature,
+            feeds=feeds,
+        )
         return propose_locator(provider, context), ()
 
     plans: list[ContextToolPlanRecord] = []
@@ -163,13 +196,42 @@ def _propose_with_incremental_context(
             repository_root=repository_root,
             preloaded_intent_section=_combined_intent_sections(intent_sections),
         )
-        context = _context_from_feeds(request, field_metadata=field_metadata, feeds=feeds)
+        context = _context_from_feeds(
+            request,
+            field_metadata=field_metadata,
+            signature=signature,
+            feeds=feeds,
+        )
         last_record = propose_locator(provider, context)
         if _ranking_context_is_adequate(last_record, bool(intent_sections)):
             return last_record, tuple(plans)
         previous_ranking = _ranking_summary(last_record)
 
     assert last_record is not None
+    fallback_section = _intent_section_from_lookup(
+        request.get("fallbackIntentLookup"),
+        repository_root=repository_root,
+        knowledge_lookup=knowledge_section,
+    )
+    if fallback_section is not None and fallback_section not in intent_sections:
+        feeds = _context_feeds_for_request(
+            request,
+            context_plan=None,
+            repository_root=repository_root,
+            preloaded_intent_section=_combined_intent_sections(
+                [*intent_sections, fallback_section]
+            ),
+        )
+        context = _context_from_feeds(
+            request,
+            field_metadata=field_metadata,
+            signature=signature,
+            feeds=feeds,
+        )
+        fallback_record = propose_locator(provider, context)
+        if _ranking_context_is_adequate(fallback_record, True):
+            return fallback_record, tuple(plans)
+        last_record = fallback_record
     if last_record.proposal is not None and (
         last_record.proposal.context_assessment.intent_fit != "SUFFICIENT"
     ):
@@ -189,6 +251,7 @@ def _context_from_feeds(
     request: Mapping[str, Any],
     *,
     field_metadata: FieldMetadata | None,
+    signature: ElementSignature | None = None,
     feeds: _ResolvedContextFeeds,
 ):
     return build_healing_context(
@@ -197,6 +260,7 @@ def _context_from_feeds(
         field_api_name=request["fieldApiName"],
         dom_evidence=request["domEvidence"],
         field_metadata=field_metadata,
+        signature=signature,
         graph_edges=feeds.graph_edges,
         intent_section=feeds.intent_section,
     )
@@ -455,6 +519,110 @@ def _field_metadata_for(
         return lookup(root, object_api_name, field_api_name)
     except (ContextFeedError, OSError, ValueError):
         return None
+
+
+def _signature_repository(settings: Settings) -> ElementSignatureRepository | None:
+    if settings.database_url is None:
+        return None
+    dsn = scoped_connection_string(
+        settings.database_url.get_secret_value(),
+        settings.postgres_schema,
+    )
+    return ElementSignatureRepository(
+        lambda: psycopg.connect(dsn, autocommit=True),
+        settings.postgres_schema,
+    )
+
+
+def _signature_for_request(
+    settings: Settings,
+    request: Mapping[str, Any],
+) -> tuple[ElementSignature | None, Mapping[str, Any] | None]:
+    raw_lookup = request.get("signatureLookup")
+    if raw_lookup is None:
+        return None, None
+    if not isinstance(raw_lookup, Mapping):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    project_id = raw_lookup.get("projectId")
+    page_key = raw_lookup.get("pageKey")
+    if not isinstance(project_id, str) or not isinstance(page_key, str):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    repository = _signature_repository(settings)
+    state: dict[str, Any] = {
+        "attempted": True,
+        "projectId": project_id,
+        "pageKey": page_key,
+        "found": False,
+    }
+    if repository is None:
+        return None, {**state, "status": "UNCONFIGURED"}
+    try:
+        signature = repository.lookup(
+            project_id=project_id,
+            page_key=page_key,
+            object_api_name=request["objectApiName"],
+            field_api_name=request["fieldApiName"],
+        )
+    except SignatureCorrupt:
+        raise LocatorProposalError("SIGNATURE_CORRUPT") from None
+    except ElementSignatureError as error:
+        return None, {**state, "status": "UNAVAILABLE", "errorCode": error.code}
+    if signature is None:
+        return None, {**state, "status": "MISS"}
+    return signature, {
+        **state,
+        "status": "FOUND",
+        "found": True,
+        "signatureSha256": signature.signature_sha256,
+    }
+
+
+def _save_signature_request(
+    request: Mapping[str, Any],
+    settings: Settings,
+) -> Mapping[str, Any]:
+    repository = _signature_repository(settings)
+    base = {
+        "schemaVersion": "1.0.0",
+        "operation": "SAVE_SIGNATURE",
+        "saved": False,
+    }
+    if repository is None:
+        return {**base, "status": "UNCONFIGURED"}
+    try:
+        payload = _signature_payload(request)
+        signature = build_signature_from_digests(**payload)
+        repository.save(signature)
+        return {
+            **base,
+            "status": "SAVED",
+            "saved": True,
+            "signatureSha256": signature.signature_sha256,
+        }
+    except SignatureCorrupt:
+        raise LocatorProposalError("SIGNATURE_CORRUPT") from None
+    except ElementSignatureError as error:
+        return {**base, "status": "UNAVAILABLE", "errorCode": error.code}
+    except (TypeError, ValueError):
+        raise ValueError("REQUEST_SCHEMA_INVALID") from None
+
+
+def _signature_payload(request: Mapping[str, Any]) -> dict[str, Any]:
+    candidate = request.get("candidate")
+    if not isinstance(candidate, Mapping):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    return {
+        "project_id": request["projectId"],
+        "page_key": request["pageKey"],
+        "object_api_name": request["objectApiName"],
+        "field_api_name": request["fieldApiName"],
+        "obligation_id": request.get("obligationId"),
+        "structure": candidate["structure"],
+        "attr_hashes": candidate["attrHashes"],
+        "nearby": candidate["nearby"],
+        "snapshot_root": request["snapshotRoot"],
+        "captured_at_utc": request["capturedAtUtc"],
+    }
 
 
 def _write_blocked(code: str) -> int:

@@ -183,6 +183,9 @@ Current proven live sub-results:
 - scoped Workbench marker deploy/readback passed for `save-evaluate-live`;
 - live LLM browser healing passed for `Name`, `Strategic_Deal__c` and `StageName` in the Workbench
   business action, followed by submit, success readback and persisted Salesforce outcome proof.
+- follow-up live dropdown proof passed for `StageName` with bounded knowledge-repo intent planning,
+  historical stripped signature lookup, LLM ordinal ranking, deterministic browser action,
+  signature refresh, submit, success readback and persisted Salesforce outcome proof.
 
 ### 8. Show governed release posture
 
@@ -212,7 +215,7 @@ Expected message:
 | Governance | Claim grounding, release posture, gate honesty | `FOUNDATION` |
 | Live Salesforce evidence | CLI/API/read-only and browser diagnostic evidence | `FOUNDATION`, partial live proof |
 | Browser worker | Live profile, readback, business-action runner | `FOUNDATION` |
-| Locator healing | Metadata/accessibility-based candidate discovery, real LLM ordinal proposal and deterministic action verification | `FOUNDATION` plus live three-field proof |
+| Locator healing | Metadata/accessibility-based candidate discovery, real LLM ordinal proposal, knowledge-repo intent, historical stripped signature support and deterministic action verification | `FOUNDATION` plus live three-field proof and stronger `StageName` context/signature proof |
 | ChromaDB retrieval | Roadmap semantic index behind retrieval port | `NEXT`; do not demo as complete |
 | Candidate deployment | Scoped marker deploy/readback exists; full campaign deployment pending | `NEXT` / partial demo evidence |
 | Live test execution | Browser-worker regression and one live Workbench business-action proof passed; full campaign gate set still pending | partial live proof |

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "b8455931342cbe3dd8b38e2ee4c6106cf6ce9560af61d8e58641ff93df405939",
+  "sourceSnapshot": "d9fc187a2e8b44c31e35951c7c0a7bc5172eefaea3800283743ad16965880477",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -6203,7 +6203,17 @@
     {
       "from": "file:src/neo_sf_q_intel/locator_healing_cli.py",
       "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/element_signature.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/locator_healing_cli.py",
+      "relation": "imports",
       "to": "file:src/neo_sf_q_intel/locator_proposal.py"
+    },
+    {
+      "from": "file:src/neo_sf_q_intel/locator_healing_cli.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/postgres_schema.py"
     },
     {
       "from": "file:src/neo_sf_q_intel/locator_healing_cli.py",
@@ -7704,6 +7714,11 @@
       "from": "file:tests/test_locator_healing_cli.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/context_feeds.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_cli.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/element_signature.py"
     },
     {
       "from": "file:tests/test_locator_healing_cli.py",

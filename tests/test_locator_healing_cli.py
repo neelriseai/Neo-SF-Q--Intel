@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from neo_sf_q_intel.context_feeds import ContextFeedError, FieldMetadata, KnowledgeSection
+from neo_sf_q_intel.element_signature import build_signature
 from neo_sf_q_intel.locator_healing_cli import (
     _combined_intent_sections,
     _context_feeds_for_request,
@@ -14,7 +15,9 @@ from neo_sf_q_intel.locator_healing_cli import (
     _propose_with_incremental_context,
     _ranking_context_is_adequate,
     _ranking_summary,
+    _save_signature_request,
     _section_summary,
+    _signature_for_request,
 )
 from neo_sf_q_intel.locator_proposal import (
     ContextToolPlanRecord,
@@ -257,6 +260,99 @@ def test_context_feeds_ignore_planned_whole_document_to_avoid_noisy_context() ->
 
     assert result.intent_section is None
     assert result.graph_edges == ()
+
+
+def test_signature_lookup_returns_prior_signature_for_same_field(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    signature = build_signature(
+        project_id="neo-sf-q-intel",
+        page_key="strategic-deal-workbench",
+        object_api_name="Opportunity",
+        field_api_name="StageName",
+        obligation_id="business-action:Opportunity.StageName",
+        structure="lightning-input-field>button[role=combobox]",
+        attributes={"aria-label": "Stage", "data-field-api": "StageName"},
+        nearby=["button", "span"],
+        snapshot_root="1" * 64,
+        captured_at_utc="2030-01-01T00:00:00Z",
+    )
+
+    class Repository:
+        def lookup(self, **kwargs: object):
+            assert kwargs == {
+                "project_id": "neo-sf-q-intel",
+                "page_key": "strategic-deal-workbench",
+                "object_api_name": "Opportunity",
+                "field_api_name": "StageName",
+            }
+            return signature
+
+    monkeypatch.setattr(
+        "neo_sf_q_intel.locator_healing_cli._signature_repository",
+        lambda _settings: Repository(),
+    )
+
+    found, state = _signature_for_request(
+        object(),
+        {
+            "objectApiName": "Opportunity",
+            "fieldApiName": "StageName",
+            "signatureLookup": {
+                "projectId": "neo-sf-q-intel",
+                "pageKey": "strategic-deal-workbench",
+            },
+        },
+    )
+
+    assert found == signature
+    assert state == {
+        "attempted": True,
+        "projectId": "neo-sf-q-intel",
+        "pageKey": "strategic-deal-workbench",
+        "found": True,
+        "status": "FOUND",
+        "signatureSha256": signature.signature_sha256,
+    }
+
+
+def test_save_signature_request_persists_only_stripped_browser_digests(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    saved = []
+
+    class Repository:
+        def save(self, signature) -> None:
+            saved.append(signature)
+
+    monkeypatch.setattr(
+        "neo_sf_q_intel.locator_healing_cli._signature_repository",
+        lambda _settings: Repository(),
+    )
+
+    result = _save_signature_request(
+        {
+            "operation": "SAVE_SIGNATURE",
+            "projectId": "neo-sf-q-intel",
+            "pageKey": "strategic-deal-workbench",
+            "objectApiName": "Opportunity",
+            "fieldApiName": "StageName",
+            "obligationId": "business-action:Opportunity.StageName",
+            "snapshotRoot": "2" * 64,
+            "capturedAtUtc": "2030-01-01T00:00:00Z",
+            "candidate": {
+                "structure": "lightning-input-field>button[role=combobox]",
+                "attrHashes": {"aria-label": "a" * 16, "data-field-api": "b" * 16},
+                "nearby": ["button", "span"],
+            },
+        },
+        object(),
+    )
+
+    assert result["status"] == "SAVED"
+    assert result["saved"] is True
+    assert saved[0].field_api_name == "StageName"
+    assert saved[0].attrs_hashed == {"aria-label": "a" * 16, "data-field-api": "b" * 16}
 
 
 def test_incremental_context_summary_and_combination_are_bounded() -> None:
@@ -523,6 +619,94 @@ def test_incremental_planner_downgrades_when_final_context_stays_partial() -> No
     assert record.rejection_code == "PROPOSAL_CONTEXT_INSUFFICIENT"
     assert record.proposal is not None
     assert record.proposal.candidate_ordinal == 0
+
+
+def test_incremental_planner_uses_bounded_fallback_section_before_downgrading() -> None:
+    request, metadata, base_context = _incremental_request_fixture("Name")
+    request["fallbackIntentLookup"] = {
+        "page": "strategic-deal-workbench",
+        "section": "Field behavior in plain English",
+    }
+    planner = _QueueProvider(
+        [
+            _json_outcome(
+                {
+                    "toolCalls": [
+                        {
+                            "tool": "knowledge_section",
+                            "arguments": {
+                                "page": "strategic-deal-workbench",
+                                "module": None,
+                                "impact": None,
+                                "section": "Live-observed page elements",
+                            },
+                        }
+                    ],
+                    "rationale": "Start with page elements.",
+                }
+            ),
+            _json_outcome(
+                {
+                    "toolCalls": [
+                        {
+                            "tool": "knowledge_section",
+                            "arguments": {
+                                "page": "strategic-deal-workbench",
+                                "module": None,
+                                "impact": None,
+                                "section": "Live-observed page elements",
+                            },
+                        }
+                    ],
+                    "rationale": "No better section found.",
+                }
+            ),
+        ]
+    )
+    ranker = _QueueProvider(
+        [
+            _json_outcome(
+                _proposal_json(
+                    intent_fit="PARTIAL",
+                    missing_context="FIELD_BEHAVIOR",
+                    rationale="Need specific field behavior.",
+                    obligation_id=request["obligationId"],
+                )
+            ),
+            _json_outcome(
+                _proposal_json(
+                    intent_fit="PARTIAL",
+                    missing_context="FIELD_BEHAVIOR",
+                    rationale="Planner repeated broad context.",
+                    obligation_id=request["obligationId"],
+                )
+            ),
+            _json_outcome(
+                _proposal_json(
+                    intent_fit="SUFFICIENT",
+                    missing_context="NONE",
+                    rationale="Fallback Workbench field behavior states how Name is entered.",
+                    obligation_id=request["obligationId"],
+                )
+            ),
+        ]
+    )
+
+    record, plans = _propose_with_incremental_context(
+        request,
+        base_context,
+        ranker,
+        planner,
+        repository_root=Path.cwd(),
+        field_metadata=metadata,
+    )
+
+    assert len(plans) == 2
+    assert record.accepted is True
+    assert record.proposal is not None
+    assert record.proposal.context_assessment.intent_fit == "SUFFICIENT"
+    assert len(ranker.prompts) == 3
+    assert "Field behavior in plain English" in ranker.prompts[2]
 
 
 def test_context_feeds_can_use_injected_evidence_graph_lookup_without_static_app_graph() -> None:

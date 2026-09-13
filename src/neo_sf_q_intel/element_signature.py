@@ -278,6 +278,62 @@ def build_signature(
     return ElementSignature.model_validate({**body, "signature_sha256": _signature_digest(body)})
 
 
+def build_signature_from_digests(
+    *,
+    project_id: str,
+    page_key: str,
+    object_api_name: str,
+    field_api_name: str,
+    obligation_id: str | None,
+    structure: str,
+    attr_hashes: Mapping[str, str],
+    nearby: Iterable[str],
+    snapshot_root: str,
+    captured_at_utc: str,
+) -> ElementSignature:
+    """Build a signature from already-stripped 16-hex attribute digests.
+
+    Browser-side live healing must not ship raw Salesforce attribute values back to Python merely
+    so they can be hashed here. This companion constructor accepts the same digest contract that
+    DOM evidence uses and validates it through :class:`ElementSignature` before persistence.
+    """
+
+    if not isinstance(attr_hashes, Mapping):
+        raise ValueError("Attribute digests must be supplied as a name to digest mapping")
+    clean: dict[str, str] = {}
+    for name, value in attr_hashes.items():
+        if (
+            isinstance(name, str)
+            and isinstance(value, str)
+            and _ATTRIBUTE_NAME_PATTERN.fullmatch(name) is not None
+            and _VALUE_DIGEST_PATTERN.fullmatch(value) is not None
+        ):
+            clean[name] = value
+    present = tuple(sorted(clean)[:MAX_ATTRS_PRESENT])
+    attrs_hashed = {name: clean[name] for name in present}
+    tags = sorted(
+        {
+            tag
+            for tag in nearby
+            if isinstance(tag, str) and _TAG_NAME_PATTERN.fullmatch(tag) is not None
+        }
+    )
+    body = {
+        "project_id": project_id,
+        "page_key": page_key,
+        "object_api_name": object_api_name,
+        "field_api_name": field_api_name,
+        "obligation_id": obligation_id,
+        "structure": structure,
+        "attrs_present": list(present),
+        "attrs_hashed": attrs_hashed,
+        "nearby": tags[:MAX_NEARBY],
+        "snapshot_root": snapshot_root,
+        "captured_at_utc": captured_at_utc,
+    }
+    return ElementSignature.model_validate({**body, "signature_sha256": _signature_digest(body)})
+
+
 def _decode_json_column(value: Any, label: str) -> Any:
     if isinstance(value, str | bytes):
         try:

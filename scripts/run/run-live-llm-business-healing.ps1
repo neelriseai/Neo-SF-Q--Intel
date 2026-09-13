@@ -1,13 +1,14 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-Run a live Salesforce Workbench business action with LLM ordinal healing on three controls.
+Run a live Salesforce Workbench business action with LLM ordinal healing on selected controls.
 
 .DESCRIPTION
-This is the live-browser counterpart to the synthetic three-field locator smoke. It uses the
-trusted live browser profile, forces the browser worker to skip deterministic field locators for
-Name, Strategic_Deal__c and StageName, asks the LLM bridge to choose candidate ordinals from the
-current live DOM, then saves the Workbench form and verifies persisted Salesforce state.
+This is the live-browser counterpart to the synthetic locator smoke. It uses the trusted live
+browser profile, forces the browser worker to skip deterministic field locators for selected
+fields, asks the LLM bridge to choose candidate ordinals from the current live DOM, then saves the
+Workbench form and verifies persisted Salesforce state. The default focuses on StageName because
+that dropdown is the current live proof for knowledge-repo intent plus historical signature usage.
 
 Secrets, session URLs, raw DOM and record ids are never printed. Full output is the sanitized
 projection emitted by the live business-action CLI.
@@ -16,6 +17,7 @@ projection emitted by the live business-action CLI.
 param(
     [string]$ProfilePath = '.runtime/live-browser-profile.json',
     [string]$OutputDirectory = '.runtime/live-llm-business-healing',
+    [string]$ForceModelFields = 'StageName',
     [switch]$Headed,
     [int]$SlowMoMs = 0
 )
@@ -56,13 +58,17 @@ $env:NEO_BROWSER_HEADED = if ($Headed) { 'true' } else { 'false' }
 $env:NEO_BROWSER_SLOW_MO_MS = [string][Math]::Max(0, [Math]::Min($SlowMoMs, 2000))
 $env:NEO_LOCATOR_HEALING_PROVIDER_SOURCE = 'dotenv'
 $env:NEO_LOCATOR_HEALING_CWD = $repositoryRoot.Path
+$env:NEO_BROWSER_SIGNATURE_PROJECT_ID = 'neo-sf-q-intel'
+$env:NEO_BROWSER_SIGNATURE_PAGE_KEY = 'strategic-deal-workbench'
+$env:NEO_BROWSER_INTENT_FALLBACK_PAGE = 'strategic-deal-workbench'
+$env:NEO_BROWSER_INTENT_FALLBACK_SECTION = 'Field behavior in plain English'
 $python = Join-Path $repositoryRoot '.venv\Scripts\python.exe'
 if (-not (Test-Path $python)) {
     throw 'Python virtual environment is missing at .venv\Scripts\python.exe'
 }
 $env:NEO_LOCATOR_HEALING_PYTHON = $python
 $env:NEO_BROWSER_BUSINESS_START_PATH = '/lightning/n/Strategic_Deal_Workbench'
-$env:NEO_BROWSER_BUSINESS_FORCE_MODEL_FIELDS = 'Name,Strategic_Deal__c,StageName'
+$env:NEO_BROWSER_BUSINESS_FORCE_MODEL_FIELDS = $ForceModelFields
 $env:NEO_BROWSER_BUSINESS_SUBMIT_TAG = 'lightning-button'
 $env:NEO_BROWSER_BUSINESS_SUBMIT_ACTION = 'save-evaluate-live'
 $env:NEO_BROWSER_BUSINESS_SUCCESS_TEXT = 'Saved successfully. The policy results are shown below.'
@@ -109,6 +115,11 @@ $summary = [pscustomobject]@{
     modelRejectionCodes = $projection.businessAction.modelRejectionCodes
     modelDomCandidateCounts = $projection.businessAction.modelDomCandidateCounts
     modelAttemptFields = $projection.businessAction.modelAttemptFields
+    modelContextPlanCounts = $projection.businessAction.modelContextPlanCounts
+    modelIntentCitedFields = $projection.businessAction.modelIntentCitedFields
+    signatureLookupFoundFields = $projection.businessAction.signatureLookupFoundFields
+    signatureSavedFields = $projection.businessAction.signatureSavedFields
+    signatureSaveErrorCodes = $projection.businessAction.signatureSaveErrorCodes
     healedFieldCount = $projection.businessAction.healedFieldCount
     abstainedFieldCount = $projection.businessAction.abstainedFieldCount
     submitted = $projection.businessAction.submitted

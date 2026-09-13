@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "live-llm-browser-healing-2026-09-13",
+  "reviewId": "live-llm-dropdown-context-signature-2026-09-13",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -160,7 +160,8 @@
     "opus5_persona_governance_run",
     "opus5_context_feed_review"
     ,
-    "live_llm_browser_healing_review"
+    "live_llm_browser_healing_review",
+    "live_dropdown_context_signature_review"
   ],
   "findings": [
     {
@@ -487,6 +488,11 @@
       "code": "LIVE_LLM_BROWSER_BUSINESS_HEALING",
       "severity": "P1",
       "resolution": "The browser business-action path now invokes the host-owned LLM locator proposal bridge when selected field locators are forced stale or deterministic recovery abstains. The model receives bounded live DOM evidence and compact field intent, proposes candidate ordinals only, and deterministic browser code verifies actionability before writing values. A live Salesforce Workbench run forced the LLM path for Name, Strategic_Deal__c and StageName, applied all three proposals, submitted the form, matched the configured success text and independently verified persisted Opportunity state. The proof simulates stale primary locators rather than deploying a metadata/UI mutation, so it is live browser and provider evidence but not full campaign acceptance."
+    },
+    {
+      "code": "LIVE_DROPDOWN_CONTEXT_SIGNATURE_HEALING",
+      "severity": "P1",
+      "resolution": "The business-action LLM path no longer relies on caller-written inline intent for live field healing. It enables incremental knowledge-repo context planning, uses a bounded Workbench Field behavior fallback section when planner choices remain insufficient, looks up a prior stripped element signature from the Neo PostgreSQL signature store, and saves refreshed stripped signatures after successful field interactions. A live caip-dev Workbench run forced only Opportunity.StageName through the LLM path, observed two live DOM candidates, executed two context-plan attempts, cited intent, found the historical StageName signature, selected ordinal 1, filled the dropdown through deterministic browser code, submitted successfully and verified persisted Salesforce state. A forced all-three run exposed a remaining generic-field Name intent-fit gap and was intentionally not accepted by weakening verification."
     },
     {
       "code": "SCOPED_CONTEXT_FEEDS",

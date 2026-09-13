@@ -129,6 +129,11 @@ export interface BrowserWorkerReceipt {
     modelCandidateOrdinals?: readonly number[];
     modelDomCandidateCounts?: readonly number[];
     modelAttemptFields?: readonly string[];
+    modelContextPlanCounts?: readonly number[];
+    modelIntentCitedFields?: readonly string[];
+    signatureLookupFoundFields?: readonly string[];
+    signatureSavedFields?: readonly string[];
+    signatureSaveErrorCodes?: readonly string[];
     strategies?: readonly string[];
   };
   probeReport?: LocatorProbeReport;
@@ -198,6 +203,15 @@ export interface BrowserWorkerOptions {
    * for diagnostic proof.
    */
   proposeBusinessLocator?: (request: BusinessLocatorProposalRequest) => Promise<BusinessLocatorProposal>;
+  recordBusinessSignature?: (request: BusinessSignatureCaptureRequest) => Promise<BusinessSignatureCaptureResult>;
+  signatureScope?: {
+    readonly projectId: string;
+    readonly pageKey: string;
+  };
+  knowledgeIntentFallback?: {
+    readonly page: string;
+    readonly section: string;
+  };
   forceModelHealingFields?: readonly string[];
   /** Test/local adapter. It receives only the non-secret URL pathname. */
   offlineDocumentForPath?: (pathname: string) => OfflineDocument | undefined;
@@ -209,7 +223,15 @@ export interface BusinessLocatorProposalRequest {
   readonly objectApiName: string;
   readonly fieldApiName: string;
   readonly domEvidence: DomEvidence;
-  readonly intentSection?: string;
+  readonly contextPlanning?: true;
+  readonly signatureLookup?: {
+    readonly projectId: string;
+    readonly pageKey: string;
+  };
+  readonly fallbackIntentLookup?: {
+    readonly page: string;
+    readonly section: string;
+  };
 }
 
 export interface BusinessLocatorProposal {
@@ -217,6 +239,34 @@ export interface BusinessLocatorProposal {
   readonly candidateOrdinal?: unknown;
   readonly confidenceMilli?: unknown;
   readonly rejectionCode?: unknown;
+  readonly signatureLookup?: {
+    readonly found?: unknown;
+  };
+}
+
+export interface BusinessSignatureCaptureRequest {
+  readonly schemaVersion: "1.0.0";
+  readonly operation: "SAVE_SIGNATURE";
+  readonly projectId: string;
+  readonly pageKey: string;
+  readonly obligationId: string;
+  readonly objectApiName: string;
+  readonly fieldApiName: string;
+  readonly candidate: {
+    readonly structure: string;
+    readonly attrNames: readonly string[];
+    readonly attrHashes: Readonly<Record<string, string>>;
+    readonly nearby: readonly string[];
+  };
+  readonly snapshotRoot: string;
+  readonly capturedAtUtc: string;
+}
+
+export interface BusinessSignatureCaptureResult {
+  readonly saved?: unknown;
+  readonly status?: unknown;
+  readonly signatureSha256?: unknown;
+  readonly errorCode?: unknown;
 }
 
 const enrollmentHandles = new WeakMap<object, VerifiedEnrollment>();
@@ -254,6 +304,9 @@ export class BrowserWorker {
   readonly #navigationTimeoutMs: number;
   readonly #operationTimeoutMs: number;
   readonly #proposeBusinessLocator?: BrowserWorkerOptions["proposeBusinessLocator"];
+  readonly #recordBusinessSignature?: BrowserWorkerOptions["recordBusinessSignature"];
+  readonly #signatureScope?: BrowserWorkerOptions["signatureScope"];
+  readonly #knowledgeIntentFallback?: BrowserWorkerOptions["knowledgeIntentFallback"];
   readonly #forceModelHealingFields: ReadonlySet<string>;
   readonly #offlineDocumentForPath?: BrowserWorkerOptions["offlineDocumentForPath"];
 
@@ -279,6 +332,9 @@ export class BrowserWorker {
       "OPERATION_TIMEOUT_INVALID",
     );
     this.#proposeBusinessLocator = options.proposeBusinessLocator;
+    this.#recordBusinessSignature = options.recordBusinessSignature;
+    this.#signatureScope = options.signatureScope;
+    this.#knowledgeIntentFallback = options.knowledgeIntentFallback;
     this.#forceModelHealingFields = new Set(options.forceModelHealingFields ?? []);
     this.#offlineDocumentForPath = options.offlineDocumentForPath;
   }
@@ -739,6 +795,11 @@ export class BrowserWorker {
       const modelCandidateOrdinals: number[] = [];
       const modelDomCandidateCounts: number[] = [];
       const modelAttemptFields: string[] = [];
+      const modelContextPlanCounts: number[] = [];
+      const modelIntentCitedFields: string[] = [];
+      const signatureLookupFoundFields: string[] = [];
+      const signatureSavedFields: string[] = [];
+      const signatureSaveErrorCodes: string[] = [];
       const strategies: string[] = [];
       for (const field of action.fields) {
         const wrapper = page.locator(`[data-field-api="${cssString(field.fieldApiName)}"]`);
@@ -747,6 +808,7 @@ export class BrowserWorker {
         const wrapperCount = await wrapper.count();
         let filled = false;
         let fieldStrategy: string | undefined;
+        let signatureLocator: Locator | undefined;
         const forceModelHealing = this.#forceModelHealingFields.has(field.fieldApiName);
         if (!forceModelHealing && wrapperCount === 1) {
           fieldStrategy = await fillBusinessField(
@@ -758,6 +820,7 @@ export class BrowserWorker {
           if (fieldStrategy) {
             strategies.push(fieldStrategy);
             filled = true;
+            signatureLocator = wrapper;
           }
         }
         if (!filled && !forceModelHealing) {
@@ -775,6 +838,7 @@ export class BrowserWorker {
               healedFieldCount += 1;
               strategies.push(healed.strategy ?? fieldStrategy);
               filled = true;
+              signatureLocator = healed.locator;
             }
           }
         }
@@ -787,6 +851,11 @@ export class BrowserWorker {
             wrapperCount === 0 ? "LOCATOR_NOT_FOUND" : "CANDIDATE_AMBIGUOUS",
           );
           modelProposalCount += proposed.proposalCount;
+          if (proposed.contextPlanCount !== undefined) {
+            modelContextPlanCounts.push(proposed.contextPlanCount);
+          }
+          if (proposed.intentCited === true) modelIntentCitedFields.push(field.fieldApiName);
+          if (proposed.signatureFound === true) signatureLookupFoundFields.push(field.fieldApiName);
           if (proposed.proposalCount > 0) modelAttemptFields.push(field.fieldApiName);
           if (proposed.rejectionCode) modelRejectionCodes.push(proposed.rejectionCode);
           if (proposed.ordinal !== undefined) modelCandidateOrdinals.push(proposed.ordinal);
@@ -805,6 +874,7 @@ export class BrowserWorker {
               modelAppliedFieldCount += 1;
               strategies.push(`llm-ordinal-${proposed.ordinal}:${fieldStrategy}`);
               filled = true;
+              signatureLocator = proposed.locator;
             } else if (wrapperCount === 1) {
               fieldStrategy = await fillBusinessField(
                 wrapper,
@@ -817,6 +887,7 @@ export class BrowserWorker {
                 modelAppliedFieldCount += 1;
                 strategies.push(`llm-field-scope-${proposed.ordinal}:${fieldStrategy}`);
                 filled = true;
+                signatureLocator = wrapper;
               } else {
                 modelRejectionCodes.push("MODEL_PROPOSED_CANDIDATE_FILL_FAILED");
               }
@@ -824,6 +895,15 @@ export class BrowserWorker {
               modelRejectionCodes.push("MODEL_PROPOSED_CANDIDATE_FILL_FAILED");
             }
           }
+        }
+        if (filled && signatureLocator) {
+          const saved = await this.#recordBusinessFieldSignature(
+            signatureLocator,
+            action.objectApiName,
+            field.fieldApiName,
+          );
+          if (saved.saved) signatureSavedFields.push(field.fieldApiName);
+          if (saved.errorCode) signatureSaveErrorCodes.push(saved.errorCode);
         }
         if (!filled) {
           abstainedFieldCount += 1;
@@ -847,6 +927,11 @@ export class BrowserWorker {
               modelCandidateOrdinals,
               modelDomCandidateCounts,
               modelAttemptFields,
+              modelContextPlanCounts,
+              modelIntentCitedFields,
+              signatureLookupFoundFields,
+              signatureSavedFields,
+              signatureSaveErrorCodes,
               strategies,
             },
             error: {
@@ -897,6 +982,11 @@ export class BrowserWorker {
             modelCandidateOrdinals,
             modelDomCandidateCounts,
             modelAttemptFields,
+            modelContextPlanCounts,
+            modelIntentCitedFields,
+            signatureLookupFoundFields,
+            signatureSavedFields,
+            signatureSaveErrorCodes,
             strategies,
           },
           error: {
@@ -941,6 +1031,11 @@ export class BrowserWorker {
             modelCandidateOrdinals,
             modelDomCandidateCounts,
             modelAttemptFields,
+            modelContextPlanCounts,
+            modelIntentCitedFields,
+            signatureLookupFoundFields,
+            signatureSavedFields,
+            signatureSaveErrorCodes,
             strategies,
           },
           postSubmit: await capturePostSubmitSignal(page, this.#operationTimeoutMs),
@@ -964,6 +1059,11 @@ export class BrowserWorker {
           modelCandidateOrdinals,
           modelDomCandidateCounts,
           modelAttemptFields,
+          modelContextPlanCounts,
+          modelIntentCitedFields,
+          signatureLookupFoundFields,
+          signatureSavedFields,
+          signatureSaveErrorCodes,
           strategies,
         },
       };
@@ -1066,6 +1166,9 @@ export class BrowserWorker {
     proposalCount: number;
     rejectionCode?: string;
     domCandidateCount?: number;
+    signatureFound?: boolean;
+    contextPlanCount?: number;
+    intentCited?: boolean;
   }> {
     if (!this.#proposeBusinessLocator) return { proposalCount: 0 };
     const candidateScope = scope ?? page;
@@ -1082,11 +1185,22 @@ export class BrowserWorker {
       objectApiName,
       fieldApiName,
       domEvidence,
-      intentSection:
-        `LIVE_BUSINESS_ACTION_FIELD_SCOPE -> target:${objectApiName}.${fieldApiName} ` +
-        `-> evidence: candidates captured inside current field boundary when available ` +
-        `-> rule: choose a unique actionable control for this field only; abstain on ambiguity`,
+      contextPlanning: true,
+      ...(this.#knowledgeIntentFallback
+        ? { fallbackIntentLookup: this.#knowledgeIntentFallback }
+        : {}),
+      ...(this.#signatureScope
+        ? {
+            signatureLookup: {
+              projectId: this.#signatureScope.projectId,
+              pageKey: this.#signatureScope.pageKey,
+            },
+          }
+        : {}),
     }).catch(() => undefined);
+    const signatureFound = modelSignatureFound(proposal);
+    const contextPlanCount = modelContextPlanCount(proposal);
+    const intentCited = modelIntentCited(proposal);
     const candidateOrdinal = modelCandidateOrdinal(proposal);
     const acceptedByModel = proposal?.accepted === true;
     const acceptedByScopedSingletonPolicy =
@@ -1103,6 +1217,9 @@ export class BrowserWorker {
       return {
         proposalCount: 1,
         domCandidateCount: captured.candidates.length,
+        signatureFound,
+        contextPlanCount,
+        intentCited,
         ...(candidateOrdinal === undefined ? {} : { ordinal: candidateOrdinal }),
         rejectionCode: modelRejectionCode(proposal),
       };
@@ -1119,6 +1236,9 @@ export class BrowserWorker {
           ordinal: candidateOrdinal,
           proposalCount: 1,
           domCandidateCount: captured.candidates.length,
+          signatureFound,
+          contextPlanCount,
+          intentCited,
           rejectionCode: "MODEL_PROPOSED_CANDIDATE_NOT_ACTIONABLE",
         };
       }
@@ -1127,6 +1247,9 @@ export class BrowserWorker {
         ordinal: candidateOrdinal,
         proposalCount: 1,
         domCandidateCount: captured.candidates.length,
+        signatureFound,
+        contextPlanCount,
+        intentCited,
         rejectionCode: "MODEL_PROPOSED_CANDIDATE_NOT_ACTIONABLE",
       };
     }
@@ -1135,7 +1258,44 @@ export class BrowserWorker {
       ordinal: candidateOrdinal,
       proposalCount: 1,
       domCandidateCount: captured.candidates.length,
+      signatureFound,
+      contextPlanCount,
+      intentCited,
     };
+  }
+
+  async #recordBusinessFieldSignature(
+    locator: Locator,
+    objectApiName: string,
+    fieldApiName: string,
+  ): Promise<{ saved: boolean; errorCode?: string }> {
+    if (!this.#recordBusinessSignature || !this.#signatureScope) return { saved: false };
+    const candidate = await captureSignatureCandidate(locator);
+    if (!candidate) return { saved: false, errorCode: "SIGNATURE_CAPTURE_EMPTY" };
+    const payload: BusinessSignatureCaptureRequest = {
+      schemaVersion: "1.0.0",
+      operation: "SAVE_SIGNATURE",
+      projectId: this.#signatureScope.projectId,
+      pageKey: this.#signatureScope.pageKey,
+      obligationId: `business-action:${objectApiName}.${fieldApiName}`,
+      objectApiName,
+      fieldApiName,
+      candidate,
+      snapshotRoot: digest(canonicalJson(candidate)),
+      capturedAtUtc: utcSecond(new Date(this.#now())),
+    };
+    try {
+      const result = await this.#recordBusinessSignature(payload);
+      if (result.saved === true) return { saved: true };
+      return {
+        saved: false,
+        errorCode: typeof result.errorCode === "string"
+          ? result.errorCode
+          : typeof result.status === "string" ? `SIGNATURE_${result.status}` : "SIGNATURE_NOT_SAVED",
+      };
+    } catch {
+      return { saved: false, errorCode: "SIGNATURE_SAVE_FAILED" };
+    }
   }
 }
 
@@ -1154,6 +1314,115 @@ function modelRejectionCode(proposal: BusinessLocatorProposal | undefined): stri
   return typeof value === "string" && /^[A-Z][A-Z0-9_]{2,100}$/.test(value)
     ? value
     : "MODEL_PROPOSAL_NOT_ACCEPTED";
+}
+
+function modelSignatureFound(proposal: BusinessLocatorProposal | undefined): boolean {
+  return proposal?.signatureLookup?.found === true;
+}
+
+function modelContextPlanCount(proposal: BusinessLocatorProposal | undefined): number | undefined {
+  const plans = proposal && typeof proposal === "object"
+    ? (proposal as { contextPlans?: unknown }).contextPlans
+    : undefined;
+  return Array.isArray(plans) ? plans.length : undefined;
+}
+
+function modelIntentCited(proposal: BusinessLocatorProposal | undefined): boolean {
+  const nested = proposal && typeof proposal === "object"
+    ? (proposal as { proposal?: { citedRefs?: unknown } }).proposal
+    : undefined;
+  const refs = nested?.citedRefs;
+  return Array.isArray(refs) && refs.some((item) =>
+    typeof item === "string" && item.startsWith("intent:")
+  );
+}
+
+async function captureSignatureCandidate(
+  locator: Locator,
+): Promise<BusinessSignatureCaptureRequest["candidate"] | undefined> {
+  type RawSignatureCandidate = {
+    tag: string;
+    role: string;
+    structure: string;
+    attributes: readonly (readonly [string, string])[];
+    nearby: readonly string[];
+  };
+  let raw: RawSignatureCandidate;
+  try {
+    raw = await locator.first().evaluate((element): RawSignatureCandidate => {
+      const token = (value: string): string =>
+        /^[a-z][a-z0-9-]{0,63}$/.test(value) ? value : "unknown";
+      const parentOf = (item: Element): Element | null => {
+        const root = item.getRootNode();
+        return item.assignedSlot ?? item.parentElement ??
+          (root instanceof ShadowRoot ? root.host : null);
+      };
+      const roleOf = (item: Element): string => {
+        const explicit = item.getAttribute("role");
+        if (explicit && explicit.trim()) return token(explicit.trim().toLowerCase());
+        const tag = item.tagName.toLowerCase();
+        if (tag === "button") return "button";
+        if (tag === "textarea") return "textbox";
+        if (tag === "select") return "combobox";
+        if (tag === "input") {
+          const type = (item.getAttribute("type") ?? "text").trim().toLowerCase();
+          const roles: Record<string, string> = {
+            checkbox: "checkbox",
+            radio: "radio",
+            number: "spinbutton",
+            search: "searchbox",
+            submit: "button",
+          };
+          return roles[type] ?? "textbox";
+        }
+        return "generic";
+      };
+      const parts: string[] = [];
+      let current: Element | null = element;
+      for (let depth = 0; current && depth < 6; depth += 1) {
+        parts.push(`${token(current.tagName.toLowerCase())}[role=${roleOf(current)}]`);
+        current = parentOf(current);
+      }
+      const attributes = Array.from(element.attributes)
+        .map((attribute) => [attribute.name.toLowerCase(), attribute.value] as const)
+        .filter(([name]) => /^[a-z][a-z0-9-]{0,63}$/.test(name))
+        .slice(0, 24);
+      const nearby = Array.from(new Set(
+        [
+          ...Array.from(element.children).map((child) => child.tagName.toLowerCase()),
+          ...Array.from(element.parentElement?.children ?? []).map((child) =>
+            child.tagName.toLowerCase()
+          ),
+        ].filter((tag) => /^[a-z][a-z0-9-]{0,63}$/.test(tag)),
+      )).sort().slice(0, 16);
+      return {
+        tag: token(element.tagName.toLowerCase()),
+        role: roleOf(element),
+        structure: parts.join(">"),
+        attributes,
+        nearby,
+      };
+    });
+  } catch {
+    return undefined;
+  }
+  const attrHashes: Record<string, string> = {};
+  for (const [name, value] of raw.attributes) {
+    if (!/^[a-z][a-z0-9-]{0,63}$/.test(name) || name in attrHashes) continue;
+    attrHashes[name] = createHash("sha256").update(value, "utf8").digest("hex").slice(0, 16);
+  }
+  const attrNames = Object.keys(attrHashes).sort();
+  if (!raw.structure || attrNames.length === 0) return undefined;
+  return Object.freeze({
+    structure: raw.structure,
+    attrNames: Object.freeze(attrNames),
+    attrHashes: Object.freeze(attrHashes),
+    nearby: Object.freeze(raw.nearby),
+  });
+}
+
+function utcSecond(date: Date): string {
+  return date.toISOString().replace(/\.\d{3}Z$/, "Z");
 }
 
 function hasExactFrontdoorCredentialShape(parsed: URL): boolean {
