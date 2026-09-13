@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "cfbb14177dcb8200f649f17b12449b104927c0f59649ce502a03a1d0b70127b2",
+  "sourceSnapshot": "92df7495c5364e881f3f7b0f8cd08f5c87b8160c2b388e86e0e5e8d8ecaad888",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -2081,7 +2081,7 @@
     {
       "path": "packages/browser/tests/live-healing-cli.spec.ts",
       "category": "test",
-      "sha256": "d4fac4a671b91110c3218b0f7e1750aa0fd04609b302211f85e443f7b841c5ef"
+      "sha256": "90b3fe9d22c69cdd47be717abbe569fd0f0d1781ec8fbe44ff918b322ba2c6cc"
     },
     {
       "path": "packages/browser/tests/live-profile-cli.spec.ts",

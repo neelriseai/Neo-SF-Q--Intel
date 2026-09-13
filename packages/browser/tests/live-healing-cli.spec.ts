@@ -97,6 +97,35 @@ test("projects model locator proposal when the llm bridge returned one", () => {
   expect(projected.modelProposal).toEqual(proposal);
 });
 
+test("projects model locator proposal for ambiguous deterministic abstention", () => {
+  const proposal = {
+    schemaVersion: "1.0.0",
+    accepted: true,
+    proposal: {
+      candidateOrdinal: 1,
+      confidenceMilli: 760,
+      rationale: "Ambiguous deterministic candidates required the model proposal.",
+      citedRefs: ["cand:1"],
+    },
+  };
+  const projection = healingProjection(
+    receipt([
+      observation({
+        outcome: "CANDIDATE_AMBIGUOUS",
+        candidateCount: 2,
+        domEvidence: { ...evidence, capturedForOutcome: "CANDIDATE_AMBIGUOUS" },
+      }),
+    ]),
+    "STALE_AND_DISCOVER",
+    ["metadata", "llm"],
+    false,
+    [proposal],
+  );
+  expect(projection.modelDiscoveryAvailable).toBe(true);
+  const projected = (projection.observations as readonly Record<string, unknown>[])[0];
+  expect(projected.modelProposal).toEqual(proposal);
+});
+
 test("does not attach model proposal to deterministic metadata recovery", () => {
   const proposal = {
     schemaVersion: "1.0.0",
@@ -129,6 +158,36 @@ test("does not attach model proposal to deterministic metadata recovery", () => 
   expect(projected.resolvedByTier).toBe("metadata");
   expect(projected.modelProposal).toBeUndefined();
   expect(projected.domEvidence).toBeUndefined();
+});
+
+test("does not attach model proposal when non-abstention observation carries dom evidence", () => {
+  const proposal = {
+    schemaVersion: "1.0.0",
+    accepted: true,
+    proposal: {
+      candidateOrdinal: 0,
+      confidenceMilli: 900,
+      rationale: "A non-abstention outcome must not consume this.",
+      citedRefs: ["cand:0"],
+    },
+  };
+  const projection = healingProjection(
+    receipt([
+      observation({
+        outcome: "ASSERTION_MISMATCH",
+        candidateCount: 1,
+        domEvidence: { ...evidence, capturedForOutcome: "ASSERTION_MISMATCH" },
+      }),
+    ]),
+    "STALE_AND_DISCOVER",
+    ["metadata", "llm"],
+    false,
+    [proposal],
+  );
+  expect(projection.modelDiscoveryAvailable).toBe(false);
+  const projected = (projection.observations as readonly Record<string, unknown>[])[0];
+  expect(projected.domEvidence).toBeDefined();
+  expect(projected.modelProposal).toBeUndefined();
 });
 
 test("leaves the metadata-tier projection shape unchanged", () => {
