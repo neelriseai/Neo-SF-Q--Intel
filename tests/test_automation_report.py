@@ -6,6 +6,7 @@ from neo_sf_q_intel.automation_report import (
     build_live_llm_healing_summary,
     dashboard_projection,
     jsonl_events,
+    publish_report,
     render_html,
     render_markdown,
 )
@@ -81,6 +82,40 @@ def test_dashboard_projection_removes_scenario_literals() -> None:
         "field-02",
         "field-03",
     ]
+
+
+def test_publish_report_writes_suite_artifacts_and_dashboard_projection(tmp_path) -> None:
+    summary = build_live_llm_healing_summary(
+        _receipt(),
+        receipt_path=".runtime/live-llm-business-healing/live-business-action-llm.json",
+        published_at_utc=datetime(2026, 9, 13, 5, 0, 0, tzinfo=UTC),
+        claim="Strategic Deal Workbench fields were healed.",
+        test_name="Live Strategic Deal Workbench healing",
+    )
+    output_dir = tmp_path / "demo-evidence"
+    dashboard_data = tmp_path / "apps" / "web" / "src" / "data" / "live-llm.json"
+
+    published = publish_report(
+        summary,
+        output_dir=output_dir,
+        dashboard_data_path=dashboard_data,
+    )
+
+    assert set(published) == {"dashboardData", "html", "log", "report", "summary"}
+    assert (output_dir / "live-llm-healing-summary.json").is_file()
+    assert (output_dir / "live-llm-healing-log.jsonl").read_text(encoding="utf-8").count(
+        "element_healing_detail"
+    ) == 3
+    html = (output_dir / "live-llm-healing-report.html").read_text(encoding="utf-8")
+    markdown = (output_dir / "live-llm-healing-report.md").read_text(encoding="utf-8")
+    dashboard = dashboard_data.read_text(encoding="utf-8")
+
+    assert "<table>" in html
+    assert "Field-level healing" in html
+    assert "| Step | Status | Detail |" in markdown
+    assert "Strategic Deal" in markdown
+    assert "field-01" in dashboard
+    assert "Strategic Deal" not in dashboard
 
 
 def _receipt() -> dict[str, object]:

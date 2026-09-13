@@ -239,6 +239,27 @@ test("dashboard opens as a clean, truthful assurance workspace", async ({ page }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test("healing tab renders the published automation suite report", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("tab", { name: "healing" }).click();
+  const panel = page.locator("#panel-healing");
+
+  await expect(panel.getByRole("heading", { name: "Live LLM locator healing" })).toBeVisible();
+  await expect(panel.getByText("Published automation report", { exact: true })).toBeVisible();
+  await expect(panel.locator(".liveHealingReport .statusTag")).toHaveText("PASSED");
+  await expect(panel.getByText("1/1")).toBeVisible();
+  await expect(panel.getByText("LLM-applied fields", { exact: true })).toBeVisible();
+  await expect(panel.getByText("healed fields", { exact: true })).toBeVisible();
+  await expect(panel.getByText("persistence matched", { exact: true })).toBeVisible();
+  await expect(panel.getByText("field-01", { exact: true })).toBeVisible();
+  await expect(panel.getByText("field-02", { exact: true })).toBeVisible();
+  await expect(panel.getByText("field-03", { exact: true })).toBeVisible();
+  await expect(panel.locator(".healingFieldCard span", { hasText: "LLM_ORDINAL" })).toHaveCount(3);
+  await expect(panel.getByText("Diagnostic-only report")).toBeVisible();
+  await expect(panel.getByText("live-llm-healing-log.jsonl")).toBeVisible();
+  await expect(panel.getByText("Strategic Deal")).toHaveCount(0);
+});
+
 test("live campaign panel replays durable status without implying execution or release", async ({ page }) => {
   const gateIds = [
     "SF-L01", "SF-L02", "SF-L03", "SF-L04", "SF-L05", "SF-L06", "SF-L07", "SF-L08", "SF-L09",

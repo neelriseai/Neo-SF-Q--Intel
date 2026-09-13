@@ -28,7 +28,10 @@
     "Docs/27-assurance-report-agent-contracts.md",
     "Docs/28-llm-locator-healing-plan.md",
     "Docs/README.md",
+    "Docs/demo-evidence/live-llm-healing-log.jsonl",
     "Docs/demo-evidence/live-llm-healing-report.html",
+    "Docs/demo-evidence/live-llm-healing-report.md",
+    "Docs/demo-evidence/live-llm-healing-summary.json",
     "README.md",
     "apps/web/src/app/page.tsx",
     "apps/web/src/app/styles.css",
@@ -77,6 +80,7 @@
     "packages/browser/src/salesforce-cli-session.ts",
     "packages/browser/tests/browser-recovery.spec.ts",
     "packages/browser/tests/browser-worker.spec.ts",
+    "packages/browser/tests/dashboard.spec.ts",
     "packages/browser/tests/live-profile-cli.spec.ts",
     "packages/browser/tests/salesforce-browser-coordinator.spec.ts",
     "packages/browser/tsconfig.live.json",
@@ -166,7 +170,8 @@
     "opus5_context_feed_review",
     "live_llm_browser_healing_review",
     "live_dropdown_context_signature_review",
-    "automation_report_integration_review"
+    "automation_report_integration_review",
+    "live_healing_report_refresh_review"
   ],
   "findings": [
     {
@@ -508,6 +513,11 @@
       "code": "AUTOMATION_HEALING_REPORTING_DASHBOARD",
       "severity": "P1",
       "resolution": "Live LLM healing evidence is now published through a reusable sanitized automation report contract: suite summary JSON, step and element JSONL, standalone HTML report, Markdown report and a runtime-dashboard-safe projection. The dashboard projection strips scenario literals from app-ingested data while Docs retain the detailed demo evidence."
+    },
+    {
+      "code": "LIVE_HEALING_REPORT_REFRESH_2026_09_13",
+      "severity": "P1",
+      "resolution": "A fresh live browser business-action run forced Name, Strategic_Deal__c and StageName through the LLM locator-healing path. All three proposals were applied, the form submitted, success text matched and Salesforce persistence matched. Published reports and dashboard projection were regenerated from the sanitized receipt; new tests verify artifact write-through, formatting and dashboard mapping."
     }
   ],
   "statusDowngrades": []

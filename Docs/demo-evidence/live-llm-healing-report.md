@@ -1,6 +1,6 @@
 # Live LLM locator-healing showcase report
 
-Published UTC: `2026-09-13T05:50:37+00:00`
+Published UTC: `2026-09-13T06:07:39+00:00`
 
 ## Suite result
 
@@ -54,7 +54,7 @@ Live Salesforce browser/provider proof that forced stale locators for the Strate
 
 | Field | Tier | Ordinal | DOM candidates | Context plans | Intent cited | Intent fit | Missing context | Confidence | Signature found | Signature saved |
 |---|---|---:|---:|---:|---|---|---|---:|---|---|
-| Name | LLM_ORDINAL | 0 | 1 | 2 | True | SUFFICIENT | NONE | 865 | True | True |
+| Name | LLM_ORDINAL | 0 | 1 | 2 | True | SUFFICIENT | NONE | 742 | True | True |
 | Strategic_Deal__c | LLM_ORDINAL | 1 | 2 | 2 | True | SUFFICIENT | NONE | 996 | True | True |
 | StageName | LLM_ORDINAL | 1 | 2 | 2 | True | SUFFICIENT | NONE | 957 | True | True |
 
@@ -68,8 +68,8 @@ Refreshed stripped signatures: `AccountId, Amount, CloseDate, Discount__c, Name,
 |---|---|
 | Evidence phase | `LIVE_BUSINESS_ACTION_BROWSER_ACCEPTANCE` |
 | Capability | `automation.browser-worker` |
-| Input digest | `2380dc183db99a2eb06fb897234df705784244b88e81c76019858428005eaa25` |
-| Execution digest | `d08840e01b510128163b4a86805fab6e970b5d22b79de46fbdb5ac2afaacf9cd` |
+| Input digest | `0780bb51380790b345e4c946e858c4986294e77a68e74eedc829c283f0980d02` |
+| Execution digest | `67221dfe9b035f7df697bab32d6f9dcd946b69df0bd2f5fca14848598967583f` |
 | Runtime receipt | `.runtime/live-llm-business-healing/live-business-action-llm.json` |
 | Structured log | `Docs/demo-evidence/live-llm-healing-log.jsonl` |
 | HTML report | `Docs/demo-evidence/live-llm-healing-report.html` |
