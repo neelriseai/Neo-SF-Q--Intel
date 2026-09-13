@@ -201,6 +201,9 @@ test("executes an explicitly authorized business action and verifies success rea
     modelAttemptFields: [],
     modelContextPlanCounts: [],
     modelIntentCitedFields: [],
+    modelIntentFits: [],
+    modelMissingContexts: [],
+    modelConfidenceMillis: [],
     signatureLookupFoundFields: [],
     signatureSavedFields: [],
     signatureSaveErrorCodes: [],
@@ -309,6 +312,11 @@ test("uses a host-owned LLM ordinal proposal when business field locators are st
         proposal: {
           candidateOrdinal: 0,
           confidenceMilli: 820,
+          citedRefs: ["cand:0", "intent:business-action:Opportunity.Name"],
+          contextAssessment: {
+            intentFit: "SUFFICIENT",
+            missingContext: "NONE",
+          },
         },
       };
     },
@@ -381,6 +389,72 @@ test("uses a host-owned LLM ordinal proposal when business field locators are st
   expect(receipt.businessAction?.strategies?.[0]).toContain("llm-ordinal-0");
   expect(JSON.stringify(receipt)).not.toContain("SYN-LLM-Healed");
   expectNoLeak(receipt, canary);
+});
+
+test("allows context-insufficient LLM proposal only for signed scoped singleton evidence", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+  const worker = makeWorker(`
+    <form data-object-api="Opportunity"
+      onsubmit="event.preventDefault();
+        document.querySelector('[role=status]').textContent =
+          document.querySelector('input[aria-label=&quot;Opportunity Name&quot;]').value === 'SYN-Singleton-Healed'
+            ? 'Saved successfully. The policy results are shown below.' : 'Unexpected value';">
+      <section data-field-api="Name">
+        <label>Opportunity Name<input aria-label="Opportunity Name" /></label>
+      </section>
+      <button data-action="save-evaluate-live">Save and Evaluate</button>
+      <p role="status"></p>
+    </form>
+  `, {
+    forceModelHealingFields: ["Name"],
+    signatureScope: { projectId: "neo-sf-q-intel", pageKey: "strategic-deal-workbench" },
+    knowledgeIntentFallback: {
+      page: "strategic-deal-workbench",
+      section: "Field behavior in plain English",
+    },
+    proposeBusinessLocator: async () => ({
+      schemaVersion: "1.0.0",
+      signatureLookup: { found: true },
+      contextPlans: [{ toolCalls: [{ tool: "knowledge_section" }] }],
+      accepted: false,
+      rejectionCode: "PROPOSAL_CONTEXT_INSUFFICIENT",
+      proposal: {
+        candidateOrdinal: 0,
+        confidenceMilli: 930,
+        citedRefs: ["cand:0", "intent:business-action:Opportunity.Name"],
+        contextAssessment: {
+          intentFit: "PARTIAL",
+          missingContext: "FIELD_BEHAVIOR",
+        },
+      },
+    }),
+  });
+  const session = await handoff(worker, canary, {
+    permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"],
+  });
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "BUSINESS_ACTION",
+    businessAction: {
+      objectApiName: "Opportunity",
+      fields: [{ fieldApiName: "Name", value: "SYN-Singleton-Healed" }],
+      submit: { tag: "button", attribute: "data-action", expectedValue: "save-evaluate-live" },
+      successText: "Saved successfully. The policy results are shown below.",
+    },
+  });
+
+  expect(receipt.status).toBe("PASSED");
+  expect(receipt.businessAction).toMatchObject({
+    healedFieldCount: 1,
+    modelAppliedFieldCount: 1,
+    modelRejectionCodes: [],
+    modelIntentFits: ["Name:PARTIAL"],
+    modelMissingContexts: ["Name:FIELD_BEHAVIOR"],
+    modelConfidenceMillis: [930],
+    modelIntentCitedFields: ["Name"],
+    signatureLookupFoundFields: ["Name"],
+  });
 });
 
 test("writes Salesforce lightning-input-field values before business submit", async () => {

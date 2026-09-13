@@ -357,3 +357,65 @@ what changed.
   fix is not "pad the estimate" but "spike the access path before sizing the chunk" — which is
   what R0 was for.
 ```
+
+## 2026-09-13 live business-action LLM healing diagnosis
+
+Selected objective: force stale locators for three Workbench control types in one live Salesforce
+business-action run and prove the model-backed healing path can recover them without deterministic
+scenario shortcuts.
+
+Initial all-three result:
+
+```text
+Name -> candidateOrdinal=0, candidateCount=1, intent cited, signature found,
+        contextPlanCounts=2, intentFit=PARTIAL, missingContext=METADATA,
+        confidenceMilli=287/1000, final status BLOCKED
+```
+
+The failure was correct. Neo stopped at the first field because the LLM explicitly said the
+metadata context was insufficient and its confidence was low. One-at-a-time dropdown proof passed
+because `StageName` had enough context/signature evidence; the all-three run failed earlier on the
+standard `Name` field, so checkbox and dropdown were never reached.
+
+Fix applied:
+
+- live business-action field inputs may carry a bounded `fieldLabel` / `fieldType` contract;
+- the Python LLM bridge uses that contract when source metadata is unavailable, which covers
+  standard Salesforce fields not represented as local custom-field XML;
+- the locator prompt now defines `fieldLabel` / `fieldType` as the metadata contract for locator
+  selection, so the model should not request `missingContext=METADATA` merely because full source
+  XML, layout metadata or picklist values are absent;
+- browser receipts now expose `modelIntentFits`, `modelMissingContexts` and
+  `modelConfidenceMillis`;
+- the older scoped-singleton fallback was tightened to require prior signature evidence, intent
+  citation and bounded confidence, and the context-insufficient singleton fallback requires prior
+  signature, intent citation, context planning and high confidence.
+
+Final live Salesforce evidence:
+
+```text
+status=PASSED, browserStatus=PASSED
+forcedModelFieldCount=3
+modelAttemptFields=[Name, Strategic_Deal__c, StageName]
+modelAppliedFieldCount=3
+modelCandidateOrdinals=[0, 1, 1]
+modelDomCandidateCounts=[1, 2, 2]
+modelContextPlanCounts=[2, 2, 2]
+modelIntentFits=[Name:SUFFICIENT, Strategic_Deal__c:SUFFICIENT, StageName:SUFFICIENT]
+modelMissingContexts=[Name:NONE, Strategic_Deal__c:NONE, StageName:NONE]
+modelConfidenceMillis=[742, 996, 969]
+signatureLookupFoundFields=[Name, Strategic_Deal__c, StageName]
+healedFieldCount=3
+submitted=true
+successTextMatched=true
+persistenceMatched=true
+```
+
+Evidence file: `.runtime/live-llm-business-healing/live-business-action-llm.json` on the operator
+machine. This file is intentionally not committed because runtime evidence may contain
+machine-local identifiers and run digests.
+
+Claim boundary: this proves the live browser/provider healing path for forced stale field locators
+across textbox, checkbox and dropdown controls. It does not prove that an actual deployed
+Salesforce metadata/UI mutation caused the drift, and it does not satisfy the full live campaign
+gate set by itself.

@@ -15,6 +15,7 @@ from neo_sf_q_intel.locator_healing_cli import (
     _propose_with_incremental_context,
     _ranking_context_is_adequate,
     _ranking_summary,
+    _request_field_metadata,
     _save_signature_request,
     _section_summary,
     _signature_for_request,
@@ -353,6 +354,24 @@ def test_save_signature_request_persists_only_stripped_browser_digests(
     assert result["saved"] is True
     assert saved[0].field_api_name == "StageName"
     assert saved[0].attrs_hashed == {"aria-label": "a" * 16, "data-field-api": "b" * 16}
+
+
+def test_request_field_metadata_builds_bounded_contract_for_standard_fields() -> None:
+    metadata = _request_field_metadata(
+        {
+            "objectApiName": "Opportunity",
+            "fieldApiName": "Name",
+            "fieldLabel": "Opportunity Name",
+            "fieldType": "Text",
+        }
+    )
+
+    assert metadata is not None
+    assert metadata.object_api_name == "Opportunity"
+    assert metadata.field_api_name == "Name"
+    assert metadata.label == "Opportunity Name"
+    assert metadata.field_type == "Text"
+    assert metadata.source_path == "request://business-action-field-contract"
 
 
 def test_incremental_context_summary_and_combination_are_bounded() -> None:

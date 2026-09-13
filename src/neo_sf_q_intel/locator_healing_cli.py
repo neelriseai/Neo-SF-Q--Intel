@@ -56,7 +56,7 @@ def main() -> int:
             settings,
             object_api_name=request["objectApiName"],
             field_api_name=request["fieldApiName"],
-        )
+        ) or _request_field_metadata(request)
         signature, signature_state = _signature_for_request(settings, request)
         repository_root = Path.cwd()
         base_context = build_healing_context(
@@ -126,7 +126,30 @@ def _read_request(raw: str) -> dict[str, Any]:
         raise ValueError("REQUEST_SCHEMA_INVALID")
     if not isinstance(body["domEvidence"], Mapping):
         raise ValueError("REQUEST_SCHEMA_INVALID")
+    for key in ("fieldLabel", "fieldType"):
+        if key in body and not isinstance(body[key], str):
+            raise ValueError("REQUEST_SCHEMA_INVALID")
     return body
+
+
+def _request_field_metadata(request: Mapping[str, Any]) -> FieldMetadata | None:
+    label = request.get("fieldLabel")
+    field_type = request.get("fieldType")
+    if label is None and field_type is None:
+        return None
+    if label is not None and (not isinstance(label, str) or not (1 <= len(label) <= 120)):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    if field_type is not None and (
+        not isinstance(field_type, str) or not (1 <= len(field_type) <= 64)
+    ):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    return FieldMetadata(
+        objectApiName=request["objectApiName"],
+        fieldApiName=request["fieldApiName"],
+        label=label,
+        type=field_type,
+        sourcePath="request://business-action-field-contract",
+    )
 
 
 MAXIMUM_INCREMENTAL_CONTEXT_ATTEMPTS = 2

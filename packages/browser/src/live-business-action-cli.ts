@@ -274,7 +274,12 @@ function parseFields(raw: string | undefined): BusinessActionIntent["fields"] {
       !item ||
       typeof item !== "object" ||
       Array.isArray(item) ||
-      !["fieldApiName,value", "fieldApiName,kind,value"].includes(
+      ![
+        "fieldApiName,value",
+        "fieldApiName,fieldLabel,fieldType,value",
+        "fieldApiName,fieldLabel,fieldType,kind,value",
+        "fieldApiName,kind,value",
+      ].includes(
         Object.keys(item).sort().join(","),
       )
     ) {
@@ -287,9 +292,26 @@ function parseFields(raw: string | undefined): BusinessActionIntent["fields"] {
     if (value.kind !== undefined && value.kind !== "TEXT" && value.kind !== "LOOKUP") {
       throw new BrowserCoordinatorError("BUSINESS_FIELDS_INVALID");
     }
+    if (
+      value.fieldLabel !== undefined &&
+      (typeof value.fieldLabel !== "string" ||
+        value.fieldLabel.length < 1 ||
+        value.fieldLabel.length > 120)
+    ) {
+      throw new BrowserCoordinatorError("BUSINESS_FIELDS_INVALID");
+    }
+    if (
+      value.fieldType !== undefined &&
+      (typeof value.fieldType !== "string" ||
+        !/^[A-Za-z][A-Za-z0-9_ ()/-]{0,63}$/.test(value.fieldType))
+    ) {
+      throw new BrowserCoordinatorError("BUSINESS_FIELDS_INVALID");
+    }
     return {
       fieldApiName: value.fieldApiName,
       value: value.value,
+      ...(value.fieldLabel === undefined ? {} : { fieldLabel: value.fieldLabel }),
+      ...(value.fieldType === undefined ? {} : { fieldType: value.fieldType }),
       ...(value.kind === undefined ? {} : { kind: value.kind as "TEXT" | "LOOKUP" }),
     };
   });

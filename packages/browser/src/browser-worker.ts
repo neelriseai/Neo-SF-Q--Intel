@@ -58,6 +58,8 @@ export interface BusinessActionIntent {
   fields: readonly {
     fieldApiName: string;
     value: string;
+    fieldLabel?: string;
+    fieldType?: string;
     // Salesforce lookups need type, dropdown wait and option selection. Declared, never inferred,
     // because picklists render as comboboxes too.
     kind?: "TEXT" | "LOOKUP";
@@ -131,6 +133,9 @@ export interface BrowserWorkerReceipt {
     modelAttemptFields?: readonly string[];
     modelContextPlanCounts?: readonly number[];
     modelIntentCitedFields?: readonly string[];
+    modelIntentFits?: readonly string[];
+    modelMissingContexts?: readonly string[];
+    modelConfidenceMillis?: readonly number[];
     signatureLookupFoundFields?: readonly string[];
     signatureSavedFields?: readonly string[];
     signatureSaveErrorCodes?: readonly string[];
@@ -222,6 +227,8 @@ export interface BusinessLocatorProposalRequest {
   readonly obligationId: string;
   readonly objectApiName: string;
   readonly fieldApiName: string;
+  readonly fieldLabel?: string;
+  readonly fieldType?: string;
   readonly domEvidence: DomEvidence;
   readonly contextPlanning?: true;
   readonly signatureLookup?: {
@@ -241,6 +248,16 @@ export interface BusinessLocatorProposal {
   readonly rejectionCode?: unknown;
   readonly signatureLookup?: {
     readonly found?: unknown;
+  };
+  readonly contextPlans?: unknown;
+  readonly proposal?: {
+    readonly candidateOrdinal?: unknown;
+    readonly confidenceMilli?: unknown;
+    readonly citedRefs?: unknown;
+    readonly contextAssessment?: {
+      readonly intentFit?: unknown;
+      readonly missingContext?: unknown;
+    };
   };
 }
 
@@ -797,6 +814,9 @@ export class BrowserWorker {
       const modelAttemptFields: string[] = [];
       const modelContextPlanCounts: number[] = [];
       const modelIntentCitedFields: string[] = [];
+      const modelIntentFits: string[] = [];
+      const modelMissingContexts: string[] = [];
+      const modelConfidenceMillis: number[] = [];
       const signatureLookupFoundFields: string[] = [];
       const signatureSavedFields: string[] = [];
       const signatureSaveErrorCodes: string[] = [];
@@ -847,7 +867,7 @@ export class BrowserWorker {
             page,
             wrapperCount === 1 ? wrapper : undefined,
             action.objectApiName,
-            field.fieldApiName,
+            field,
             wrapperCount === 0 ? "LOCATOR_NOT_FOUND" : "CANDIDATE_AMBIGUOUS",
           );
           modelProposalCount += proposed.proposalCount;
@@ -855,6 +875,13 @@ export class BrowserWorker {
             modelContextPlanCounts.push(proposed.contextPlanCount);
           }
           if (proposed.intentCited === true) modelIntentCitedFields.push(field.fieldApiName);
+          if (proposed.intentFit) modelIntentFits.push(`${field.fieldApiName}:${proposed.intentFit}`);
+          if (proposed.missingContext) {
+            modelMissingContexts.push(`${field.fieldApiName}:${proposed.missingContext}`);
+          }
+          if (proposed.confidenceMilli !== undefined) {
+            modelConfidenceMillis.push(proposed.confidenceMilli);
+          }
           if (proposed.signatureFound === true) signatureLookupFoundFields.push(field.fieldApiName);
           if (proposed.proposalCount > 0) modelAttemptFields.push(field.fieldApiName);
           if (proposed.rejectionCode) modelRejectionCodes.push(proposed.rejectionCode);
@@ -929,6 +956,9 @@ export class BrowserWorker {
               modelAttemptFields,
               modelContextPlanCounts,
               modelIntentCitedFields,
+              modelIntentFits,
+              modelMissingContexts,
+              modelConfidenceMillis,
               signatureLookupFoundFields,
               signatureSavedFields,
               signatureSaveErrorCodes,
@@ -984,6 +1014,9 @@ export class BrowserWorker {
             modelAttemptFields,
             modelContextPlanCounts,
             modelIntentCitedFields,
+            modelIntentFits,
+            modelMissingContexts,
+            modelConfidenceMillis,
             signatureLookupFoundFields,
             signatureSavedFields,
             signatureSaveErrorCodes,
@@ -1033,6 +1066,9 @@ export class BrowserWorker {
             modelAttemptFields,
             modelContextPlanCounts,
             modelIntentCitedFields,
+            modelIntentFits,
+            modelMissingContexts,
+            modelConfidenceMillis,
             signatureLookupFoundFields,
             signatureSavedFields,
             signatureSaveErrorCodes,
@@ -1061,6 +1097,9 @@ export class BrowserWorker {
           modelAttemptFields,
           modelContextPlanCounts,
           modelIntentCitedFields,
+          modelIntentFits,
+          modelMissingContexts,
+          modelConfidenceMillis,
           signatureLookupFoundFields,
           signatureSavedFields,
           signatureSaveErrorCodes,
@@ -1158,7 +1197,7 @@ export class BrowserWorker {
     page: Page,
     scope: Locator | undefined,
     objectApiName: string,
-    fieldApiName: string,
+    field: BusinessActionIntent["fields"][number],
     outcome: "LOCATOR_NOT_FOUND" | "CANDIDATE_AMBIGUOUS",
   ): Promise<{
     locator?: Locator;
@@ -1169,6 +1208,9 @@ export class BrowserWorker {
     signatureFound?: boolean;
     contextPlanCount?: number;
     intentCited?: boolean;
+    intentFit?: string;
+    missingContext?: string;
+    confidenceMilli?: number;
   }> {
     if (!this.#proposeBusinessLocator) return { proposalCount: 0 };
     const candidateScope = scope ?? page;
@@ -1181,9 +1223,11 @@ export class BrowserWorker {
     });
     const proposal = await this.#proposeBusinessLocator({
       schemaVersion: "1.0.0",
-      obligationId: `business-action:${objectApiName}.${fieldApiName}`,
+      obligationId: `business-action:${objectApiName}.${field.fieldApiName}`,
       objectApiName,
-      fieldApiName,
+      fieldApiName: field.fieldApiName,
+      ...(field.fieldLabel ? { fieldLabel: field.fieldLabel } : {}),
+      ...(field.fieldType ? { fieldType: field.fieldType } : {}),
       domEvidence,
       contextPlanning: true,
       ...(this.#knowledgeIntentFallback
@@ -1201,16 +1245,33 @@ export class BrowserWorker {
     const signatureFound = modelSignatureFound(proposal);
     const contextPlanCount = modelContextPlanCount(proposal);
     const intentCited = modelIntentCited(proposal);
+    const intentFit = modelContextIntentFit(proposal);
+    const missingContext = modelMissingContext(proposal);
+    const confidenceMilli = modelConfidenceMilli(proposal);
     const candidateOrdinal = modelCandidateOrdinal(proposal);
     const acceptedByModel = proposal?.accepted === true;
     const acceptedByScopedSingletonPolicy =
       modelRejectionCode(proposal) === "PROPOSAL_CONFIDENCE_BELOW_FLOOR" &&
       scope !== undefined &&
       captured.candidates.length === 1 &&
-      candidateOrdinal !== undefined;
+      candidateOrdinal !== undefined &&
+      signatureFound &&
+      intentCited &&
+      (confidenceMilli ?? 0) >= 500;
+    const acceptedBySignedScopedSingletonContext =
+      modelRejectionCode(proposal) === "PROPOSAL_CONTEXT_INSUFFICIENT" &&
+      scope !== undefined &&
+      captured.candidates.length === 1 &&
+      candidateOrdinal !== undefined &&
+      signatureFound &&
+      intentCited &&
+      (contextPlanCount ?? 0) > 0 &&
+      (confidenceMilli ?? 0) >= 850;
     if (
       !proposal ||
-      (!acceptedByModel && !acceptedByScopedSingletonPolicy) ||
+      (!acceptedByModel &&
+        !acceptedByScopedSingletonPolicy &&
+        !acceptedBySignedScopedSingletonContext) ||
       candidateOrdinal === undefined ||
       !captured.candidates.some((candidate) => candidate.ordinal === candidateOrdinal)
     ) {
@@ -1220,6 +1281,9 @@ export class BrowserWorker {
         signatureFound,
         contextPlanCount,
         intentCited,
+        intentFit,
+        missingContext,
+        confidenceMilli,
         ...(candidateOrdinal === undefined ? {} : { ordinal: candidateOrdinal }),
         rejectionCode: modelRejectionCode(proposal),
       };
@@ -1239,6 +1303,9 @@ export class BrowserWorker {
           signatureFound,
           contextPlanCount,
           intentCited,
+          intentFit,
+          missingContext,
+          confidenceMilli,
           rejectionCode: "MODEL_PROPOSED_CANDIDATE_NOT_ACTIONABLE",
         };
       }
@@ -1250,6 +1317,9 @@ export class BrowserWorker {
         signatureFound,
         contextPlanCount,
         intentCited,
+        intentFit,
+        missingContext,
+        confidenceMilli,
         rejectionCode: "MODEL_PROPOSED_CANDIDATE_NOT_ACTIONABLE",
       };
     }
@@ -1261,6 +1331,9 @@ export class BrowserWorker {
       signatureFound,
       contextPlanCount,
       intentCited,
+      intentFit,
+      missingContext,
+      confidenceMilli,
     };
   }
 
@@ -1335,6 +1408,26 @@ function modelIntentCited(proposal: BusinessLocatorProposal | undefined): boolea
   return Array.isArray(refs) && refs.some((item) =>
     typeof item === "string" && item.startsWith("intent:")
   );
+}
+
+function modelContextIntentFit(proposal: BusinessLocatorProposal | undefined): string | undefined {
+  const value = proposal?.proposal?.contextAssessment?.intentFit;
+  return typeof value === "string" && /^[A-Z_]{3,40}$/.test(value) ? value : undefined;
+}
+
+function modelMissingContext(proposal: BusinessLocatorProposal | undefined): string | undefined {
+  const value = proposal?.proposal?.contextAssessment?.missingContext;
+  return typeof value === "string" && /^[A-Z_]{3,40}$/.test(value) ? value : undefined;
+}
+
+function modelConfidenceMilli(proposal: BusinessLocatorProposal | undefined): number | undefined {
+  const nested = proposal?.proposal;
+  const value = typeof proposal?.confidenceMilli === "number"
+    ? proposal.confidenceMilli
+    : nested?.confidenceMilli;
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 1000
+    ? value
+    : undefined;
 }
 
 async function captureSignatureCandidate(

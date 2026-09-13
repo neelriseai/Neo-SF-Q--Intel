@@ -74,14 +74,14 @@ $env:NEO_BROWSER_BUSINESS_SUBMIT_ACTION = 'save-evaluate-live'
 $env:NEO_BROWSER_BUSINESS_SUCCESS_TEXT = 'Saved successfully. The policy results are shown below.'
 
 $fields = @(
-    @{ fieldApiName = 'Name'; value = $opportunityName },
-    @{ fieldApiName = 'Strategic_Deal__c'; value = 'true' },
-    @{ fieldApiName = 'StageName'; value = 'Prospecting' },
-    @{ fieldApiName = 'AccountId'; value = 'SYN-SDA Demo Account'; kind = 'LOOKUP' },
-    @{ fieldApiName = 'CloseDate'; value = 'Dec 31, 2026' },
-    @{ fieldApiName = 'Amount'; value = '60000000' },
-    @{ fieldApiName = 'Discount__c'; value = '15.01' },
-    @{ fieldApiName = 'Regional_VP_Approver__c'; value = 'Synthetic Regional VP'; kind = 'LOOKUP' }
+    @{ fieldApiName = 'Name'; fieldLabel = 'Opportunity Name'; fieldType = 'Text'; value = $opportunityName },
+    @{ fieldApiName = 'Strategic_Deal__c'; fieldLabel = 'Strategic Deal'; fieldType = 'Checkbox'; value = 'true' },
+    @{ fieldApiName = 'StageName'; fieldLabel = 'Stage'; fieldType = 'Picklist'; value = 'Prospecting' },
+    @{ fieldApiName = 'AccountId'; fieldLabel = 'Account Name'; fieldType = 'Lookup(Account)'; value = 'SYN-SDA Demo Account'; kind = 'LOOKUP' },
+    @{ fieldApiName = 'CloseDate'; fieldLabel = 'Close Date'; fieldType = 'Date'; value = 'Dec 31, 2026' },
+    @{ fieldApiName = 'Amount'; fieldLabel = 'Amount'; fieldType = 'Currency'; value = '60000000' },
+    @{ fieldApiName = 'Discount__c'; fieldLabel = 'Discount'; fieldType = 'Number'; value = '15.01' },
+    @{ fieldApiName = 'Regional_VP_Approver__c'; fieldLabel = 'Regional VP Approver'; fieldType = 'Lookup(User)'; value = 'Synthetic Regional VP'; kind = 'LOOKUP' }
 )
 $env:NEO_BROWSER_BUSINESS_FIELDS_JSON = ($fields | ConvertTo-Json -Depth 8 -Compress)
 
@@ -117,6 +117,9 @@ $summary = [pscustomobject]@{
     modelAttemptFields = $projection.businessAction.modelAttemptFields
     modelContextPlanCounts = $projection.businessAction.modelContextPlanCounts
     modelIntentCitedFields = $projection.businessAction.modelIntentCitedFields
+    modelIntentFits = $projection.businessAction.modelIntentFits
+    modelMissingContexts = $projection.businessAction.modelMissingContexts
+    modelConfidenceMillis = $projection.businessAction.modelConfidenceMillis
     signatureLookupFoundFields = $projection.businessAction.signatureLookupFoundFields
     signatureSavedFields = $projection.businessAction.signatureSavedFields
     signatureSaveErrorCodes = $projection.businessAction.signatureSaveErrorCodes
