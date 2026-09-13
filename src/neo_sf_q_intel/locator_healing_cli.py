@@ -11,13 +11,18 @@ from neo_sf_q_intel.context_feeds import (
     ContextFeedError,
     FieldMetadata,
     KnowledgeSection,
+    knowledge_index,
     knowledge_section,
     metadata_lookup,
 )
 from neo_sf_q_intel.locator_proposal import (
+    CONTEXT_PLAN_RESPONSE_SCHEMA,
     RESPONSE_SCHEMA,
+    ContextToolPlanRecord,
+    KnowledgeDocumentView,
     LocatorProposalError,
     build_healing_context,
+    propose_context_tool_plan,
     propose_locator,
 )
 from neo_sf_q_intel.providers import (
@@ -35,7 +40,33 @@ def main() -> int:
             object_api_name=request["objectApiName"],
             field_api_name=request["fieldApiName"],
         )
-        context_feeds = _context_feeds_for_request(request, repository_root=Path.cwd())
+        repository_root = Path.cwd()
+        base_context = build_healing_context(
+            obligation_id=request["obligationId"],
+            object_api_name=request["objectApiName"],
+            field_api_name=request["fieldApiName"],
+            dom_evidence=request["domEvidence"],
+            field_metadata=field_metadata,
+        )
+        if not settings.allow_llm:
+            return _write_blocked("LLM_DISABLED")
+        context_provider = OpenAISpecialistProvider(
+            settings,
+            response_schema_name="locator_context_tool_plan",
+            response_schema=CONTEXT_PLAN_RESPONSE_SCHEMA,
+            reasoning_profile="locator-context-plan-v1",
+        )
+        context_plan = _context_plan_for_request(
+            request,
+            base_context,
+            context_provider,
+            repository_root=repository_root,
+        )
+        context_feeds = _context_feeds_for_request(
+            request,
+            context_plan=context_plan,
+            repository_root=repository_root,
+        )
         context = build_healing_context(
             obligation_id=request["obligationId"],
             object_api_name=request["objectApiName"],
@@ -45,8 +76,6 @@ def main() -> int:
             graph_edges=context_feeds.graph_edges,
             intent_section=context_feeds.intent_section,
         )
-        if not settings.allow_llm:
-            return _write_blocked("LLM_DISABLED")
         provider = OpenAISpecialistProvider(
             settings,
             response_schema_name="locator_healing_proposal",
@@ -54,7 +83,12 @@ def main() -> int:
             reasoning_profile="locator-healing-v1",
         )
         record = propose_locator(provider, context)
-        sys.stdout.write(record.model_dump_json(by_alias=True, exclude_none=True))
+        body = record.model_dump(by_alias=True, mode="json", exclude_none=True)
+        if context_plan is not None:
+            body["contextPlan"] = context_plan.model_dump(
+                by_alias=True, mode="json", exclude_none=True
+            )
+        sys.stdout.write(json.dumps(body, sort_keys=True, separators=(",", ":")))
         sys.stdout.write("\n")
         return 0
     except (LocatorProposalError, ProviderConfigurationBlockedError, ValueError) as error:
@@ -89,6 +123,7 @@ class _ResolvedContextFeeds:
 def _context_feeds_for_request(
     request: Mapping[str, Any],
     *,
+    context_plan: ContextToolPlanRecord | None = None,
     repository_root: Path | None = None,
     knowledge_lookup: Callable[..., KnowledgeSection] = knowledge_section,
     evidence_graph_lookup: Callable[[Mapping[str, Any]], Sequence[str]] | None = None,
@@ -110,7 +145,7 @@ def _context_feeds_for_request(
         raise ValueError("REQUEST_SCHEMA_INVALID")
 
     intent_section = raw_intent or _intent_section_from_lookup(
-        request.get("intentLookup"),
+        request.get("intentLookup") or _intent_lookup_from_plan(context_plan),
         repository_root=repository_root,
         knowledge_lookup=knowledge_lookup,
     )
@@ -119,6 +154,60 @@ def _context_feeds_for_request(
         evidence_graph_lookup=evidence_graph_lookup,
     )
     return _ResolvedContextFeeds(graph_edges=graph_edges, intent_section=intent_section)
+
+
+def _context_plan_for_request(
+    request: Mapping[str, Any],
+    base_context,
+    provider,
+    *,
+    repository_root: Path,
+) -> ContextToolPlanRecord | None:
+    if request.get("contextPlanning") is False:
+        return None
+    if request.get("intentSection") is not None or request.get("intentLookup") is not None:
+        return None
+    try:
+        documents = _knowledge_document_views(repository_root)
+    except (ContextFeedError, OSError, ValueError):
+        documents = ()
+    if not documents:
+        return None
+    return propose_context_tool_plan(
+        provider,
+        base_context,
+        knowledge_documents=documents,
+    )
+
+
+def _knowledge_document_views(repository_root: Path) -> tuple[KnowledgeDocumentView, ...]:
+    index = knowledge_index(repository_root)
+    views: list[KnowledgeDocumentView] = []
+    for group, documents in (
+        ("pages", index.pages),
+        ("modules", index.modules),
+        ("impact", index.impact),
+    ):
+        for document in documents:
+            views.append(
+                KnowledgeDocumentView(
+                    key=document.key,
+                    group=group,
+                    headings=list(document.headings[:16]),
+                )
+            )
+    return tuple(views)
+
+
+def _intent_lookup_from_plan(plan: ContextToolPlanRecord | None) -> Mapping[str, Any] | None:
+    if plan is None or not plan.accepted or not plan.tool_calls:
+        return None
+    call = plan.tool_calls[0]
+    if call.tool != "knowledge_section":
+        return None
+    if call.arguments.section is None:
+        return None
+    return call.arguments.model_dump(mode="json", exclude_none=True)
 
 
 def _intent_section_from_lookup(

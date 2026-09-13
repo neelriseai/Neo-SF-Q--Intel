@@ -14,10 +14,14 @@ import pytest
 
 from neo_sf_q_intel.locator_proposal import (
     DomCandidateView,
+    KnowledgeDocumentView,
     LocatorHealingContext,
     LocatorProposalError,
+    build_context_plan_prompt,
     build_locator_prompt,
+    parse_context_tool_plan,
     parse_locator_proposal,
+    propose_context_tool_plan,
     propose_locator,
     render_prompt,
 )
@@ -192,6 +196,113 @@ def test_enriched_context_adds_citable_evidence_without_changing_candidates() ->
     assert "intent:ob-vp-approver" in enriched_payload["allowedRefs"]
     assert "edge:0" in enriched_payload["allowedRefs"]
     assert enriched.prompt_sha256 != base.prompt_sha256
+
+
+def test_context_plan_prompt_offers_only_bounded_mcp_style_tools() -> None:
+    envelope = build_context_plan_prompt(
+        _context(graphEdges=[], intentSection=None),
+        knowledge_documents=[
+            KnowledgeDocumentView(
+                key="strategic-deal-workbench",
+                group="pages",
+                headings=["Page elements", "Test flow"],
+            )
+        ],
+    )
+
+    payload = envelope.untrusted_payload
+
+    assert payload["tools"] == [
+        {
+            "name": "knowledge_section",
+            "purpose": "Fetch one bounded knowledge-repo heading block or document by key.",
+            "arguments": ["page|module|impact", "section?"],
+        }
+    ]
+    assert payload["knowledgeIndex"][0]["key"] == "strategic-deal-workbench"
+    assert "candidateStructures" in payload
+
+
+def test_context_tool_plan_selects_one_knowledge_section() -> None:
+    plan = parse_context_tool_plan(
+        json.dumps(
+            {
+                "toolCalls": [
+                    {
+                        "tool": "knowledge_section",
+                        "arguments": {
+                            "page": "strategic-deal-workbench",
+                            "section": "Page elements",
+                        },
+                    }
+                ],
+                "rationale": "The page element section clarifies the lookup interaction.",
+            }
+        )
+    )
+
+    assert len(plan.tool_calls) == 1
+    assert plan.tool_calls[0].arguments.page == "strategic-deal-workbench"
+
+
+def test_context_tool_plan_rejects_ambiguous_or_unbounded_requests() -> None:
+    with pytest.raises(LocatorProposalError) as error:
+        parse_context_tool_plan(
+            json.dumps(
+                {
+                    "toolCalls": [
+                        {
+                            "tool": "knowledge_section",
+                            "arguments": {
+                                "page": "strategic-deal-workbench",
+                                "module": "persona-permission-journeys",
+                            },
+                        }
+                    ],
+                    "rationale": "Too many selectors.",
+                }
+            )
+        )
+
+    assert error.value.code == "CONTEXT_PLAN_SELECTOR_INVALID"
+
+
+def test_context_tool_plan_provider_receipt_is_recorded() -> None:
+    provider = _Provider(
+        _outcome(
+            json.dumps(
+                {
+                    "toolCalls": [
+                        {
+                            "tool": "knowledge_section",
+                            "arguments": {
+                                "impact": "field-impact-matrix",
+                                "section": "Opportunity fields",
+                            },
+                        }
+                    ],
+                    "rationale": "Impact matrix can disambiguate field purpose.",
+                }
+            )
+        )
+    )
+
+    record = propose_context_tool_plan(
+        provider,
+        _context(graphEdges=[], intentSection=None),
+        knowledge_documents=[
+            KnowledgeDocumentView(
+                key="field-impact-matrix",
+                group="impact",
+                headings=["Opportunity fields"],
+            )
+        ],
+    )
+
+    assert record.accepted is True
+    assert record.tool_calls[0].arguments.impact == "field-impact-matrix"
+    assert record.receipt.status is ProviderCallStatus.SUCCESS
+    assert provider.prompts
 
 
 def test_prompt_envelope_changes_when_the_candidate_set_changes() -> None:

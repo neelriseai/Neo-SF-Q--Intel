@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "ed28bf3b1c7a731345d268086f0c504d2015df9fb2dd7b41344a2c35aedcb401",
+  "sourceSnapshot": "fc438f45d7b1d599891a31d6a9ea50bbd0c5c4d0f212b8b2880ac43e49e6424a",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -1618,6 +1618,14 @@
       "kind": "file",
       "label": "current-scope-review.json",
       "source": "quality/reviews/current-scope-review.json",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:quality/reviews/locator-healing-context-comparison-2026-09-13.json",
+      "kind": "file",
+      "label": "locator-healing-context-comparison-2026-09-13.json",
+      "source": "quality/reviews/locator-healing-context-comparison-2026-09-13.json",
       "category": "project",
       "authority": "supporting"
     },
@@ -7672,6 +7680,16 @@
       "from": "file:tests/test_locator_healing_cli.py",
       "relation": "imports",
       "to": "file:src/neo_sf_q_intel/locator_healing_cli.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_cli.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/locator_proposal.py"
+    },
+    {
+      "from": "file:tests/test_locator_healing_cli.py",
+      "relation": "imports",
+      "to": "file:src/neo_sf_q_intel/specialist.py"
     },
     {
       "from": "file:tests/test_locator_proposal.py",

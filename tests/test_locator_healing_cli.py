@@ -5,7 +5,12 @@ from pathlib import Path
 import pytest
 
 from neo_sf_q_intel.context_feeds import ContextFeedError, FieldMetadata, KnowledgeSection
-from neo_sf_q_intel.locator_healing_cli import _context_feeds_for_request, _field_metadata_for
+from neo_sf_q_intel.locator_healing_cli import (
+    _context_feeds_for_request,
+    _field_metadata_for,
+)
+from neo_sf_q_intel.locator_proposal import ContextToolPlanRecord
+from neo_sf_q_intel.specialist import ProviderCallStatus, ProviderInvocationReceipt
 
 
 class _Settings:
@@ -149,6 +154,80 @@ def test_context_feeds_keep_caller_supplied_bounded_context_over_lookup() -> Non
     )
 
 
+def test_context_feeds_execute_planned_knowledge_section_when_no_explicit_context() -> None:
+    calls: list[dict[str, object]] = []
+
+    def knowledge_lookup(root: Path, **kwargs: object) -> KnowledgeSection:
+        calls.append({"root": root, **kwargs})
+        return KnowledgeSection(
+            path="knowledge-repo/impact/field-impact-matrix.md",
+            section="Opportunity fields",
+            body="Regional VP Approver drives native approval route.",
+            chars=51,
+            truncated=False,
+        )
+
+    plan = ContextToolPlanRecord(
+        accepted=True,
+        promptSha256="0" * 64,
+        receipt=_receipt(),
+        toolCalls=[
+            {
+                "tool": "knowledge_section",
+                "arguments": {"impact": "field-impact-matrix", "section": "Opportunity fields"},
+            }
+        ],
+        rationale="Impact section clarifies field role.",
+    )
+
+    result = _context_feeds_for_request(
+        {},
+        context_plan=plan,
+        repository_root=Path("repo"),
+        knowledge_lookup=knowledge_lookup,
+    )
+
+    assert result.intent_section is not None
+    assert "Regional VP Approver drives native approval route" in result.intent_section
+    assert calls == [
+        {
+            "root": Path("repo"),
+            "page": None,
+            "module": None,
+            "impact": "field-impact-matrix",
+            "section": "Opportunity fields",
+        }
+    ]
+
+
+def test_context_feeds_ignore_planned_whole_document_to_avoid_noisy_context() -> None:
+    def knowledge_lookup(root: Path, **kwargs: object) -> KnowledgeSection:
+        raise AssertionError("broad whole-document plan must not be executed")
+
+    plan = ContextToolPlanRecord(
+        accepted=True,
+        promptSha256="0" * 64,
+        receipt=_receipt(),
+        toolCalls=[
+            {
+                "tool": "knowledge_section",
+                "arguments": {"module": "persona-permission-journeys"},
+            }
+        ],
+        rationale="Broad context is not suitable for locator ranking.",
+    )
+
+    result = _context_feeds_for_request(
+        {},
+        context_plan=plan,
+        repository_root=Path("repo"),
+        knowledge_lookup=knowledge_lookup,
+    )
+
+    assert result.intent_section is None
+    assert result.graph_edges == ()
+
+
 def test_context_feeds_can_use_injected_evidence_graph_lookup_without_static_app_graph() -> None:
     calls: list[dict[str, object]] = []
 
@@ -203,3 +282,32 @@ def test_context_feeds_omit_missing_knowledge_section_instead_of_adding_ambiguou
 def test_context_feeds_reject_malformed_context_requests(payload: dict[str, object]) -> None:
     with pytest.raises(ValueError, match="REQUEST_SCHEMA_INVALID"):
         _context_feeds_for_request(payload, repository_root=Path("repo"))
+
+
+def _receipt() -> ProviderInvocationReceipt:
+    return ProviderInvocationReceipt(
+        status=ProviderCallStatus.SUCCESS,
+        provider_kind="openai",
+        model_id="gpt-test",
+        deployment_id="gpt-test",
+        model_version="gpt-test",
+        api_version="responses-v1",
+        response_format="STRICT_JSON_SCHEMA",
+        temperature_milli=0,
+        top_p_milli=1000,
+        reasoning_profile="locator-context-plan-v1",
+        tools_enabled=False,
+        provider_profile_sha256="1" * 64,
+        invoked_at="2026-09-13T00:00:00.000Z",
+        completed_at="2026-09-13T00:00:01.000Z",
+        request_sha256="0" * 64,
+        prompt_sha256="0" * 64,
+        response_sha256="2" * 64,
+        finish_reason="STOP",
+        input_tokens=10,
+        output_tokens=5,
+        duration_milliseconds=1000,
+        timeout_milliseconds=30000,
+        maximum_output_tokens=500,
+        maximum_total_tokens=16000,
+    )

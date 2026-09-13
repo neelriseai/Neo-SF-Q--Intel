@@ -98,6 +98,10 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
 [DONE] bounded intent resolver    locator-healing CLI accepts caller-bounded intentSection or
           intentLookup(page|module|impact, section); missing sections add no context instead of
           inventing one, and malformed/ambiguous selectors fail before the LLM call
+[DONE] MCP-style context planner  before final ranking, the LLM may emit one strict JSON
+          knowledge_section tool plan over the compact knowledge index; Neo executes the bounded
+          section fetch locally, ignores broad whole-document requests, and falls back to base
+          metadata+DOM ranking when planning fails
 [DONE] knowledge repo             14 files · pages / modules / impact · operator-authored
 [DONE] deterministic heal proven  live drift -> stale -> metadata rediscovery -> rerun -> exact restore
 [DONE] T-SIG                      element signature store + tests
@@ -113,6 +117,10 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
 [DONE] context comparison tests   base vs enriched prompts keep identical candidate payloads while
           adding only citable intent/edge refs, so context can improve ranking without widening the
           model's candidate choice surface
+[DONE] real context comparison    base metadata+DOM ranking and planned MCP-style ranking both
+          selected the correct lookup candidate; the first planner draft chose noisy persona
+          context, so instructions and execution guard were tightened to require a named
+          page/impact field-behavior section before intent context is admitted
 ```
 
 `[MEAS]` graph full 228,591 ch vs 1-hop 946 ch (99.6% cut) · knowledge heading block 517 ch vs whole page 5,824 ch (91% cut).

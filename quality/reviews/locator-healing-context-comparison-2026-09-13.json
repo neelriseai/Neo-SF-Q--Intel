@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0.0",
+  "reviewId": "locator-healing-context-comparison-2026-09-13",
+  "status": "APPROVED_WITH_GUARDRAILS",
+  "capability": "automation.locator-healing",
+  "scenario": "Regional VP Approver lookup ambiguity: combobox lookup candidate versus plain text input candidate",
+  "decision": {
+    "kept": "MCP-style context planner as the primary LLM-context path for locator healing",
+    "fallback": "If context planning fails, returns no section, requests malformed input, or selects a whole document, Neo falls back to base metadata + DOM ranking.",
+    "reason": "The corrected planner selected a bounded page section directly about field behavior, added citable intent evidence, preserved the same candidate choice, and did not widen the model's selectable candidates. Broad context was proven risky and is now ignored unless a named section is selected."
+  },
+  "runs": [
+    {
+      "id": "base-v2",
+      "contextPlanning": false,
+      "accepted": true,
+      "candidateOrdinal": 0,
+      "confidenceMilli": 989,
+      "citedRefs": [
+        "cand:0",
+        "cand:1",
+        "meta:Opportunity.Regional_VP_Approver__c"
+      ],
+      "finalInputTokens": 699,
+      "finalOutputTokens": 124,
+      "assessment": "Accurate and stable on this easy metadata-rich case, but has no business intent citation."
+    },
+    {
+      "id": "planned-v2-before-tightening",
+      "contextPlanning": true,
+      "plannerAccepted": true,
+      "plannerToolCall": {
+        "tool": "knowledge_section",
+        "arguments": {
+          "module": "persona-permission-journeys"
+        }
+      },
+      "accepted": true,
+      "candidateOrdinal": 0,
+      "confidenceMilli": 986,
+      "citedRefs": [
+        "cand:0",
+        "cand:1",
+        "meta:Opportunity.Regional_VP_Approver__c",
+        "intent:L08.regional-vp-approver.lookup"
+      ],
+      "assessment": "Correct candidate, but selected broad persona/governance context. This validated the user's noise concern and was not accepted as final design."
+    },
+    {
+      "id": "planned-v3-after-tightening",
+      "contextPlanning": true,
+      "plannerAccepted": true,
+      "plannerToolCall": {
+        "tool": "knowledge_section",
+        "arguments": {
+          "page": "strategic-deal-workbench",
+          "section": "Field behavior in plain English"
+        }
+      },
+      "accepted": true,
+      "candidateOrdinal": 0,
+      "confidenceMilli": 986,
+      "citedRefs": [
+        "cand:0",
+        "cand:1",
+        "meta:Opportunity.Regional_VP_Approver__c",
+        "intent:L08.regional-vp-approver.lookup"
+      ],
+      "plannerInputTokens": 1269,
+      "plannerOutputTokens": 141,
+      "finalInputTokens": 838,
+      "finalOutputTokens": 136,
+      "assessment": "Correct candidate with relevant bounded page-behavior context and citable intent evidence. Confidence is slightly lower than base on this simple case, but robustness and traceability improve without changing candidate choice."
+    }
+  ],
+  "guardrails": [
+    "Provider-native tool calls remain disabled; the model emits a strict JSON tool plan and Neo executes the bounded MCP-style tool.",
+    "Only knowledge_section is currently available to the planner.",
+    "knowledge_section arguments must include page, module, impact and section keys; exactly one selector is a string and section must name a heading for planner-originated context.",
+    "Whole-document planner requests are ignored to avoid adding broad or noisy context.",
+    "If planning fails, final ranking still runs on metadata plus DOM candidates.",
+    "Final model output can still choose only an existing candidate ordinal; context never grants selector-writing authority."
+  ],
+  "evidenceFiles": [
+    ".runtime/locator-healing-comparison/base-v2.json",
+    ".runtime/locator-healing-comparison/planned-v2.json",
+    ".runtime/locator-healing-comparison/planned-v3.json"
+  ]
+}
