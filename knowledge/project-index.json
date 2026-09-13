@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "7dee4242034fa8865dc9b1926bd6b95c7ca1cefed091a227d97d00ae9815641d",
+  "sourceSnapshot": "b688c17c201a435f3ee4692e001fa65cff7f915de697051b61e16c3eb0b67750",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1606,7 +1606,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "f990da64b49b06d3fa9f1139ac7b65e52b552be5bf2471c95020a4ea6a68f152"
+      "sha256": "c7c073732b149afec45143eca7ca3e5c7ef6e0d012eb528249133151277577a5"
     },
     {
       "path": "Docs/29-d-series-requirement-test-matrix.md",
@@ -2316,12 +2316,12 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "8c7b0d52f2248edb303a26b5b0f7b88cf2c91e27361f738abef28958543516b9"
+      "sha256": "a93b87532b933e57ba17c1de69c3cddea65211b50c672b204b3af15f5e6a3b03"
     },
     {
       "path": "quality/reviews/locator-healing-context-comparison-2026-09-13.json",
       "category": "project",
-      "sha256": "b0b1457da4edda5124408800a3bde8b01582bd32410589d23689d7bbbc57a711"
+      "sha256": "df6ebd861deab2864d2817af2f53b4db11378343c921b8876c32de12fc0ce9b9"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
@@ -2546,12 +2546,12 @@
     {
       "path": "src/neo_sf_q_intel/locator_healing_cli.py",
       "category": "python-runtime",
-      "sha256": "f08e5636cfce2356d075f8ce1be4301446a79489c26cd308d9849c65daa18c87"
+      "sha256": "011a61f97173ca597a5e08bfcf7750aee01a186fa57144d06f613fe1f59abc08"
     },
     {
       "path": "src/neo_sf_q_intel/locator_proposal.py",
       "category": "python-runtime",
-      "sha256": "800d0005c7469beb1509a4dcd9df7fea0747ba14c4e15367f32b0b050616da7f"
+      "sha256": "f1c0d923c7618b860a340b2e3a0fe2796c8303cabb142fae7bf74b1166db4c8d"
     },
     {
       "path": "src/neo_sf_q_intel/mcp_server.py",
@@ -2931,12 +2931,12 @@
     {
       "path": "tests/test_locator_healing_cli.py",
       "category": "test",
-      "sha256": "4c3a5da8d4a490db82b8313018f7af88134667df4dd161d93c4379a08b4f50aa"
+      "sha256": "e99f1670565537f19f69bbb28b5d12d789f631e52d1258efb1a9b96bdbd0fa65"
     },
     {
       "path": "tests/test_locator_proposal.py",
       "category": "test",
-      "sha256": "3860e2dc4020dff6e1233b8fe5a99456b2ed6982fb52b6e0d67ca98c116035c4"
+      "sha256": "387887f767e58b7606f37b2f3616be66bef0bcfc1ecf02c0cda5e1731048fba9"
     },
     {
       "path": "tests/test_locator_rebind_contract.py",

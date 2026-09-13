@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import pytest
@@ -9,12 +11,23 @@ from neo_sf_q_intel.locator_healing_cli import (
     _combined_intent_sections,
     _context_feeds_for_request,
     _field_metadata_for,
+    _propose_with_incremental_context,
     _ranking_context_is_adequate,
     _ranking_summary,
     _section_summary,
 )
-from neo_sf_q_intel.locator_proposal import ContextToolPlanRecord, LocatorProposalRecord
-from neo_sf_q_intel.specialist import ProviderCallStatus, ProviderInvocationReceipt
+from neo_sf_q_intel.locator_proposal import (
+    ContextToolPlanRecord,
+    LocatorProposalRecord,
+    build_healing_context,
+)
+from neo_sf_q_intel.specialist import (
+    ProviderCallOutcome,
+    ProviderCallStatus,
+    ProviderFinishReason,
+    ProviderInvocationReceipt,
+    ProviderProfile,
+)
 
 
 class _Settings:
@@ -272,10 +285,17 @@ def test_incremental_context_requires_intent_citation_when_context_was_fetched()
         cited_refs=["cand:0", "intent:L08.regional-vp-approver.lookup"],
         confidence_milli=900,
     )
+    partial_intent = _proposal_record(
+        cited_refs=["cand:0", "intent:L08.regional-vp-approver.lookup"],
+        confidence_milli=990,
+        intent_fit="PARTIAL",
+        missing_context="PAGE_FLOW",
+    )
 
     assert _ranking_context_is_adequate(without_intent, False) is True
     assert _ranking_context_is_adequate(without_intent, True) is False
     assert _ranking_context_is_adequate(with_intent, True) is True
+    assert _ranking_context_is_adequate(partial_intent, True) is False
 
 
 def test_incremental_ranking_summary_is_safe_and_compact() -> None:
@@ -293,7 +313,141 @@ def test_incremental_ranking_summary_is_safe_and_compact() -> None:
         "confidenceMilli": 875,
         "citedRefs": ["cand:0", "intent:L08.regional-vp-approver.lookup"],
         "intentCited": True,
+        "intentFit": "SUFFICIENT",
+        "missingContext": "NONE",
     }
+
+
+def test_incremental_planner_uses_real_knowledge_repo_until_intent_is_sufficient() -> None:
+    request = {
+        "obligationId": "L08.regional-vp-approver.lookup",
+        "objectApiName": "Opportunity",
+        "fieldApiName": "Regional_VP_Approver__c",
+        "domEvidence": {
+            "candidates": [
+                {
+                    "ordinal": 0,
+                    "tag": "input",
+                    "role": "combobox",
+                    "structure": "lightning-input-field>input[role=combobox]",
+                    "attrNames": ["data-value", "role", "title"],
+                    "attrHashes": {"data-value": "a" * 16, "title": "b" * 16},
+                    "nameDigest": "c" * 16,
+                    "nearby": ["label", "lightning-icon", "lookup"],
+                    "visible": True,
+                    "enabled": True,
+                },
+                {
+                    "ordinal": 1,
+                    "tag": "input",
+                    "role": "textbox",
+                    "structure": "lightning-input>input[type=text]",
+                    "attrNames": ["name", "type"],
+                    "attrHashes": {"name": "d" * 16, "type": "e" * 16},
+                    "nameDigest": "f" * 16,
+                    "nearby": ["amount", "discount"],
+                    "visible": True,
+                    "enabled": True,
+                },
+            ]
+        },
+    }
+    metadata = FieldMetadata(
+        objectApiName="Opportunity",
+        fieldApiName="Regional_VP_Approver__c",
+        type="Lookup",
+        label="Regional VP Approver",
+        required=False,
+        sourcePath="force-app/main/default/objects/Opportunity/fields/Regional_VP_Approver__c.field-meta.xml",
+    )
+    base_context = build_healing_context(
+        obligation_id=request["obligationId"],
+        object_api_name=request["objectApiName"],
+        field_api_name=request["fieldApiName"],
+        dom_evidence=request["domEvidence"],
+        field_metadata=metadata,
+    )
+    planner = _QueueProvider(
+        [
+            _json_outcome(
+                {
+                    "toolCalls": [
+                        {
+                            "tool": "knowledge_section",
+                            "arguments": {
+                                "page": "strategic-deal-workbench",
+                                "module": None,
+                                "impact": None,
+                                "section": "Field behavior in plain English",
+                            },
+                        }
+                    ],
+                    "rationale": "Start with the narrow field behavior section.",
+                }
+            ),
+            _json_outcome(
+                {
+                    "toolCalls": [
+                        {
+                            "tool": "knowledge_section",
+                            "arguments": {
+                                "page": "strategic-deal-workbench",
+                                "module": None,
+                                "impact": None,
+                                "section": "Main happy path",
+                            },
+                        }
+                    ],
+                    "rationale": "Previous ranking was partial; add the exact page flow.",
+                }
+            ),
+        ]
+    )
+    ranker = _QueueProvider(
+        [
+            _json_outcome(
+                _proposal_json(
+                    intent_fit="PARTIAL",
+                    missing_context="PAGE_FLOW",
+                    rationale=(
+                        "Candidate 0 looks like a lookup, but the field section alone does not "
+                        "prove the full interaction."
+                    ),
+                )
+            ),
+            _json_outcome(
+                _proposal_json(
+                    intent_fit="SUFFICIENT",
+                    missing_context="NONE",
+                    rationale=(
+                        "Candidate 0 matches the lookup field and the fetched flow says typed "
+                        "lookup text must be selected from the suggestion."
+                    ),
+                )
+            ),
+        ]
+    )
+
+    record, plans = _propose_with_incremental_context(
+        request,
+        base_context,
+        ranker,
+        planner,
+        repository_root=Path.cwd(),
+        field_metadata=metadata,
+    )
+
+    assert record.accepted is True
+    assert record.proposal is not None
+    assert record.proposal.candidate_ordinal == 0
+    assert record.proposal.context_assessment.intent_fit == "SUFFICIENT"
+    assert len(plans) == 2
+    assert len(planner.prompts) == 2
+    assert len(ranker.prompts) == 2
+    assert "Field behavior in plain English" in planner.prompts[0]
+    assert "priorContext" in planner.prompts[1]
+    assert "previousRanking" in planner.prompts[1]
+    assert "Main happy path" in ranker.prompts[1]
 
 
 def test_context_feeds_can_use_injected_evidence_graph_lookup_without_static_app_graph() -> None:
@@ -381,8 +535,80 @@ def _receipt() -> ProviderInvocationReceipt:
     )
 
 
+class _QueueProvider:
+    def __init__(self, outcomes: list[ProviderCallOutcome]) -> None:
+        self._outcomes = list(outcomes)
+        self.prompts: list[str] = []
+
+    @property
+    def profile(self) -> ProviderProfile:
+        body = {
+            "provider_kind": "openai",
+            "model_id": "gpt-test",
+            "deployment_id": "gpt-test",
+            "model_version": "gpt-test",
+            "api_version": "responses-v1",
+            "response_format": "STRICT_JSON_SCHEMA",
+            "temperature_milli": 0,
+            "top_p_milli": 1000,
+            "reasoning_profile": "test",
+            "tools_enabled": False,
+        }
+        return ProviderProfile(**body, profile_sha256=_digest(body))
+
+    def __call__(
+        self, prompt: str, *, timeout_milliseconds: int, maximum_output_tokens: int
+    ) -> ProviderCallOutcome:
+        self.prompts.append(prompt)
+        assert self._outcomes
+        return self._outcomes.pop(0)
+
+
+def _json_outcome(body: dict[str, object]) -> ProviderCallOutcome:
+    return ProviderCallOutcome(
+        status=ProviderCallStatus.SUCCESS,
+        provider_profile_sha256="1" * 64,
+        invoked_at="2026-09-13T00:00:00.000Z",
+        completed_at="2026-09-13T00:00:01.000Z",
+        duration_milliseconds=1000,
+        raw_response=json.dumps(body),
+        finish_reason=ProviderFinishReason.STOP,
+        input_tokens=100,
+        output_tokens=20,
+    )
+
+
+def _proposal_json(
+    *,
+    intent_fit: str,
+    missing_context: str,
+    rationale: str,
+) -> dict[str, object]:
+    return {
+        "candidateOrdinal": 0,
+        "confidenceMilli": 930,
+        "rationale": rationale,
+        "citedRefs": ["cand:0", "intent:L08.regional-vp-approver.lookup"],
+        "contextAssessment": {
+            "intentFit": intent_fit,
+            "missingContext": missing_context,
+            "reason": rationale,
+        },
+    }
+
+
+def _digest(value: object) -> str:
+    body = json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+
 def _proposal_record(
-    *, cited_refs: list[str], confidence_milli: int, accepted: bool = True
+    *,
+    cited_refs: list[str],
+    confidence_milli: int,
+    accepted: bool = True,
+    intent_fit: str = "SUFFICIENT",
+    missing_context: str = "NONE",
 ) -> LocatorProposalRecord:
     return LocatorProposalRecord(
         obligationId="L08.regional-vp-approver.lookup",
@@ -395,6 +621,11 @@ def _proposal_record(
                 "confidenceMilli": confidence_milli,
                 "rationale": "Candidate matches bounded intent and DOM evidence.",
                 "citedRefs": cited_refs,
+                "contextAssessment": {
+                    "intentFit": intent_fit,
+                    "missingContext": missing_context,
+                    "reason": "Intent section directly describes the lookup field.",
+                },
             }
             if accepted
             else None

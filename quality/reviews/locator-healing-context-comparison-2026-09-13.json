@@ -7,7 +7,7 @@
   "decision": {
     "kept": "MCP-style context planner as the primary LLM-context path for locator healing",
     "fallback": "If context planning fails, returns no section, requests malformed input, or selects a whole document, Neo falls back to base metadata + DOM ranking.",
-    "reason": "The corrected planner selected a bounded page section directly about field behavior, added citable intent evidence, preserved the same candidate choice, and did not widen the model's selectable candidates. Broad context was proven risky and is now ignored unless a named section is selected. The planner is now incremental: if the first bounded section does not produce an intent-cited, high-confidence final ranking, Neo provides compact prior-context and previous-ranking summaries to request one additional named section before stopping."
+    "reason": "The corrected planner selected a bounded page section directly about field behavior, added citable intent evidence, preserved the same candidate choice, and did not widen the model's selectable candidates. Broad context was proven risky and is now ignored unless a named section is selected. The planner is now incremental: if the first bounded section does not produce an intent-cited, high-confidence final ranking with contextAssessment.intentFit=SUFFICIENT, Neo provides compact prior-context and previous-ranking summaries to request one additional named section before stopping."
   },
   "runs": [
     {
@@ -78,6 +78,28 @@
       "accepted": false,
       "rejectionCode": "PROVIDER_CREDENTIAL_SOURCE_CONFLICT",
       "assessment": "Attempted a new real provider smoke after adding incremental planning. Dispatch was blocked before any model call by credential-source policy, so this run is retained as a blocked configuration receipt rather than live LLM evidence for the new loop."
+    },
+    {
+      "id": "incremental-knowledge-repo-functional",
+      "contextPlanning": true,
+      "providerMode": "fake-provider-with-real-knowledge-repo",
+      "plannerToolCalls": [
+        {
+          "tool": "knowledge_section",
+          "arguments": {
+            "page": "strategic-deal-workbench",
+            "section": "Field behavior in plain English"
+          }
+        },
+        {
+          "tool": "knowledge_section",
+          "arguments": {
+            "page": "strategic-deal-workbench",
+            "section": "Main happy path"
+          }
+        }
+      ],
+      "assessment": "Functional test proves Neo does not stop when the first ranking reports contextAssessment.intentFit=PARTIAL and missingContext=PAGE_FLOW. It fetches the second real knowledge-repo section and accepts only after the final ranking reports SUFFICIENT with an intent citation."
     }
   ],
   "guardrails": [
@@ -87,7 +109,8 @@
     "Whole-document planner requests are ignored to avoid adding broad or noisy context.",
     "If planning fails, final ranking still runs on metadata plus DOM candidates.",
     "Final model output can still choose only an existing candidate ordinal; context never grants selector-writing authority.",
-    "Incremental expansion is capped at two planner attempts and sends only compact prior-context and previous-ranking summaries; it never repeats a fetched section or escalates to whole-document context."
+    "Incremental expansion is capped at two planner attempts and sends only compact prior-context and previous-ranking summaries; it never repeats a fetched section or escalates to whole-document context.",
+    "The final locator proposal schema requires contextAssessment.intentFit, missingContext and reason. Neo treats PARTIAL, INSUFFICIENT and NOT_PROVIDED as insufficient grounding when incremental context was fetched, so confidence alone cannot prematurely stop the loop."
   ],
   "evidenceFiles": [
     ".runtime/locator-healing-comparison/base-v2.json",

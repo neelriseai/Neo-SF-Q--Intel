@@ -102,6 +102,11 @@ def _response(**overrides) -> str:
         "confidenceMilli": 900,
         "rationale": "Structure and attribute names match the stored signature.",
         "citedRefs": ["cand:0", "meta:Opportunity.Regional_VP_Approver__c"],
+        "contextAssessment": {
+            "intentFit": "SUFFICIENT",
+            "missingContext": "NONE",
+            "reason": "The supplied metadata and intent directly describe the target lookup.",
+        },
     }
     body.update(overrides)
     return json.dumps(body)
@@ -390,6 +395,7 @@ def test_well_formed_proposal_is_accepted() -> None:
     assert proposal.candidate_ordinal == 0
     assert proposal.confidence_milli == 900
     assert proposal.cited_refs == ["cand:0", "meta:Opportunity.Regional_VP_Approver__c"]
+    assert proposal.context_assessment.intent_fit == "SUFFICIENT"
 
 
 def test_non_json_response_is_rejected() -> None:

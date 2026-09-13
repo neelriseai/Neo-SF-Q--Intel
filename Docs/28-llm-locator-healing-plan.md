@@ -107,6 +107,11 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
           compact prior-context summary plus previous ranking back to the planner and permits one
           additional named-section fetch. Repeated sections, whole documents and malformed plans
           are ignored; the model still chooses only an existing candidate ordinal.
+[DONE] intent-fit gate            final ranking output must include contextAssessment:
+          intentFit, missingContext, and reason. Neo does not stop after the first context fetch
+          unless the model explicitly says the fetched intent is SUFFICIENT, cites intent, and
+          meets the confidence floor; PARTIAL/INSUFFICIENT/NOT_PROVIDED forces the second bounded
+          fetch when available.
 [DONE] knowledge repo             14 files · pages / modules / impact · operator-authored
 [DONE] deterministic heal proven  live drift -> stale -> metadata rediscovery -> rerun -> exact restore
 [DONE] T-SIG                      element signature store + tests
@@ -130,6 +135,10 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
           before a model call with PROVIDER_CREDENTIAL_SOURCE_CONFLICT. Unit and browser-path
           contract tests cover the loop; this is not claimed as new live LLM evidence until
           credential source policy is clean.
+[DONE] repo-backed functional test  uses real knowledge-repo section fetches from the Strategic
+          Deal Workbench page: Field behavior first, then Main happy path when the first ranking
+          reports PARTIAL/PAGE_FLOW. This proves the incremental design improves grounding without
+          widening selector authority or stuffing a whole document.
 ```
 
 `[MEAS]` graph full 228,591 ch vs 1-hop 946 ch (99.6% cut) · knowledge heading block 517 ch vs whole page 5,824 ch (91% cut).

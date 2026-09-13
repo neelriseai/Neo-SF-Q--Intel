@@ -278,6 +278,11 @@ def _ranking_context_is_adequate(
         ref.startswith("intent:") for ref in record.proposal.cited_refs
     ):
         return False
+    if (
+        has_incremental_intent
+        and record.proposal.context_assessment.intent_fit != "SUFFICIENT"
+    ):
+        return False
     return record.proposal.confidence_milli >= 850
 
 
@@ -292,6 +297,8 @@ def _ranking_summary(record: LocatorProposalRecord) -> Mapping[str, Any]:
         "intentCited": bool(
             proposal and any(ref.startswith("intent:") for ref in proposal.cited_refs)
         ),
+        "intentFit": proposal.context_assessment.intent_fit if proposal else None,
+        "missingContext": proposal.context_assessment.missing_context if proposal else None,
     }
 
 
