@@ -170,6 +170,10 @@ def _propose_with_incremental_context(
         previous_ranking = _ranking_summary(last_record)
 
     assert last_record is not None
+    if last_record.proposal is not None and (
+        last_record.proposal.context_assessment.intent_fit != "SUFFICIENT"
+    ):
+        return _downgrade_for_insufficient_context(last_record), tuple(plans)
     return last_record, tuple(plans)
 
 
@@ -300,6 +304,15 @@ def _ranking_summary(record: LocatorProposalRecord) -> Mapping[str, Any]:
         "intentFit": proposal.context_assessment.intent_fit if proposal else None,
         "missingContext": proposal.context_assessment.missing_context if proposal else None,
     }
+
+
+def _downgrade_for_insufficient_context(record: LocatorProposalRecord) -> LocatorProposalRecord:
+    return record.model_copy(
+        update={
+            "accepted": False,
+            "rejection_code": "PROPOSAL_CONTEXT_INSUFFICIENT",
+        }
+    )
 
 
 def _context_plan_for_request(

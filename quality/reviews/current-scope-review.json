@@ -476,6 +476,11 @@
       "resolution": "The credential-source conflict was traced to an inherited process OPENAI_API_KEY that differed from the repository .env value. The provider guard is correct and was not weakened. A dedicated smoke launcher now clears inherited provider variables before invoking the locator-healing CLI so .env remains the single provider source. Real provider smoke passed through two incremental context plans and accepted candidateOrdinal=0 with confidenceMilli=986 and contextAssessment.intentFit=SUFFICIENT. Evidence receipt: .runtime/locator-healing-incremental/planned-incremental-clean-env-script-v1.json."
     },
     {
+      "code": "THREE_CONTROL_LLM_HEALING_SMOKE",
+      "severity": "P1",
+      "resolution": "A real provider smoke now validates three distinct Workbench control types instead of only the Regional VP lookup: Opportunity.Name textbox, Opportunity.Strategic_Deal__c checkbox, and Opportunity.StageName dropdown/combobox. All three selected candidateOrdinal=0, matched the expected candidate, returned final provider status SUCCESS and contextAssessment.intentFit=SUFFICIENT. The CLI now downgrades plausible ordinals to PROPOSAL_CONTEXT_INSUFFICIENT when the final context assessment remains PARTIAL/INSUFFICIENT/NOT_PROVIDED after bounded incremental context attempts."
+    },
+    {
       "code": "SCOPED_CONTEXT_FEEDS",
       "severity": "P2",
       "resolution": "Three read-only feeds expose the knowledge repo and application graph in slices rather than whole documents: an index, a single document or heading block bounded at 8000 characters and confined to the repo with traversal rejected, and a one or two hop edge list around a seed entity, deterministic and capped. Exposed as MCP tools that surface only the typed error code, never a path or stack. No caller supplies a filesystem path. Review corrected the composition root: the tools initially called Path.cwd() inline at each site, against the API convention of an injectable repository_root with cwd as fallback only; build_mcp now takes that root, resolves it once, and run() threads the same value into create_service and build_mcp."

@@ -68,6 +68,9 @@ INSTRUCTIONS: tuple[str, ...] = (
     "Always assess whether supplied intent context is enough for this locator decision."
     " intentFit=SUFFICIENT only when the intent section directly clarifies the target field,"
     " expected widget behavior, page state, permission visibility, or relevant change delta."
+    " Sufficiency is about this locator decision, not the entire business scenario; if metadata,"
+    " DOM structure, and bounded intent together make one candidate uniquely safer than the others,"
+    " mark SUFFICIENT even if unrelated page flow details are absent."
     " Use PARTIAL or INSUFFICIENT when more page/field/flow context would materially reduce"
     " ambiguity; do not mark context sufficient only because metadata identifies the field.",
 )
@@ -78,6 +81,9 @@ CONTEXT_PLAN_INSTRUCTIONS: tuple[str, ...] = (
     " candidate ranking or safe abstention.",
     "Prefer page or impact sections that describe observed page elements, field behavior, or field"
     " impact for the target object and field.",
+    "For standard or generic fields such as Name or StageName, prefer page sections named"
+    " Live-observed page elements, Page elements, Field behavior, or Main happy path when those"
+    " sections can distinguish textbox, checkbox, dropdown, lookup, or button candidates.",
     "Avoid persona, governance, or approval-process sections for locator ranking unless the failure"
     " is explicitly about denied visibility, denied editability, or permission-specific UI.",
     "If you call knowledge_section, arguments must contain page, module, impact, and section keys;"

@@ -127,6 +127,41 @@
         }
       ],
       "assessment": "Functional test proves Neo does not stop when the first ranking reports contextAssessment.intentFit=PARTIAL and missingContext=PAGE_FLOW. It fetches the second real knowledge-repo section and accepts only after the final ranking reports SUFFICIENT with an intent citation."
+    },
+    {
+      "id": "three-control-real-provider-smoke",
+      "contextPlanning": true,
+      "providerMode": "real-openai-clean-env",
+      "cases": [
+        {
+          "id": "name-textbox",
+          "field": "Opportunity.Name",
+          "expectedControl": "textbox",
+          "accepted": true,
+          "candidateOrdinal": 0,
+          "confidenceMilli": 986,
+          "intentFit": "SUFFICIENT"
+        },
+        {
+          "id": "strategic-deal-checkbox",
+          "field": "Opportunity.Strategic_Deal__c",
+          "expectedControl": "checkbox",
+          "accepted": true,
+          "candidateOrdinal": 0,
+          "confidenceMilli": 992,
+          "intentFit": "SUFFICIENT"
+        },
+        {
+          "id": "stage-dropdown",
+          "field": "Opportunity.StageName",
+          "expectedControl": "dropdown/combobox",
+          "accepted": true,
+          "candidateOrdinal": 0,
+          "confidenceMilli": 986,
+          "intentFit": "SUFFICIENT"
+        }
+      ],
+      "assessment": "Real LLM smoke proves the healing layer generalizes beyond the original lookup scenario. Textbox, checkbox and dropdown/combobox candidates were ranked correctly from digest-only DOM evidence and bounded Workbench context."
     }
   ],
   "guardrails": [
@@ -138,12 +173,14 @@
     "Final model output can still choose only an existing candidate ordinal; context never grants selector-writing authority.",
     "Incremental expansion is capped at two planner attempts and sends only compact prior-context and previous-ranking summaries; it never repeats a fetched section or escalates to whole-document context.",
     "The final locator proposal schema requires contextAssessment.intentFit, missingContext and reason. Neo treats PARTIAL, INSUFFICIENT and NOT_PROVIDED as insufficient grounding when incremental context was fetched, so confidence alone cannot prematurely stop the loop.",
-    "Manual/provider smoke runs must use scripts/run/run-locator-healing-smoke.ps1 or otherwise clear inherited provider variables; Settings must continue blocking conflicting process/.env credentials."
+    "Manual/provider smoke runs must use scripts/run/run-locator-healing-smoke.ps1, scripts/run/run-three-field-locator-healing-smoke.ps1, or otherwise clear inherited provider variables; Settings must continue blocking conflicting process/.env credentials.",
+    "If all incremental attempts are exhausted and the final proposal still reports contextAssessment.intentFit other than SUFFICIENT, Neo downgrades the proposal to PROPOSAL_CONTEXT_INSUFFICIENT even when the candidate ordinal is plausible."
   ],
   "evidenceFiles": [
     ".runtime/locator-healing-comparison/base-v2.json",
     ".runtime/locator-healing-comparison/planned-v2.json",
     ".runtime/locator-healing-comparison/planned-v3.json",
-    ".runtime/locator-healing-incremental/planned-incremental-clean-env-script-v1.json"
+    ".runtime/locator-healing-incremental/planned-incremental-clean-env-script-v1.json",
+    ".runtime/locator-healing-three-field/summary.json"
   ]
 }

@@ -140,6 +140,11 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
           Deal Workbench page: Field behavior first, then Main happy path when the first ranking
           reports PARTIAL/PAGE_FLOW. This proves the incremental design improves grounding without
           widening selector authority or stuffing a whole document.
+[DONE] three-control LLM smoke     real provider smoke now covers three distinct control types on
+          the Workbench: Opportunity.Name textbox, Opportunity.Strategic_Deal__c checkbox, and
+          Opportunity.StageName dropdown/combobox. All three selected candidateOrdinal=0,
+          matched expected, and returned intentFit=SUFFICIENT. A partial final assessment is now
+          downgraded to PROPOSAL_CONTEXT_INSUFFICIENT instead of being treated as healed.
 ```
 
 `[MEAS]` graph full 228,591 ch vs 1-hop 946 ch (99.6% cut) · knowledge heading block 517 ch vs whole page 5,824 ch (91% cut).

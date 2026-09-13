@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "829cec5086c4f466520303f85002281ce292e824115f65ece5f5dd8040d58181",
+  "sourceSnapshot": "a3f5108c03f2ae107bbb762522895ab89e1bf05fa1e5c6366439c4bb6b5f4d45",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -1682,6 +1682,14 @@
       "kind": "file",
       "label": "run-locator-healing-smoke.ps1",
       "source": "scripts/run/run-locator-healing-smoke.ps1",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:scripts/run/run-three-field-locator-healing-smoke.ps1",
+      "kind": "file",
+      "label": "run-three-field-locator-healing-smoke.ps1",
+      "source": "scripts/run/run-three-field-locator-healing-smoke.ps1",
       "category": "project",
       "authority": "supporting"
     },

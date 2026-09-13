@@ -450,6 +450,81 @@ def test_incremental_planner_uses_real_knowledge_repo_until_intent_is_sufficient
     assert "Main happy path" in ranker.prompts[1]
 
 
+def test_incremental_planner_downgrades_when_final_context_stays_partial() -> None:
+    request, metadata, base_context = _incremental_request_fixture("Strategic_Deal__c")
+    planner = _QueueProvider(
+        [
+            _json_outcome(
+                {
+                    "toolCalls": [
+                        {
+                            "tool": "knowledge_section",
+                            "arguments": {
+                                "page": "strategic-deal-workbench",
+                                "module": None,
+                                "impact": None,
+                                "section": "Field behavior in plain English",
+                            },
+                        }
+                    ],
+                    "rationale": "Start with bounded field behavior.",
+                }
+            ),
+            _json_outcome(
+                {
+                    "toolCalls": [
+                        {
+                            "tool": "knowledge_section",
+                            "arguments": {
+                                "page": "strategic-deal-workbench",
+                                "module": None,
+                                "impact": None,
+                                "section": "Live-observed page elements",
+                            },
+                        }
+                    ],
+                    "rationale": "Add page elements.",
+                }
+            ),
+        ]
+    )
+    ranker = _QueueProvider(
+        [
+            _json_outcome(
+                _proposal_json(
+                    intent_fit="PARTIAL",
+                    missing_context="PAGE_FLOW",
+                    rationale="First context is still partial.",
+                    obligation_id=request["obligationId"],
+                )
+            ),
+            _json_outcome(
+                _proposal_json(
+                    intent_fit="PARTIAL",
+                    missing_context="FIELD_BEHAVIOR",
+                    rationale="Second context is still partial.",
+                    obligation_id=request["obligationId"],
+                )
+            ),
+        ]
+    )
+
+    record, plans = _propose_with_incremental_context(
+        request,
+        base_context,
+        ranker,
+        planner,
+        repository_root=Path.cwd(),
+        field_metadata=metadata,
+    )
+
+    assert len(plans) == 2
+    assert record.accepted is False
+    assert record.rejection_code == "PROPOSAL_CONTEXT_INSUFFICIENT"
+    assert record.proposal is not None
+    assert record.proposal.candidate_ordinal == 0
+
+
 def test_context_feeds_can_use_injected_evidence_graph_lookup_without_static_app_graph() -> None:
     calls: list[dict[str, object]] = []
 
@@ -583,18 +658,74 @@ def _proposal_json(
     intent_fit: str,
     missing_context: str,
     rationale: str,
+    obligation_id: str = "L08.regional-vp-approver.lookup",
 ) -> dict[str, object]:
     return {
         "candidateOrdinal": 0,
         "confidenceMilli": 930,
         "rationale": rationale,
-        "citedRefs": ["cand:0", "intent:L08.regional-vp-approver.lookup"],
+        "citedRefs": ["cand:0", f"intent:{obligation_id}"],
         "contextAssessment": {
             "intentFit": intent_fit,
             "missingContext": missing_context,
             "reason": rationale,
         },
     }
+
+
+def _incremental_request_fixture(field_api_name: str):
+    request = {
+        "obligationId": f"L08.{field_api_name}.healing",
+        "objectApiName": "Opportunity",
+        "fieldApiName": field_api_name,
+        "domEvidence": {
+            "candidates": [
+                {
+                    "ordinal": 0,
+                    "tag": "input",
+                    "role": "checkbox",
+                    "structure": "lightning-input-field>input[type=checkbox]",
+                    "attrNames": ["type", "checked"],
+                    "attrHashes": {"type": "a" * 16, "checked": "b" * 16},
+                    "nameDigest": "c" * 16,
+                    "nearby": ["strategic", "deal"],
+                    "visible": True,
+                    "enabled": True,
+                },
+                {
+                    "ordinal": 1,
+                    "tag": "input",
+                    "role": "textbox",
+                    "structure": "lightning-input-field>input[type=text]",
+                    "attrNames": ["name", "type"],
+                    "attrHashes": {"name": "d" * 16, "type": "e" * 16},
+                    "nameDigest": "f" * 16,
+                    "nearby": ["name"],
+                    "visible": True,
+                    "enabled": True,
+                },
+            ]
+        },
+    }
+    metadata = FieldMetadata(
+        objectApiName="Opportunity",
+        fieldApiName=field_api_name,
+        type="Checkbox",
+        label="Strategic Deal",
+        required=False,
+        sourcePath=(
+            "force-app/main/default/objects/Opportunity/fields/"
+            f"{field_api_name}.field-meta.xml"
+        ),
+    )
+    base_context = build_healing_context(
+        obligation_id=request["obligationId"],
+        object_api_name=request["objectApiName"],
+        field_api_name=request["fieldApiName"],
+        dom_evidence=request["domEvidence"],
+        field_metadata=metadata,
+    )
+    return request, metadata, base_context
 
 
 def _digest(value: object) -> str:
