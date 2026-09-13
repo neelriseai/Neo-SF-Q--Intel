@@ -1,0 +1,86 @@
+{
+  "claimBoundary": {
+    "claim": "Live Salesforce browser/provider proof that forced stale locators for three Workbench fields were healed by the LLM ordinal-ranking path and then verified by deterministic browser action and Salesforce persistence readback.",
+    "notClaimed": [
+      "full live campaign acceptance",
+      "release eligibility",
+      "proof that a deployed metadata/UI mutation caused the drift",
+      "raw DOM or raw Salesforce record values"
+    ],
+    "sanitization": "Report includes only field API names, counts, booleans, statuses, confidence numbers and one-way digests from the sanitized receipt."
+  },
+  "fieldEvidence": [
+    {
+      "confidenceMilli": 865,
+      "contextPlanCount": 2,
+      "domCandidateCount": 1,
+      "fieldApiName": "Name",
+      "intentCited": true,
+      "intentFit": "SUFFICIENT",
+      "llmAttempted": true,
+      "missingContext": "NONE",
+      "modelOrdinal": 0,
+      "signatureFound": true,
+      "signatureSaved": true
+    },
+    {
+      "confidenceMilli": 996,
+      "contextPlanCount": 2,
+      "domCandidateCount": 2,
+      "fieldApiName": "Strategic_Deal__c",
+      "intentCited": true,
+      "intentFit": "SUFFICIENT",
+      "llmAttempted": true,
+      "missingContext": "NONE",
+      "modelOrdinal": 1,
+      "signatureFound": true,
+      "signatureSaved": true
+    },
+    {
+      "confidenceMilli": 957,
+      "contextPlanCount": 2,
+      "domCandidateCount": 2,
+      "fieldApiName": "StageName",
+      "intentCited": true,
+      "intentFit": "SUFFICIENT",
+      "llmAttempted": true,
+      "missingContext": "NONE",
+      "modelOrdinal": 1,
+      "signatureFound": true,
+      "signatureSaved": true
+    }
+  ],
+  "publishedAtUtc": "2026-09-13T05:29:39+00:00",
+  "runResult": {
+    "abstainedFieldCount": 0,
+    "browserStatus": "PASSED",
+    "errorCode": null,
+    "forcedModelFieldCount": 3,
+    "healedFieldCount": 3,
+    "modelAppliedFieldCount": 3,
+    "modelProposalCount": 3,
+    "modelRejectionCodes": [],
+    "persistenceMatched": true,
+    "status": "PASSED",
+    "submitted": true,
+    "successTextMatched": true
+  },
+  "savedSignatureFields": [
+    "AccountId",
+    "Amount",
+    "CloseDate",
+    "Discount__c",
+    "Name",
+    "Regional_VP_Approver__c",
+    "StageName",
+    "Strategic_Deal__c"
+  ],
+  "schemaVersion": "1.0.0",
+  "source": {
+    "capabilityId": "automation.browser-worker",
+    "evidencePhase": "LIVE_BUSINESS_ACTION_BROWSER_ACCEPTANCE",
+    "executionIdDigest": "d08840e01b510128163b4a86805fab6e970b5d22b79de46fbdb5ac2afaacf9cd",
+    "inputDigest": "2380dc183db99a2eb06fb897234df705784244b88e81c76019858428005eaa25",
+    "receiptPath": ".runtime/live-llm-business-healing/live-business-action-llm.json"
+  }
+}

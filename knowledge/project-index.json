@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "1ed4124c263e422a231384590cc12a742ffaf371d1210e1399df2735ed894df1",
+  "sourceSnapshot": "3c3ae997973f6c4bd7fc55342141fe4d8bd1c5a73e971a52232d2eb0d70ace08",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1624,6 +1624,21 @@
       "sha256": "54e057eecba90646ce1b72ad371945b39854ab2e65920d125c7b360c7939848f"
     },
     {
+      "path": "Docs/demo-evidence/live-llm-healing-log.jsonl",
+      "category": "reference-documentation",
+      "sha256": "7cd30dfe2d3a6f52e5601f4190def5ee9e42c6a510b67ed23545add287ec7204"
+    },
+    {
+      "path": "Docs/demo-evidence/live-llm-healing-report.md",
+      "category": "reference-documentation",
+      "sha256": "62772b512a499df1cc7c30ac938431766ab291b58f17e84e461b07f810d80820"
+    },
+    {
+      "path": "Docs/demo-evidence/live-llm-healing-summary.json",
+      "category": "reference-documentation",
+      "sha256": "21c7072c59a53cf48452a4687a64a790e7ff3fbe32f5bee471fa130ba3e38421"
+    },
+    {
       "path": "Docs/salesforce-change-assurance-production-solution-design (1).md",
       "category": "reference-documentation",
       "sha256": "8b4c5af2a5d9aa48b403598dddf74495ec612522cf91d65d0cd12cbcd36a8d76"
@@ -2352,6 +2367,11 @@
       "path": "scripts/quality/check_governance_policy.py",
       "category": "project",
       "sha256": "cb71873ca43c4217febfce976f296f8fb4899b81e93d2bf63e1f7a3b7c0c63f4"
+    },
+    {
+      "path": "scripts/run/publish_live_llm_healing_report.py",
+      "category": "project",
+      "sha256": "7587cd339ce5c0435d948453f07dd6484e46d6e71aa505f4b4cc47585ab5da1b"
     },
     {
       "path": "scripts/run/run-live-llm-business-healing.ps1",
