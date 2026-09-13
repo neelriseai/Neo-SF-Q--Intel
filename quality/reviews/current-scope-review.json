@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "reviewId": "context-feeds-mcp-2026-09-12",
+  "reviewId": "live-llm-browser-healing-2026-09-13",
   "status": "APPROVED",
   "reviewedPaths": [
     "AGENTS.md",
@@ -83,6 +83,7 @@
     "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
     "scripts/catalog/build_project_index.py",
     "scripts/quality/check_genericity.py",
+    "scripts/run/run-live-llm-business-healing.ps1",
     "scripts/run/start-platform.ps1",
     "src/neo_sf_q_intel/analysis.py",
     "src/neo_sf_q_intel/api.py",
@@ -158,6 +159,8 @@
     "opus5_authority_window_migration",
     "opus5_persona_governance_run",
     "opus5_context_feed_review"
+    ,
+    "live_llm_browser_healing_review"
   ],
   "findings": [
     {
@@ -479,6 +482,11 @@
       "code": "THREE_CONTROL_LLM_HEALING_SMOKE",
       "severity": "P1",
       "resolution": "A real provider smoke now validates three distinct Workbench control types instead of only the Regional VP lookup: Opportunity.Name textbox, Opportunity.Strategic_Deal__c checkbox, and Opportunity.StageName dropdown/combobox. All three selected candidateOrdinal=0, matched the expected candidate, returned final provider status SUCCESS and contextAssessment.intentFit=SUFFICIENT. The CLI now downgrades plausible ordinals to PROPOSAL_CONTEXT_INSUFFICIENT when the final context assessment remains PARTIAL/INSUFFICIENT/NOT_PROVIDED after bounded incremental context attempts."
+    },
+    {
+      "code": "LIVE_LLM_BROWSER_BUSINESS_HEALING",
+      "severity": "P1",
+      "resolution": "The browser business-action path now invokes the host-owned LLM locator proposal bridge when selected field locators are forced stale or deterministic recovery abstains. The model receives bounded live DOM evidence and compact field intent, proposes candidate ordinals only, and deterministic browser code verifies actionability before writing values. A live Salesforce Workbench run forced the LLM path for Name, Strategic_Deal__c and StageName, applied all three proposals, submitted the form, matched the configured success text and independently verified persisted Opportunity state. The proof simulates stale primary locators rather than deploying a metadata/UI mutation, so it is live browser and provider evidence but not full campaign acceptance."
     },
     {
       "code": "SCOPED_CONTEXT_FEEDS",

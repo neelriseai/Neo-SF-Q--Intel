@@ -204,7 +204,7 @@ async function requestModelProposals(
   return Object.freeze(results);
 }
 
-async function requestModelProposal(
+export async function requestModelProposal(
   payload: Record<string, unknown>,
   environment: Environment,
 ): Promise<ModelProposal> {
@@ -221,6 +221,7 @@ async function requestModelProposal(
       {
         timeout,
         env: locatorBridgeEnvironment(environment),
+        cwd: environment.NEO_LOCATOR_HEALING_CWD,
       },
     );
     return parseModelProposal(stdout);
@@ -258,10 +259,11 @@ function runPythonBridge(
   command: string,
   args: readonly string[],
   input: string,
-  options: { timeout: number; env: NodeJS.ProcessEnv },
+  options: { timeout: number; env: NodeJS.ProcessEnv; cwd?: string },
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
+      cwd: options.cwd,
       env: options.env,
       stdio: ["pipe", "pipe", "ignore"],
       windowsHide: true,

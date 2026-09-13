@@ -15,6 +15,7 @@ import {
   NodeSalesforceCliProcessRunner,
   SalesforceCliSessionBroker,
 } from "./salesforce-cli-session.js";
+import { requestModelProposal } from "./live-healing-cli.js";
 
 type Environment = Readonly<Record<string, string | undefined>>;
 type OutputWriter = (value: string) => void;
@@ -73,6 +74,9 @@ export async function runLiveBusinessActionCli(
       throw new BrowserCoordinatorError("BUSINESS_ACTION_NOT_AUTHORIZED");
     }
     const request = businessActionRequest(environment);
+    const forceModelHealingFields = parseForcedModelFields(
+      environment.NEO_BROWSER_BUSINESS_FORCE_MODEL_FIELDS,
+    );
     const expectedEnrollment = canonicalJson(profile.enrollment);
     const worker = new BrowserWorker({
       verifyEnrollment: (assertion) => constantTimeEqual(canonicalJson(assertion), expectedEnrollment),
@@ -88,6 +92,9 @@ export async function runLiveBusinessActionCli(
           launchTimeoutMs: profile.browser.launchTimeoutMs,
           slowMoMs: slowMoMs,
         }).launch(),
+      proposeBusinessLocator: (payload) =>
+        requestModelProposal({ ...payload }, environment),
+      forceModelHealingFields,
     });
     const broker = new SalesforceCliSessionBroker(profile.sessionBroker, worker);
     const enrollment = await worker.enroll(profile.enrollment);
@@ -103,7 +110,12 @@ export async function runLiveBusinessActionCli(
       receipt.status === "PASSED"
         ? await verifyPersistence(request.persistence, profile.sessionBroker)
         : persistenceNotRun(request.persistence, "BROWSER_ACTION_NOT_PASSED");
-    const projection = liveBusinessActionProjection(receipt, request, persistence);
+    const projection = liveBusinessActionProjection(
+      receipt,
+      request,
+      persistence,
+      forceModelHealingFields,
+    );
     write(`${JSON.stringify({ ...projection, headedMode, postSubmit: receipt.postSubmit })}\n`);
     return projection.status === "PASSED" ? 0 : 2;
   } catch (error) {
@@ -125,6 +137,7 @@ export function liveBusinessActionProjection(
     request.persistence,
     "PERSISTENCE_NOT_RUN",
   ),
+  forcedModelFields: readonly string[] = [],
 ): Record<string, unknown> {
   const status = receipt.status === "PASSED" && persistence.matched ? "PASSED" : "FAILED";
   return Object.freeze({
@@ -144,6 +157,8 @@ export function liveBusinessActionProjection(
     })),
     submitActionDigest: digest(request.businessAction.submit.expectedValue),
     successTextDigest: digest(request.businessAction.successText),
+    forcedModelFieldCount: forcedModelFields.length,
+    forcedModelFieldDigests: forcedModelFields.map(digest),
     lifecycle: receipt.lifecycle,
     candidateCount: receipt.candidateCount,
     businessAction: receipt.businessAction,
@@ -153,6 +168,21 @@ export function liveBusinessActionProjection(
     inputDigest: receipt.inputDigest,
     executionIdDigest: digest(receipt.executionId),
   });
+}
+
+function parseForcedModelFields(raw: string | undefined): readonly string[] {
+  if (!raw) return Object.freeze([]);
+  const fields = raw.split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+  if (
+    fields.length > 8 ||
+    fields.some((field) => !/^[A-Za-z][A-Za-z0-9_]{0,79}$/.test(field)) ||
+    new Set(fields).size !== fields.length
+  ) {
+    throw new BrowserCoordinatorError("BUSINESS_FORCE_MODEL_FIELDS_INVALID");
+  }
+  return Object.freeze(fields);
 }
 
 function businessActionRequest(environment: Environment): BusinessActionRequest {

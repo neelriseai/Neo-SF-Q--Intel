@@ -4,6 +4,44 @@ Priority: ahead of the assurance-report agent (`Docs/27`). Rationale: higher cap
 smaller surface. Healing today works only because the AUT is instrumented with `data-field-api`
 hooks; most customer orgs are not. This slice is what makes healing survive an org we did not build.
 
+## 0. Live proof checkpoint — 2026-09-13
+
+`[DONE]` A live Salesforce browser business-action run proved the LLM locator-healing layer can
+resolve three different control types in the same Workbench flow:
+
+```
+runner: scripts/run/run-live-llm-business-healing.ps1
+receipt: .runtime/live-llm-business-healing/live-business-action-llm.json
+status: PASSED
+browserStatus: PASSED
+forcedModelFieldCount: 3
+modelProposalCount: 3
+modelAppliedFieldCount: 3
+modelAttemptFields: [Name, Strategic_Deal__c, StageName]
+modelCandidateOrdinals: [0, 1, 1]
+modelDomCandidateCounts: [1, 2, 2]
+healedFieldCount: 3
+submitted: true
+successTextMatched: true
+persistenceMatched: true
+```
+
+What this proves:
+
+- Neo can call the real LLM healing provider during a live Salesforce browser run.
+- The LLM receives bounded live DOM evidence and field intent, proposes candidate ordinals, and
+  deterministic browser code verifies/action-applies the result.
+- Textbox (`Name`), checkbox (`Strategic_Deal__c`) and dropdown (`StageName`) controls all healed
+  and the Workbench business action persisted successfully.
+
+Boundary:
+
+- This run intentionally simulated stale primary locators with
+  `NEO_BROWSER_BUSINESS_FORCE_MODEL_FIELDS=Name,Strategic_Deal__c,StageName`; it did not deploy a
+  Salesforce metadata change to break those controls.
+- Runtime receipts are ignored evidence artifacts, not committed source. The committed source is
+  the runner, browser-worker LLM wiring and tests.
+
 Reuses the shipped `NEO_HEAL_TIERS` switch: default `metadata`, `llm` fires only when the
 deterministic tier abstains.
 

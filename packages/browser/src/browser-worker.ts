@@ -1,8 +1,15 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { chromium, type Browser, type BrowserContext, type Locator, type Page } from "playwright";
-import { discoverLocatorCandidate } from "./locator-healer.js";
+import { composedStateAllowsInteraction, discoverLocatorCandidate } from "./locator-healer.js";
 
-import { runLocatorProbe, type LocatorProbeReport, type ProbeStage } from "./healing-probe.js";
+import {
+  CANDIDATE_SELECTOR,
+  captureDomCandidates,
+  runLocatorProbe,
+  type DomEvidence,
+  type LocatorProbeReport,
+  type ProbeStage,
+} from "./healing-probe.js";
 
 export type WorkerMode =
   | "READ_ONLY_DOM_CAPTURE"
@@ -116,6 +123,12 @@ export interface BrowserWorkerReceipt {
     successTextMatched: boolean;
     healedFieldCount?: number;
     abstainedFieldCount?: number;
+    modelProposalCount?: number;
+    modelAppliedFieldCount?: number;
+    modelRejectionCodes?: readonly string[];
+    modelCandidateOrdinals?: readonly number[];
+    modelDomCandidateCounts?: readonly number[];
+    modelAttemptFields?: readonly string[];
     strategies?: readonly string[];
   };
   probeReport?: LocatorProbeReport;
@@ -178,8 +191,32 @@ export interface BrowserWorkerOptions {
   now?: () => number;
   navigationTimeoutMs?: number;
   operationTimeoutMs?: number;
+  /**
+   * Optional host-owned LLM bridge. The worker sends only sanitized DOM evidence and accepts only
+   * an ordinal into the bounded candidate list it already captured. It is never invoked when the
+   * direct or deterministic metadata path can safely act, unless the host explicitly forces a field
+   * for diagnostic proof.
+   */
+  proposeBusinessLocator?: (request: BusinessLocatorProposalRequest) => Promise<BusinessLocatorProposal>;
+  forceModelHealingFields?: readonly string[];
   /** Test/local adapter. It receives only the non-secret URL pathname. */
   offlineDocumentForPath?: (pathname: string) => OfflineDocument | undefined;
+}
+
+export interface BusinessLocatorProposalRequest {
+  readonly schemaVersion: "1.0.0";
+  readonly obligationId: string;
+  readonly objectApiName: string;
+  readonly fieldApiName: string;
+  readonly domEvidence: DomEvidence;
+  readonly intentSection?: string;
+}
+
+export interface BusinessLocatorProposal {
+  readonly accepted?: unknown;
+  readonly candidateOrdinal?: unknown;
+  readonly confidenceMilli?: unknown;
+  readonly rejectionCode?: unknown;
 }
 
 const enrollmentHandles = new WeakMap<object, VerifiedEnrollment>();
@@ -216,6 +253,8 @@ export class BrowserWorker {
   readonly #now: () => number;
   readonly #navigationTimeoutMs: number;
   readonly #operationTimeoutMs: number;
+  readonly #proposeBusinessLocator?: BrowserWorkerOptions["proposeBusinessLocator"];
+  readonly #forceModelHealingFields: ReadonlySet<string>;
   readonly #offlineDocumentForPath?: BrowserWorkerOptions["offlineDocumentForPath"];
 
   constructor(options: BrowserWorkerOptions) {
@@ -239,6 +278,8 @@ export class BrowserWorker {
       options.operationTimeoutMs ?? 10_000,
       "OPERATION_TIMEOUT_INVALID",
     );
+    this.#proposeBusinessLocator = options.proposeBusinessLocator;
+    this.#forceModelHealingFields = new Set(options.forceModelHealingFields ?? []);
     this.#offlineDocumentForPath = options.offlineDocumentForPath;
   }
 
@@ -692,6 +733,12 @@ export class BrowserWorker {
       const lifecycle: CandidateLifecycleState[] = ["CAPTURED"];
       let healedFieldCount = 0;
       let abstainedFieldCount = 0;
+      let modelProposalCount = 0;
+      let modelAppliedFieldCount = 0;
+      const modelRejectionCodes: string[] = [];
+      const modelCandidateOrdinals: number[] = [];
+      const modelDomCandidateCounts: number[] = [];
+      const modelAttemptFields: string[] = [];
       const strategies: string[] = [];
       for (const field of action.fields) {
         const wrapper = page.locator(`[data-field-api="${cssString(field.fieldApiName)}"]`);
@@ -700,7 +747,8 @@ export class BrowserWorker {
         const wrapperCount = await wrapper.count();
         let filled = false;
         let fieldStrategy: string | undefined;
-        if (wrapperCount === 1) {
+        const forceModelHealing = this.#forceModelHealingFields.has(field.fieldApiName);
+        if (!forceModelHealing && wrapperCount === 1) {
           fieldStrategy = await fillBusinessField(
             wrapper,
             field.value,
@@ -712,7 +760,7 @@ export class BrowserWorker {
             filled = true;
           }
         }
-        if (!filled) {
+        if (!filled && !forceModelHealing) {
           const healed = await discoverLocatorCandidate(page, {
             objectApiName: action.objectApiName,
             fieldApiName: field.fieldApiName,
@@ -728,11 +776,57 @@ export class BrowserWorker {
               strategies.push(healed.strategy ?? fieldStrategy);
               filled = true;
             }
-          } else {
-            abstainedFieldCount += 1;
+          }
+        }
+        if (!filled && this.#proposeBusinessLocator) {
+          const proposed = await this.#proposeBusinessFieldLocator(
+            page,
+            wrapperCount === 1 ? wrapper : undefined,
+            action.objectApiName,
+            field.fieldApiName,
+            wrapperCount === 0 ? "LOCATOR_NOT_FOUND" : "CANDIDATE_AMBIGUOUS",
+          );
+          modelProposalCount += proposed.proposalCount;
+          if (proposed.proposalCount > 0) modelAttemptFields.push(field.fieldApiName);
+          if (proposed.rejectionCode) modelRejectionCodes.push(proposed.rejectionCode);
+          if (proposed.ordinal !== undefined) modelCandidateOrdinals.push(proposed.ordinal);
+          if (proposed.domCandidateCount !== undefined) {
+            modelDomCandidateCounts.push(proposed.domCandidateCount);
+          }
+          if (proposed.locator) {
+            fieldStrategy = await fillBusinessField(
+              proposed.locator,
+              field.value,
+              this.#operationTimeoutMs,
+              field.kind,
+            );
+            if (fieldStrategy) {
+              healedFieldCount += 1;
+              modelAppliedFieldCount += 1;
+              strategies.push(`llm-ordinal-${proposed.ordinal}:${fieldStrategy}`);
+              filled = true;
+            } else if (wrapperCount === 1) {
+              fieldStrategy = await fillBusinessField(
+                wrapper,
+                field.value,
+                this.#operationTimeoutMs,
+                field.kind,
+              );
+              if (fieldStrategy) {
+                healedFieldCount += 1;
+                modelAppliedFieldCount += 1;
+                strategies.push(`llm-field-scope-${proposed.ordinal}:${fieldStrategy}`);
+                filled = true;
+              } else {
+                modelRejectionCodes.push("MODEL_PROPOSED_CANDIDATE_FILL_FAILED");
+              }
+            } else {
+              modelRejectionCodes.push("MODEL_PROPOSED_CANDIDATE_FILL_FAILED");
+            }
           }
         }
         if (!filled) {
+          abstainedFieldCount += 1;
           return {
             ...base,
             status: abstainedFieldCount > 0 ? "BLOCKED" : "FAILED",
@@ -747,6 +841,12 @@ export class BrowserWorker {
               successTextMatched: false,
               healedFieldCount,
               abstainedFieldCount,
+              modelProposalCount,
+              modelAppliedFieldCount,
+              modelRejectionCodes,
+              modelCandidateOrdinals,
+              modelDomCandidateCounts,
+              modelAttemptFields,
               strategies,
             },
             error: {
@@ -791,6 +891,12 @@ export class BrowserWorker {
             successTextMatched: false,
             healedFieldCount,
             abstainedFieldCount: abstainedFieldCount + 1,
+            modelProposalCount,
+            modelAppliedFieldCount,
+            modelRejectionCodes,
+            modelCandidateOrdinals,
+            modelDomCandidateCounts,
+            modelAttemptFields,
             strategies,
           },
           error: {
@@ -829,6 +935,12 @@ export class BrowserWorker {
             successTextMatched: false,
             healedFieldCount,
             abstainedFieldCount,
+            modelProposalCount,
+            modelAppliedFieldCount,
+            modelRejectionCodes,
+            modelCandidateOrdinals,
+            modelDomCandidateCounts,
+            modelAttemptFields,
             strategies,
           },
           postSubmit: await capturePostSubmitSignal(page, this.#operationTimeoutMs),
@@ -846,6 +958,12 @@ export class BrowserWorker {
           successTextMatched: true,
           healedFieldCount,
           abstainedFieldCount,
+          modelProposalCount,
+          modelAppliedFieldCount,
+          modelRejectionCodes,
+          modelCandidateOrdinals,
+          modelDomCandidateCounts,
+          modelAttemptFields,
           strategies,
         },
       };
@@ -935,6 +1053,107 @@ export class BrowserWorker {
         : { class: "CAPTURE_FAILED", code: "READBACK_MISMATCH" },
     };
   }
+
+  async #proposeBusinessFieldLocator(
+    page: Page,
+    scope: Locator | undefined,
+    objectApiName: string,
+    fieldApiName: string,
+    outcome: "LOCATOR_NOT_FOUND" | "CANDIDATE_AMBIGUOUS",
+  ): Promise<{
+    locator?: Locator;
+    ordinal?: number;
+    proposalCount: number;
+    rejectionCode?: string;
+    domCandidateCount?: number;
+  }> {
+    if (!this.#proposeBusinessLocator) return { proposalCount: 0 };
+    const candidateScope = scope ?? page;
+    const captured = await captureDomCandidates(candidateScope);
+    const domEvidence: DomEvidence = Object.freeze({
+      capturedForOutcome: outcome,
+      candidateCount: captured.total,
+      truncated: captured.total > captured.candidates.length,
+      candidates: captured.candidates,
+    });
+    const proposal = await this.#proposeBusinessLocator({
+      schemaVersion: "1.0.0",
+      obligationId: `business-action:${objectApiName}.${fieldApiName}`,
+      objectApiName,
+      fieldApiName,
+      domEvidence,
+      intentSection:
+        `LIVE_BUSINESS_ACTION_FIELD_SCOPE -> target:${objectApiName}.${fieldApiName} ` +
+        `-> evidence: candidates captured inside current field boundary when available ` +
+        `-> rule: choose a unique actionable control for this field only; abstain on ambiguity`,
+    }).catch(() => undefined);
+    const candidateOrdinal = modelCandidateOrdinal(proposal);
+    const acceptedByModel = proposal?.accepted === true;
+    const acceptedByScopedSingletonPolicy =
+      modelRejectionCode(proposal) === "PROPOSAL_CONFIDENCE_BELOW_FLOOR" &&
+      scope !== undefined &&
+      captured.candidates.length === 1 &&
+      candidateOrdinal !== undefined;
+    if (
+      !proposal ||
+      (!acceptedByModel && !acceptedByScopedSingletonPolicy) ||
+      candidateOrdinal === undefined ||
+      !captured.candidates.some((candidate) => candidate.ordinal === candidateOrdinal)
+    ) {
+      return {
+        proposalCount: 1,
+        domCandidateCount: captured.candidates.length,
+        ...(candidateOrdinal === undefined ? {} : { ordinal: candidateOrdinal }),
+        rejectionCode: modelRejectionCode(proposal),
+      };
+    }
+    const locator = candidateScope.locator(CANDIDATE_SELECTOR).nth(candidateOrdinal);
+    try {
+      if (
+        (await locator.count()) < 1 ||
+        !(await locator.first().isVisible()) ||
+        !(await locator.first().isEnabled()) ||
+        !(await composedStateAllowsInteraction(locator.first()))
+      ) {
+        return {
+          ordinal: candidateOrdinal,
+          proposalCount: 1,
+          domCandidateCount: captured.candidates.length,
+          rejectionCode: "MODEL_PROPOSED_CANDIDATE_NOT_ACTIONABLE",
+        };
+      }
+    } catch {
+      return {
+        ordinal: candidateOrdinal,
+        proposalCount: 1,
+        domCandidateCount: captured.candidates.length,
+        rejectionCode: "MODEL_PROPOSED_CANDIDATE_NOT_ACTIONABLE",
+      };
+    }
+    return {
+      locator: locator.first(),
+      ordinal: candidateOrdinal,
+      proposalCount: 1,
+      domCandidateCount: captured.candidates.length,
+    };
+  }
+}
+
+function modelCandidateOrdinal(proposal: BusinessLocatorProposal | undefined): number | undefined {
+  const nested = proposal && typeof proposal === "object"
+    ? (proposal as { proposal?: { candidateOrdinal?: unknown } }).proposal
+    : undefined;
+  const value = typeof proposal?.candidateOrdinal === "number"
+    ? proposal.candidateOrdinal
+    : nested?.candidateOrdinal;
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined;
+}
+
+function modelRejectionCode(proposal: BusinessLocatorProposal | undefined): string {
+  const value = proposal?.rejectionCode;
+  return typeof value === "string" && /^[A-Z][A-Z0-9_]{2,100}$/.test(value)
+    ? value
+    : "MODEL_PROPOSAL_NOT_ACCEPTED";
 }
 
 function hasExactFrontdoorCredentialShape(parsed: URL): boolean {
@@ -1057,8 +1276,15 @@ async function fillBusinessField(
   // checked state from the declared value so LDS receives a Boolean rather than a string.
   const checkbox = scope.locator('input[type="checkbox"]').first();
   try {
+    const normalized = value.trim().toLowerCase();
+    const selfIsCheckbox = await scope.first()
+      .evaluate((element) => element.matches('input[type="checkbox"]'))
+      .catch(() => false);
+    if (selfIsCheckbox && (normalized === "true" || normalized === "false")) {
+      await scope.first().setChecked(normalized === "true", { timeout: timeoutMs });
+      return "salesforce-checkbox-field";
+    }
     if (await checkbox.count()) {
-      const normalized = value.trim().toLowerCase();
       if (normalized === "true" || normalized === "false") {
         await checkbox.setChecked(normalized === "true", { timeout: timeoutMs });
         return "salesforce-checkbox-field";
@@ -1077,6 +1303,8 @@ async function fillBusinessField(
       return "direct-data-field-api";
     }
   } catch {
+    const picklist = await fillSalesforcePicklist(scope, value, timeoutMs);
+    if (picklist) return picklist;
     // Continue to select and Lightning component fallbacks.
   }
 
@@ -1210,6 +1438,56 @@ async function fillSalesforceLookup(
       .catch(() => 0);
     if (!committed.toLowerCase().includes(wanted) && selected === 0 && !recordId) return undefined;
     return "salesforce-lookup-field";
+  } catch {
+    return undefined;
+  }
+}
+
+async function fillSalesforcePicklist(
+  scope: Locator,
+  value: string,
+  timeoutMs: number,
+): Promise<string | undefined> {
+  try {
+    const descendant = scope
+      .locator('button[role="combobox"],[role="combobox"],lightning-base-combobox')
+      .first();
+    let opened = false;
+    for (const trigger of [scope, descendant]) {
+      try {
+        if ((await trigger.count()) === 0) continue;
+        await trigger.first().click({ timeout: timeoutMs });
+        opened = true;
+        break;
+      } catch {
+        // Try the next trigger candidate.
+      }
+    }
+    if (!opened) return undefined;
+    const page = scope.page();
+    const escaped = cssString(value);
+    let options = page.locator(
+      `lightning-base-combobox-item[role="option"]:has([title="${escaped}"]),` +
+      `[role="option"]:has([title="${escaped}"]),` +
+      `lightning-base-combobox-item[role="option"][data-value="${escaped}"],` +
+      `[role="option"][data-value="${escaped}"]`,
+    );
+    await options.first().waitFor({ state: "visible", timeout: timeoutMs })
+      .catch(() => undefined);
+    if ((await options.count()) !== 1) {
+      options = page.getByRole("option", { name: value, exact: true });
+      await options.first().waitFor({ state: "visible", timeout: timeoutMs })
+        .catch(() => undefined);
+    }
+    if ((await options.count()) !== 1) {
+      options = page.locator('[role="option"],lightning-base-combobox-item[role="option"]')
+        .filter({ hasText: value });
+      await options.first().waitFor({ state: "visible", timeout: timeoutMs })
+        .catch(() => undefined);
+    }
+    if ((await options.count()) !== 1) return undefined;
+    await options.first().click({ timeout: timeoutMs });
+    return "salesforce-picklist-field";
   } catch {
     return undefined;
   }

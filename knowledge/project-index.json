@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "a3f5108c03f2ae107bbb762522895ab89e1bf05fa1e5c6366439c4bb6b5f4d45",
+  "sourceSnapshot": "b8455931342cbe3dd8b38e2ee4c6106cf6ce9560af61d8e58641ff93df405939",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1586,7 +1586,7 @@
     {
       "path": "Docs/24-strategic-deal-change-assurance-demo.md",
       "category": "reference-documentation",
-      "sha256": "1ed8850584a63de484ac0a12b723f36749afd5b4f2a084a56f28b11b4971179c"
+      "sha256": "1bdbbe8678d3c1d00560ea25c18ca4821a84ce9844a7b8fa87a456a28048cc65"
     },
     {
       "path": "Docs/25-strategic-deal-demo-test-pass-2026-09-12.md",
@@ -1606,7 +1606,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "24e5d01f32672d46a2d780dcfbd1ff4ba66affcb31e9262378e7c6429bf7ded4"
+      "sha256": "5e93388b0bb756dc4877a42699f708c91440ae1cb928eb2f5b20dc26c78650e7"
     },
     {
       "path": "Docs/29-d-series-requirement-test-matrix.md",
@@ -2001,17 +2001,17 @@
     {
       "path": "packages/browser/src/browser-worker.ts",
       "category": "browser-runtime",
-      "sha256": "35375802ae8a766274b493a62cc88405c181f15938fc5f26bfc74d49d4e2dbb4"
+      "sha256": "f1cf546ec1ef9b63ecc233e230d43a1c0bcc362a5a31bbbaa269193c3976af78"
     },
     {
       "path": "packages/browser/src/healing-probe.ts",
       "category": "browser-runtime",
-      "sha256": "39ca36857bf968f1c6204095b2aae16d321095e17a6b8c5237f198752a811891"
+      "sha256": "3d861c52464c9e56029bd755d0914e3d93e6ccb5f7b1f426115209458c227ba0"
     },
     {
       "path": "packages/browser/src/live-business-action-cli.ts",
       "category": "browser-runtime",
-      "sha256": "7417e9b4e1cda850a2795ac3db6ea4aa3d0a8de177edaa38ec8f8e1c9a9abf90"
+      "sha256": "ea643f2bb16c7d4330e13c26d4cc5e61ef7a889aaa02cc5d15792e4574864877"
     },
     {
       "path": "packages/browser/src/live-candidate-readback-cli.ts",
@@ -2021,7 +2021,7 @@
     {
       "path": "packages/browser/src/live-healing-cli.ts",
       "category": "browser-runtime",
-      "sha256": "a2d9428d80e680d969fe6576cf052991ab6892b9cede67f3214e06c7c2722b77"
+      "sha256": "fcbe2f1f3f6f59eb5ca2a9d9175fb51593a8354b58e98ed04b00897d415b8b56"
     },
     {
       "path": "packages/browser/src/live-profile-cli.ts",
@@ -2056,7 +2056,7 @@
     {
       "path": "packages/browser/tests/browser-worker.spec.ts",
       "category": "test",
-      "sha256": "42450aabf94dcb662dade5fc7af981b2d67ac615527c06011010a4b005f32751"
+      "sha256": "3c5f4df2050f35b033f19e7d1f1289439b515595c08a626967928a6f2328e0bb"
     },
     {
       "path": "packages/browser/tests/candidate-client.spec.ts",
@@ -2316,7 +2316,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "39af012a5958c2118b9ea5682a6e4033356636c0b205807720ed157ff5c447e5"
+      "sha256": "eedf6eda65c913f06c694c8c33762fb64ae71c7796b4bcae2afebe2a99964534"
     },
     {
       "path": "quality/reviews/locator-healing-context-comparison-2026-09-13.json",
@@ -2352,6 +2352,11 @@
       "path": "scripts/quality/check_governance_policy.py",
       "category": "project",
       "sha256": "cb71873ca43c4217febfce976f296f8fb4899b81e93d2bf63e1f7a3b7c0c63f4"
+    },
+    {
+      "path": "scripts/run/run-live-llm-business-healing.ps1",
+      "category": "project",
+      "sha256": "37771678cf264885fe4a0c67617228ba85c0e3383817015cd7f4ff499e793fe0"
     },
     {
       "path": "scripts/run/run-locator-healing-smoke.ps1",

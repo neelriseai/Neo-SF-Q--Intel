@@ -193,6 +193,12 @@ test("executes an explicitly authorized business action and verifies success rea
     successTextMatched: true,
     healedFieldCount: 0,
     abstainedFieldCount: 0,
+    modelProposalCount: 0,
+    modelAppliedFieldCount: 0,
+    modelRejectionCodes: [],
+    modelCandidateOrdinals: [],
+    modelDomCandidateCounts: [],
+    modelAttemptFields: [],
     strategies: ["direct-data-field-api", "direct-data-field-api"],
   });
   expect(JSON.stringify(receipt)).not.toContain("SYN-Widget Renewal");
@@ -261,6 +267,72 @@ test("self-heals business submit locators through stable action identity before 
     strategies: ["direct-data-field-api", "stable-action-identity"],
   });
   expect(JSON.stringify(receipt)).not.toContain("SYN-Healed Renewal");
+  expectNoLeak(receipt, canary);
+});
+
+test("uses a host-owned LLM ordinal proposal when business field locators are stale", async () => {
+  const canary = `session-${randomBytes(12).toString("hex")}`;
+  const proposals: unknown[] = [];
+  const worker = makeWorker(`
+    <form data-object-api="Opportunity"
+      onsubmit="event.preventDefault();
+        document.querySelector('[role=status]').textContent =
+          document.querySelector('input[aria-label=&quot;Opportunity Name&quot;]').value === 'SYN-LLM-Healed'
+            ? 'Saved successfully. The policy results are shown below.' : 'Unexpected value';">
+      <section data-field-api="Name">
+        <label>Opportunity Name<input aria-label="Opportunity Name" /></label>
+      </section>
+      <button data-action="save-evaluate-live">Save and Evaluate</button>
+      <p role="status"></p>
+    </form>
+  `, {
+    forceModelHealingFields: ["Name"],
+    proposeBusinessLocator: async (payload) => {
+      proposals.push(payload);
+      return {
+        schemaVersion: "1.0.0",
+        accepted: false,
+        rejectionCode: "PROPOSAL_CONFIDENCE_BELOW_FLOOR",
+        proposal: {
+          candidateOrdinal: 0,
+          confidenceMilli: 820,
+        },
+      };
+    },
+  });
+  const session = await handoff(worker, canary, {
+    permittedModes: ["READ_ONLY_DOM_CAPTURE", "CANDIDATE_READBACK", "BUSINESS_ACTION"],
+  });
+
+  const receipt = await worker.execute({
+    handoff: session,
+    mode: "BUSINESS_ACTION",
+    businessAction: {
+      objectApiName: "Opportunity",
+      fields: [{ fieldApiName: "Name", value: "SYN-LLM-Healed" }],
+      submit: { tag: "button", attribute: "data-action", expectedValue: "save-evaluate-live" },
+      successText: "Saved successfully. The policy results are shown below.",
+    },
+  });
+
+  expect(receipt.status).toBe("PASSED");
+  expect(proposals).toHaveLength(1);
+  expect(proposals[0]).toMatchObject({
+    schemaVersion: "1.0.0",
+    objectApiName: "Opportunity",
+    fieldApiName: "Name",
+  });
+  expect(receipt.businessAction).toMatchObject({
+    fieldCount: 1,
+    submitted: true,
+    successTextMatched: true,
+    healedFieldCount: 1,
+    abstainedFieldCount: 0,
+    modelProposalCount: 1,
+    modelAppliedFieldCount: 1,
+  });
+  expect(receipt.businessAction?.strategies?.[0]).toContain("llm-ordinal-0");
+  expect(JSON.stringify(receipt)).not.toContain("SYN-LLM-Healed");
   expectNoLeak(receipt, canary);
 });
 

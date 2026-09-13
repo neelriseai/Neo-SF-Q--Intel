@@ -12,7 +12,7 @@ const MAX_CANDIDATES = 40;
 const MAX_ATTRS_PER_CANDIDATE = 24;
 const MAX_NEARBY = 12;
 const MAX_STRUCTURE_DEPTH = 6;
-const CANDIDATE_SELECTOR =
+export const CANDIDATE_SELECTOR =
   "input,select,textarea,button,a,[role=combobox],[role=textbox],[role=button]," +
   "lightning-input-field";
 // Clear-text vocabulary is allowlisted so an author-chosen tag or role can never smuggle data out.
@@ -324,7 +324,7 @@ interface RawDomCandidate {
   readonly enabled: boolean;
 }
 
-interface CapturedCandidates {
+export interface CapturedCandidates {
   readonly total: number;
   readonly candidates: readonly DomCandidate[];
 }
@@ -337,10 +337,10 @@ function deterministicTierAbstained(outcome: ProbeOutcome): boolean {
  * Reads a bounded interactive-element list and sanitizes it in this process. Raw values are held
  * only long enough to digest them; nothing raw is ever placed on an observation or a report.
  */
-async function captureDomCandidates(page: Page): Promise<CapturedCandidates> {
+export async function captureDomCandidates(scope: Page | Locator): Promise<CapturedCandidates> {
   let raw: { total: number; raw: RawDomCandidate[] };
   try {
-    raw = await page.locator(CANDIDATE_SELECTOR).evaluateAll(readCandidates, {
+    raw = await scope.locator(CANDIDATE_SELECTOR).evaluateAll(readCandidates, {
       candidates: MAX_CANDIDATES,
       attributes: MAX_ATTRS_PER_CANDIDATE,
       nearby: MAX_NEARBY,

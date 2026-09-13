@@ -181,7 +181,8 @@ Current proven live sub-results:
 - live Salesforce read-only proof has passed through the configured CLI/API route;
 - live headless browser profile/diagnostic has passed;
 - scoped Workbench marker deploy/readback passed for `save-evaluate-live`;
-- live business action reached field fill and submit, but did not yet produce success/persistence.
+- live LLM browser healing passed for `Name`, `Strategic_Deal__c` and `StageName` in the Workbench
+  business action, followed by submit, success readback and persisted Salesforce outcome proof.
 
 ### 8. Show governed release posture
 
@@ -211,10 +212,10 @@ Expected message:
 | Governance | Claim grounding, release posture, gate honesty | `FOUNDATION` |
 | Live Salesforce evidence | CLI/API/read-only and browser diagnostic evidence | `FOUNDATION`, partial live proof |
 | Browser worker | Live profile, readback, business-action runner | `FOUNDATION` |
-| Locator healing | Metadata/accessibility-based candidate discovery and abstention | `FOUNDATION` |
+| Locator healing | Metadata/accessibility-based candidate discovery, real LLM ordinal proposal and deterministic action verification | `FOUNDATION` plus live three-field proof |
 | ChromaDB retrieval | Roadmap semantic index behind retrieval port | `NEXT`; do not demo as complete |
 | Candidate deployment | Scoped marker deploy/readback exists; full campaign deployment pending | `NEXT` / partial demo evidence |
-| Live test execution | Required future gate for full campaign acceptance | `NEXT` |
+| Live test execution | Browser-worker regression and one live Workbench business-action proof passed; full campaign gate set still pending | partial live proof |
 
 ## What can be demoed now
 
@@ -223,7 +224,8 @@ Use this as the honest current demo path:
 1. Show candidate advisory from a local Salesforce app candidate with real LLM specialist captures.
 2. Show graph/evidence/test-selection reasoning and release-blocking gaps.
 3. Show locator-healing tests and the Workbench UI-drift scenario.
-4. Show live Salesforce read/browser diagnostic and deployed marker readback.
+4. Show live Salesforce read/browser diagnostic, deployed marker readback and live LLM-healed
+   Workbench business action persistence.
 5. Show the gate matrix proving why full live acceptance remains incomplete.
 
 ## What must not be claimed yet
@@ -233,22 +235,22 @@ Do not claim:
 - full GraphRAG or ChromaDB-backed retrieval;
 - full candidate deployment campaign acceptance;
 - full live test execution;
-- full business action acceptance until Salesforce emits success and persisted-state proof;
+- full campaign acceptance from one business action receipt;
 - production release readiness.
 
 ## Current main blocker
 
-The live browser business action currently reaches the Workbench, fills Salesforce controls and
-clicks submit, but Salesforce does not emit the configured success status and the post-action
-Salesforce CLI persistence query finds no matching synthetic Opportunity.
+The three-field LLM-healed Workbench business action is now proven live, but the full signed
+campaign gate set is still incomplete. The latest proof simulates stale primary locators by
+forcing the LLM path for selected fields; it does not yet prove a deployed Salesforce metadata/UI
+mutation caused the locator drift.
 
 Next focused work:
 
-1. capture sanitized post-submit validation/error classification;
-2. identify the exact Salesforce save-contract blocker;
-3. adjust only the required synthetic payload or route;
-4. rerun live business-flow acceptance;
-5. preserve `releaseEligible=false` until signed live receipts satisfy the configured gates.
+1. run the same business-action path after an intentional deployed UI/metadata mutation;
+2. add the receipt to the live gate matrix;
+3. run persona/governance evidence with the Regional VP path;
+4. preserve `releaseEligible=false` until signed live receipts satisfy the configured gates.
 
 ## Demo positioning
 
@@ -256,4 +258,3 @@ The strongest message is not “everything is green.” The strongest message is
 
 > Neo turns a Salesforce change into graph-grounded impact, LLM advisory, test obligations, safe
 > browser healing and live evidence, then refuses to overclaim when a required gate is missing.
-
