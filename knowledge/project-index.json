@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "b2489ad2af0850bec2ce314b7d22577132512891974d4c52a19c008c6573fa96",
+  "sourceSnapshot": "ed28bf3b1c7a731345d268086f0c504d2015df9fb2dd7b41344a2c35aedcb401",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1606,7 +1606,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "8544ee56af34b4a3e53108b03ccf3cb56e0fa38028df287a1e78bd167077a039"
+      "sha256": "8ab0f148fd9e8e3e7f67ba4bc69ad475187e17aa895243289c15a9568363d84b"
     },
     {
       "path": "Docs/29-d-series-requirement-test-matrix.md",
@@ -2316,7 +2316,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "7449f6c8f1c695e818b3b264fee98d63dc8556d8cbd4a3e128df25fee381cad6"
+      "sha256": "be7d43bc94efef20eac5b0e4784f6295abd4d3da033e6ee5513bfe82a275351d"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
@@ -2541,7 +2541,7 @@
     {
       "path": "src/neo_sf_q_intel/locator_healing_cli.py",
       "category": "python-runtime",
-      "sha256": "6fd7db5648075f33aae708abd97e4b26100998913bf6460495252d591c77a85c"
+      "sha256": "071602ad52c3c954c0f112219029013ad62248eba93fa44d529f1679ffd29354"
     },
     {
       "path": "src/neo_sf_q_intel/locator_proposal.py",
@@ -2926,12 +2926,12 @@
     {
       "path": "tests/test_locator_healing_cli.py",
       "category": "test",
-      "sha256": "7bb7daa074e593a01919485ff04dbf9625382dec0f96d63be2d7164be211cbfb"
+      "sha256": "cc02a73bf78c1caab9f02c49bdd278999f276d9ce1a6f1cbcb23a6daf5754b75"
     },
     {
       "path": "tests/test_locator_proposal.py",
       "category": "test",
-      "sha256": "4c0f9a40d094b2f146f90764b9cd6db675f8709985b03562826c92708c1c8620"
+      "sha256": "8a72aeaee93581d7566935a23f168e6e44ebd44a793613028031479381ef3084"
     },
     {
       "path": "tests/test_locator_rebind_contract.py",

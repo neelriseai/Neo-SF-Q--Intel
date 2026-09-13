@@ -95,6 +95,9 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
 [DONE] live:healing CLI           headed + slow-mo, diagnosticOnly projection
 [DONE] T-GRAPH                    graph_neighborhood(entity, hops, cap) -> edge list · MCP-exposed
 [DONE] T-INTENT                   knowledge_index + knowledge_section(page|module|impact, section) · MCP-exposed
+[DONE] bounded intent resolver    locator-healing CLI accepts caller-bounded intentSection or
+          intentLookup(page|module|impact, section); missing sections add no context instead of
+          inventing one, and malformed/ambiguous selectors fail before the LLM call
 [DONE] knowledge repo             14 files · pages / modules / impact · operator-authored
 [DONE] deterministic heal proven  live drift -> stale -> metadata rediscovery -> rerun -> exact restore
 [DONE] T-SIG                      element signature store + tests
@@ -107,6 +110,9 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
           and non-fatal T-META enrichment
 [DONE] evidence isolation         projection refuses to attach modelProposal or advertise
           modelDiscoveryAvailable for deterministic metadata PASS observations
+[DONE] context comparison tests   base vs enriched prompts keep identical candidate payloads while
+          adding only citable intent/edge refs, so context can improve ranking without widening the
+          model's candidate choice surface
 ```
 
 `[MEAS]` graph full 228,591 ch vs 1-hop 946 ch (99.6% cut) · knowledge heading block 517 ch vs whole page 5,824 ch (91% cut).
@@ -219,6 +225,14 @@ what changed.
 [DECISION] change_neighborhood defaults to side=CANDIDATE (the live org reflects the candidate
   tree, i.e. what the current source project actually declares now); BASE is selectable
   explicitly for callers that need the pre-change side.
+```
+
+```
+[IMPLEMENTED_GUARD] The locator-healing CLI now has an evidenceGraphLookup hook but intentionally
+  does not call the retired Salesforce app knowledge/application-graph.json. Until R1 implements
+  the evidence/change-delta accessor, graph context must be supplied as already-bounded graphEdges
+  or by an injected evidence lookup in tests/host orchestration. This prevents a stale static graph
+  from creating false confidence or candidate-ranking ambiguity.
 ```
 
 ```

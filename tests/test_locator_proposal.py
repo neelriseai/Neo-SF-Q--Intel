@@ -179,6 +179,21 @@ def test_rendered_prompt_is_the_sealed_provider_envelope() -> None:
     )
 
 
+def test_enriched_context_adds_citable_evidence_without_changing_candidates() -> None:
+    base = build_locator_prompt(_context(graphEdges=[], intentSection=None))
+    enriched = build_locator_prompt(_context())
+
+    base_payload = base.untrusted_payload
+    enriched_payload = enriched.untrusted_payload
+
+    assert base_payload["candidates"] == enriched_payload["candidates"]
+    assert "intent:ob-vp-approver" not in base_payload["allowedRefs"]
+    assert "edge:0" not in base_payload["allowedRefs"]
+    assert "intent:ob-vp-approver" in enriched_payload["allowedRefs"]
+    assert "edge:0" in enriched_payload["allowedRefs"]
+    assert enriched.prompt_sha256 != base.prompt_sha256
+
+
 def test_prompt_envelope_changes_when_the_candidate_set_changes() -> None:
     first = build_locator_prompt(_context())
     second = build_locator_prompt(_context(candidates=[_candidate(0)]))

@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import json
 import sys
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
 from neo_sf_q_intel.config import Settings
-from neo_sf_q_intel.context_feeds import ContextFeedError, FieldMetadata, metadata_lookup
+from neo_sf_q_intel.context_feeds import (
+    ContextFeedError,
+    FieldMetadata,
+    KnowledgeSection,
+    knowledge_section,
+    metadata_lookup,
+)
 from neo_sf_q_intel.locator_proposal import (
     RESPONSE_SCHEMA,
     LocatorProposalError,
@@ -29,14 +35,15 @@ def main() -> int:
             object_api_name=request["objectApiName"],
             field_api_name=request["fieldApiName"],
         )
+        context_feeds = _context_feeds_for_request(request, repository_root=Path.cwd())
         context = build_healing_context(
             obligation_id=request["obligationId"],
             object_api_name=request["objectApiName"],
             field_api_name=request["fieldApiName"],
             dom_evidence=request["domEvidence"],
             field_metadata=field_metadata,
-            graph_edges=request.get("graphEdges") or (),
-            intent_section=request.get("intentSection"),
+            graph_edges=context_feeds.graph_edges,
+            intent_section=context_feeds.intent_section,
         )
         if not settings.allow_llm:
             return _write_blocked("LLM_DISABLED")
@@ -71,6 +78,112 @@ def _read_request(raw: str) -> dict[str, Any]:
     if not isinstance(body["domEvidence"], Mapping):
         raise ValueError("REQUEST_SCHEMA_INVALID")
     return body
+
+
+class _ResolvedContextFeeds:
+    def __init__(self, *, graph_edges: Sequence[str] = (), intent_section: str | None = None):
+        self.graph_edges = tuple(graph_edges)
+        self.intent_section = intent_section
+
+
+def _context_feeds_for_request(
+    request: Mapping[str, Any],
+    *,
+    repository_root: Path | None = None,
+    knowledge_lookup: Callable[..., KnowledgeSection] = knowledge_section,
+    evidence_graph_lookup: Callable[[Mapping[str, Any]], Sequence[str]] | None = None,
+) -> _ResolvedContextFeeds:
+    """Resolve only bounded context explicitly requested by the caller.
+
+    This is deliberately not an automatic knowledge-repo dump. The caller may pass already-bounded
+    ``intentSection`` / ``graphEdges`` for backwards compatibility, or may request one exact
+    knowledge section through ``intentLookup``. Evidence graph support is hook-shaped here but does
+    not fall back to the retired static Salesforce application graph; until a change-delta accessor
+    is wired in, graph context must be supplied by the caller or by an injected evidence lookup.
+    """
+
+    raw_intent = request.get("intentSection")
+    if raw_intent is not None and not isinstance(raw_intent, str):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    raw_edges = request.get("graphEdges")
+    if raw_edges is not None and not _string_sequence(raw_edges):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+
+    intent_section = raw_intent or _intent_section_from_lookup(
+        request.get("intentLookup"),
+        repository_root=repository_root,
+        knowledge_lookup=knowledge_lookup,
+    )
+    graph_edges = tuple(raw_edges or ()) or _graph_edges_from_lookup(
+        request.get("evidenceGraphLookup"),
+        evidence_graph_lookup=evidence_graph_lookup,
+    )
+    return _ResolvedContextFeeds(graph_edges=graph_edges, intent_section=intent_section)
+
+
+def _intent_section_from_lookup(
+    raw_lookup: Any,
+    *,
+    repository_root: Path | None,
+    knowledge_lookup: Callable[..., KnowledgeSection],
+) -> str | None:
+    if raw_lookup is None:
+        return None
+    if not isinstance(raw_lookup, Mapping):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+
+    selectors = {
+        "page": raw_lookup.get("page"),
+        "module": raw_lookup.get("module"),
+        "impact": raw_lookup.get("impact"),
+    }
+    if any(value is not None and not isinstance(value, str) for value in selectors.values()):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    section = raw_lookup.get("section")
+    if section is not None and not isinstance(section, str):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    if sum(value is not None for value in selectors.values()) != 1:
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+
+    try:
+        result = knowledge_lookup(
+            repository_root or Path.cwd(),
+            page=selectors["page"],
+            module=selectors["module"],
+            impact=selectors["impact"],
+            section=section,
+        )
+    except (ContextFeedError, OSError, ValueError):
+        return None
+
+    label = result.section or "document"
+    return f"{result.path}#{label}\n{result.body}"
+
+
+def _graph_edges_from_lookup(
+    raw_lookup: Any,
+    *,
+    evidence_graph_lookup: Callable[[Mapping[str, Any]], Sequence[str]] | None,
+) -> tuple[str, ...]:
+    if raw_lookup is None:
+        return ()
+    if not isinstance(raw_lookup, Mapping):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    if evidence_graph_lookup is None:
+        return ()
+    try:
+        result = evidence_graph_lookup(raw_lookup)
+    except (ContextFeedError, OSError, ValueError):
+        return ()
+    if not _string_sequence(result):
+        raise ValueError("REQUEST_SCHEMA_INVALID")
+    return tuple(result)
+
+
+def _string_sequence(value: Any) -> bool:
+    return isinstance(value, Sequence) and not isinstance(value, (str, bytes)) and all(
+        isinstance(item, str) for item in value
+    )
 
 
 def _field_metadata_for(

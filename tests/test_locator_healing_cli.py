@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from neo_sf_q_intel.context_feeds import ContextFeedError, FieldMetadata
-from neo_sf_q_intel.locator_healing_cli import _field_metadata_for
+import pytest
+
+from neo_sf_q_intel.context_feeds import ContextFeedError, FieldMetadata, KnowledgeSection
+from neo_sf_q_intel.locator_healing_cli import _context_feeds_for_request, _field_metadata_for
 
 
 class _Settings:
@@ -85,3 +87,119 @@ def test_cli_metadata_enrichment_is_non_fatal_when_lookup_fails() -> None:
         )
         is None
     )
+
+
+def test_context_feeds_resolve_one_requested_knowledge_section_without_graph_fallback() -> None:
+    calls: list[dict[str, object]] = []
+
+    def knowledge_lookup(root: Path, **kwargs: object) -> KnowledgeSection:
+        calls.append({"root": root, **kwargs})
+        return KnowledgeSection(
+            path="knowledge-repo/pages/strategic-deal-workbench.md",
+            section="Page elements",
+            body="Regional VP Approver must be selected from the lookup suggestion.",
+            chars=67,
+            truncated=False,
+        )
+
+    result = _context_feeds_for_request(
+        {
+            "intentLookup": {
+                "page": "strategic-deal-workbench",
+                "section": "Page elements",
+            },
+            "evidenceGraphLookup": {"entityId": "field:Opportunity.Regional_VP_Approver__c"},
+        },
+        repository_root=Path("repo"),
+        knowledge_lookup=knowledge_lookup,
+    )
+
+    assert result.graph_edges == ()
+    assert result.intent_section is not None
+    assert result.intent_section.startswith("knowledge-repo/pages/strategic-deal-workbench.md")
+    assert "Regional VP Approver" in result.intent_section
+    assert calls == [
+        {
+            "root": Path("repo"),
+            "page": "strategic-deal-workbench",
+            "module": None,
+            "impact": None,
+            "section": "Page elements",
+        }
+    ]
+
+
+def test_context_feeds_keep_caller_supplied_bounded_context_over_lookup() -> None:
+    def knowledge_lookup(root: Path, **kwargs: object) -> KnowledgeSection:
+        raise AssertionError("raw intentSection should already be bounded by the caller")
+
+    result = _context_feeds_for_request(
+        {
+            "intentSection": "caller-selected section",
+            "intentLookup": {"page": "strategic-deal-workbench"},
+            "graphEdges": ["field:Opportunity.Regional_VP_Approver__c -> changed-by -> delta:1"],
+        },
+        repository_root=Path("repo"),
+        knowledge_lookup=knowledge_lookup,
+    )
+
+    assert result.intent_section == "caller-selected section"
+    assert result.graph_edges == (
+        "field:Opportunity.Regional_VP_Approver__c -> changed-by -> delta:1",
+    )
+
+
+def test_context_feeds_can_use_injected_evidence_graph_lookup_without_static_app_graph() -> None:
+    calls: list[dict[str, object]] = []
+
+    def evidence_lookup(raw: object) -> tuple[str, ...]:
+        assert isinstance(raw, dict)
+        calls.append(raw)
+        return ("field:Opportunity.Regional_VP_Approver__c -> MODIFY -> lwc:Workbench",)
+
+    result = _context_feeds_for_request(
+        {
+            "evidenceGraphLookup": {
+                "entityId": "field:Opportunity.Regional_VP_Approver__c",
+                "side": "CANDIDATE",
+            }
+        },
+        repository_root=Path("repo"),
+        evidence_graph_lookup=evidence_lookup,
+    )
+
+    assert result.graph_edges == (
+        "field:Opportunity.Regional_VP_Approver__c -> MODIFY -> lwc:Workbench",
+    )
+    assert calls == [
+        {"entityId": "field:Opportunity.Regional_VP_Approver__c", "side": "CANDIDATE"}
+    ]
+
+
+def test_context_feeds_omit_missing_knowledge_section_instead_of_adding_ambiguous_context() -> None:
+    def knowledge_lookup(root: Path, **kwargs: object) -> KnowledgeSection:
+        raise ContextFeedError("SECTION_NOT_FOUND")
+
+    result = _context_feeds_for_request(
+        {"intentLookup": {"page": "strategic-deal-workbench", "section": "Missing"}},
+        repository_root=Path("repo"),
+        knowledge_lookup=knowledge_lookup,
+    )
+
+    assert result.intent_section is None
+    assert result.graph_edges == ()
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"intentLookup": {"page": "strategic-deal-workbench", "module": "policy"}},
+        {"intentLookup": {"page": 7}},
+        {"intentSection": ["too", "wide"]},
+        {"graphEdges": "field:Opportunity.Name -> noisy -> object:Opportunity"},
+        {"evidenceGraphLookup": "field:Opportunity.Name"},
+    ],
+)
+def test_context_feeds_reject_malformed_context_requests(payload: dict[str, object]) -> None:
+    with pytest.raises(ValueError, match="REQUEST_SCHEMA_INVALID"):
+        _context_feeds_for_request(payload, repository_root=Path("repo"))
