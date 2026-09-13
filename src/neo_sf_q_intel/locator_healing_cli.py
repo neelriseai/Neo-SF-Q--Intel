@@ -3,9 +3,11 @@ from __future__ import annotations
 import json
 import sys
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from neo_sf_q_intel.config import Settings
+from neo_sf_q_intel.context_feeds import ContextFeedError, FieldMetadata, metadata_lookup
 from neo_sf_q_intel.locator_proposal import (
     RESPONSE_SCHEMA,
     LocatorProposalError,
@@ -21,15 +23,21 @@ from neo_sf_q_intel.providers import (
 def main() -> int:
     try:
         request = _read_request(sys.stdin.read())
+        settings = Settings()
+        field_metadata = _field_metadata_for(
+            settings,
+            object_api_name=request["objectApiName"],
+            field_api_name=request["fieldApiName"],
+        )
         context = build_healing_context(
             obligation_id=request["obligationId"],
             object_api_name=request["objectApiName"],
             field_api_name=request["fieldApiName"],
             dom_evidence=request["domEvidence"],
+            field_metadata=field_metadata,
             graph_edges=request.get("graphEdges") or (),
             intent_section=request.get("intentSection"),
         )
-        settings = Settings()
         if not settings.allow_llm:
             return _write_blocked("LLM_DISABLED")
         provider = OpenAISpecialistProvider(
@@ -63,6 +71,29 @@ def _read_request(raw: str) -> dict[str, Any]:
     if not isinstance(body["domEvidence"], Mapping):
         raise ValueError("REQUEST_SCHEMA_INVALID")
     return body
+
+
+def _field_metadata_for(
+    settings: Settings,
+    *,
+    object_api_name: str,
+    field_api_name: str,
+    lookup=metadata_lookup,
+    repository_root: Path | None = None,
+) -> FieldMetadata | None:
+    """Return source metadata when configured; absence never blocks locator healing.
+
+    Metadata improves ranking and explanations, but the model can still choose from a bounded
+    digest-only DOM candidate set without it. A missing source checkout, absent field, or malformed
+    metadata therefore degrades the prompt rather than turning locator healing into a hard outage.
+    Identity mismatches are still caught later by ``build_healing_context`` if metadata is returned.
+    """
+
+    try:
+        root = settings.resolved_salesforce_root(repository_root or Path.cwd())
+        return lookup(root, object_api_name, field_api_name)
+    except (ContextFeedError, OSError, ValueError):
+        return None
 
 
 def _write_blocked(code: str) -> int:

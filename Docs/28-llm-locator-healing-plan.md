@@ -98,11 +98,13 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
 [DONE] knowledge repo             14 files · pages / modules / impact · operator-authored
 [DONE] deterministic heal proven  live drift -> stale -> metadata rediscovery -> rerun -> exact restore
 [DONE] T-SIG                      element signature store + tests
-[DONE] T-META                     field metadata lookup + tests
+[DONE] T-META                     field metadata lookup + tests; live CLI enriches from the
+          configured source root and degrades without blocking when source metadata is unavailable
 [DONE] T-DOM push                 digest-only candidate payload on deterministic abstention
 [DONE] prompt + provider + wiring provider schema hook + locator-healing Python bridge + browser projection
 [DONE] live provider acceptance   real OpenAI locator-proposal smoke accepted candidateOrdinal=0
-          with confidenceMilli=986 after fixing sealed-envelope rendering and explicit allowedRefs
+          with confidenceMilli=986 after fixing sealed-envelope rendering, explicit allowedRefs
+          and non-fatal T-META enrichment
 [DONE] evidence isolation         projection refuses to attach modelProposal or advertise
           modelDiscoveryAvailable for deterministic metadata PASS observations
 ```

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "92df7495c5364e881f3f7b0f8cd08f5c87b8160c2b388e86e0e5e8d8ecaad888",
+  "sourceSnapshot": "b2489ad2af0850bec2ce314b7d22577132512891974d4c52a19c008c6573fa96",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1606,7 +1606,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "2bfd7f37fd1280c22e4e8a6eac8f53591714c079abd2b458f5eaaa12fef8cb2a"
+      "sha256": "8544ee56af34b4a3e53108b03ccf3cb56e0fa38028df287a1e78bd167077a039"
     },
     {
       "path": "Docs/29-d-series-requirement-test-matrix.md",
@@ -2316,7 +2316,7 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "c9f9db4497c6687027019c4316f17406099a8e159878a3617ca4c70a8b3e055c"
+      "sha256": "7449f6c8f1c695e818b3b264fee98d63dc8556d8cbd4a3e128df25fee381cad6"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
@@ -2541,7 +2541,7 @@
     {
       "path": "src/neo_sf_q_intel/locator_healing_cli.py",
       "category": "python-runtime",
-      "sha256": "1082f069dc23a149ff214f080bdaa05b5b25e8e059d4397aeaf456ea3b779a1f"
+      "sha256": "6fd7db5648075f33aae708abd97e4b26100998913bf6460495252d591c77a85c"
     },
     {
       "path": "src/neo_sf_q_intel/locator_proposal.py",
@@ -2922,6 +2922,11 @@
       "path": "tests/test_locator_healing_bridge_functional.py",
       "category": "test",
       "sha256": "3be5735a57942465353c4aabe814dbcf33221ab8911f4c1141386b49d0eede0b"
+    },
+    {
+      "path": "tests/test_locator_healing_cli.py",
+      "category": "test",
+      "sha256": "7bb7daa074e593a01919485ff04dbf9625382dec0f96d63be2d7164be211cbfb"
     },
     {
       "path": "tests/test_locator_proposal.py",
