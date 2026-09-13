@@ -131,10 +131,11 @@ D7 145-150  docs, knowledge, compliance log, commit                sonnet
           selected the correct lookup candidate; the first planner draft chose noisy persona
           context, so instructions and execution guard were tightened to require a named
           page/impact field-behavior section before intent context is admitted
-[BLOCKED] incremental provider smoke  attempted on 2026-09-13, but provider dispatch stopped
-          before a model call with PROVIDER_CREDENTIAL_SOURCE_CONFLICT. Unit and browser-path
-          contract tests cover the loop; this is not claimed as new live LLM evidence until
-          credential source policy is clean.
+[DONE] incremental provider smoke  direct smoke initially exposed PROVIDER_CREDENTIAL_SOURCE_CONFLICT
+          because the parent process exported an OPENAI_API_KEY that differed from .env. The
+          permanent smoke launcher now clears inherited provider variables before dispatch, keeping
+          .env as the single credential source. Real provider smoke then executed two context plans
+          and accepted candidateOrdinal=0 with confidenceMilli=986 and intentFit=SUFFICIENT.
 [DONE] repo-backed functional test  uses real knowledge-repo section fetches from the Strategic
           Deal Workbench page: Field behavior first, then Main happy path when the first ranking
           reports PARTIAL/PAGE_FLOW. This proves the incremental design improves grounding without

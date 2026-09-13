@@ -73,11 +73,38 @@
       "assessment": "Correct candidate with relevant bounded page-behavior context and citable intent evidence. Confidence is slightly lower than base on this simple case, but robustness and traceability improve without changing candidate choice."
     },
     {
-      "id": "planned-incremental-v1-blocked",
+      "id": "planned-incremental-clean-env-script-v1",
       "contextPlanning": true,
-      "accepted": false,
-      "rejectionCode": "PROVIDER_CREDENTIAL_SOURCE_CONFLICT",
-      "assessment": "Attempted a new real provider smoke after adding incremental planning. Dispatch was blocked before any model call by credential-source policy, so this run is retained as a blocked configuration receipt rather than live LLM evidence for the new loop."
+      "accepted": true,
+      "candidateOrdinal": 0,
+      "confidenceMilli": 986,
+      "contextPlans": [
+        {
+          "tool": "knowledge_section",
+          "arguments": {
+            "page": "strategic-deal-workbench",
+            "section": "Field behavior in plain English"
+          }
+        },
+        {
+          "tool": "knowledge_section",
+          "arguments": {
+            "page": "strategic-deal-workbench",
+            "section": "Live-observed page elements"
+          }
+        }
+      ],
+      "contextAssessment": {
+        "intentFit": "SUFFICIENT",
+        "missingContext": "NONE"
+      },
+      "plannerInputTokens": [
+        1295,
+        1414
+      ],
+      "finalInputTokens": 1374,
+      "finalOutputTokens": 226,
+      "assessment": "Real provider smoke passed after launching with inherited provider variables cleared so .env was the single provider source. The planner fetched a narrow field-behavior section first, continued because the first ranking was not sufficient, fetched a second bounded page-elements section, and accepted only after the final proposal reported intentFit=SUFFICIENT."
     },
     {
       "id": "incremental-knowledge-repo-functional",
@@ -110,12 +137,13 @@
     "If planning fails, final ranking still runs on metadata plus DOM candidates.",
     "Final model output can still choose only an existing candidate ordinal; context never grants selector-writing authority.",
     "Incremental expansion is capped at two planner attempts and sends only compact prior-context and previous-ranking summaries; it never repeats a fetched section or escalates to whole-document context.",
-    "The final locator proposal schema requires contextAssessment.intentFit, missingContext and reason. Neo treats PARTIAL, INSUFFICIENT and NOT_PROVIDED as insufficient grounding when incremental context was fetched, so confidence alone cannot prematurely stop the loop."
+    "The final locator proposal schema requires contextAssessment.intentFit, missingContext and reason. Neo treats PARTIAL, INSUFFICIENT and NOT_PROVIDED as insufficient grounding when incremental context was fetched, so confidence alone cannot prematurely stop the loop.",
+    "Manual/provider smoke runs must use scripts/run/run-locator-healing-smoke.ps1 or otherwise clear inherited provider variables; Settings must continue blocking conflicting process/.env credentials."
   ],
   "evidenceFiles": [
     ".runtime/locator-healing-comparison/base-v2.json",
     ".runtime/locator-healing-comparison/planned-v2.json",
     ".runtime/locator-healing-comparison/planned-v3.json",
-    ".runtime/locator-healing-incremental/planned-incremental-v1.json"
+    ".runtime/locator-healing-incremental/planned-incremental-clean-env-script-v1.json"
   ]
 }

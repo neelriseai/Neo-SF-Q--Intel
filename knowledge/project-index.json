@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
   "pathBase": "repository-root",
-  "sourceSnapshot": "b688c17c201a435f3ee4692e001fa65cff7f915de697051b61e16c3eb0b67750",
+  "sourceSnapshot": "829cec5086c4f466520303f85002281ce292e824115f65ece5f5dd8040d58181",
   "generatedOutputs": [
     "knowledge/application-graph.json",
     "knowledge/project-index.json"
@@ -1606,7 +1606,7 @@
     {
       "path": "Docs/28-llm-locator-healing-plan.md",
       "category": "reference-documentation",
-      "sha256": "c7c073732b149afec45143eca7ca3e5c7ef6e0d012eb528249133151277577a5"
+      "sha256": "513875d1be3c2c046a71e82d38636caeb2b566de963e8f1401f96af47e9f516d"
     },
     {
       "path": "Docs/29-d-series-requirement-test-matrix.md",
@@ -2316,12 +2316,12 @@
     {
       "path": "quality/reviews/current-scope-review.json",
       "category": "project",
-      "sha256": "a93b87532b933e57ba17c1de69c3cddea65211b50c672b204b3af15f5e6a3b03"
+      "sha256": "69031372d8de9885a3f5adb105301edcd7f218059bfc912979127fec92d66043"
     },
     {
       "path": "quality/reviews/locator-healing-context-comparison-2026-09-13.json",
       "category": "project",
-      "sha256": "df6ebd861deab2864d2817af2f53b4db11378343c921b8876c32de12fc0ce9b9"
+      "sha256": "f07b1dad8506fb8d82781dabafa4610b95d8d47773a65442c2648c9ee61870ca"
     },
     {
       "path": "quality/reviews/strategic-deal-demo-bug-map-2026-09-12.json",
@@ -2352,6 +2352,11 @@
       "path": "scripts/quality/check_governance_policy.py",
       "category": "project",
       "sha256": "cb71873ca43c4217febfce976f296f8fb4899b81e93d2bf63e1f7a3b7c0c63f4"
+    },
+    {
+      "path": "scripts/run/run-locator-healing-smoke.ps1",
+      "category": "project",
+      "sha256": "52c34db82de06106340ac50c8986f85a35d82fe3622a678ce3cd77a46d88e972"
     },
     {
       "path": "scripts/run/start-platform.ps1",

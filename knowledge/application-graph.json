@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "project": "Neo SF Q-Intel",
-  "sourceSnapshot": "b688c17c201a435f3ee4692e001fa65cff7f915de697051b61e16c3eb0b67750",
+  "sourceSnapshot": "829cec5086c4f466520303f85002281ce292e824115f65ece5f5dd8040d58181",
   "provenance": "Static repository structure and explicit import/reference relationships.",
   "authorization": "Discovery only; graph edges grant no tool or write authority.",
   "nodes": [
@@ -1674,6 +1674,14 @@
       "kind": "file",
       "label": "check_governance_policy.py",
       "source": "scripts/quality/check_governance_policy.py",
+      "category": "project",
+      "authority": "supporting"
+    },
+    {
+      "id": "file:scripts/run/run-locator-healing-smoke.ps1",
+      "kind": "file",
+      "label": "run-locator-healing-smoke.ps1",
+      "source": "scripts/run/run-locator-healing-smoke.ps1",
       "category": "project",
       "authority": "supporting"
     },
